@@ -6,7 +6,7 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="no" ?>
-<rfc category="exp" docName="draft-ietf-homenet-babel-profile-00"
+<rfc category="exp" docName="draft-ietf-homenet-babel-profile-01"
      ipr="trust200902">
 <front>
 <title abbrev="Homenet Babel profile">Homenet profile of the Babel routing protocol</title>
@@ -24,12 +24,12 @@
 </address>
 </author>
 
-<date day="8" month="July" year="2016"/>
+<date day="2" month="December" year="2016"/>
 
 <abstract>
 <t>This document defines the subset of the Babel routing protocol
 <xref target="RFC6126"/> and its extensions that a Homenet router must
-implement.</t>
+implement, as well as the interactions between HNCP and Babel.</t>
 </abstract>
 
 </front>
@@ -47,9 +47,10 @@ demonstrated that consist of a few hundred of lines of code, while the
 "large" implementation includes support for a number of extensions and
 consists of over ten thousand lines of C code.</t>
 
-<t>This document defines the exact subset of the Babel protocol and its
-extensions that is required by a conformant implementation of the Homenet
-protocol suite.</t>
+<t>This document consists of two parts.  The first specifies the exact
+subset of the Babel protocol and its extensions that is required by an
+implementation of the Homenet protocol suite.  The second specifies how
+HNCP interacts with Babel.</t>
 
 <section title="Background">
 
@@ -91,9 +92,6 @@ with each other.</t>
 
 <section title="Requirements">
 
-<t><list style="empty"><t>[Sentences within square brackets are editorial
-notes and are not intended for publication.]</t></list></t>
-
 <t>REQ1: a Homenet implementation of Babel MUST encapsulate Babel control
 traffic in IPv6 packets sent to the IANA-assigned port 6696 and either the
 IANA-assigned multicast group ff02::1:6 or to a link-local unicast
@@ -124,9 +122,6 @@ to assign distinct IPv4 prefixes to the links in a network, it is not
 necessary to resort to multiple layers of NAT, with all of its
 problems.</t></list></t>
 
-<t><list style="empty"><t>[BS suggest that this should be
-a MUST.]</t></list></t>
-
 <t>REQ4: a Homenet implementation of Babel MUST implement source-specific
 routing for IPv6, as defined in draft-boutier-babel-source-specific <xref
 target="BABEL-SS"/>.  This implies that it MUST implement the extension
@@ -155,14 +150,6 @@ Babel.  Statically keyed IPsec, perhaps with keys rotated by HNCP, is
 vulnerable to replay attacks and would therefore require the addition of
 a nonce mechanism to Babel.</t></list></t>
 
-<t><list style="empty">
-<t>[There is no consensus about this requirement.  A simpler solution is
-to disable Babel on guest interfaces.  MS suggests this might be
-a SHOULD.]</t>
-
-<t>[This needs expanding with an explanation of how HNCP is supposed to
-signal the use of authentication.]</t></list></t>
-
 <t>REQ6: a Homenet implementation of Babel MUST use metrics that are of
 a similar magnitude to the values suggested in Appendix&nbsp;A of
 RFC&nbsp;6126.  In particular, it SHOULD assign costs that are no less
@@ -186,11 +173,7 @@ and easy to explain to our bosses.  In the absence of dynamically computed
 metrics, the routing protocol attempts to minimise the number of links
 crossed by a route, and therefore prefers long, lossy links to shorter,
 lossless ones.  In wireless networks, "hop-count routing is worst-path
-routing".</t>
-
-<t>[This should probably be MUST, but it might be difficult or even
-impossible to implement in some environments, especially in the presence
-of wired-to-wireless bridges.]</t></list></t>
+routing".</t></list></t>
 
 </section>
 
@@ -217,6 +200,81 @@ redundant meshes of tunnels, which do not occur in typical home networks
 on the other hand, is likely to be useful in home networks, but the
 extension requires further evaluation before it can be recommended for
 widespread deployment.</t></list></t>
+
+</section>
+
+</section>
+
+<section title="Interactions between HNCP and Babel">
+
+<t>The Homenet architecture cleanly separates between configuration, which
+is done by HNCP, and routing, which is done by Babel.  While the coupling
+between the two protocols is deliberately kept to a minimum, some
+interactions are unavoidable.</t>
+
+<t>All the interactions between HNCP and Babel consist of HNCP causing
+Babel to perform an announcement on its behalf (in particular, under no
+circumstances does Babel cause HNCP to perform an action).  How this is
+realised is an implementation detail that is outside the scope of this
+document: while it could conceivably be done using a private communication
+channel between HNCP and Babel, existing implementations have HNCP install
+a route in the operating system's kernel which is later picked up by
+Babel.</t>
+
+<section title="Requirements">
+
+<t>REQ7: if an HNCP node receives a DHCPv6 prefix delegation for prefix
+P and publishes an External-Connection TLV containing a Delegated-Prefix
+TLV with prefix P and no Prefix-Policy TLV, then it MUST announce
+a source-specific default route with source prefix P over Babel.</t>
+
+<t><list style="empty"><t>Rationale: source-specific routes are the main
+tool that Homenet uses to enable optimal routing in the presence of
+multiple IPv6 prefixes.  External connections with non-trivial prefix
+policies are explicitly excluded from this requirement, since their exact
+behaviour is application-specific.</t></list></t>
+
+<t>REQ8: if an HNCP node receives a DHCPv4 lease with an IPv4 address and
+wins the election for NAT gateway, then it MUST act as a NAT gateway and
+MUST announce a (non-specific) IPv4 default route over Babel.</t>
+
+<t><list style="empty"><t>Rationale: the Homenet architecture does not use
+source-specific routing for IPv4; instead, HNCP elects a single NAT
+gateway and publishes a single default route towards that gateway (RFC
+7788 Section 6.5).</t></list></t>
+
+<t>REQ9: if an HNCP node assigns a prefix P to an attached link and
+announces P in an Assigned-Prefix TLV, then it MUST announce a route towards
+P over Babel.</t>
+
+<t><list style="empty"><t>Rationale: prefixes assigned to links must be
+routable within the Homenet.</t></list></t>
+
+</section>
+
+<section title="Non-requirements">
+
+<t>NR3: an HNCP node that receives a DHCPv6 prefix delegation MAY announce
+a non-specific IPv6 default route over Babel in addition to the
+source-specific default route mandated by requirement REQ7.</t>
+
+<t><list style="empty"><t>Rationale: since the source-specific default
+route is more specific than the non-specific default route, the former
+will override the latter if all nodes implement source-specific routing.
+Announcing an additional non-specific route is allowed, since doing that
+causes no harm and might simplify operations in some circumstances,
+e.g.&nbsp;when interoperating with a rougint protocol that does not
+support source-specific routing.</t></list></t>
+
+<t>NR4: an HNCP node that receives a DHCPv4 lease with an IPv4 address and
+wins the election for NAT gateway SHOULD NOT announce a source-specific
+IPv4 default route.</t>
+
+<t><list style="empty"><t>Homenet does not require support for IPv4
+source-specific routing.  Announcing source-specific routes will not cause
+routing pathologies (blackholes or routing loops), but it might cause
+packets sourced in different parts of the Homenet to follow different
+paths, with all the confusion that this entails.</t></list></t>
 
 </section>
 

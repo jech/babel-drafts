@@ -1319,8 +1319,9 @@ applications of Babel.</t>
 </section>
 
 <section title="Router-Id">
-<t>A router-id is an arbitrary 8-octet value.  Router-ids SHOULD be assigned
-in modified EUI-64 format <xref target="ADDRARCH"/>.</t>
+<t>A router-id is an arbitrary 8-octet.  A router-id MUST NOT consist of
+either all zeroes or all ones.  Router-ids SHOULD be assigned in modified
+EUI-64 format <xref target="ADDRARCH"/>.</t>
 </section>
 
 <section title="Address">
@@ -1620,7 +1621,7 @@ Update TLVs.</t>
 Length fields.</t>
 <t hangText="Reserved">Sent as 0 and MUST be ignored on reception.</t>
 <t hangText="Router-Id">The router-id for routes advertised in subsequent
-Update TLVs</t>
+Update TLVs.  This MUST NOT consist of all zeroes or all ones.</t>
 </list></t>
 </section>
 
@@ -1820,6 +1821,9 @@ Length fields.</t>
 <t hangText="Seqno">The sequence number that is being requested.</t>
 <t hangText="Hop Count">The maximum number of times that this TLV may be
 forwarded, plus 1.  This MUST NOT be 0.</t>
+<t hangText="Reserved">Sent as 0 and MUST be ignored on reception.</t>
+<t hangText="Router Id">The Router-Id that is being requested.  This MUST
+NOT consist of all zeroes or all ones.</t>
 <t hangText="Prefix">The prefix being requested.  This field's size is
 Plen/8 rounded upwards.</t>
 </list></t>
@@ -2219,6 +2223,9 @@ reply to route requests.</t>
 <t>Clarified that the source garbage collection timer is reset after
   sending an update even if the entry was not modified.</t>
 <t>In section "Seqno Requests", fixed an erroneous "route request".</t>
+<t>In the description of the Seqno Request TLV, added the description of
+the Router-Id field.</t>
+<t>Made router-ids all-0 and all-1 forbidden.</t>
 </list></t>
 
 </section>    

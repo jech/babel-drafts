@@ -24,7 +24,7 @@
 </address>
 </author>
 
-<date day="1" month="August" year="2016"/>
+<date day="5" month="December" year="2016"/>
 
 <abstract>
 <t>Babel is a loop-avoiding distance-vector routing protocol that is
@@ -813,10 +813,10 @@ when
 </list>
 where sequence numbers are compared modulo 2^16.</t>
 
-<t>Given a source (p, plen, id), a node's feasibility distance for this
-source is the minimum, according to the ordering defined above, of the
+<t>Given a source (p, plen, router-id), a node's feasibility distance for
+this source is the minimum, according to the ordering defined above, of the
 distances of all the finite updates ever sent by this particular node for
-the prefix (p, plen) carrying the router-id id.  Feasibility distances are
+the prefix (p, plen) and the given router-id.  Feasibility distances are
 maintained in the source table; the exact procedure is given in
 <xref target="maintaining-fd"/>.</t>
 
@@ -828,7 +828,7 @@ source.  More precisely, a route advertisement carrying the quintuple
 following conditions holds:
 <list style="symbols">
   <t>metric is infinite; or</t>
-  <t>no entry exists in the source table indexed by (id, prefix, plen);
+  <t>no entry exists in the source table indexed by (router-id, prefix, plen);
   or</t>
   <t>an entry (prefix, plen, router-id, seqno', metric') exists in the
     source table, and either
@@ -902,18 +902,19 @@ optionally be derived from the low-order bits of the advertised prefix.</t>
 
 <section title="Route Acquisition" anchor="route-acquisition">
 
-<t>When a Babel node receives an update (id, prefix, seqno, metric) from a
-neighbour neigh with a link cost value equal to cost, it checks whether it
-already has a routing table entry indexed by (neigh, id, prefix).</t>
+<t>When a Babel node receives an update (router-id, prefix, seqno, metric)
+from a neighbour neigh with a link cost value equal to cost, it checks
+whether it already has a routing table entry indexed by (neigh, router-id,
+prefix).</t>
 
 <t>If no such entry exists:
 <list style="symbols">
   <t>if the update is unfeasible, it is ignored;</t>
   <t>if the metric is infinite (the update is a retraction), the update is
   ignored;</t>
-  <t>otherwise, a new route table entry is created, indexed by (neigh, id,
-  prefix), with seqno equal to seqno and an advertised metric equal to the
-  metric carried by the update.</t>
+  <t>otherwise, a new route table entry is created, indexed by (neigh,
+  router-id, prefix), with seqno equal to seqno and an advertised metric
+  equal to the metric carried by the update.</t>
 </list>
 If such an entry exists:
 <list style="symbols">
@@ -1090,9 +1091,8 @@ is updated as follows:
   <t>otherwise, nothing needs to be done.</t>
 </list></t>
 
-<t>The garbage-collection timer for the modified entry is then reset.
-Note that the garbage-collection timer is not reset when a retraction is
-sent.</t>
+<t>The garbage-collection timer for the entry is then reset.  Note that
+the garbage-collection timer is not reset when a retraction is sent.</t>
 
 </section>
 
@@ -1166,7 +1166,7 @@ send an update for the given prefix.</t>
 entry's, the node compares the router-id against its own router-id.  If the
 router-id is its own, then it increases its sequence number by 1 and sends
 an update.  A node MUST NOT increase its sequence number by more than 1 in
-response to a route request.</t>
+response to a seqno request.</t>
 
 <t>If the requested router-id is not its own, the received request's hop
 count is 2 or more, and the node has a route (not necessarily a feasible
@@ -1842,7 +1842,7 @@ one neighbour.  A request MUST NOT be forwarded if its Hop Count field is
 
 <section title="IANA Considerations">
 
-<t>IANA has registered the UDP port number 6697, called "babel", for use
+<t>IANA has registered the UDP port number 6696, called "babel", for use
 by the Babel protocol.</t>
 
 <t>IANA has registered the IPv6 multicast group ff02:0:0:0:0:0:1:6 and the
@@ -2206,6 +2206,22 @@ reply to route requests.</t>
 
 <t>The sample implementation of Babel is available from
 <eref target="http://www.pps.univ-paris-diderot.fr/~jch/software/babel/"/>.</t>
+
+</section>
+
+<section title="Changes from previous versions">
+
+<section title="Changes since RFC 6126">
+
+<t><list style="symbols">
+<t>Changed UDP port number to 6696.</t>
+<t>Consistently use router-id rather than id.</t>
+<t>Clarified that the source garbage collection timer is reset after
+  sending an update even if the entry was not modified.</t>
+<t>In section "Seqno Requests", fixed an erroneous "route request".</t>
+</list></t>
+
+</section>    
 
 </section>
 

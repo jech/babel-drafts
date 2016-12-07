@@ -1465,7 +1465,7 @@ Length fields.</t>
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ]]></artwork></figure>
 
-<t>This TLV requests that the receiver send an Acknowledgement TLV
+<t>This TLV requests that the receiver sends an Acknowledgement TLV
 within the number of centiseconds specified by the Interval field.</t>
 
 <t>Fields :
@@ -1764,7 +1764,7 @@ ignored.</t>
 +-+-+-+-+-+-+-+-+-+-+-+-
 ]]></artwork></figure>
 
-<t>A Route Request TLV prompts the receiver to send an update for a given
+<t>A Route Request TLV prompts the receiver to send an Update for a given
 prefix, or a full routing table dump.</t>
 
 <t>Fields :

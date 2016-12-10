@@ -703,7 +703,9 @@ decreased at any time; it SHOULD NOT be increased, except immediately
 before sending a Hello packet.  (Equivalently, a node SHOULD send an
 unscheduled Hello immediately after increasing its Hello interval.)</t>
 
-<t>How to deal with received Hello TLVs and what statistics to maintain
+<t>A node that receives a Hello TLV from an unknown neighbour creates a new
+entry in the neighbour table and sets its txcost to infinity. How to deal
+with the received Hello TLVs further and what statistics to maintain
 are considered local implementation matters; typically, a node will
 maintain some sort of history of recently received Hellos.  A possible
 algorithm is described in <xref target="hello-history"/>.</t>

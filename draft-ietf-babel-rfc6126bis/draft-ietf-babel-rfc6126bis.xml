@@ -687,6 +687,10 @@ bidirectional reachability.  On unreliable media, neighbour acquisition
 additionally provides some statistics that MAY be used in link quality
 computation.</t>
 
+<t>For the avoidance of doubt, for a neighbour to remain in a stable
+bidirectional reachability state it is essential that it keeps sending both
+Hello and IHU TLVs on time as specified below.</t>
+
 <section title="Reverse Reachability Detection">
 
 <t>Every Babel node sends periodic Hellos over each of its interfaces.

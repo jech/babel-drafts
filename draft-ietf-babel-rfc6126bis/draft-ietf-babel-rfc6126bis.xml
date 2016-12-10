@@ -746,6 +746,15 @@ a small multiple of the value received in the IHU.</t>
 neighbour's cost (<xref target="cost-computation"/>) and runs the route
 selection procedure (<xref target="route-selection"/>).</t>
 
+<t>The bidirectional reachability detection is a prerequisite for the
+routing information exchange and processing. Specifically, a node MUST ignore:
+<list style="symbols">
+  <t>any TLV except Hello if received from a neighbour that does not have an
+  entry in the neighbour table, and</t>
+  <t>any TLV except Hello and IHU if received from a neighbour that has an
+  entry in the neighbour table with txcost equal to infinity.</t>
+</list></t>
+
 </section>
 
 <section title="Cost Computation" anchor="cost-computation">

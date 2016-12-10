@@ -677,6 +677,9 @@ acknowledgement requests is not necessary, and not even recommended, as
 the acknowledgements cause additional traffic and may force additional
 Address Resolution Protocol (ARP) or Neighbour Discovery exchanges.</t>
 
+<t>Likewise, it is a matter of the same policy how to handle acknowledgements
+that were received without a request or requested but never received.</t>
+
 </section>
 
 <section title="Neighbour Acquisition">

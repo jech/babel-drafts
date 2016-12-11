@@ -1,5 +1,22 @@
+Babel drafts
+============
+
+Internet-drafts related to the
+[Babel routing protocol](https://www.irif.fr/~jch/software/babel/).  The
+in-progress version is stored without a version number
+(e.g. *draft-ietf-babel-rfc6126bis*), and whenever a version is submitted,
+it is archived under its final name (e.g. *draft-ietf-babel-rfc6126bis-00*).
+
+Discussion about these drafts should happen on the
+[IETF Babel mailing list](https://www.ietf.org/mailman/listinfo/babel).
+Please do not submit pull requests to this repository, prefer sending
+a patch to the list.
+
+The IETF *Note Well* (included below) applies to all contributions.
+
+
 Note Well
-=========
+---------
 
 Any submission to the IETF intended by the Contributor for publication
 as all or part of an IETF Internet-Draft or RFC and any statement made

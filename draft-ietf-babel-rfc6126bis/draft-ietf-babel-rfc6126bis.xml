@@ -677,6 +677,9 @@ acknowledgement requests is not necessary, and not even recommended, as
 the acknowledgements cause additional traffic and may force additional
 Address Resolution Protocol (ARP) or Neighbour Discovery exchanges.</t>
 
+<t>Likewise, it is a matter of the same policy how to handle acknowledgements
+that were received without a request or requested but never received.</t>
+
 </section>
 
 <section title="Neighbour Acquisition">
@@ -686,6 +689,10 @@ set of neighbours heard over each of its interfaces and ascertains
 bidirectional reachability.  On unreliable media, neighbour acquisition
 additionally provides some statistics that MAY be used in link quality
 computation.</t>
+
+<t>For the avoidance of doubt, for a neighbour to remain in a stable
+bidirectional reachability state it is essential that it keeps sending both
+Hello and IHU TLVs on time as specified below.</t>
 
 <section title="Reverse Reachability Detection">
 
@@ -703,7 +710,9 @@ decreased at any time; it SHOULD NOT be increased, except immediately
 before sending a Hello packet.  (Equivalently, a node SHOULD send an
 unscheduled Hello immediately after increasing its Hello interval.)</t>
 
-<t>How to deal with received Hello TLVs and what statistics to maintain
+<t>A node that receives a Hello TLV from an unknown neighbour creates a new
+entry in the neighbour table and sets its txcost to infinity. How to deal
+with the received Hello TLVs further and what statistics to maintain
 are considered local implementation matters; typically, a node will
 maintain some sort of history of recently received Hellos.  A possible
 algorithm is described in <xref target="hello-history"/>.</t>
@@ -743,6 +752,15 @@ a small multiple of the value received in the IHU.</t>
 <t>After updating a neighbour's txcost, the receiving node recomputes the
 neighbour's cost (<xref target="cost-computation"/>) and runs the route
 selection procedure (<xref target="route-selection"/>).</t>
+
+<t>The bidirectional reachability detection is a prerequisite for the
+routing information exchange and processing. Specifically, a node MUST ignore:
+<list style="symbols">
+  <t>any TLV except Hello if received from a neighbour that does not have an
+  entry in the neighbour table, and</t>
+  <t>any TLV except Hello and IHU if received from a neighbour that has an
+  entry in the neighbour table with txcost equal to infinity.</t>
+</list></t>
 
 </section>
 

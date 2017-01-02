@@ -142,7 +142,15 @@ section before publication.]</t>
 
 <section title="Security Considerations">
 
-<t>TBD</t>
+<t>As all distance vector routing protocols, a Babel speaker receives
+reachability information from its neighbours, which by default is trusted.
+A number of attacks are possible if this information is not suitably
+protected, either by a lower-layer mechanism or by an extension to the
+protocol itself (e.g.&nbsp;<xref target="RFC7298"/>).</t>
+
+<t>Implementors and deployers must be aware of the insecure nature of the
+base protocol, and must take suitable measures to ensure that the protocol
+is deployed as securely as required by the application.</t>
 
 </section>
 
@@ -344,6 +352,20 @@ Networks</title>
 <date year="2010"/>
 </front>
 <seriesInfo name="Proc. ATNAC" value="2010"/>
+</reference>
+
+<reference anchor="RFC7298" target="http://www.rfc-editor.org/info/rfc7298">
+<front>
+<title>
+Babel Hashed Message Authentication Code (HMAC) Cryptographic Authentication
+</title>
+<author initials="D." surname="Ovsienko" fullname="D. Ovsienko">
+<organization/>
+</author>
+<date year="2014" month="July"/>
+</front>
+<seriesInfo name="RFC" value="7298"/>
+<seriesInfo name="DOI" value="10.17487/RFC7298"/>
 </reference>
 
 </references>

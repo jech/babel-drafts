@@ -6,7 +6,7 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="no" ?>
-<rfc category="info" docName="draft-ietf-babel-applicability-00"
+<rfc category="info" docName="draft-ietf-babel-applicability-01"
      ipr="trust200902">
 <front>
 <title abbrev="Babel Protocol Applicability">Applicability of the Babel
@@ -25,7 +25,7 @@ routing protocol</title>
 </address>
 </author>
 
-<date day="8" month="July" year="2016"/>
+<date day="3" month="January" year="2017"/>
 
 <abstract>
 <t>This document describes some application areas where the Babel routing

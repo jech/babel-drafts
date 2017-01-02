@@ -29,7 +29,7 @@ routing protocol</title>
 
 <abstract>
 <t>This document describes some application areas where the Babel routing
-protocol <xref target="RFC6126"/> has been found to be useful.</t>
+protocol (RFC&nbsp;6126) has been found to be useful.</t>
 </abstract>
 
 </front>
@@ -96,7 +96,7 @@ routing protocols for wireless mesh networks <xref target="REAL-WORLD"/>
 <xref target="BRIDGING-LAYERS"/>.  However, this particular niche is
 already served by a number of mature protocols, notably OLSR-ETX as well
 as OLSRv2 <xref target="RFC7181"/> equipped with the DAT metric
-<xref target="DAT"/>, so Babel has not seen major deployments in pure
+<xref target="RFC7779"/>, so Babel has not seen major deployments in pure
 meshes yet.</t>
 
 </section>
@@ -114,7 +114,7 @@ meshes yet.</t>
 generates a constant amount of background traffic.  In large, stable,
 well-administered networks, it is preferable to use protocols layered
 above a reliable transport mechanism, such as OSPF <xref
-target="RFC5340"/>, EIGRP <xref target="EIGRP"/> or IS-IS <xref
+target="RFC5340"/>, EIGRP <xref target="RFC7868"/> or IS-IS <xref
 target="RFC1195"/>.</t>
 
 </section>
@@ -133,11 +133,24 @@ LOADng <xref target="LOADng"/>.</t>
 
 </section>
 
+<section title="IANA Considerations">
+
+<t>This document requires no IANA actions.  [RFC Editor: please remove this
+section before publication.]</t>
+
+</section>
+
+<section title="Security Considerations">
+
+<t>TBD</t>
+
+</section>
+
 </middle>
 
 <back>
 
-<references>
+<references title="Informational References">
 
 <reference anchor="RFC6126"><front>
 <title>The Babel Routing Protocol</title>
@@ -189,15 +202,21 @@ The Optimized Link State Routing Protocol Version 2
 <seriesInfo name="RFC" value="7181"/>
 </reference>
 
-<reference anchor='DAT'>
+<reference anchor="RFC7779">
 <front>
-<title>Packet Sequence Number based directional airtime metric for OLSRv2</title>
-
-<author initials='H' surname='Rogge' fullname='Henning Rogge'/>
-<author initials='E' surname='Baccelli' fullname='Emmanuel Baccelli'/>
-<date month='December' day='15' year='2015' />
+<title>
+Directional Airtime Metric Based on Packet Sequence Numbers for Optimized Link State Routing Version 2 (OLSRv2)
+</title>
+<author initials="H." surname="Rogge" fullname="H. Rogge">
+<organization/>
+</author>
+<author initials="E." surname="Baccelli" fullname="E. Baccelli">
+<organization/>
+</author>
+<date year="2016" month="April"/>
 </front>
-<seriesInfo name='Internet-Draft' value='draft-ietf-manet-olsrv2-dat-metric-12' />
+<seriesInfo name="RFC" value="7779"/>
+<seriesInfo name="DOI" value="10.17487/RFC7779"/>
 </reference>
 
 <reference anchor="RFC5340">
@@ -212,18 +231,33 @@ The Optimized Link State Routing Protocol Version 2
 <seriesInfo name="RFC" value="5340"/>
 </reference>
 
-<reference anchor='EIGRP'>
+<reference anchor="RFC7868">
 <front>
-<title>Enhanced Interior Gateway Routing Protocol</title>
-<author initials='D' surname='Savage' fullname='Donnie Savage'/>
-<author initials='J' surname='Ng' fullname='James Ng'/>
-<author initials='S' surname='Moore' fullname='Steven Moore'/>
-<author initials='D' surname='Slice' fullname='Donald Slice'/>
-<author initials='P' surname='Paluch' fullname='Peter Paluch'/>
-<author initials='R' surname='White' fullname='Russ White'/>
-<date month='August' day='20' year='2015' />
+<title>
+Cisco's Enhanced Interior Gateway Routing Protocol (EIGRP)
+</title>
+<author initials="D." surname="Savage" fullname="D. Savage">
+<organization/>
+</author>
+<author initials="J." surname="Ng" fullname="J. Ng">
+<organization/>
+</author>
+<author initials="S." surname="Moore" fullname="S. Moore">
+<organization/>
+</author>
+<author initials="D." surname="Slice" fullname="D. Slice">
+<organization/>
+</author>
+<author initials="P." surname="Paluch" fullname="P. Paluch">
+<organization/>
+</author>
+<author initials="R." surname="White" fullname="R. White">
+<organization/>
+</author>
+<date year="2016" month="May"/>
 </front>
-<seriesInfo name='Internet-Draft' value='draft-savage-eigrp-04' />
+<seriesInfo name="RFC" value="7868"/>
+<seriesInfo name="DOI" value="10.17487/RFC7868"/>
 </reference>
 
 <reference anchor="RFC1195">
@@ -247,9 +281,9 @@ Use of OSI IS-IS for routing in TCP/IP and dual environments
 <author initials='J' surname='Dowdell' fullname='John Dowdell'/>
 <author initials='L' surname='Steenbrink' fullname='Lotte Steenbrink'/>
 <author initials='V' surname='Mercieca' fullname='Victoria Mercieca'/>
-<date month='January' day='18' year='2016' />
+<date month='May' day='3' year='2016' />
 </front>
-<seriesInfo name='Internet-Draft' value='draft-ietf-manet-aodvv2-13' />
+<seriesInfo name='Internet-Draft' value='draft-ietf-manet-aodvv2-16' />
 </reference>
 
 <reference anchor="RFC6550">
@@ -285,9 +319,9 @@ RPL: IPv6 Routing Protocol for Low-Power and Lossy Networks
 <author initials='C' surname='Lavenu' fullname='Cedric Lavenu'/>
 <author initials='T' surname='Lys' fullname='Thierry Lys'/>
 <author initials='J' surname='Dean' fullname='Justin Dean'/>
-<date month='January' day='7' year='2016' />
+<date month='January' day='5' year='2017' />
 </front>
-<seriesInfo name='Internet-Draft' value='draft-clausen-lln-loadng-14' />
+<seriesInfo name='Internet-Draft' value='draft-clausen-lln-loadng-15' />
 </reference>
 
 <reference anchor="REAL-WORLD"><front>

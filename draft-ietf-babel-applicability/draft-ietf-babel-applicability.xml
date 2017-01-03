@@ -56,11 +56,11 @@ of Babel is not encouraged because better alternatives are available.</t>
 <section title="Hybrid networks">
 
 <t>Babel is able to deal with both classical, prefix-based
-("Internet-style") routing and flat ("mesh-style") over non-transitive
-link technologies.  Because of that, it has seen a number of succesful
-deployments in medium-sized hybrid networks, networks that combine
-a wired, aggregated backbone with meshy wireless bits at the edges.  No
-other routing protocol known to us is similarly robust and efficient in
+("Internet-style") routing and flat ("mesh-style") routing over
+non-transitive link technologies.  Because of that, it has seen a number
+of succesful deployments in medium-sized hybrid networks, networks that
+combine a wired, aggregated backbone with meshy wireless bits at the edges.
+No other routing protocol known to us is similarly robust and efficient in
 this particular type of network.</t>
 
 </section>

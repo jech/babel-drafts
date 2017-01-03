@@ -142,7 +142,7 @@ section before publication.]</t>
 
 <section title="Security Considerations">
 
-<t>As all distance vector routing protocols, a Babel speaker receives
+<t>As in all distance-vector routing protocols, a Babel speaker receives
 reachability information from its neighbours, which by default is trusted.
 A number of attacks are possible if this information is not suitably
 protected, either by a lower-layer mechanism or by an extension to the

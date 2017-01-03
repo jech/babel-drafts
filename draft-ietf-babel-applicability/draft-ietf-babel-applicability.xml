@@ -43,11 +43,10 @@ routing protocol that aims to be robust in a variety of environments.</t>
 
 <t>This document describes a few areas where Babel has been found to be
 useful.  It is structured as follows.  In <xref target="existing"/>, we
-describe application areas where Babel has been successfully deployed.  In
-<xref target="potential"/>, we describe application areas where Babel
-works well, but has not been widely deployed yet.  In <xref
-target="not-recommended"/>, we describe application areas where deployment
-of Babel is not encouraged because better alternatives are available.</t>
+describe application areas where Babel has been successfully deployed, and
+in <xref target="not-recommended"/>, we describe application areas where
+deployment of Babel is not encouraged because better alternatives are
+available.</t>
 
 </section>
 
@@ -74,30 +73,25 @@ built out of thousands of tunnels spanning continents, where it is used
 with a metric computed from links' latencies <xref target="DELAY-BASED"/>.</t>
 
 </section>
-<section title="Small unmanaged networks">
-
-<t>Because of its small size and simple configuration, Babel has been
-deployed in small, unmanaged networks (three to five routers), where it
-serves as a more efficient replacement for RIP <xref target="RFC2453"/>,
-albeit with good support for wireless links.</t>
-
-</section>
-</section>
-
-<section title="Potential deployments of Babel" anchor="potential">
-
-<t>There are application areas for which Babel is a good fit, but where it
-has not seen major deployments yet.</t>
 
 <section title="Pure mesh networks">
 
 <t>Babel has been repeatedly shown to be competitive with dedicated
 routing protocols for wireless mesh networks <xref target="REAL-WORLD"/>
-<xref target="BRIDGING-LAYERS"/>.  However, this particular niche is
-already served by a number of mature protocols, notably OLSR-ETX as well
-as OLSRv2 <xref target="RFC7181"/> equipped with the DAT metric
-<xref target="RFC7779"/>, so Babel has not seen major deployments in pure
-meshes yet.</t>
+<xref target="BRIDGING-LAYERS"/>.  While this particular niche is already
+served by a number of mature protocols, notably OLSR-ETX and OLSRv2
+<xref target="RFC7181"/> equipped with the DAT metric <xref target="RFC7779"/>,
+Babel has seen a moderate amount of successful deployment in pure mesh
+networks.</t>
+
+</section>
+
+<section title="Small unmanaged networks">
+
+<t>Because of its small size and simple configuration, Babel has been
+deployed in small, unmanaged networks (three to five routers), where it
+serves as a more efficient replacement for RIP <xref target="RFC2453"/>,
+with the significant advantage of having good support for wireless links.</t>
 
 </section>
 
@@ -106,7 +100,7 @@ meshes yet.</t>
 <section title="Application Areas where Babel is not recommended"
          anchor="not-recommended">
 
-<t>There are a number of application areas where Babel is a poor fit.</t>
+<t>There exist application areas where Babel is a poor fit.</t>
 
 <section title="Large, stable networks">
 
@@ -119,7 +113,7 @@ target="RFC1195"/>.</t>
 
 </section>
 
-<section title="Low-power networks">
+<section title="Low-power and constrained networks">
 
 <t>Babel relies on periodic updates and maintains within each node an
 amount of state that is proportional to the number of reachable

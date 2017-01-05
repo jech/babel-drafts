@@ -21,11 +21,11 @@ routing protocol</title>
 <code></code>
 <country>France</country>
 </postal>
-<email>jch@pps.univ-paris-diderot.fr</email>
+<email>jch@irif.fr</email>
 </address>
 </author>
 
-<date day="3" month="January" year="2017"/>
+<date day="5" month="January" year="2017"/>
 
 <abstract>
 <t>This document describes some application areas where the Babel routing

@@ -6,7 +6,7 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="no" ?>
-<rfc category="std" docName="draft-ietf-babel-rfc6126bis-00"
+<rfc category="std" docName="draft-ietf-babel-rfc6126bis-01"
      ipr="trust200902">
 <front>
 <title>The Babel Routing Protocol</title>
@@ -20,11 +20,11 @@
 <code></code>
 <country>France</country>
 </postal>
-<email>jch@pps.univ-paris-diderot.fr</email>
+<email>jch@irif.fr</email>
 </address>
 </author>
 
-<date day="5" month="December" year="2016"/>
+<date day="31" month="January" year="2017"/>
 
 <abstract>
 <t>Babel is a loop-avoiding distance-vector routing protocol that is

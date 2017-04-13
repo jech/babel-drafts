@@ -2228,7 +2228,14 @@ the Router-Id field.</t>
 <t>Made router-ids all-0 and all-1 forbidden.</t>
 </list></t>
 
-</section>    
+</section>
+
+<section title="Changes since draft-ietf-babel-rfc6126bis-00">
+
+<t><list style="symbols">
+<t>Added security considerations</t>
+</list></t>
+</section>
 
 </section>
 

@@ -1715,11 +1715,11 @@ ignored.</t>
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |    Type = 8   |    Length     |       AE      |    Flags      |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|     Plen      |    Omitted    |            Interval           |
+|    Opaque1    |    Omitted    |            Interval           |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |             Seqno             |            Metric             |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|      Prefix...
+|      Opaque2
 +-+-+-+-+-+-+-+-+-+-+-+-
 ]]></artwork></figure>
 
@@ -1732,47 +1732,41 @@ a new default prefix.</t>
 <t hangText="Type">Set to 8 to indicate an Update TLV.</t>
 <t hangText="Length">The length of the body, exclusive of the Type and
 Length fields.</t>
-<t hangText="AE">The encoding of the Prefix field.</t>
+<t hangText="AE">Specifies the interpretation of the Opaque1 and Opaque2
+fields.</t>
 <t hangText="Flags">The individual bits of this field specify special
 handling of this TLV (see below).  Every node MUST be able to interpret the
 flags with values 80 and 40 hexadecimal; unknown flags MUST be silently
 ignored.</t>
-<t hangText="Plen">The length of the advertised prefix.</t>
-<t hangText="Omitted">The number of octets that have been omitted at
-the beginning of the advertised prefix and that should be taken from a
-preceding Update TLV with the flag with value 80 hexadecimal set.</t>
+<t hangText="Opaque1">A field the interpretation of which depends on the
+value of the AE field.</t>
+<t hangText="Omitted">The number of octets that have been omitted from
+this update and should be taken from a previous update TLV in the same
+packet with the same AE value and the flag 80 hexadecimal set.  The
+location of the omitted octets is specified for each AE.</t>
 <t hangText="Interval">An upper bound, expressed in centiseconds, on the
 time after which the sending node will send a new update for this prefix.
 This MUST NOT be 0 and SHOULD NOT be less than 10.  The receiving node
 will use this value to compute a hold time for this routing table entry.
 The value FFFF hexadecimal (infinity) expresses that this announcement will
-not be repeated unless a request is received (<xref
-target="request-expiring"/>).</t>
+not be repeated unless a request is received
+(<xref target="request-expiring"/>).</t>
 <t hangText="Seqno">The originator's sequence number for this update.</t>
 <t hangText="Metric">The sender's metric for this route.  The value FFFF
 hexadecimal (infinity) means that this is a route retraction.</t>
-<t hangText="Prefix">The prefix being advertised.  This field's size is
-(Plen/8 - Omitted) rounded upwards.</t>
+<t hangText="Opaque2">A field the interpretation of which depends on the
+value of the AE field.</t>
 </list></t>
 
 <t>The Flags field is interpreted as follows:
 <list style="symbols">
 <t>if the bit with value 80 hexadecimal is set, then this Update
-establishes a new default prefix for subsequent Update TLVs with a matching
-address family within the same packet;</t>
-<t>if the bit with value 40 hexadecimal is set, then the low-order 8 octets
-of the advertised prefix establish a new default router-id for this TLV and
-subsequent Update TLVs in the same packet.</t>
-</list>
-</t>
-
-<t>The prefix being advertised by an Update TLV is computed as follows:
-<list style="symbols">
-<t>the first Omitted octets of the prefix are taken from the previous
-Update TLV with flag 80 hexadecimal set and the same address family;</t>
-<t>the next (Plen/8 - Omitted) (rounded upwards) octets are taken from the
-Prefix field;</t>
-<t>the remaining octets are set to 0.</t>
+establishes a new default prefix for subsequent Update TLVs with the same
+AE within the same packet;</t>
+<t>if the bit with value 40 hexadecimal is set, then this Update TLV
+establishes a new default router-id for this TLV and subsequent update
+TLVs in the same packet.  How the router-id is derived from the Update is
+specified for each AE value.</t>
 </list>
 </t>
 
@@ -1796,7 +1790,70 @@ routes previously advertised on this interface.</t>
 <t>Update TLVs with an unknown value for the AE field MUST be silently
 ignored.</t>
 
-<t>This TLV is self-terminating, and allows sub-TLVs.</t>
+<section title="AE 0">
+
+<t>Update TLVs with AE 0 MUST NOT be sent and MUST be silently ignored on
+reception.</t>
+
+</section>
+
+<section title="Update TLVs for AEs 1 and 2">
+
+<t>AEs 1 and 2 are used for advertising prefixes for next-hop routing for
+IPv4 and IPv6 respectively.  The Opaque1 field carries the prefix length,
+and is called Plen, while the Opaque2 field carries (a substring of) the
+prefix, and is called Prefix:
+<figure><artwork><![CDATA[
+0                   1                   2                   3
+0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|    Type = 8   |    Length     |  AE = 1 or 2  |    Flags      |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|     Plen      |    Omitted    |            Interval           |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|             Seqno             |            Metric             |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|      Prefix...
++-+-+-+-+-+-+-+-+-+-+-+-
+]]></artwork></figure></t>
+
+<t>The Prefix field's size is (Plen/8 - Omitted) rounded upwards.</t>
+
+<t>The prefix being advertised is computed as follows:
+<list style="symbols">
+<t>the first Omitted octets of the prefix are taken from the previous
+Update TLV with flag 80 hexadecimal set and the same AE value;</t>
+<t>the next (Plen/8 - Omitted) (rounded upwards) octets are taken from the
+Prefix field;</t>
+<t>the remaining octets are set to 0.</t>
+</list></t>
+
+<t>The router-id associated to the route is computed as follows:
+<list style="symbols">
+<t>if the flag with value 40 hexadecimal is set, then the router-id
+consists of 32 bits of zeroes concatenated with the first address of the
+prefix being advertised (if AE=1) or of the low-order 64 bits of the first
+address of the prefix being advertised (if AE=2);</t>
+<t>otherwise, the router-id is taken from the previous Router-ID TLV in
+the same packet or the previous Update TLV with AE=1 or 2 and flag 40
+hexadecimal set, whichever comes last.</t>
+</list></t>
+
+</section>
+
+<section title="AE 3">
+
+<t>Since link-local addresses are not routable, Update TLVs with AE 3 MUST
+NOT be sent and MUST be silently ignored on reception.</t>
+
+</section>
+
+<section title="Other AE values">
+
+<t>Update TLVs with an unknown value for the AE field MUST be silently
+ignored.</t>
+
+</section>
 
 </section>
 
@@ -1806,9 +1863,9 @@ ignored.</t>
 0                   1                   2                   3
 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|    Type = 9   |    Length     |      AE       |     Plen      |
+|    Type = 9   |    Length     |      AE       |    Opaque1    |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|      Prefix...
+|      Opaque2
 +-+-+-+-+-+-+-+-+-+-+-+-
 ]]></artwork></figure>
 
@@ -1823,9 +1880,10 @@ Length fields.</t>
 <t hangText="AE">The encoding of the Prefix field.  The value 0 specifies
 that this is a request for a full routing table dump (a wildcard
 request).</t>
-<t hangText="Plen">The length of the requested prefix.</t>
-<t hangText="Prefix">The prefix being requested.  This field's size is
-Plen/8 rounded upwards.</t>
+<t hangText="Opaque1">A per-AE value, defined like in the corresponding
+Update TLV;</t>
+<t hangText="Prefix">A per-AE value, defined like in the corresponding
+Update TLV.</t>
 </list></t>
 
 <t>A Request TLV prompts the receiving node to send an update message for
@@ -1845,12 +1903,12 @@ of the neighbours of the sending interface.</t>
 0                   1                   2                   3
 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|    Type = 10  |    Length     |      AE       |    Plen       |
+|    Type = 10  |    Length     |      AE       |    Opaque1    |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |             Seqno             |  Hop Count    |   Reserved    |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |                                                               |
-+                          Router-Id                            +
++                            Opaque2                            |
 |                                                               |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |   Prefix...        
@@ -1867,15 +1925,16 @@ it cannot be satisfied locally.</t>
 <t hangText="Length">The length of the body, exclusive of the Type and
 Length fields.</t>
 <t hangText="AE">The encoding of the Prefix field.  This MUST NOT be 0.</t>
-<t hangText="Plen">The length of the requested prefix.</t>
+<t hangText="Opaque1">A per-AE value, defined like in the corresponding
+Update TLV;</t>
 <t hangText="Seqno">The sequence number that is being requested.</t>
 <t hangText="Hop Count">The maximum number of times that this TLV may be
 forwarded, plus 1.  This MUST NOT be 0.</t>
 <t hangText="Reserved">Sent as 0 and MUST be ignored on reception.</t>
 <t hangText="Router Id">The Router-Id that is being requested.  This MUST
 NOT consist of all zeroes or all ones.</t>
-<t hangText="Prefix">The prefix being requested.  This field's size is
-Plen/8 rounded upwards.</t>
+<t hangText="Prefix">A per-AE value, defined like in the corresponding
+Update TLV.</t>
 </list></t>
 
 <t>A Seqno Request TLV prompts the receiving node to send an Update for the
@@ -1893,6 +1952,7 @@ one neighbour.  A request MUST NOT be forwarded if its Hop Count field is
 <t>This TLV is self-terminating, and allows sub-TLVs.</t>
 
 </section>
+
 </section>
 
 <section title="Details of specific sub-TLVs">
@@ -2383,6 +2443,8 @@ the Router-Id field.</t>
 <t>Integrated the format of sub-TLVs.</t>
 <t>Mentioned for each TLV whether it supports sub-TLVs.</t>
 <t>Added <xref target="extensions"/>.</t>
+<t>Changed the definition of Updates and Requests to be more flexible and
+make compression per-AE.</t>
 </list></t>
 
 </section>

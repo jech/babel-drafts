@@ -1409,6 +1409,8 @@ selected TLV types, an optional list of sub-TLVs.</t>
 
 <t>TLVs with an unknown type value MUST be silently ignored.</t>
 
+</section>
+
 <section title="Sub-TLV Format">
 
 <t>Every TLV carries an explicit length in its header; however, most TLVs
@@ -1438,6 +1440,8 @@ embedded.</t>
 </list></t>
 
 <t>Sub-TLVs with an unknown type value MUST be silently ignored.</t>
+
+</section>
 
 <section title="Details of Specific TLVs" anchor="tlv-details">
 
@@ -1931,10 +1935,6 @@ Type and Length fields.</t>
 </list></t>
 
 <t>This sub-TLV is silently ignored on reception.</t>
-
-</section>
-
-</section>
 
 </section>
 

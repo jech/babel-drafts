@@ -2269,6 +2269,48 @@ one-half the Hello interval.</t>
 
 </section>
 
+<section title="Considerations for protocol extensions" anchor="extensions">
+
+<t>Babel is an extensible protocol, and this document defines a number of
+mechanisms that can be used to extend the protocol in a backwards
+compatible manner:
+<list style="symbols">
+<t>increasing the version number in the packet header;</t>
+<t>defining new TLVs;</t>
+<t>defining new sub-TLVs;</t>
+<t>using the packet trailer.</t>
+</list></t>
+
+<t>New versions of the Babel protocol should only be defined if the new
+version is not backwards compatible with the original protocol.</t>
+
+<t>In many cases, an extension could be implemented either by defining
+a new TLV, or by adding a new sub-TLV to an existing TLV.  For example, an
+extension whose purpose is to attach additional data to route updates can
+be implemented either by creating a new "enriched" Update TLV, or by
+adding a sub-TLV to the Update TLV.</t>
+
+<t>The two encodings are treated differently by implementations that do
+not understand the extension.  In the case of a new TLV, the whole unknown
+TLV is ignored by an implementation of the original protocol, while in the
+case of a new sub-TLV, the TLV is parsed and acted upon, and the unknown
+sub-TLV is silently ignored.  Therefore, a sub-TLV should be used by
+extensions that extend the Update in a compatible manner (the extension
+data may be silently ignored), while a new TLV must be used by extensions
+that make incompatible extensions to the meaning of the TLV (the whole TLV
+must be thrown away if the extension data is not understood).</t>
+
+<t>The packet trailer &mdash; the space after the declared length of the
+packet but within the payload of the UDP datagram &mdash; was originally
+intended to carry a cryptographic signature.  However, at this time no
+extension has used it, and therefore we refrain from making any
+recommendations about its use due to the lack of implementation
+experience.</t>
+
+
+
+</section>
+
 <section title="Simplified Implementations">
 
 <t>Babel is a fairly economic protocol.  Route updates take between 12 and

@@ -2373,10 +2373,19 @@ the Router-Id field.</t>
 <section title="Changes since draft-ietf-babel-rfc6126bis-00">
 
 <t><list style="symbols">
-<t>Added security considerations</t>
+<t>Added security considerations.</t>
 </list></t>
 </section>
 
+<section title="Changes since draft-ietf-babel-rfc6126bis-01">
+
+<t><list style="symbols">
+<t>Integrated the format of sub-TLVs.</t>
+<t>Mentioned for each TLV whether it supports sub-TLVs.</t>
+<t>Added <xref target="extensions"/>.</t>
+</list></t>
+
+</section>
 </section>
 
 </back>

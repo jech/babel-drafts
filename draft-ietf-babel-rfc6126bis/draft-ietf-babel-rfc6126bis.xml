@@ -493,7 +493,8 @@ manner as the IPv6 layer assigns host IDs.)</t>
 <section title="Message Transmission and Reception">
 
 <t>Babel protocol packets are sent in the body of a UDP datagram.  Each
-Babel packet consists of one or more TLVs.</t>
+Babel packet consists of zero or more TLVs.  Most TLVs may contain
+sub-TLVs.</t>
 
 <t>The source address of a Babel packet is always a unicast address,
 link-local in the case of IPv6.  Babel packets may be sent to a well-known
@@ -1392,7 +1393,7 @@ packets with a first octet different from 42 MUST be silently ignored.</t>
 0                   1                   2                   3
 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|     Type      |    Length     |     Body...
+|     Type      |    Length     |     Payload...
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
 ]]></artwork></figure>
 
@@ -1402,13 +1403,41 @@ packets with a first octet different from 42 MUST be silently ignored.</t>
 <t hangText="Length">The length of the body, exclusive of the Type and
   Length fields.  If the body is longer than the expected length of a given
   type of TLV, any extra data MUST be silently ignored.</t>
-<t hangText="Body">The TLV body, the interpretation of which depends on
-the type.</t>
+<t hangText="Payload">The TLV payload, which consists of a body and, for
+selected TLV types, an optional list of sub-TLVs.</t>
 </list></t>
 
 <t>TLVs with an unknown type value MUST be silently ignored.</t>
 
-</section>
+<section title="Sub-TLV Format">
+
+<t>Every TLV carries an explicit length in its header; however, most TLVs
+are self-terminating, in the sense that it is possible to determine the
+length of the body without reference to the explicit TLV length.  If a TLV
+has a self-terminating format, then it MAY allow a sequence of sub-TLVs to
+follow the body.</t>
+
+<t>Sub-TLVs have the same structure as TLVs.  With the exception of PAD1,
+all TLVs have the following structure:</t>
+<figure><artwork><![CDATA[
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|     Type      |    Length     |     Body...
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+]]></artwork></figure>
+
+<t>Fields :
+<list style="hanging" hangIndent="10">
+<t hangText="Type">The type of the sub-TLV.</t>
+<t hangText="Length">The length of the body, in octets, exclusive of the
+Type and Length fields.</t>
+<t hangText="Body">The sub-TLV body, the interpretation of which depends
+on both the type of the sub-TLV and the type of the TLV within which it is
+embedded.</t>
+</list></t>
+
+<t>Sub-TLVs with an unknown type value MUST be silently ignored.</t>
 
 <section title="Details of Specific TLVs" anchor="tlv-details">
 
@@ -1483,6 +1512,8 @@ The receiver MUST send an acknowledgement before this time has elapsed
 (with a margin allowing for propagation time). </t>
 </list></t>
 
+<t>This TLV is self-terminating, and allows sub-TLVs.</t>
+
 </section>
 
 <section title="Acknowledgement">
@@ -1508,6 +1539,8 @@ that prompted this Acknowledgement.</t>
 
 <t>Since nonce values are not globally unique, this TLV MUST be sent to
 a unicast address.</t>
+
+<t>This TLV is self-terminating, and allows sub-TLVs.</t>
 
 </section>
 
@@ -1543,6 +1576,8 @@ be 0.</t>
 node over a given interface, this TLV MUST be sent to a multicast
 destination.  In order to avoid large discontinuities in link quality,
 multiple Hello TLVs SHOULD NOT be sent in the same packet.</t>
+
+<t>This TLV is self-terminating, and allows sub-TLVs.</t>
 
 </section>
 
@@ -1595,6 +1630,8 @@ traffic.</t>
 <t>IHU TLVs with an unknown value for the AE field MUST be silently
 ignored.</t>
 
+<t>This TLV is self-terminating, and allows sub-TLVs.</t>
+
 </section>
 
 <section title="Router-Id">
@@ -1623,6 +1660,9 @@ Length fields.</t>
 <t hangText="Router-Id">The router-id for routes advertised in subsequent
 Update TLVs.  This MUST NOT consist of all zeroes or all ones.</t>
 </list></t>
+
+<t>This TLV is self-terminating, and allows sub-TLVs.</t>
+
 </section>
 
 <section title="Next Hop">
@@ -1658,6 +1698,8 @@ next hop is taken to be the source address of the packet.</t>
 
 <t>Next Hop TLVs with an unknown value for the AE field MUST be silently
 ignored.</t>
+
+<t>This TLV is self-terminating, and allows sub-TLVs.</t>
 
 </section>
 
@@ -1750,6 +1792,8 @@ routes previously advertised on this interface.</t>
 <t>Update TLVs with an unknown value for the AE field MUST be silently
 ignored.</t>
 
+<t>This TLV is self-terminating, and allows sub-TLVs.</t>
+
 </section>
 
 <section title="Route Request">
@@ -1786,6 +1830,8 @@ its routing table if AE is 0 (in which case Plen MUST be 0 and Prefix is of
 length 0).  A Request may be sent to a unicast address if it is destined to
 a single node, or to a multicast address if the request is destined to all
 of the neighbours of the sending interface.</t>
+
+<t>This TLV is self-terminating, and allows sub-TLVs.</t>
 
 </section>
 
@@ -1840,8 +1886,60 @@ forwarded to a multicast address and MUST NOT be forwarded to more than
 one neighbour.  A request MUST NOT be forwarded if its Hop Count field is
 1.</t>
 
+<t>This TLV is self-terminating, and allows sub-TLVs.</t>
+
 </section>
 </section>
+
+<section title="Details of specific sub-TLVs">
+
+<section title="Pad1" anchor="pad1">
+
+<figure><artwork><![CDATA[
+ 0               
+ 0 1 2 3 4 5 6 7 
++-+-+-+-+-+-+-+-+
+|   Type = 0    |
++-+-+-+-+-+-+-+-+
+]]></artwork></figure>
+
+<t>Fields :
+<list style="hanging" hangIndent="10">
+<t hangText="Type">Set to 0 to indicate a Pad1 sub-TLV.</t>
+</list></t>
+
+<t>This sub-TLV is silently ignored on reception.</t>
+
+</section>
+
+<section title="PadN">
+
+<figure><artwork><![CDATA[
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|    Type = 1   |    Length     |      MBZ...
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+]]></artwork></figure>
+
+<t>Fields :
+<list style="hanging" hangIndent="10">
+<t hangText="Type">Set to 1 to indicate a PadN sub-TLV.</t>
+<t hangText="Length">The length of the body, in octets, exclusive of the
+Type and Length fields.</t>
+<t hangText="MBZ">Set to 0 on transmission.</t>
+</list></t>
+
+<t>This sub-TLV is silently ignored on reception.</t>
+
+</section>
+
+</section>
+
+</section>
+
+</section>
+
 </section>
 
 <section title="IANA Considerations">

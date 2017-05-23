@@ -1439,7 +1439,12 @@ on both the type of the sub-TLV and the type of the TLV within which it is
 embedded.</t>
 </list></t>
 
-<t>Sub-TLVs with an unknown type value MUST be silently ignored.</t>
+<t>The most-specific bit of the sub-TLV, called the mandatory bit,
+indicates how to handle unknown sub-TLVs.  If the mandatory bit is not
+set, then an unknown sub-TLV MUST be silently ignored, and the rest of the
+TLV processed normally.  If the mandatory bit is set, then the whole
+enclosing TLV MUST be silently ignored (except for updating the
+compression state, see <xref target="update"/>.</t>
 
 </section>
 
@@ -1638,7 +1643,7 @@ ignored.</t>
 
 </section>
 
-<section title="Router-Id">
+<section title="Router-Id" anchor="router-id">
 
 <figure><artwork><![CDATA[
 0                   1                   2                   3
@@ -1707,7 +1712,7 @@ ignored.</t>
 
 </section>
 
-<section title="Update">
+<section title="Update" anchor="update">
 
 <figure><artwork><![CDATA[
 0                   1                   2                   3
@@ -1759,18 +1764,21 @@ hexadecimal (infinity) means that this is a route retraction.</t>
 <list style="symbols">
 <t>if the bit with value 80 hexadecimal is set, then this Update
 establishes a new default prefix for subsequent Update TLVs with a matching
-address family within the same packet;</t>
+address family within the same packet, even if this TLV is otherwise
+ignored due to an unknown mandatory sub-TLV;</t>
 <t>if the bit with value 40 hexadecimal is set, then the low-order 8 octets
 of the advertised prefix establish a new default router-id for this TLV and
-subsequent Update TLVs in the same packet.</t>
+subsequent Update TLVs in the same packet, even if this TLV is otherwise
+ignored due to an unknown mandatory sub-TLV.</t>
 </list>
 </t>
 
 <t>The prefix being advertised by an Update TLV is computed as follows:
 <list style="symbols">
 <t>the first Omitted octets of the prefix are taken from the previous
-Update TLV with flag 80 hexadecimal set and the same address family;</t>
-<t>the next (Plen/8 - Omitted) (rounded upwards) octets are taken from the
+Update TLV with flag 80 hexadecimal set and the same address encoding,
+even if it was ignored due to an unknown mandatory sub-TLV;</t>
+<t>the next (Plen/8 - Omitted) rounded upwards octets are taken from the
 Prefix field;</t>
 <t>the remaining octets are set to 0.</t>
 </list>
@@ -2277,7 +2285,7 @@ compatible manner:
 <list style="symbols">
 <t>increasing the version number in the packet header;</t>
 <t>defining new TLVs;</t>
-<t>defining new sub-TLVs;</t>
+<t>defining new sub-TLVs (with the mandatory bit set or not);</t>
 <t>using the packet trailer.</t>
 </list></t>
 

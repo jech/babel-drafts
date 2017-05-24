@@ -1764,7 +1764,7 @@ hexadecimal (infinity) means that this is a route retraction.</t>
 <list style="symbols">
 <t>if the bit with value 80 hexadecimal is set, then this Update
 establishes a new default prefix for subsequent Update TLVs with a matching
-address family within the same packet, even if this TLV is otherwise
+address encoding within the same packet, even if this TLV is otherwise
 ignored due to an unknown mandatory sub-TLV;</t>
 <t>if the bit with value 40 hexadecimal is set, then the low-order 8 octets
 of the advertised prefix establish a new default router-id for this TLV and

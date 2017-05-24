@@ -2331,9 +2331,10 @@ TLVs with an unknown AE are ignored, just like unknown TLVs.  However,
 adding a new AE is often more involved than adding a new TLV, since it
 creates a new set of compression state.  Additionally, since the Next Hop
 TLV creates state specific to a given address family, as opposed to
-a given AE, a new AE for an existing address family must not be used in
-Next Hop TLVs if compatibility with unextended implementations is
-required.</t>
+a given AE.  A similar issue arises with Update TLVs with unknown AEs
+establishing a new router-id (flag 40 hexadecimal).  Therefore, defining
+new AEs must be done with care if compatibility with unextended
+implementations is required.</t>
 
 <t>The packet trailer &mdash; the space after the declared length of the
 packet but within the payload of the UDP datagram &mdash; was originally

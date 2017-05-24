@@ -690,8 +690,18 @@ Address Resolution Protocol (ARP) or Neighbour Discovery exchanges.</t>
 <t>Neighbour acquisition is the process by which a Babel node discovers the
 set of neighbours heard over each of its interfaces and ascertains
 bidirectional reachability.  On unreliable media, neighbour acquisition
-additionally provides some statistics that MAY be used in link quality
+additionally provides some statistics that may be useful for link quality
 computation.</t>
+
+<t>Before it can exchange routing information with a neighbour, a Babel
+node MUST create an entry for that neighbour in the neighbour table.  When
+to do that is an implementation detail; suitable strategies include
+creating an entry when any Babel packet is received, or creating an entry
+when a Hello TLV is parsed.  Similarly, in order to conserve system
+resources, an implementation SHOULD discard an entry when it has been
+unused for long enough; suitable strategies include dropping the neighbour
+after a timeout, and dropping a neighbour when the associated Hello
+history becomes empty (see <xref target="cost-computation-examples"/>).</t>
 
 <section title="Reverse Reachability Detection">
 
@@ -2437,6 +2447,8 @@ the Router-Id field.</t>
 <t>Clarified how router-ids are computed when bit 0x40 is set in Updates.</t>
 <t>Relaxed the conditions for sending requests, and tightened the
 conditions for forwarding requests.</t>
+<t>Clarified that neighbours should be acquired at some point, but it
+doesn't matter when.</t>
 </list></t>
 
 </section>

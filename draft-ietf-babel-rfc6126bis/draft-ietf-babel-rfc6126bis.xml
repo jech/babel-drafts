@@ -1213,22 +1213,31 @@ requests is required (<xref target="avoiding-starvation"/>).</t>
 another feasible route for the same prefix.  It may be the case, however,
 that no such routes are available.</t>
 
-<t>A node that has lost all feasible routes to a given destination MUST
-send a seqno request.  The router-id of the request is set to the router-id
-of the route that it has just lost, and the requested seqno is the value
+<t>A node that has lost all feasible routes to a given destination but
+still has unexpired unfeasible routes to that destination, MUST send
+a seqno request; if it doesn't have any such routes, it MAY still send
+a seqno request.  The router-id of the request is set to the router-id of
+the route that it has just lost, and the requested seqno is the value
 contained in the source table, plus 1.</t>
 
-<t>Such a request SHOULD be multicast over all of the node's attached
-interfaces.  Similar requests will be sent by other nodes that are
-affected by the route's loss and will be forwarded by neighbouring nodes
-up to the source.  If the network is connected, and there is no packet
-loss, this will result in a route being advertised with a new sequence
-number.  (Note that, due to duplicate suppression, only a small number of
-such requests will actually reach the source.)</t>
+<t>If the node has any (unfeasible) routes to the requested destination,
+then it MUST send the request to at least one of the next-hop neighbours
+that advertised these routes, and SHOULD send it to all of them; in any
+case, it MAY send the request to any other neighbours, whether they
+advertise a route to the requested destination or not.  A simple
+implementation strategy is therefore to unconditionally multicast the
+request over all attached interfaces.</t>
+
+<t>Similar requests will be sent by other nodes that are affected by the
+route's loss.  If the network is still connected, and assuming no packet
+loss, then at least one of these requests will be forwarded to the source,
+resulting in a route being advertised with a new sequence number.  (Note
+that, due to duplicate suppression, only a small number of such requests
+will actually reach the source.)</t>
 
 <t>In order to compensate for packet loss, a node SHOULD repeat such
 a request a small number of times if no route becomes feasible within
-a short time.  Under heavy packet loss, however, all such requests may
+a short time.  Under heavy packet loss, however, all such requests might
 be lost; in that case, the second mechanism in the next section will
 eventually ensure that a new seqno is received.</t>
 
@@ -1246,10 +1255,12 @@ become unfeasible, a node SHOULD send a unicast seqno request whenever it
 receives an unfeasible update for a route that is currently selected.  The
 requested sequence number is computed from the source table as above.</t>
 
-<t>Additionally, a node SHOULD send a unicast seqno request whenever it
-receives an unfeasible update from a currently unselected neighbour that is
-"good enough", i.e., that would lead to the received route becoming selected
-were it feasible.</t>
+<t>Additionally, since metric computation does not necessarily coincide
+with the delay in propagating updates, a node might receive an unfeasible
+update from a currently unselected neighbour that is preferable to the
+currently selected route (e.g., because it has a much smaller metric); in
+that case, the node SHOULD send a unicast seqno request to the neighbour
+that advertised the preferable update.</t>
 
 </section>
 
@@ -1257,8 +1268,8 @@ were it feasible.</t>
 
 <t>In normal operation, a route's expiry timer should never trigger: since
 a route's hold time is computed from an explicit interval included in
-Update TLVs, a new update should arrive in time to prevent a route from
-expiring.</t>
+Update TLVs, a new update (possibly a retraction) should arrive in time to
+prevent a route from expiring.</t>
 
 <t>In the presence of packet loss, however, it may be the case that no
 update is successfully received for an extended period of time, causing a
@@ -1273,10 +1284,12 @@ either the route being refreshed or a retraction being received.</t>
 
 <section title="Acquiring New Neighbours">
 
-<t>In order to speed up convergence after a mobility event, a node MAY send
-a unicast wildcard request after acquiring a new neighbour.  Additionally,
-a node MAY send a small number of multicast wildcard requests shortly after
-booting.</t>
+<t>In order to speed up convergence after a mobility event, a node MAY
+send a unicast wildcard request after acquiring a new neighbour.
+Additionally, a node MAY send a small number of multicast wildcard
+requests shortly after booting.  Note that doing that carelessly can cause
+serious congestion when a whole network is rebooted, especially on link
+layers with high per-packet overhead (e.g., IEEE&nbsp;802.11).</t>
 
 </section>
 
@@ -2423,6 +2436,7 @@ the Router-Id field.</t>
 <t>Changed compression state to be per-AF rather than per-AE.</t>
 <t>Added implementation hint for the route table.</t>
 <t>Clarified how router-ids are computed when bit 0x40 is set in Updates.</t>
+<t>Relaxed the conditions for sending requests.</t>
 </list></t>
 
 </section>

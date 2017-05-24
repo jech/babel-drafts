@@ -1439,12 +1439,12 @@ on both the type of the sub-TLV and the type of the TLV within which it is
 embedded.</t>
 </list></t>
 
-<t>The most-specific bit of the sub-TLV, called the mandatory bit,
+<t>The most-significant bit of the sub-TLV, called the mandatory bit,
 indicates how to handle unknown sub-TLVs.  If the mandatory bit is not
 set, then an unknown sub-TLV MUST be silently ignored, and the rest of the
 TLV processed normally.  If the mandatory bit is set, then the whole
 enclosing TLV MUST be silently ignored (except for updating the
-compression state, see <xref target="update"/>.</t>
+compression state, see <xref target="update"/>).</t>
 
 </section>
 

@@ -526,18 +526,50 @@ manner.</t>
 
 <section title="Data Structures">
 
-<t>Every Babel speaker maintains a number of data structures.</t>
+<t>Every Babel speaker maintains a number of data structures.  All of
+these data structures consist of familiar data types &mdash; integers, IP
+addresses, etc. &mdash; with the exception of sequence numbers.</t>
 
-<section title="Sequence Number">
+<section title="Sequence number arithmetic" anchor="sequence-number">
+
+<t>Sequence numbers (seqnos) appear in a number of Babel data structures,
+and they are interpreted as integers modulo 2^16.  For the purposes of
+this document, arithmetic on serial numbers is defined as follows.</t>
+
+<t>Given a seqno s and an integer n, the sum of s and n is defined by
+<list style="empty">
+  <t>s + n (modulo 2^16) = (s + n) MOD 2^16</t>
+</list>
+or, equivalently,
+<list style="empty">
+  <t>s + n (modulo 2^16) = (s + n) AND 65535</t>
+</list>
+where MOD is the modulo operation yielding a non-negative integer and AND is
+the bitwise conjunction operation.</t>
+
+<t>Given two sequence numbers s and s', the relation s is less than s'
+(s&nbsp;&lt;&nbsp;s') is defined by
+<list style="empty">
+  <t>s &lt; s' (modulo 2^16) when 0 &lt; ((s' - s) MOD 2^16) &lt; 32768 </t>
+</list>
+or equivalently
+<list style="empty">
+  <t>s &lt; s' (modulo 2^16) when s /= s' and ((s' - s) AND 32768) = 0.</t>
+</list></t>
+
+</section>
+
+<section title="Node Sequence Number">
 
 <t>A node's sequence number is a 16-bit integer that is included in route
-updates sent for routes originated by this node.  A node increments its
-sequence number (modulo 2^16) whenever it receives a request for a new
-sequence number (<xref target="handling-seqno-requests"/>).</t>
+updates sent for routes originated by this node.</t>
 
-<t>A node SHOULD NOT increment its sequence number (seqno) spontaneously,
-since increasing seqnos makes it less likely that other nodes will have
-feasible alternate routes when their selected routes fail.</t>
+<t>A node increments its sequence number (modulo 2^16) whenever it
+receives a request for a new sequence number (<xref
+target="handling-seqno-requests"/>).  A node SHOULD NOT increment its
+sequence number (seqno) spontaneously, since increasing seqnos makes it
+less likely that other nodes will have feasible alternate routes when
+their selected routes fail.</t>
 
 </section>
 
@@ -1174,11 +1206,11 @@ that prefix.  If a selected route for the given prefix exists, it has
 finite metric, and either the router-ids are different or the router-ids
 are equal and the entry's sequence number is no smaller than the requested
 sequence number, the node MUST send an update for the given prefix.  If
-the router-ids match but the requested seqno is larger than the route
-entry's, the node compares the router-id against its own router-id.  If
-the router-id is its own, then it increases its sequence number by 1 and
-sends an update.  A node MUST NOT increase its sequence number by more
-than 1 in response to a seqno request.</t>
+the router-ids match but the requested seqno is larger (modulo 2^16) than
+the route entry's, the node compares the router-id against its own
+router-id.  If the router-id is its own, then it increases its sequence
+number by 1 and sends an update.  A node MUST NOT increase its sequence
+number by more than 1 in response to a seqno request.</t>
 
 <t>Otherwise, if the requested router-id is not its own, the received
 request's hop count is 2 or more, and the node has a route (not
@@ -1925,12 +1957,13 @@ NOT consist of all zeroes or all ones.</t>
 Plen/8 rounded upwards.</t>
 </list></t>
 
-<t>A Seqno Request TLV prompts the receiving node to send an Update for the
-prefix specified by the AE, Plen, and Prefix fields, with either a router-id
-different from what is specified by the Router-Id field, or a Seqno no less
-than what is specified by the Seqno field.  If this request cannot be
-satisfied locally, then it is forwarded according to the rules set out in
-<xref target="handling-seqno-requests"/>.</t>
+<t>A Seqno Request TLV prompts the receiving node to send an Update for
+the prefix specified by the AE, Plen, and Prefix fields, with either
+a router-id different from what is specified by the Router-Id field, or
+a Seqno no less (modulo 2^16) than what is specified by the Seqno field.
+If this request cannot be satisfied locally, then it is forwarded
+according to the rules set out in <xref
+target="handling-seqno-requests"/>.</t>
 
 <t>While a Seqno Request MAY be sent to a multicast address, it MUST NOT be
 forwarded to a multicast address and MUST NOT be forwarded to more than

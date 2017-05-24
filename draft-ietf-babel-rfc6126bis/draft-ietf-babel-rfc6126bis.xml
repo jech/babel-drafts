@@ -1160,33 +1160,30 @@ routing table dump.</t>
 
 <t>When a node receives a seqno request for a given router-id and sequence
 number, it checks whether its routing table contains a selected entry for
-that prefix; if no such entry exists, or the entry has infinite metric, it
-ignores the request.</t>
-
-<t>If a selected route for the given prefix exists, and either the
-router-ids are different or the router-ids are equal and the entry's
-sequence number is no smaller than the requested sequence number, it MUST
-send an update for the given prefix.</t>
-
-<t>If the router-ids match but the requested seqno is larger than the route
-entry's, the node compares the router-id against its own router-id.  If the
-router-id is its own, then it increases its sequence number by 1 and sends
-an update.  A node MUST NOT increase its sequence number by more than 1 in
-response to a seqno request.</t>
+that prefix.  If a selected route for the given prefix exists, it has
+finite metric, and either the router-ids are different or the router-ids
+are equal and the entry's sequence number is no smaller than the requested
+sequence number, the node MUST send an update for the given prefix.  If
+the router-ids match but the requested seqno is larger than the route
+entry's, the node compares the router-id against its own router-id.  If
+the router-id is its own, then it increases its sequence number by 1 and
+sends an update.  A node MUST NOT increase its sequence number by more
+than 1 in response to a seqno request.</t>
 
 <t>If the requested router-id is not its own, the received request's hop
 count is 2 or more, and the node has a route (not necessarily a feasible
-one) for the requested prefix that does not use the requestor as
-a next hop, the node SHOULD forward the request.  It does so by decreasing
-the hop count and sending the request in a unicast packet destined to
-a neighbour that advertises the given prefix (not necessarily the selected
-neighbour) and that is distinct from the neighbour from which the request
-was received.</t>
+one) for the requested prefix that does not use the requestor as a next
+hop, the node MUST forward the request.  It does so by decreasing the hop
+count and sending the request in a unicast packet destined to a neighbour
+that advertises the given prefix (not necessarily the selected neighbour)
+and that is distinct from the neighbour from which the request was
+received.</t>
 
 <t>A node SHOULD maintain a list of recently forwarded requests and
-forward the reply in a timely manner.  A node SHOULD compare every incoming
-request against its list of recently forwarded requests and avoid
-forwarding it if it is redundant.</t>
+forward the reply (an update with a sufficiently large seqno) in a timely
+manner.  A node SHOULD compare every incoming request against its list of
+recently forwarded requests and avoid forwarding it if it is
+redundant.</t>
 
 <t>Since the request-forwarding mechanism does not necessarily obey the
 feasibility condition, it may get caught in routing loops; hence, requests
@@ -2436,7 +2433,8 @@ the Router-Id field.</t>
 <t>Changed compression state to be per-AF rather than per-AE.</t>
 <t>Added implementation hint for the route table.</t>
 <t>Clarified how router-ids are computed when bit 0x40 is set in Updates.</t>
-<t>Relaxed the conditions for sending requests.</t>
+<t>Relaxed the conditions for sending requests, and tightened the
+conditions for forwarding requests.</t>
 </list></t>
 
 </section>

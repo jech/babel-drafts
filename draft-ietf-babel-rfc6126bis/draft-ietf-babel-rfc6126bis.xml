@@ -1142,6 +1142,9 @@ is updated as follows:
 <t>The garbage-collection timer for the entry is then reset.  Note that
 the garbage-collection timer is not reset when a retraction is sent.</t>
 
+<t>When the garbage-collection timer expires, the entry is removed from
+the source table.</t>
+
 </section>
 
 <section title="Split Horizon">

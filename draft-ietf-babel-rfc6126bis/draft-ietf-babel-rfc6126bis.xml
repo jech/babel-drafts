@@ -1771,10 +1771,20 @@ hexadecimal (infinity) means that this is a route retraction.</t>
 establishes a new default prefix for subsequent Update TLVs with a matching
 address encoding within the same packet, even if this TLV is otherwise
 ignored due to an unknown mandatory sub-TLV;</t>
-<t>if the bit with value 40 hexadecimal is set, then the low-order 8 octets
-of the advertised prefix establish a new default router-id for this TLV and
-subsequent Update TLVs in the same packet, even if this TLV is otherwise
-ignored due to an unknown mandatory sub-TLV.</t>
+<t>if the bit with value 40 hexadecimal is set, then this TLV establishes
+a new default router-id for this TLV and subsequent Update TLVs in the
+same packet, even if this TLV is otherwise ignored due to an unknown
+mandatory sub-TLV.  This router-id is computed from the first address of
+the advertised prefix as follows:
+<list>
+  <t>if the length of the address is 8 octets or more, then the new
+  router-id is taken from the 8 last octets of the address;</t>
+  <t>if the length of the address is smaller than 8 octets, then the new
+  router-id consists of the required number of zero octets followed by the
+  address, i.e., the address is stored on the right of the router-id.  For
+  example, for an IPv4 address, the router-id consists of 4 octets of
+  zeroes followed by the IPv4 address.</t>
+</list></t>
 </list>
 </t>
 
@@ -1790,9 +1800,9 @@ Prefix field;</t>
 </t>
 
 <t>If the Metric field is finite, the router-id of the originating node
-for this announcement is taken from the low-order 8 octets of the prefix
-advertised by this Update if the bit with value 40 hexadecimal is set in
-the Flags field.  Otherwise, it is taken either from the preceding
+for this announcement is taken from the prefix advertised by this Update
+if the bit with value 40 hexadecimal is set in the Flags field, computed
+as described above.  Otherwise, it is taken either from the preceding
 Router-Id packet that was not ignored due to an unknown mandatory sub-TLV,
 or the preceding Update packet with flag 40 hexadecimal set, whichever
 comes last.</t>
@@ -2411,6 +2421,7 @@ the Router-Id field.</t>
 <t>Added a mandatory bit in sub-TLVs.</t>
 <t>Changed compression state to be per-AF rather than per-AE.</t>
 <t>Added implementation hint for the route table.</t>
+<t>Clarified how router-ids are computed when bit 0x40 is set in Updates.</t>
 </list></t>
 
 </section>

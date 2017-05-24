@@ -1505,11 +1505,38 @@ embedded.</t>
 indicates how to handle unknown sub-TLVs.  If the mandatory bit is not
 set, then an unknown sub-TLV MUST be silently ignored, and the rest of the
 TLV processed normally.  If the mandatory bit is set, then the whole
-enclosing TLV MUST be silently ignored (except for updating the
-compression state by an Update TLV, see <xref target="update"/>).</t>
+enclosing TLV MUST be silently ignored (except for updating the parser
+state by a Router-ID, Next-Hop or Update TLV, see <xref target="router-id"/>,
+<xref target="next-hop"/>, and <xref target="update"/>).</t>
 
 </section>
 
+<section title="Parser state">
+
+<t>Babel uses a stateful parser: a TLV may refer to data from a previous
+TLV.  Babel's parser state consists of the following pieces of data:
+<list style="symbols">
+  <t>for each address encoding that allows compression, the current
+  default prefix; this is undefined at the start of the packet, and is
+  updated by an Update TLV with flag 80 hexadecimal set
+  (<xref target="update"/>);</t>
+  <t>for each address family (IPv4 or IPv6), the current next-hop; this is
+  the source address of the enclosing packet for the matching address
+  family at the start of a packet, and is updated by the Next-Hop TLV
+  (<xref target="next-hop"/>);</t>
+  <t>the current router-id; this is undefined at the start of the packet,
+  and is updated by both the Router-ID TLV (<xref target="router-id"/>)
+  and the Update TLV with flag 40 hexadecimal set.</t>
+</list></t>
+
+<t>Since the parser state is separate from the bulk of Babel's state, and
+for correct parsing must be identical across implementations, it is
+updated before checking for mandatory TLVs: parsing a TLV updates the
+parser state even if the TLV is otherwise ignored due to an unknown
+mandatory sub-TLV.</t>
+
+</section>
+  
 <section title="Details of Specific TLVs" anchor="tlv-details">
 
 <section title="Pad1">
@@ -1720,7 +1747,8 @@ ignored.</t>
 ]]></artwork></figure>
 
 <t>A Router-Id TLV establishes a router-id that is implied by subsequent
-Update TLVs.</t>
+Update TLVs.  This TLV sets the router-id even if it is otherwise ignored
+due to an unknown mandatory sub-TLV.</t>
 
 <t>Fields :
 <list style="hanging" hangIndent="10">
@@ -1736,7 +1764,7 @@ Update TLVs.  This MUST NOT consist of all zeroes or all ones.</t>
 
 </section>
 
-<section title="Next Hop">
+<section title="Next Hop" anchor="next-hop">
 
 <figure><artwork><![CDATA[
 0                   1                   2                   3
@@ -1748,8 +1776,10 @@ Update TLVs.  This MUST NOT consist of all zeroes or all ones.</t>
 +-+-+-+-+-+-+-+-+-+-+-+-
 ]]></artwork></figure>
 
-<t>A Next Hop TLV establishes a next-hop address for a given address family
-(IPv4 or IPv6) that is implied by subsequent Update TLVs.</t>
+<t>A Next Hop TLV establishes a next-hop address for a given address
+family (IPv4 or IPv6) that is implied by subsequent Update TLVs.  This TLV
+sets up the next-hop for subsequent Update TLVs even if it is ignored due
+to an unknown mandatory sub-TLV.</t>
 
 <t>Fields :
 <list style="hanging" hangIndent="10">
@@ -1860,15 +1890,15 @@ Prefix field;</t>
 for this announcement is taken from the prefix advertised by this Update
 if the bit with value 40 hexadecimal is set in the Flags field, computed
 as described above.  Otherwise, it is taken either from the preceding
-Router-Id packet that was not ignored due to an unknown mandatory sub-TLV,
-or the preceding Update packet with flag 40 hexadecimal set, whichever
-comes last.</t>
+Router-Id packet, or the preceding Update packet with flag 40 hexadecimal
+set, whichever comes last, even if that TLV is otherwise ignored due to an
+unknown mandatory sub-TLV.</t>
 
 <t>The next-hop address for this update is taken from the last preceding
 Next Hop TLV with a matching address family (IPv4 or IPv6) in the same
-packet (that was not ignored due to an unknown mandatory sub-TLV); if no
-such TLV exists, it is taken from the network-layer source address of this
-packet.</t>
+packet even if it was otherwise ignored due to an unknown mandatory
+sub-TLV; if no such TLV exists, it is taken from the network-layer source
+address of this packet.</t>
 
 <t>If the metric field is FFFF hexadecimal, this TLV specifies
 a retraction.  In that case, the current router-id and the Seqno are not

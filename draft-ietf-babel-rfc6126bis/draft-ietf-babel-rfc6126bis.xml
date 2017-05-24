@@ -630,6 +630,11 @@ it is currently being used for forwarding and is being advertised.</t>
 route expiry timer.  It is initialised and reset as specified in
 <xref target="route-acquisition"/>.</t>
 
+<t>Of course, the data structure described above is conceptual: actual
+implementations will likely use a different data structure, for example
+a table of installed routes and a set of redundant ones, or some more
+complicated data structure.</t>
+
 </section>
 
 <section title="The Table of Pending Requests">
@@ -2405,6 +2410,7 @@ the Router-Id field.</t>
 <t>Added <xref target="extensions"/>.</t>
 <t>Added a mandatory bit in sub-TLVs.</t>
 <t>Changed compression state to be per-AF rather than per-AE.</t>
+<t>Added implementation hint for the route table.</t>
 </list></t>
 
 </section>

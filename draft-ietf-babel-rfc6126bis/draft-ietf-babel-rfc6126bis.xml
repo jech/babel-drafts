@@ -1170,14 +1170,16 @@ the router-id is its own, then it increases its sequence number by 1 and
 sends an update.  A node MUST NOT increase its sequence number by more
 than 1 in response to a seqno request.</t>
 
-<t>If the requested router-id is not its own, the received request's hop
-count is 2 or more, and the node has a route (not necessarily a feasible
-one) for the requested prefix that does not use the requestor as a next
-hop, the node MUST forward the request.  It does so by decreasing the hop
+<t>Otherwise, if the requested router-id is not its own, the received
+request's hop count is 2 or more, and the node has a route (not
+necessarily a feasible one) for the requested prefix that does not use the
+requestor as a next hop, the node MUST forward the request if it has
+a feasible route to the requested prefix and it is advertising this prefix
+to neighbours, and SHOULD forward the request if it has a (not necessarily
+feasible) route to the requested prefix.  It does so by decreasing the hop
 count and sending the request in a unicast packet destined to a neighbour
-that advertises the given prefix (not necessarily the selected neighbour)
-and that is distinct from the neighbour from which the request was
-received.</t>
+that advertises the given prefix and that is not the neighbour from which
+the request was received.</t>
 
 <t>A node SHOULD maintain a list of recently forwarded requests and
 forward the reply (an update with a sufficiently large seqno) in a timely
@@ -1191,8 +1193,8 @@ carry a hop count to limit the time for which they remain in the network.
 However, since requests are only ever forwarded as unicast packets, the
 initial hop count need not be kept particularly low, and performing an
 expanding horizon search is not necessary.  A request MUST NOT be
-forwarded to a multicast address, and it MUST be forwarded to a single
-neighbour only.</t>
+forwarded to a multicast address, and it MUST NOT be forwarded to multiple
+neighbours.</t>
 
 </section>
 

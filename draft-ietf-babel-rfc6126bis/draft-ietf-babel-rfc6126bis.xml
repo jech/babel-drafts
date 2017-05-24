@@ -2286,6 +2286,7 @@ compatible manner:
 <t>increasing the version number in the packet header;</t>
 <t>defining new TLVs;</t>
 <t>defining new sub-TLVs (with the mandatory bit set or not);</t>
+<t>defining new AEs;</t>
 <t>using the packet trailer.</t>
 </list></t>
 
@@ -2307,6 +2308,15 @@ extensions that extend the Update in a compatible manner (the extension
 data may be silently ignored), while a new TLV must be used by extensions
 that make incompatible extensions to the meaning of the TLV (the whole TLV
 must be thrown away if the extension data is not understood).</t>
+
+<t>Adding a new AE is essentially equivalent to adding a new TLV: Update
+TLVs with an unknown AE are ignored, just like unknown TLVs.  However,
+adding a new AE is often more involved than adding a new TLV, since it
+creates a new set of compression state.  Additionally, since the Next Hop
+TLV creates state specific to a given address family, as opposed to
+a given AE, a new AE for an existing address family must not be used in
+Next Hop TLVs if compatibility with unextended implementations is
+required.</t>
 
 <t>The packet trailer &mdash; the space after the declared length of the
 packet but within the payload of the UDP datagram &mdash; was originally
@@ -2391,6 +2401,8 @@ the Router-Id field.</t>
 <t>Integrated the format of sub-TLVs.</t>
 <t>Mentioned for each TLV whether it supports sub-TLVs.</t>
 <t>Added <xref target="extensions"/>.</t>
+<t>Added a mandatory bit in sub-TLVs.</t>
+<t>Changed compression state to be per-AF rather than per-AE.</t>
 </list></t>
 
 </section>

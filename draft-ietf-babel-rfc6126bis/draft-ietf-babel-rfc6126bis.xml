@@ -1444,7 +1444,7 @@ indicates how to handle unknown sub-TLVs.  If the mandatory bit is not
 set, then an unknown sub-TLV MUST be silently ignored, and the rest of the
 TLV processed normally.  If the mandatory bit is set, then the whole
 enclosing TLV MUST be silently ignored (except for updating the
-compression state, see <xref target="update"/>).</t>
+compression state by an Update TLV, see <xref target="update"/>).</t>
 
 </section>
 
@@ -1784,17 +1784,19 @@ Prefix field;</t>
 </list>
 </t>
 
-<t>If the Metric field is finite, the router-id of the originating node for
-this announcement is taken from the low-order 8 octets of the prefix
+<t>If the Metric field is finite, the router-id of the originating node
+for this announcement is taken from the low-order 8 octets of the prefix
 advertised by this Update if the bit with value 40 hexadecimal is set in
 the Flags field.  Otherwise, it is taken either from the preceding
-Router-Id packet, or the preceding Update packet with flag 40 hexadecimal
-set, whichever comes last.</t>
+Router-Id packet that was not ignored due to an unknown mandatory sub-TLV,
+or the preceding Update packet with flag 40 hexadecimal set, whichever
+comes last.</t>
 
 <t>The next-hop address for this update is taken from the last preceding
-Next Hop TLV with a matching address family in the same packet; if no
-such TLV exists, it is taken from the network-layer source address of
-this packet.</t>
+Next Hop TLV with a matching address family (IPv4 or IPv6) in the same
+packet (that was not ignored due to an unknown mandatory sub-TLV); if no
+such TLV exists, it is taken from the network-layer source address of this
+packet.</t>
 
 <t>If the metric field is FFFF hexadecimal, this TLV specifies
 a retraction.  In that case, the current router-id and the Seqno are not

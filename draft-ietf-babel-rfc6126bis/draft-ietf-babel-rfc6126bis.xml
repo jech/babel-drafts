@@ -750,24 +750,23 @@ histories become empty (see <xref target="cost-computation-examples"/>).</t>
 
 <section title="Reverse Reachability Detection">
 
-<t>Every Babel node sends Periodic Multicast Hellos over each of its interfaces.
-Each Periodic Multicast Hello TLV carries an increasing (modulo 2^16) sequence number and the
-interval between successive periodic packets sent on this particular
-interface.  A Babel node MAY also send Unicast Hellos to its neighbors.
-Each Periodic Unicast Hello TLV carries an increasing (modulo 2^16) sequence number
-specific to that neighbour and the interval between successive periodic packets
-sent to this particular neighbour.</t>
+<t>Every Babel node sends Periodic Hellos.  Each Periodic Hello TLV carries
+an increasing (modulo 2^16) sequence number and the interval between
+successive periodic packets of this type (unicast vs multicast).  Hello TLVs
+can be sent over both multicast or unicast, but the sequence number and
+interval are specific to this type and destination (interface in the case
+of multicast, neighbour in the case of unicast).</t>
 
 <t>The dichotomy between Multicast and Unicast Hellos (and the fact that they
 have separate sequence numbers and intervals) allows implementations to
 use different intervals based on link properties.  Multicast Hellos
-allow discovery of new neighbors but may cause issues on link layers
+allow discovery of new neighbours but may cause issues on link layers
 where multicast is degraded.  Unicast Hellos improve reliability on
 these networks.</t>
 
 <t>Periodic Hellos are defined as Hellos that carry a non-zero Interval.  Each
 node MUST parse both Unicast and Multicast Periodic Hellos, except if the
-underlying link-layer does not support the corresponding option.  An
+underlying link-layer does not support the corresponding type.  An
 implementation MUST send Periodic Hellos, either Multicast or Unicast or
 both.  Any time a node sends a Periodic Hello, it commits to sending another
 Periodic Hello of the same type (unicast vs multicast) within the time
@@ -780,10 +779,10 @@ have suddenly changed.  In addition to these, a node MAY send Unscheduled
 Hello packets, which are defined as Hellos that carry an Interval of
 0.  Unscheduled Hellos do not increment the seqno and can be used, for
 example, to transmit Hello sub-TLVs when the node is not sending Periodic
-Hellos with this value of the UNICAST flag.  Unscheduled Hellos MAY be
-ignored for link-quality estimation purposes, and MAY be outright ignored
-upon reception; however, any sub-TLVs it carries that the implementation
-supports MUST still be parsed, and acted upon.</t>
+Hellos of this type.  Unscheduled Hellos MAY be ignored for link-quality
+estimation purposes, and MAY be outright ignored upon reception; however,
+any sub-TLVs it carries that the implementation supports MUST still be
+parsed, and acted upon.</t>
 
 <t>A node MAY change its periodic Hello intervals.  The Hello interval MAY be
 decreased at any time; it SHOULD NOT be increased, except immediately
@@ -1694,8 +1693,8 @@ a unicast address.</t>
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ]]></artwork></figure>
 
-<t>This TLV is used for neighbour discovery and for determining a link's
-reception cost.</t>
+<t>This TLV is used for neighbour discovery and for determining a
+neighbour's reception cost.</t>
 
 <t>Fields :
 <list style="hanging" hangIndent="10">
@@ -1705,7 +1704,7 @@ Length fields.</t>
 <t hangText="Flags">The individual bits of this field specify special
 handling of this TLV (see below).</t>
 <t hangText="Seqno">If the UNICAST flag is set, this is the value of the
-sending node's outgoing Unicast Hello seqno for this neighbor.  Otherwise,
+sending node's outgoing Unicast Hello seqno for this neighbour.  Otherwise,
 it is the sending node's outgoing Multicast Hello seqno for this
 interface.</t>
 <t hangText="Interval">If non-zero, this is an
@@ -2440,7 +2439,7 @@ in those scenarios.  On unreliable wireless links where multicast has worse
 performance than unicast, a node may rely more on Unicast Hellos and send
 them alongside every unicast IHU it sends; it may also use a higher Periodic
 Multicast Hello Interval as they are no longer necessary for reachability
-detection but still allow discovery of new neighbors.</t>
+detection but still allow discovery of new neighbours.</t>
 
 </section>
 

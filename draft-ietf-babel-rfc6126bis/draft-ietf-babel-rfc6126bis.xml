@@ -765,8 +765,7 @@ where multicast is degraded.  Unicast Hellos improve reliability on
 these networks.</t>
 
 <t>Periodic Hellos are defined as Hellos that carry a non-zero Interval.  Each
-node MUST parse both Unicast and Multicast Periodic Hellos, except if the
-underlying link-layer does not support the corresponding type.  An
+node MUST parse both Unicast and Multicast Periodic Hellos.  An
 implementation MUST send Periodic Hellos, either Multicast or Unicast or
 both.  Any time a node sends a Periodic Hello, it commits to sending another
 Periodic Hello of the same type (unicast vs multicast) within the time
@@ -1734,9 +1733,11 @@ represents a Unicast Hello, otherwise it represents a Multicast Hello.</t>
 
 <t>Since there is a single seqno counter for all the Periodic Multicast Hellos sent by a given
 node over a given interface, if the UNICAST flag is not set, this TLV MUST
-be sent to a multicast destination.  Similarly, if the UNICAST flag is set, this
-TLV MUST be sent to a unicast destination.
-In order to avoid large discontinuities in link quality,
+be sent to all neighbors on this link, which can be achieved by sending
+to a multicast destination, or repeatedly sending unicast to all known
+neighbours.  Similarly, if the UNICAST flag is set, this
+TLV MUST be sent to a single neighbour, which can achieved by sending
+to a unicast destination.  In order to avoid large discontinuities in link quality,
 multiple Hello TLVs SHOULD NOT be sent in the same packet.</t>
 
 <t>If the Interval is 0, then this Hello represents an Unscheduled
@@ -2565,10 +2566,9 @@ routing loop; hence, it need not evaluate the feasibility condition, and
 need not maintain a source table.</t>
 
 <t>A parasitic implementation MUST answer acknowledgement requests and
-MUST participate in the Multicast Hello/IHU protocol.  It MUST parse
-both Unicast and Multicast Periodic Hellos, except if the
-underlying link-layer does not support the corresponding option.  It MUST
-send Periodic Hellos, either Multicast or Unicast or both.  Finally,
+MUST participate in the Multicast Hello/IHU protocol (it MUST parse
+both Unicast and Multicast Periodic Hellos and
+send Periodic Hellos, either Multicast or Unicast or both).  Finally,
 it MUST be able to
 reply to seqno requests for routes that it announces and SHOULD be able to
 reply to route requests.</t>

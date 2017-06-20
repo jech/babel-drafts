@@ -24,7 +24,7 @@
 </address>
 </author>
 
-<date day="14" month="June" year="2017"/>
+<date day="19" month="June" year="2017"/>
 
 <abstract>
 <t>Babel is a loop-avoiding distance-vector routing protocol that is
@@ -577,13 +577,14 @@ their selected routes fail.</t>
 
 <t>The interface table contains the list of interfaces on which the node
 speaks the Babel protocol.  Every interface table entry contains the
-interface's outgoing Multicast Hello seqno, a 16-bit integer that is sent with each Multicast Hello TLV
-on this interface and is incremented (modulo 2^16) whenever a Multicast Hello is
-sent.  (Note that an interface's Multicast Hello seqno is unrelated to the node's
-seqno.)</t>
+interface's outgoing Periodic Multicast Hello seqno, a 16-bit integer that is sent with each Periodic Multicast Hello TLV
+on this interface and is incremented (modulo 2^16) whenever a Periodic Multicast Hello is
+sent.  The outgoing Periodic Multicast Hello seqno MUST NOT be incremented
+when sending Unscheduled Hellos.  (Note that an interface's Periodic
+Multicast Hello seqno is unrelated to the node's seqno.)</t>
 
 <t>There are two timers associated with each interface table entry &mdash;
-the multicast hello timer, which governs the sending of periodic Multicast Hello and IHU
+the periodic multicast hello timer, which governs the sending of Periodic Multicast Hello and IHU
 packets, and the update timer, which governs the sending of periodic route
 updates.</t>
 
@@ -598,27 +599,31 @@ entry contains the following data:
 <list style="symbols">
 <t>the local node's interface over which this neighbour is reachable;</t>
 <t>the address of the neighbouring interface;</t>
-<t>a history of recently received Multicast Hello packets from this neighbour; this
+<t>a history of recently received Periodic Multicast Hello packets from this neighbour; this
 can, for example, be a sequence of n bits, for some small value n,
 indicating which of the n hellos most recently sent by this neighbour have
 been received by the local node;</t>
-<t>a history of recently received Unicast Hello packets from this neighbour;</t>
+<t>a history of recently received Periodic Unicast Hello packets from this neighbour;</t>
 <t>the "transmission cost" value from the last IHU packet received from
 this neighbour, or FFFF hexadecimal (infinity) if the IHU hold timer for
 this neighbour has expired;</t>
-<t>the neighbour's expected incoming Multicast Hello sequence number,
+<t>the neighbour's expected incoming Periodic Multicast Hello sequence number,
 an integer modulo 2^16.</t>
-<t>the neighbour's expected incoming Unicast Hello sequence number,
+<t>the neighbour's expected incoming Periodic Unicast Hello sequence number,
 an integer modulo 2^16.</t>
-<t>the neighbour's outgoing Unicast Hello sequence number, an integer modulo
-2^16.  (Note that a neighbour's outgoing Unicast Hello seqno is distinct from the
-interface's outgoing Multicast Hello seqno.)</t>
+<t>the neighbour's outgoing Periodic Unicast Hello sequence number, an integer modulo
+2^16 that is sent with each Periodic Unicast Hello TLV to this neighbour and
+is incremented (modulo 2^16) whenever a Periodic Unicast Hello is
+sent.  The outgoing Periodic Unicast Hello seqno MUST NOT be incremented
+when sending Unscheduled Hellos.  (Note that a neighbour's outgoing
+Periodic Unicast Hello seqno is distinct from the interface's outgoing
+Periodic Multicast Hello seqno.)</t>
 </list>
 </t>
 
 <t>There are three timers associated with each neighbour entry &mdash; the
-multicast hello timer, which is initialised from the interval value carried by Multicast Hello
-TLVs, the unicast hello timer, which is initialised from the interval value carried by Unicast Hello
+periodic multicast hello timer, which is initialised from the interval value carried by Periodic Multicast Hello
+TLVs, the periodic unicast hello timer, which is initialised from the interval value carried by Periodic Unicast Hello
 TLVs, and the IHU timer, which is initialised to a small multiple of the
 interval carried in IHU TLVs.</t>
 
@@ -745,29 +750,45 @@ histories become empty (see <xref target="cost-computation-examples"/>).</t>
 
 <section title="Reverse Reachability Detection">
 
-<t>Every Babel node sends periodic Multicast Hellos over each of its interfaces.
-Each Multicast Hello TLV carries an increasing (modulo 2^16) sequence number and the
+<t>Every Babel node sends Periodic Multicast Hellos over each of its interfaces.
+Each Periodic Multicast Hello TLV carries an increasing (modulo 2^16) sequence number and the
 interval between successive periodic packets sent on this particular
 interface.  A Babel node MAY also send Unicast Hellos to its neighbors.
-Each Unicast Hello TLV carries an increasing (modulo 2^16) sequence number
+Each Periodic Unicast Hello TLV carries an increasing (modulo 2^16) sequence number
 specific to that neighbour and the interval between successive periodic packets
 sent to this particular neighbour.</t>
 
 <t>The dichotomy between Multicast and Unicast Hellos (and the fact that they
 have separate sequence numbers and intervals) allows implementations to
-use different intervals based on link properties.  Multicast Hellos are sent
-over multicast, which allows discovery of new neighbors but may cause issues
-on link layers where multicast is degraded.  Unicast Hellos are sent over
-unicast, improving reliability on these networks.</t>
+use different intervals based on link properties.  Multicast Hellos
+allow discovery of new neighbors but may cause issues on link layers
+where multicast is degraded.  Unicast Hellos improve reliability on
+these networks.</t>
 
-<t>In addition to the periodic Hello packets, a node MAY send unscheduled
-Hello packets, e.g., to accelerate link cost estimation when a new
-neighbour is discovered, or when link conditions have suddenly changed.</t>
+<t>Periodic Hellos are defined as Hellos that carry a non-zero Interval.  Each
+node MUST parse both Unicast and Multicast Periodic Hellos, except if the
+underlying link-layer does not support the corresponding option.  An
+implementation MUST send Periodic Hellos, either Multicast or Unicast or
+both.  Any time a node sends a Periodic Hello, it commits to sending another
+Periodic Hello of the same type (unicast vs multicast) within the time
+window specified by the Interval field.</t>
 
-<t>A node MAY change its Hello intervals.  The Hello interval MAY be
+<t>In addition to the regularly scheduled Periodic Hello packets, a node MAY
+send Periodic Hello packets ahead of schedule, e.g., to accelerate link
+cost estimation when a new neighbour is discovered, or when link conditions
+have suddenly changed.  In addition to these, a node MAY send Unscheduled
+Hello packets, which are defined as Hellos that carry an Interval of
+0.  Unscheduled Hellos do not increment the seqno and can be used, for
+example, to transmit Hello sub-TLVs when the node is not sending Periodic
+Hellos with this value of the UNICAST flag.  Unscheduled Hellos MAY be
+ignored for link-quality estimation purposes, and MAY be outright ignored
+upon reception; however, any sub-TLVs it carries that the implementation
+supports MUST still be parsed, and acted upon.</t>
+
+<t>A node MAY change its periodic Hello intervals.  The Hello interval MAY be
 decreased at any time; it SHOULD NOT be increased, except immediately
 before sending a Hello packet.  (Equivalently, a node SHOULD send an
-unscheduled Hello immediately after increasing its Hello interval.)</t>
+extra Periodic Hello immediately after increasing its Hello interval.)</t>
 
 <t>How to deal with received Hello TLVs and what statistics to maintain
 are considered local implementation matters; typically, a node will
@@ -820,7 +841,7 @@ the neighbour table about the reception of Hellos, and the txcost computed
 from received IHU packets.</t>
 
 <t>For every neighbour, a Babel node computes a value known as this
-neighbour's rxcost.  This value is usually derived from the Hello history,
+neighbour's rxcost.  This value is usually derived from the Periodic Hello history,
 which may be combined with other data, such as statistics maintained by
 the link layer.  The rxcost is sent to a neighbour in each IHU.</t>
 
@@ -829,7 +850,7 @@ cost is a matter of local policy; as far as Babel's correctness is
 concerned, only the following conditions MUST be satisfied:
 <list style="symbols">
   <t>the cost is strictly positive;</t>
-  <t>if no hellos (neither multicast nor unicast)
+  <t>if no periodic hellos (neither multicast nor unicast)
     were received recently, then the cost is infinite;</t>
   <t>if the txcost is infinite, then the cost is infinite.</t>
 </list></t>
@@ -1537,7 +1558,7 @@ TLV.  Babel's parser state consists of the following pieces of data:
 <list style="symbols">
   <t>for each address encoding that allows compression, the current
   default prefix; this is undefined at the start of the packet, and is
-  updated by an Update TLV with flag 80 hexadecimal set
+  updated by an Update TLV with the PREFIX flag set
   (<xref target="update"/>);</t>
   <t>for each address family (IPv4 or IPv6), the current next-hop; this is
   the source address of the enclosing packet for the matching address
@@ -1545,7 +1566,7 @@ TLV.  Babel's parser state consists of the following pieces of data:
   (<xref target="next-hop"/>);</t>
   <t>the current router-id; this is undefined at the start of the packet,
   and is updated by both the Router-ID TLV (<xref target="router-id"/>)
-  and the Update TLV with flag 40 hexadecimal set.</t>
+  and the Update TLV with ROUTER-ID flag set.</t>
 </list></t>
 
 <t>Since the parser state is separate from the bulk of Babel's state, and
@@ -1682,31 +1703,49 @@ reception cost.</t>
 <t hangText="Length">The length of the body, exclusive of the Type and
 Length fields.</t>
 <t hangText="Flags">The individual bits of this field specify special
-handling of this TLV (see below).  Every node MUST be able to interpret the
-UNICAST flag (value 8000 hexadecimal); unknown flags MUST be silently
-ignored.</t>
+handling of this TLV (see below).</t>
 <t hangText="Seqno">If the UNICAST flag is set, this is the value of the
 sending node's outgoing Unicast Hello seqno for this neighbor.  Otherwise,
 it is the sending node's outgoing Multicast Hello seqno for this
 interface.</t>
-<t hangText="Interval">An upper bound, expressed in centiseconds, on the
-time after which the sending node will send a new Hello TLV with the same
-setting of the UNICAST flag.  This MUST NOT be 0.</t>
+<t hangText="Interval">If non-zero, this is an
+upper bound, expressed in centiseconds, on the
+time after which the sending node will send a new Periodic Hello TLV with the same
+setting of the UNICAST flag.  If this is 0, then this Hello represents an
+Unscheduled Hello, it MAY be ignored for link-quality estimation purposes.  If
+this is not 0, this Hello represents a Periodic Hello.</t>
 </list></t>
 
+
 <t>The Flags field is interpreted as follows:
+<figure><artwork><![CDATA[
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|U|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+]]></artwork></figure>
+In the description below, a bit being 'set' means its value is '1',
+while 'cleared' means its value is '0'.  'X' bits MUST be cleared
+when sending and MUST be ignored on receipt.  Every node MUST be able
+to interpret the UNICAST flag.
 <list style="symbols">
-<t>UNICAST flag (8000 hexadecimal): if set, then this Hello
+<t>U (UNICAST) flag (8000 hexadecimal): if set, then this Hello
 represents a Unicast Hello, otherwise it represents a Multicast Hello.</t>
 </list>
 </t>
 
-<t>Since there is a single seqno counter for all the Multicast Hellos sent by a given
+<t>Since there is a single seqno counter for all the Periodic Multicast Hellos sent by a given
 node over a given interface, if the UNICAST flag is not set, this TLV MUST
 be sent to a multicast destination.  Similarly, if the UNICAST flag is set, this
 TLV MUST be sent to a unicast destination.
 In order to avoid large discontinuities in link quality,
 multiple Hello TLVs SHOULD NOT be sent in the same packet.</t>
+
+<t>If the Interval is 0, then this Hello represents an Unscheduled
+Hello.  In that case, Seqno MUST be set to 0 when sending and MUST
+be ignored on reception.  Unscheduled Hellos MAY be ignored for
+link-quality estimation purposes, and MAY be outright ignored upon
+reception; however, any sub-TLVs it carries that the implementation
+supports MUST still be parsed, and acted upon.</t>
 
 <t>This TLV is self-terminating, and allows sub-TLVs.</t>
 
@@ -1864,13 +1903,11 @@ a new default prefix.</t>
 Length fields.</t>
 <t hangText="AE">The encoding of the Prefix field.</t>
 <t hangText="Flags">The individual bits of this field specify special
-handling of this TLV (see below).  Every node MUST be able to interpret the
-flags with values 80 and 40 hexadecimal; unknown flags MUST be silently
-ignored.</t>
+handling of this TLV (see below).</t>
 <t hangText="Plen">The length of the advertised prefix.</t>
 <t hangText="Omitted">The number of octets that have been omitted at
 the beginning of the advertised prefix and that should be taken from a
-preceding Update TLV with the flag with value 80 hexadecimal set.</t>
+preceding Update TLV with the PREFIX flag set.</t>
 <t hangText="Interval">An upper bound, expressed in centiseconds, on the
 time after which the sending node will send a new update for this prefix.
 This MUST NOT be 0 and SHOULD NOT be less than 10.  The receiving node
@@ -1886,12 +1923,21 @@ hexadecimal (infinity) means that this is a route retraction.</t>
 </list></t>
 
 <t>The Flags field is interpreted as follows:
+<figure><artwork><![CDATA[
++-+-+-+-+-+-+-+-+
+|P|R|X|X|X|X|X|X|
++-+-+-+-+-+-+-+-+
+]]></artwork></figure>
+In the description below, a bit being 'set' means its value is '1',
+while 'cleared' means its value is '0'.  'X' bits MUST be cleared
+when sending and MUST be ignored on receipt.  Every node MUST be able
+to interpret the PREFIX and ROUTER-ID flags.
 <list style="symbols">
-<t>if the bit with value 80 hexadecimal is set, then this Update
+<t>P (PREFIX) flag (80 hexadecimal): if set, then this Update
 establishes a new default prefix for subsequent Update TLVs with a matching
 address encoding within the same packet, even if this TLV is otherwise
 ignored due to an unknown mandatory sub-TLV;</t>
-<t>if the bit with value 40 hexadecimal is set, then this TLV establishes
+<t>R (ROUTER-ID) flag (40 hexadecimal): if set, then this TLV establishes
 a new default router-id for this TLV and subsequent Update TLVs in the
 same packet, even if this TLV is otherwise ignored due to an unknown
 mandatory sub-TLV.  This router-id is computed from the first address of
@@ -2392,9 +2438,9 @@ may choose to only use Multicast Hellos, as they are sufficient for discovery
 and reachability detection, and Unicast Hellos offer close to no benefits
 in those scenarios.  On unreliable wireless links where multicast has worse
 performance than unicast, a node may rely more on Unicast Hellos and send
-them alongside every unicast IHU it sends; it also uses a higher Multicast
-Hello Interval as they are no longer necessary for reachability detection
-but still allow discovery of new neighbors.</t>
+them alongside every unicast IHU it sends; it may also use a higher Periodic
+Multicast Hello Interval as they are no longer necessary for reachability
+detection but still allow discovery of new neighbors.</t>
 
 </section>
 
@@ -2520,9 +2566,11 @@ routing loop; hence, it need not evaluate the feasibility condition, and
 need not maintain a source table.</t>
 
 <t>A parasitic implementation MUST answer acknowledgement requests and
-MUST participate in the Multicast Hello/IHU protocol.  It MUST either handle
-Unicast Hellos separately from Multicast Hellos, or ignore all Unicast
-Hellos altogether.  Finally, it MUST be able to
+MUST participate in the Multicast Hello/IHU protocol.  It MUST parse
+both Unicast and Multicast Periodic Hellos, except if the
+underlying link-layer does not support the corresponding option.  It MUST
+send Periodic Hellos, either Multicast or Unicast or both.  Finally,
+it MUST be able to
 reply to seqno requests for routes that it announces and SHOULD be able to
 reply to route requests.</t>
 

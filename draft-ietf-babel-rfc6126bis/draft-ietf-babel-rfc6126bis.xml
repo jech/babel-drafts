@@ -2452,18 +2452,19 @@ Hello interval is the most important time constant: a mobility event is
 detected within 1.5 to 3 Hello intervals.  Due to Babel's reliance on
 triggered updates and explicit requests, the Update interval only has an
 effect on the time it takes for accurate metrics to be propagated after
-variations in link costs too small to trigger an unscheduled update.</t>
+variations in link costs too small to trigger an unscheduled update or in
+the presence of packet loss.</t>
 
 <t>At the time of writing, the sample implementation of Babel uses the
 following default values:
 <list style="empty">
-<t>Multicast Hello Interval: 4 seconds on wireless links, 20 seconds on
-wired links.</t>
-<t>IHU Interval: the advertised IHU interval is always 3 times the Multicast Hello
-interval.  IHUs are actually sent with each Hello on lossy links (as
-determined from the Hello history), but only with every third Multicast Hello on
-lossless links.</t>
-<t>Unicast Hello Interval: equal to the IHU interval.</t>
+<t>Multicast Hello Interval: 4 seconds.</t>
+<t>IHU Interval: the advertised IHU interval is always 3 times the
+Multicast Hello interval.  IHUs are actually sent with each Hello on lossy
+links (as determined from the Hello history), but only with every third
+Multicast Hello on lossless links.</t>
+<t>Unicast Hello Interval: the sample implementation never sends scheduled
+Unicast Hellos;
 <t>Update Interval: 4 times the Multicast Hello interval.</t>
 <t>IHU Hold Time: 3.5 times the advertised IHU interval.</t>
 <t>Route Expiry Time: 3.5 times the advertised update interval.</t>

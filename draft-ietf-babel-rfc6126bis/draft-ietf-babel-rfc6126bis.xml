@@ -1028,11 +1028,11 @@ the route is flushed from the route table.</t>
 
 <section title="Hold Time" anchor="hold-time">
 
-<t>When a prefix P is retracted, because all routes are unfeasible, too
-old, or have an infinite metric, and a shorter prefix P' that covers P is
-reachable, P' cannot in general be used for routing packets destined to
-P without running the risk of creating a routing loop (<xref
-target="overlapping-prefixes"/>).</t>
+<t>When a prefix P is retracted, because all routes are unfeasible or have
+an infinite metric (whether due to the expiry timer or to other reasons),
+and a shorter prefix P' that covers P is reachable, P' cannot in general
+be used for routing packets destined to P without running the risk of
+creating a routing loop (<xref target="overlapping-prefixes"/>).</t>
 
 <t>To avoid this issue, whenever a prefix P is retracted, a routing table
 entry with infinite metric is inserted as described in <xref

@@ -103,13 +103,15 @@ target="OSPF"/>, IS-IS <xref target="IS-IS"/>, or the Enhanced Interior
 Gateway Routing Protocol (EIGRP) <xref target="EIGRP"/> might be more
 suitable.</t>
 
-<t>Second, Babel does impose a hold time when a prefix is retracted
-(<xref target="hold-time"/>).  While this hold time does not apply to the
-exact prefix being retracted, and hence does not prevent fast reconvergence
+<t>Second, Babel does impose a hold time when a prefix is retracted (<xref
+target="hold-time"/>).  While this hold time does not apply to the exact
+prefix being retracted, and hence does not prevent fast reconvergence
 should it become available again, it does apply to any shorter prefix that
 covers it.  Hence, if a previously deaggregated prefix becomes aggregated,
-it will be unreachable for a few minutes.  This makes Babel unsuitable for
-use in mobile networks that implement automatic prefix aggregation.</t>
+it will be unreachable for a few hundred milliseconds up to a few minutes,
+depending on the implementation.  This may make some implementations of
+Babel unsuitable for use in neotwrks that implement automatic prefix
+aggregation.</t>
 
 </section>
 
@@ -705,7 +707,7 @@ both the resending of requests and their expiry.</t>
 </section>
 </section>
 
-<section title="Acknowledged Packets">
+<section title="Acknowledged Packets" anchor="acknowledged-packets">
 
 <t>A Babel speaker may request that any neighbour receiving a given packet
 reply with an explicit acknowledgement within a given time.  While the use
@@ -1026,19 +1028,36 @@ the route is flushed from the route table.</t>
 
 <section title="Hold Time" anchor="hold-time">
 
-<t>When a prefix p is retracted, because all routes are unfeasible, too
-old, or have an infinite metric, and a shorter prefix p' that covers p is
-reachable, p' cannot in general be used for routing packets destined to
-p without running the risk of creating a routing loop (<xref
+<t>When a prefix P is retracted, because all routes are unfeasible, too
+old, or have an infinite metric, and a shorter prefix P' that covers P is
+reachable, P' cannot in general be used for routing packets destined to
+P without running the risk of creating a routing loop (<xref
 target="overlapping-prefixes"/>).</t>
 
-<t>To avoid this issue, whenever a prefix is retracted, a routing table
-entry with infinite metric is maintained as described in <xref
-target="route-acquisition"/> above, and packets destined for that prefix
-MUST NOT be forwarded by following a route for a shorter prefix.  The
-infinite metric entry is maintained until it is superseded by a feasible
-update; if no such update arrives within the route hold time, the entry is
-flushed.</t>
+<t>To avoid this issue, whenever a prefix P is retracted, a routing table
+entry with infinite metric is inserted as described in <xref
+target="route-acquisition"/> above.  As long as this entry is maintained,
+packets destined to an address within P MUST NOT be forwarded by following
+a route for a shorter prefix.  The infinite metric entry MUST be
+maintained at least until a retraction (an update with infinite metric)
+for prefix P has been sent to all neighbours, or until a finite-metric
+feasible update for prefix P has been received and the resulting route
+selected (thus overriding the infinite-metric entry), whichever happens
+first.  If no finite-metric feasible update arrives, the route SHOULD
+ideally be maintained until it can be guaranteed that no neighbour has
+selected the current node as its next-hop for prefix P.</t>
+
+<t>There are multiple ways to make the latter guarantee.  The simplest is
+to simply wait until the route's expiry timer has expired (<xref
+target="route-acquisition"/>); at that point, any routes pointing at the
+current node should have expired.  However, since the expiry time can be
+as high as a few minutes, doing that prevents automatic aggregation by
+creating spurious blackholes for aggregated routes.  A better strategy is
+to send to each neighbour a retraction with an acknowledgement request
+(<xref target="acknowledged-packets"/>) to every neighbour that has not
+explicitly retracted prefix P; when all acknowledgements have been
+received, it is guaranteed that no neighbour has selected the current node
+as next-hop for prefix P.</t>
 
 </section>
 

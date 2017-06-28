@@ -2464,7 +2464,7 @@ Multicast Hello interval.  IHUs are actually sent with each Hello on lossy
 links (as determined from the Hello history), but only with every third
 Multicast Hello on lossless links.</t>
 <t>Unicast Hello Interval: the sample implementation never sends scheduled
-Unicast Hellos;
+Unicast Hellos;</t>
 <t>Update Interval: 4 times the Multicast Hello interval.</t>
 <t>IHU Hold Time: 3.5 times the advertised IHU interval.</t>
 <t>Route Expiry Time: 3.5 times the advertised update interval.</t>

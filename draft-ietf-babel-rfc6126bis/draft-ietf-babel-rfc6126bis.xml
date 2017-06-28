@@ -1053,8 +1053,8 @@ target="route-acquisition"/>); at that point, any routes pointing at the
 current node should have expired.  However, since the expiry time can be
 as high as a few minutes, doing that prevents automatic aggregation by
 creating spurious blackholes for aggregated routes.  A better strategy is
-to send to each neighbour a retraction with an acknowledgement request
-(<xref target="acknowledged-packets"/>) to every neighbour that has not
+to send a retraction with an acknowledgement request (<xref
+target="acknowledged-packets"/>) to every neighbour that has not
 explicitly retracted prefix P; when all acknowledgements have been
 received, it is guaranteed that no neighbour has selected the current node
 as next-hop for prefix P.</t>

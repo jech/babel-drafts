@@ -1039,25 +1039,25 @@ entry with infinite metric is inserted as described in <xref
 target="route-acquisition"/> above.  As long as this entry is maintained,
 packets destined to an address within P MUST NOT be forwarded by following
 a route for a shorter prefix.  The infinite metric entry MUST be
-maintained at least until a retraction (an update with infinite metric)
-for prefix P has been sent to all neighbours, or until a finite-metric
-feasible update for prefix P has been received and the resulting route
-selected (thus overriding the infinite-metric entry), whichever happens
-first.  If no finite-metric feasible update arrives, the route SHOULD
-ideally be maintained until it can be guaranteed that no neighbour has
-selected the current node as its next-hop for prefix P.</t>
-
-<t>There are multiple ways to make the latter guarantee.  The simplest is
-to simply wait until the route's expiry timer has expired (<xref
-target="route-acquisition"/>); at that point, any routes pointing at the
-current node should have expired.  However, since the expiry time can be
-as high as a few minutes, doing that prevents automatic aggregation by
-creating spurious blackholes for aggregated routes.  A better strategy is
-to send a retraction with an acknowledgement request (<xref
+maintained at least until it is guaranteed that no neighbour has selected
+the current node as next-hop for prefix P. This can be achieved by either:
+<list style="symbols">
+<t>waiting until the route's expiry timer has expired (<xref
+target="route-acquisition"/>)</t>
+<t>sending a retraction with an acknowledgement request (<xref
 target="acknowledged-packets"/>) to every neighbour that has not
-explicitly retracted prefix P; when all acknowledgements have been
-received, it is guaranteed that no neighbour has selected the current node
-as next-hop for prefix P.</t>
+explicitly retracted prefix P and waiting for all acknowledgements</t>
+</list>
+The former option is simpler and ensures that at that point, any routes
+for prefix P pointing at the current node have expired.  However, since
+the expiry time can be as high as a few minutes, doing that prevents
+automatic aggregation by creating spurious black-holes for aggregated
+routes.  The latter option is RECOMMENDED as it reduces convergence
+time.</t>
+
+<t>Additionally, if a finite-metric feasible update for prefix P is
+received and the resulting route selected, the infinite-metric entry is
+overridden and removed.</t>
 
 </section>
 

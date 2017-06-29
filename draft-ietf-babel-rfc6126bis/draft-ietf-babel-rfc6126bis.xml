@@ -1038,15 +1038,18 @@ creating a routing loop (<xref target="overlapping-prefixes"/>).</t>
 entry with infinite metric is inserted as described in <xref
 target="route-acquisition"/> above.  As long as this entry is maintained,
 packets destined to an address within P MUST NOT be forwarded by following
-a route for a shorter prefix.  The infinite metric entry MUST be
-maintained at least until it is guaranteed that no neighbour has selected
-the current node as next-hop for prefix P. This can be achieved by either:
+a route for a shorter prefix.  This entry is removed as soon as
+a finite-metric update for prefix P is received and the resulting route
+selected.  If no such update is forthcoming, the infinite metric entry
+MUST be maintained at least until it is guaranteed that no neighbour has
+selected the current node as next-hop for prefix P.  This can be achieved
+by either:
 <list style="symbols">
 <t>waiting until the route's expiry timer has expired (<xref
 target="route-acquisition"/>)</t>
 <t>sending a retraction with an acknowledgement request (<xref
 target="acknowledged-packets"/>) to every neighbour that has not
-explicitly retracted prefix P and waiting for all acknowledgements</t>
+explicitly retracted prefix P and waiting for all acknowledgements.</t>
 </list>
 The former option is simpler and ensures that at that point, any routes
 for prefix P pointing at the current node have expired.  However, since
@@ -1054,10 +1057,6 @@ the expiry time can be as high as a few minutes, doing that prevents
 automatic aggregation by creating spurious black-holes for aggregated
 routes.  The latter option is RECOMMENDED as it reduces convergence
 time.</t>
-
-<t>Additionally, if a finite-metric feasible update for prefix P is
-received and the resulting route selected, the infinite-metric entry is
-overridden and removed.</t>
 
 </section>
 

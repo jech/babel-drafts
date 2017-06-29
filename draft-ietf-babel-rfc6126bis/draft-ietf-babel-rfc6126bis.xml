@@ -110,7 +110,7 @@ should it become available again, it does apply to any shorter prefix that
 covers it.  Hence, if a previously deaggregated prefix becomes aggregated,
 it will be unreachable for a few hundred milliseconds up to a few minutes,
 depending on the implementation.  This may make some implementations of
-Babel unsuitable for use in neotwrks that implement automatic prefix
+Babel unsuitable for use in networks that implement automatic prefix
 aggregation.</t>
 
 </section>
@@ -510,7 +510,7 @@ does not depend on whether the destination was a unicast or multicast
 address.  Hence, a Babel speaker does not need to determine the destination
 address of a packet that it receives in order to interpret it.</t>
 
-<t>A moderate amount of jitter is applied to packets sent by a Babel
+<t>A moderate amount of jitter may be applied to packets sent by a Babel
 speaker: outgoing TLVs are buffered and SHOULD be sent with a small random
 delay.  This is done for two purposes: it avoids synchronisation of
 multiple Babel speakers across a network <xref target="JITTER"/>, and
@@ -990,8 +990,7 @@ optionally be derived from the low-order bits of the advertised prefix.</t>
 
 <t>When a Babel node receives an update (router-id, prefix, seqno, metric)
 from a neighbour neigh with a link cost value equal to cost, it checks
-whether it already has a routing table entry indexed by (neigh, router-id,
-prefix).</t>
+whether it already has a routing table entry indexed by (neigh, prefix).</t>
 
 <t>If no such entry exists:
 <list style="symbols">
@@ -999,7 +998,8 @@ prefix).</t>
   <t>if the metric is infinite (the update is a retraction), the update is
   ignored;</t>
   <t>otherwise, a new route table entry is created, indexed by (neigh,
-  router-id, prefix), with seqno equal to seqno and an advertised metric
+  prefix), with source equal to (router-id, prefix),
+  seqno equal to seqno and an advertised metric
   equal to the metric carried by the update.</t>
 </list>
 If such an entry exists:
@@ -1213,7 +1213,8 @@ over the same interface.</t>
 <t>Split horizon SHOULD NOT be applied to an interface unless the interface
 is known to be symmetric and transitive; in particular, split horizon is
 not applicable to decentralised wireless link technologies
-(e.g., IEEE 802.11 in ad hoc mode).</t>
+(e.g., IEEE 802.11 in ad hoc mode) when routing updates are sent over
+multicast.</t>
 
 </section>
 
@@ -1453,8 +1454,8 @@ is known as address compression <xref target="PACKETBB"/>.</t>
 <t>AE 0: wildcard address.  The value is 0 octets long.</t>
 <t>AE 1: IPv4 address.  Compression is allowed.  4 octets or less.</t>
 <t>AE 2: IPv6 address.  Compression is allowed.  16 octets or less.</t>
-<t>AE 3: link-local IPv6 address.  The value is 8 octets long, a prefix of
-fe80::/64 is implied.</t>
+<t>AE 3: link-local IPv6 address.  Compression is not allowed.  The value
+is 8 octets long, a prefix of fe80::/64 is implied.</t>
 </list>
 </t>
 
@@ -1746,7 +1747,9 @@ represents a Unicast Hello, otherwise it represents a Multicast Hello.</t>
 </list>
 </t>
 
-<t>Since there is a single seqno counter for all the Multicast Hellos sent by a given
+<t>Every time a Hello is sent, the corresponding seqno counter MUST be
+incremented.  Since there is a single seqno counter
+for all the Multicast Hellos sent by a given
 node over a given interface, if the UNICAST flag is not set, this TLV MUST
 be sent to all neighbors on this link, which can be achieved by sending
 to a multicast destination, or repeatedly sending unicast to all known
@@ -1968,19 +1971,20 @@ the advertised prefix as follows:
 <t>The prefix being advertised by an Update TLV is computed as follows:
 <list style="symbols">
 <t>the first Omitted octets of the prefix are taken from the previous
-Update TLV with flag 80 hexadecimal set and the same address encoding,
+Update TLV with the PREFIX flag set and the same address encoding,
 even if it was ignored due to an unknown mandatory sub-TLV;</t>
 <t>the next (Plen/8 - Omitted) rounded upwards octets are taken from the
 Prefix field;</t>
-<t>the remaining octets are set to 0.</t>
+<t>the remaining octets are set to 0.  If AE is 3 (link-local IPv6),
+Omitted MUST be 0)</t>
 </list>
 </t>
 
 <t>If the Metric field is finite, the router-id of the originating node
 for this announcement is taken from the prefix advertised by this Update
-if the bit with value 40 hexadecimal is set in the Flags field, computed
+if the ROUTER-ID flag is set, computed
 as described above.  Otherwise, it is taken either from the preceding
-Router-Id packet, or the preceding Update packet with flag 40 hexadecimal
+Router-Id packet, or the preceding Update packet with the ROUTER-ID flag
 set, whichever comes last, even if that TLV is otherwise ignored due to an
 unknown mandatory sub-TLV.</t>
 
@@ -1993,7 +1997,9 @@ address of this packet.</t>
 <t>If the metric field is FFFF hexadecimal, this TLV specifies
 a retraction.  In that case, the current router-id and the Seqno are not
 used.  AE MAY then be 0, in which case this Update retracts all of the
-routes previously advertised on this interface.</t>
+routes previously advertised on this interface.  If the metric is
+finite, AE MUST NOT be 0.  If the metric is infinite and AE is 0, Plen
+and Omitted MUST both be 0.</t>
 
 <t>Update TLVs with an unknown value for the AE field MUST be silently
 ignored.</t>
@@ -2534,7 +2540,7 @@ adding a new AE is often more involved than adding a new TLV, since it
 creates a new set of compression state.  Additionally, since the Next Hop
 TLV creates state specific to a given address family, as opposed to
 a given AE.  A similar issue arises with Update TLVs with unknown AEs
-establishing a new router-id (flag 40 hexadecimal).  Therefore, defining
+establishing a new router-id (with ROUTER-ID flag set).  Therefore, defining
 new AEs must be done with care if compatibility with unextended
 implementations is required.</t>
 

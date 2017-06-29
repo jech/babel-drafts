@@ -24,7 +24,7 @@
 </address>
 </author>
 
-<date day="19" month="June" year="2017"/>
+<date/>
 
 <abstract>
 <t>Babel is a loop-avoiding distance-vector routing protocol that is
@@ -110,7 +110,7 @@ should it become available again, it does apply to any shorter prefix that
 covers it.  Hence, if a previously deaggregated prefix becomes aggregated,
 it will be unreachable for a few hundred milliseconds up to a few minutes,
 depending on the implementation.  This may make some implementations of
-Babel unsuitable for use in neotwrks that implement automatic prefix
+Babel unsuitable for use in networks that implement automatic prefix
 aggregation.</t>
 
 </section>
@@ -118,8 +118,9 @@ aggregation.</t>
 <section title="Specification of Requirements">
 
 <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
-"SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
-document are to be interpreted as described in <xref target="RFC2119"/>.</t>
+"SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+"OPTIONAL" in this document are to be interpreted as described in <xref
+target="RFC2119"/>.</t>
 
 </section>
 
@@ -510,7 +511,7 @@ does not depend on whether the destination was a unicast or multicast
 address.  Hence, a Babel speaker does not need to determine the destination
 address of a packet that it receives in order to interpret it.</t>
 
-<t>A moderate amount of jitter is applied to packets sent by a Babel
+<t>A moderate amount of jitter may be applied to packets sent by a Babel
 speaker: outgoing TLVs are buffered and SHOULD be sent with a small random
 delay.  This is done for two purposes: it avoids synchronisation of
 multiple Babel speakers across a network <xref target="JITTER"/>, and
@@ -588,7 +589,8 @@ Multicast Hello seqno is unrelated to the node's seqno.)</t>
 <t>There are two timers associated with each interface table entry &mdash;
 the multicast hello timer, which governs the sending of Scheduled Multicast Hello and IHU
 packets, and the update timer, which governs the sending of periodic route
-updates.</t>
+updates.  Note that the IHU and update timers may be part of the neighbour
+table if the Babel node is sending those TLVs over unicast.</t>
 
 </section>
 
@@ -682,6 +684,10 @@ route expiry timer.  It is initialised and reset as specified in
 implementations will likely use a different data structure, for example
 a table of installed routes and a set of redundant ones, or some more
 complicated data structure.</t>
+
+<t>Note that the source (prefix, plen, router-id) in the route table is
+not a reference to a source in the source table since their seqnos and
+metrics can differ.</t>
 
 </section>
 
@@ -976,7 +982,9 @@ when multiple updates are sent with the same router-id.</t>
 <t>Additionally, a prefix of the advertised prefix can be omitted in an
 Update TLV, in which case it is copied from a previous Update TLV in
 the same packet &mdash; this is known as address compression <xref
-target="PACKETBB"/>.</t>
+target="PACKETBB"/>.  Babel only supports one method of address
+compression, which is the Omitted field of the Update TLV (<xref
+target="update"/>).</t>
 
 <t>Finally, as a special optimisation for the case when a router-id
 coincides with the interface-id part of an IPv6 address, the router-id can
@@ -990,8 +998,7 @@ optionally be derived from the low-order bits of the advertised prefix.</t>
 
 <t>When a Babel node receives an update (router-id, prefix, seqno, metric)
 from a neighbour neigh with a link cost value equal to cost, it checks
-whether it already has a routing table entry indexed by (neigh, router-id,
-prefix).</t>
+whether it already has a routing table entry indexed by (neigh, prefix).</t>
 
 <t>If no such entry exists:
 <list style="symbols">
@@ -999,7 +1006,8 @@ prefix).</t>
   <t>if the metric is infinite (the update is a retraction), the update is
   ignored;</t>
   <t>otherwise, a new route table entry is created, indexed by (neigh,
-  router-id, prefix), with seqno equal to seqno and an advertised metric
+  prefix), with source equal to (router-id, prefix),
+  seqno equal to seqno and an advertised metric
   equal to the metric carried by the update.</t>
 </list>
 If such an entry exists:
@@ -1214,7 +1222,11 @@ over the same interface.</t>
 <t>Split horizon SHOULD NOT be applied to an interface unless the interface
 is known to be symmetric and transitive; in particular, split horizon is
 not applicable to decentralised wireless link technologies
-(e.g., IEEE 802.11 in ad hoc mode).</t>
+(e.g., IEEE 802.11 in ad hoc mode) when routing updates are sent over
+multicast.  However, if routing updates are sent individually to each
+neighbour over unicast, split horizon MAY be used. In that case, a routing
+update is not sent to this particular neighbour when the advertised route
+was learnt from that same neighbour.</t>
 
 </section>
 
@@ -1447,15 +1459,18 @@ EUI-64 format <xref target="ADDRARCH"/>.</t>
 <t>Since the bulk of the protocol is taken by addresses, multiple ways of
 encoding addresses are defined.  Additionally, a common subnet prefix may
 be omitted when multiple addresses are sent in a single packet &mdash; this
-is known as address compression <xref target="PACKETBB"/>.</t>
+is known as address compression <xref target="PACKETBB"/>.  Babel only
+supports one method of address compression, which is the Omitted field
+of the Update TLV (<xref target="update"/>).</t>
 
 <t>Address encodings:
 <list style="symbols">
 <t>AE 0: wildcard address.  The value is 0 octets long.</t>
-<t>AE 1: IPv4 address.  Compression is allowed.  4 octets or less.</t>
+<t>AE 1: IPv4 address.  Compression (the Omitted field of the Update TLV)
+is allowed.  4 octets or less.</t>
 <t>AE 2: IPv6 address.  Compression is allowed.  16 octets or less.</t>
-<t>AE 3: link-local IPv6 address.  The value is 8 octets long, a prefix of
-fe80::/64 is implied.</t>
+<t>AE 3: link-local IPv6 address.  Compression is not allowed.  The value
+is 8 octets long, a prefix of fe80::/64 is implied.</t>
 </list>
 </t>
 
@@ -1747,7 +1762,9 @@ represents a Unicast Hello, otherwise it represents a Multicast Hello.</t>
 </list>
 </t>
 
-<t>Since there is a single seqno counter for all the Multicast Hellos sent by a given
+<t>Every time a Hello is sent, the corresponding seqno counter MUST be
+incremented.  Since there is a single seqno counter
+for all the Multicast Hellos sent by a given
 node over a given interface, if the UNICAST flag is not set, this TLV MUST
 be sent to all neighbors on this link, which can be achieved by sending
 to a multicast destination, or repeatedly sending unicast to all known
@@ -1810,7 +1827,8 @@ Neighbour Discovery exchange when a neighbour is not being used for data
 traffic.</t>
 
 <t>IHU TLVs with an unknown value for the AE field MUST be silently
-ignored.</t>
+ignored.  An IHU TLV with AE set to 0 MUST NOT be sent to a multicast
+address.</t>
 
 <t>This TLV is self-terminating, and allows sub-TLVs.</t>
 
@@ -1969,19 +1987,20 @@ the advertised prefix as follows:
 <t>The prefix being advertised by an Update TLV is computed as follows:
 <list style="symbols">
 <t>the first Omitted octets of the prefix are taken from the previous
-Update TLV with flag 80 hexadecimal set and the same address encoding,
+Update TLV with the PREFIX flag set and the same address encoding,
 even if it was ignored due to an unknown mandatory sub-TLV;</t>
 <t>the next (Plen/8 - Omitted) rounded upwards octets are taken from the
 Prefix field;</t>
-<t>the remaining octets are set to 0.</t>
+<t>the remaining octets are set to 0.  If AE is 3 (link-local IPv6),
+Omitted MUST be 0)</t>
 </list>
 </t>
 
 <t>If the Metric field is finite, the router-id of the originating node
 for this announcement is taken from the prefix advertised by this Update
-if the bit with value 40 hexadecimal is set in the Flags field, computed
+if the ROUTER-ID flag is set, computed
 as described above.  Otherwise, it is taken either from the preceding
-Router-Id packet, or the preceding Update packet with flag 40 hexadecimal
+Router-Id packet, or the preceding Update packet with the ROUTER-ID flag
 set, whichever comes last, even if that TLV is otherwise ignored due to an
 unknown mandatory sub-TLV.</t>
 
@@ -1994,7 +2013,9 @@ address of this packet.</t>
 <t>If the metric field is FFFF hexadecimal, this TLV specifies
 a retraction.  In that case, the current router-id and the Seqno are not
 used.  AE MAY then be 0, in which case this Update retracts all of the
-routes previously advertised on this interface.</t>
+routes previously advertised on this interface.  If the metric is
+finite, AE MUST NOT be 0.  If the metric is infinite and AE is 0, Plen
+and Omitted MUST both be 0.</t>
 
 <t>Update TLVs with an unknown value for the AE field MUST be silently
 ignored.</t>
@@ -2514,20 +2535,11 @@ compatible manner:
 version is not backwards compatible with the original protocol.</t>
 
 <t>In many cases, an extension could be implemented either by defining
-a new TLV, or by adding a new sub-TLV to an existing TLV.  For example, an
-extension whose purpose is to attach additional data to route updates can
-be implemented either by creating a new "enriched" Update TLV, or by
-adding a sub-TLV to the Update TLV.</t>
-
-<t>The two encodings are treated differently by implementations that do
-not understand the extension.  In the case of a new TLV, the whole unknown
-TLV is ignored by an implementation of the original protocol, while in the
-case of a new sub-TLV, the TLV is parsed and acted upon, and the unknown
-sub-TLV is silently ignored.  Therefore, a sub-TLV should be used by
-extensions that extend the Update in a compatible manner (the extension
-data may be silently ignored), while a new TLV must be used by extensions
-that make incompatible extensions to the meaning of the TLV (the whole TLV
-must be thrown away if the extension data is not understood).</t>
+a new TLV, or by adding a new sub-TLV to an existing TLV.  If an extension
+makes incompatible changes to the meaning of a TLV, it should use a
+mandatory sub-TLV to ensure that the whole TLV is thrown away if the
+extension data is not understood.  New TLVs should only be used when the
+extension adds semantics that do not map to existing TLVs.</t>
 
 <t>Adding a new AE is essentially equivalent to adding a new TLV: Update
 TLVs with an unknown AE are ignored, just like unknown TLVs.  However,
@@ -2535,7 +2547,7 @@ adding a new AE is often more involved than adding a new TLV, since it
 creates a new set of compression state.  Additionally, since the Next Hop
 TLV creates state specific to a given address family, as opposed to
 a given AE.  A similar issue arises with Update TLVs with unknown AEs
-establishing a new router-id (flag 40 hexadecimal).  Therefore, defining
+establishing a new router-id (with ROUTER-ID flag set).  Therefore, defining
 new AEs must be done with care if compatibility with unextended
 implementations is required.</t>
 

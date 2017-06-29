@@ -683,14 +683,19 @@ implementations will likely use a different data structure, for example
 a table of installed routes and a set of redundant ones, or some more
 complicated data structure.</t>
 
+<t>Note that there are two (seqno, metric) pairs associated to each
+route &mdash; the route's distance, in the route table, and the feasibility
+distance, stored in the source table and shared between all routes with
+the same source.</t>
+
 </section>
 
-<section title="The Table of Pending Requests">
+<section title="The Table of Pending Seqno Requests">
 
-<t>The table of pending requests contains a list of seqno requests that
+<t>The table of pending seqno requests contains a list of seqno requests that
 the local node has sent (either because they have been originated
 locally, or because they were forwarded) and to which no reply has been
-received yet.  This table is indexed by prefixes, and every entry in
+received yet.  This table is indexed by prefixes and router-ids, and every entry in
 this table contains the following data:
 <list style="symbols">
 <t>the prefix, router-id, and seqno being requested;</t>
@@ -701,7 +706,7 @@ resent if it remains unsatisfied.</t>
 </list>
 </t>
 
-<t>There is one timer associated with each pending request; it governs
+<t>There is one timer associated with each pending seqno request; it governs
 both the resending of requests and their expiry.</t>
 
 </section>
@@ -975,8 +980,8 @@ when multiple updates are sent with the same router-id.</t>
 
 <t>Additionally, a prefix of the advertised prefix can be omitted in an
 Update TLV, in which case it is copied from a previous Update TLV in
-the same packet &mdash; this is known as address compression <xref
-target="PACKETBB"/>.</t>
+the same packet &mdash; this is known as address compression (<xref
+target="update"/>).</t>
 
 <t>Finally, as a special optimisation for the case when a router-id
 coincides with the interface-id part of an IPv6 address, the router-id can
@@ -1281,11 +1286,12 @@ count and sending the request in a unicast packet destined to a neighbour
 that advertises the given prefix and that is not the neighbour from which
 the request was received.</t>
 
-<t>A node SHOULD maintain a list of recently forwarded requests and
+<t>A node SHOULD maintain a list of recently forwarded seqno requests and
 forward the reply (an update with a sufficiently large seqno) in a timely
-manner.  A node SHOULD compare every incoming request against its list of
-recently forwarded requests and avoid forwarding it if it is
-redundant.</t>
+manner.  A node SHOULD compare every incoming seqno request against its list of
+recently forwarded seqno requests and avoid forwarding it if it is
+redundant (meaning it has recently sent a seqno request with the
+same prefix and router-id).</t>
 
 <t>Since the request-forwarding mechanism does not necessarily obey the
 feasibility condition, it may get caught in routing loops; hence, requests
@@ -1294,7 +1300,12 @@ However, since requests are only ever forwarded as unicast packets, the
 initial hop count need not be kept particularly low, and performing an
 expanding horizon search is not necessary.  A request MUST NOT be
 forwarded to a multicast address, and it MUST NOT be forwarded to multiple
-neighbours.</t>
+neighbours.  Note that these forwarding restrictions apply to individual
+transmissions: if a seqno request is resent due to the lack of a timely
+response, the individual retransmissions MAY be sent to a different
+neighbour than the initial one.  If the route corresponding to a
+seqno request is unselected between retransmissions, the node SHOULD
+stop sending retransmissions for it.</t>
 
 </section>
 
@@ -1447,7 +1458,7 @@ EUI-64 format <xref target="ADDRARCH"/>.</t>
 <t>Since the bulk of the protocol is taken by addresses, multiple ways of
 encoding addresses are defined.  Additionally, a common subnet prefix may
 be omitted when multiple addresses are sent in a single packet &mdash; this
-is known as address compression <xref target="PACKETBB"/>.</t>
+is known as address compression (<xref target="update"/>).</t>
 
 <t>Address encodings:
 <list style="symbols">
@@ -2182,6 +2193,14 @@ from a link-local IPv6 address; since routers don't forward link-local IPv6
 packets, this provides protection against spoofed Babel packets being sent
 from the global Internet.  No such natural protection exists when Babel
 packets are carried over IPv4.</t>
+</section>
+
+<section title="Acknowledgments">
+
+<t>We would like to thank TODO and TBD for their contributions to this
+document.  Additionally, the address compression used in Babel was
+inspired by <xref target="PACKETBB"/>.</t>
+
 </section>
 
 </middle>

@@ -980,8 +980,8 @@ when multiple updates are sent with the same router-id.</t>
 
 <t>Additionally, a prefix of the advertised prefix can be omitted in an
 Update TLV, in which case it is copied from a previous Update TLV in
-the same packet &mdash; this is known as address compression <xref
-target="PACKETBB"/>.</t>
+the same packet &mdash; this is known as address compression (<xref
+target="update"/>).</t>
 
 <t>Finally, as a special optimisation for the case when a router-id
 coincides with the interface-id part of an IPv6 address, the router-id can
@@ -1458,7 +1458,7 @@ EUI-64 format <xref target="ADDRARCH"/>.</t>
 <t>Since the bulk of the protocol is taken by addresses, multiple ways of
 encoding addresses are defined.  Additionally, a common subnet prefix may
 be omitted when multiple addresses are sent in a single packet &mdash; this
-is known as address compression <xref target="PACKETBB"/>.</t>
+is known as address compression (<xref target="update"/>).</t>
 
 <t>Address encodings:
 <list style="symbols">
@@ -2193,6 +2193,14 @@ from a link-local IPv6 address; since routers don't forward link-local IPv6
 packets, this provides protection against spoofed Babel packets being sent
 from the global Internet.  No such natural protection exists when Babel
 packets are carried over IPv4.</t>
+</section>
+
+<section title="Acknowledgments">
+
+<t>We would like to thank TODO and TBD for their contributions to this
+document.  Additionally, the address compression used in Babel was
+inspired by <xref target="PACKETBB"/>.</t>
+
 </section>
 
 </middle>

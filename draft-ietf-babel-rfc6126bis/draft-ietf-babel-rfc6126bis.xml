@@ -683,6 +683,11 @@ implementations will likely use a different data structure, for example
 a table of installed routes and a set of redundant ones, or some more
 complicated data structure.</t>
 
+<t>Note that there are two (seqno, metric) pairs associated to each
+route &mdash; the route's distance, in the route table, and the feasibility
+distance, stored in the source table and shared between all routes with
+the same source.</t>
+
 </section>
 
 <section title="The Table of Pending Seqno Requests">

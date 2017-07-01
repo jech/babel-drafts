@@ -683,10 +683,10 @@ implementations will likely use a different data structure, for example
 a table of installed routes and a set of redundant ones, or some more
 complicated data structure.</t>
 
-<t>Note that there are two (seqno, metric) pairs associated to each
-route &mdash; the route's distance, in the route table, and the feasibility
-distance, stored in the source table and shared between all routes with
-the same source.</t>
+<t>Note that there are two distinct (seqno, metric) pairs associated to
+each route: the route's distance, which is stored in the route table, and
+the feasibility distance, stored in the source table and shared between
+all routes with the same source.</t>
 
 </section>
 
@@ -1288,24 +1288,23 @@ the request was received.</t>
 
 <t>A node SHOULD maintain a list of recently forwarded seqno requests and
 forward the reply (an update with a sufficiently large seqno) in a timely
-manner.  A node SHOULD compare every incoming seqno request against its list of
-recently forwarded seqno requests and avoid forwarding it if it is
-redundant (meaning it has recently sent a seqno request with the
-same prefix and router-id).</t>
+manner.  A node SHOULD compare every incoming seqno request against its
+list of recently forwarded seqno requests and avoid forwarding it if it is
+redundant (i.e., if it has recently sent a request with the same prefix,
+router-id and a seqno that is not smaller).</t>
 
 <t>Since the request-forwarding mechanism does not necessarily obey the
 feasibility condition, it may get caught in routing loops; hence, requests
 carry a hop count to limit the time for which they remain in the network.
 However, since requests are only ever forwarded as unicast packets, the
 initial hop count need not be kept particularly low, and performing an
-expanding horizon search is not necessary.  A request MUST NOT be
-forwarded to a multicast address, and it MUST NOT be forwarded to multiple
-neighbours.  Note that these forwarding restrictions apply to individual
-transmissions: if a seqno request is resent due to the lack of a timely
-response, the individual retransmissions MAY be sent to a different
-neighbour than the initial one.  If the route corresponding to a
-seqno request is unselected between retransmissions, the node SHOULD
-stop sending retransmissions for it.</t>
+expanding horizon search is not necessary.  A single request MUST NOT be
+duplicated: it MUST NOT be forwarded to a multicast address, and it MUST
+NOT be forwarded to multiple neighbours.  However, if a seqno request is
+resent, the subsequent copies MAY be sent to a different neighbour than
+the initial one.  If the route corresponding to a seqno request is
+unselected between retransmissions, the node SHOULD stop retransmitting
+requests for it.</t>
 
 </section>
 

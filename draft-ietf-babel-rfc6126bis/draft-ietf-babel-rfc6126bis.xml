@@ -2611,41 +2611,48 @@ experience.</t>
 
 </section>
 
-<section title="Simplified Implementations">
+<section title="Stub Implementations">
 
-<t>Babel is a fairly economic protocol.  Route updates take between 12 and
-40 octets per destination, depending on how successful compression is; in
-a double-stack mesh network, an average of less than 24 octets is typical.
-The route table occupies about 35 octets per IPv6 entry.  To put these
-values into perspective, a single full-size Ethernet frame can carry some
-65 route updates, and a megabyte of memory can contain a 20000-entry
-routing table and the associated source table.</t>
+<t>Babel is a fairly economic protocol.  Updates take between 12 and 40
+octets per destination, depending on the address family and how successful
+compression is; in a double-stack flat network, an average of less than 24
+octets per destination is typical.  The route table occupies about 35
+octets per IPv6 entry.  To put these values into perspective, a single
+full-size Ethernet frame can carry some 65 route updates, and a megabyte
+of memory can contain a 20000-entry routing table and the associated
+source table.</t>
 
 <t>Babel is also a reasonably simple protocol.  The sample implementation
-consists of less than 8000 lines of C code, and it compiles to less than
-60&nbsp;kB of text on a 32-bit CISC architecture.</t>
+consists of less than 12&nbsp;000 lines of C code, and it compiles to less
+than 120&nbsp;kB of text on a 32-bit CISC architecture; about half of this
+figure is due to protocol extensions and user-interface code.</t>
 
 <t>Nonetheless, in some very constrained environments, such as PDAs,
 microwave ovens, or abacuses, it may be desirable to have subset
 implementations of the protocol.</t>
 
-<t>A parasitic implementation is one that uses a Babel network for routing
-its packets but does not announce any of the routes that it has learnt from
-its neighbours.  (This is slightly more than a passive implementation,
-which doesn't even announce routes to itself.)  It may either maintain a
-full routing table or simply select a gateway amongst any one of its
-neighbours that announces a default route.  Since a parasitic
-implementation never forwards packets, it cannot possibly participate in a
-routing loop; hence, it need not evaluate the feasibility condition, and
-need not maintain a source table.</t>
+<t>There are many different definitions of a stub router, but for the
+needs of this section a stub implementation of Babel is one that announces
+one or more directly attached prefixes into a Babel network but doesn't
+reannounce any routes that it has learnt from its neighbours.  It may
+either maintain a full routing table, or simply select a default gateway
+amongst any one of its neighbours that announces a default route.  Since
+a stub implementation never forwards packets except from or to directly
+attached links, it cannot possibly participate in a routing loop, and
+hence it need not evaluate the feasibility condition or maintain a source
+table.</t>
 
-<t>A parasitic implementation MUST answer acknowledgement requests and
-MUST participate in the Multicast Hello/IHU protocol (it MUST parse
-both Unicast and Multicast Hellos and
-send Scheduled Hellos, either Multicast or Unicast or both).  Finally,
-it MUST be able to
-reply to seqno requests for routes that it announces and SHOULD be able to
-reply to route requests.</t>
+<t>No matter how primitive, a stub implementation MUST parse sub-TLVs of
+all the TLVs that it understands and check for the mandatory bit.  It MUST
+answer acknowledgement requests and MUST participate in the Hello/IHU
+protocol (it MUST parse both Unicast and Multicast Hellos and send
+Scheduled Hellos, either Multicast, or Unicast, or both).  It MUST also be
+able to reply to seqno requests for routes that it announces and SHOULD be
+able to reply to route requests.</t>
+
+<t>Experiments show that an IPv6-only stub implementation of Babel can be
+written in less than 1000 lines of C code and compile to 13&nbsp;kB of
+text on 32-bit CISC architecture.</t>
 
 </section>
 
@@ -2708,6 +2715,7 @@ doesn't matter when.</t>
 <t>Added optional algorithm to avoid the hold time.</t>
 <t>Changed the table of pending seqno requests to be indexed by router-id
 in addition to prefixes.</t>
+<t>Replaced minimal implementations by stub implementations.</t>
 <t>Added acknowledgements section.</t>
 </list></t>
 

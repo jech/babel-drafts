@@ -2196,9 +2196,10 @@ packets are carried over IPv4.</t>
 
 <section title="Acknowledgments">
 
-<t>We would like to thank TODO and TBD for their contributions to this
-document.  Additionally, the address compression used in Babel was
-inspired by <xref target="PACKETBB"/>.</t>
+<t>A number of people have contributed text and ideas to this
+specification.  I am particularly indebted to Matthieu Boutier, Gwendoline
+Chouasne, Toke Hoiland-Jorgensen, and especially David Schinazi.  The
+address compression technique was inspired by <xref target="PACKETBB"/>.</t>
 
 </section>
 
@@ -2669,6 +2670,7 @@ doesn't matter when.</t>
 <t>Added optional algorithm to avoid the hold time.</t>
 <t>Changed the table of pending seqno requests to be indexed by router-id
 in addition to prefixes.</t>
+<t>Added acknowledgements section.</t>
 </list></t>
 
 </section>

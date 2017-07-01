@@ -2659,7 +2659,7 @@ text on 32-bit CISC architecture.</t>
 <section title="Software Availability">
 
 <t>The sample implementation of Babel is available from
-<eref target="http://www.pps.univ-paris-diderot.fr/~jch/software/babel/"/>.</t>
+<eref target="https://www.irif.fr/~jch/software/babel/"/>.</t>
 
 </section>
 

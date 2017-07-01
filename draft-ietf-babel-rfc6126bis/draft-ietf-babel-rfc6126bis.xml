@@ -2333,23 +2333,23 @@ strategies in a single network and MAY use different strategies on
 different interface types.  This section gives a few examples of such
 strategies.</t>
 
-<t>The sample implementation of Babel maintains statistics about the last
-16 received Hello TLVs (<xref target="hello-history"/>), computes costs by
-using the 2-out-of-3 strategy (<xref target="k-j"/>) on wired links, and
-ETX (<xref target="etx"/>) on wireless links.  It uses an additive algebra
-for metric computation (<xref target="additive-metric"/>).</t>
+<t>The sample implementation of Babel sends periodic Multicast Hellos, and
+never sends Unicast Hellos.  It maintains statistics about the last 16
+received Multicast Hello TLVs of each kind (<xref
+target="hello-history"/>), computes costs by using the 2-out-of-3 strategy
+(<xref target="k-j"/>) on wired links, and ETX (<xref target="etx"/>) on
+wireless links.  It uses an additive algebra for metric computation (<xref
+target="additive-metric"/>).</t>
 
 <section title="Maintaining Hello History" anchor="hello-history">
 
-<t>(Note that this is currently not true, this paragraph and the
-sample implementation are both expected to change before publication.)  For
-each neighbour, the sample implementation of Babel maintains
-two sets of a Hello history and an expected sequence number,
-one for Multicast and one for Unicast Hellos.  The Hello history is a vector of
-16 bits, where a 1 value represents a received Hello, and a 0 value
-a missed Hello.  The expected sequence number, written ne, is the sequence
-number that is expected to be carried by the next received hello from this
-neighbour.</t>
+<t>For each neighbour, the sample implementation of Babel maintains two
+sets of a Hello history, one for each kind of Hello, and an expected
+sequence number, one for Multicast and one for Unicast Hellos.  Each Hello
+history is a vector of 16 bits, where a 1 value represents a received
+Hello, and a 0 value a missed Hello.  For each kind of Hello, the expected
+sequence number, written ne, is the sequence number that is expected to be
+carried by the next received Hello from this neighbour.</t>
 
 <t>Whenever it receives a Hello packet from a neighbour, a node compares
 the received sequence number nr with its expected sequence number ne.
@@ -2358,7 +2358,7 @@ is taken:
 <list style="symbols">
   <t>if the two differ by more than 16 (modulo 2^16), then the sending node
   has probably rebooted and lost its sequence number; the associated
-  neighbour table entry is flushed;</t>
+  neighbour table entry is flushed and a new one created;</t>
   <t>otherwise, if the received nr is smaller (modulo 2^16) than the
   expected sequence number ne, then the sending node has increased its
   Hello interval without our noticing; the receiving node removes the last
@@ -2369,17 +2369,19 @@ is taken:
   receiving node adds (nr - ne) 0 bits to the Hello history (we
   "fast-forward").</t>
 </list>
-The receiving node then appends a 1 bit to the neighbour's Hello history,
-resets the neighbour's hello timer, and sets ne to (nr + 1).  It then
-resets the neighbour's hello timer to 1.5 times the value advertised in the
-received Hello (the extra margin allows for the delay due to jitter).</t>
+The receiving node then appends a 1 bit to the Hello history, resets the
+neighbour's hello timer, and sets ne to (nr + 1).  It then resets the
+neighbour's hello timer to 1.5 times the value advertised in the received
+Hello (the extra margin allows for the delay due to jitter).</t>
 
-<t>Whenever the hello timer associated to a neighbour expires, the local
-node adds a 0 bit to this neighbour's Hello history, and increments the
-expected Hello number.  If the Hello history is empty (it contains 0 bits
-only), the neighbour entry is flushed; otherwise, it resets the neighbour's
-hello timer to the value advertised in the last Hello received from this
-neighbour (no extra margin is necessary in this case).</t>
+<t>Whenever either hello timer associated to a neighbour expires, the
+local node adds a 0 bit to this neighbour's Hello history, and increments
+the expected Hello number.  If both Hello histories are empty (they
+contain 0 bits only), the neighbour entry is flushed; otherwise, the
+neighbour's hello timer is reset to the value advertised in the last Hello
+of that kind received from this neighbour (no extra margin is necessary in
+this case, since jitter was already taken into account when computing the
+timeout that expired).</t>
 
 </section>
 
@@ -2403,7 +2405,15 @@ been correctly received, the link is assumed to be up, and the rxcost is
 set to K; otherwise, the link is assumed to be down, and the rxcost is set
 to infinity.</t>
 
-<t>The cost of such a link is defined as
+<t>Since Babel supports two kinds of Hellos, a Babel node performs
+k-out-of-j twice for each neighbour, once on the Unicast and once on the
+Multicast Hello history.  If either of the instances of k-out-of-j
+indicates that the link is up, then the link is assumed to be up, and the
+rxcost is set to K; if both instances indicate that the link is down, then
+the link is assumed to be down, and the rxcost is set to infinity.</t>
+
+<t>The cost of a link performing k-out-of-j link sensing is defined as
+follows:
   <list style="symbols">
     <t>cost = FFFF hexadecimal if rxcost = FFFF hexadecimal;</t>
     <t>cost = txcost otherwise.</t>
@@ -2414,13 +2424,27 @@ to infinity.</t>
 
 <section title="ETX" anchor="etx">
 
-<t>The Estimated Transmission Cost metric <xref target="ETX"/> estimates
-the number of times that a unicast frame will be retransmitted by the IEEE
-802.11 MAC, assuming infinite persistence.</t>
+<t>Unlike wired links, which are bimodal (either up or down), wireless
+links exhibit continuous variation of the link quality.  Naive application
+of hop-count routing in networks that use wireless links for transit tends
+to select long, lossy links in preference to shorter, lossless links,
+which can dramatically reduce throughput.  For that reason, it is
+essential that a routing protocol designed to support wireless links
+perform some form of link-quality estimation.</t>
 
-<t>A node uses a neighbour's Hello history to compute an estimate, written
-beta, of the probability that a Hello TLV is successfully received.  The
-rxcost is defined as 256/beta.</t>
+<t>ETX <xref target="ETX"/> is a simple link-quality estimation algorithm
+that is designed to work well with the IEEE&nbsp;802.11 MAC.  The
+IEEE&nbsp;802.11 MAC performs ARQ and rate adaptation on unicast frames,
+but not on multicast frames, which are sent at a fixed rate with no ARQ;
+therefore, measuring the loss rate of multicast frames yields a useful
+estimate of a link's quality.</t>
+
+<t>A node performing ETX link quality estimation uses a neighbour's
+Multicast Hello history to compute an estimate, written beta, of the
+probability that a Hello TLV is successfully received.  Beta can be simply
+computed as the fraction of 1 bits within a small number (say, 6) of the
+most recent entries in the Multicast Hello history, or it can be an
+exponential average, or some combination of both approaches.</t>
 
 <t>Let alpha be MIN(1, 256/txcost), an estimate of the probability of
 successfully sending a Hello TLV.  The cost is then computed by
@@ -2428,6 +2452,12 @@ successfully sending a Hello TLV.  The cost is then computed by
 or, equivalently,
   <list style="empty"><t>cost = (MAX(txcost, 256) * rxcost) / 256.</t></list>
 </t>
+
+<t>Since the IEEE&nbsp;802.11 MAC performs ARQ on unicast frames, unicast
+frames do not provide a useful measure of link quality, and therefore ETX
+ignores the Unicast Hello history.  Thus, a node performing ETX
+link-quality estimation will not route through nodes that don't send
+periodic Multicast Hellos (possibly in addition to Unicast Hellos).</t>
 
 </section>
 

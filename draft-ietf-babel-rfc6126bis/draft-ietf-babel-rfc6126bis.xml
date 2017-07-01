@@ -2664,6 +2664,11 @@ doesn't matter when.</t>
 
 <t><list style="symbols">
 <t>Added Unicast Hellos.</t>
+<t>Added unscheduled (interval-less) Hellos.</t>
+<t>Changed Appendix B to agree with the reference implementation.</t>
+<t>Added optional algorithm to avoid the hold time.</t>
+<t>Changed the table of pending seqno requests to be indexed by router-id
+in addition to prefixes.</t>
 </list></t>
 
 </section>

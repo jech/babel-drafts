@@ -2351,14 +2351,14 @@ Hello, and a 0 value a missed Hello.  For each kind of Hello, the expected
 sequence number, written ne, is the sequence number that is expected to be
 carried by the next received Hello from this neighbour.</t>
 
-<t>Whenever it receives a Hello packet from a neighbour, a node compares
-the received sequence number nr with its expected sequence number ne.
-Depending on the outcome of this comparison, one of the following actions
-is taken:
+<t>Whenever it receives a Hello packet of a given kind from a neighbour,
+a node compares the received sequence number nr for that kind of Hello
+with its expected sequence number ne.  Depending on the outcome of this
+comparison, one of the following actions is taken:
 <list style="symbols">
-  <t>if the two differ by more than 16 (modulo 2^16), then the sending node
-  has probably rebooted and lost its sequence number; the associated
-  neighbour table entry is flushed and a new one created;</t>
+  <t>if the two differ by more than 16 (modulo 2^16), then the sending
+  node has probably rebooted and lost its sequence number; the whole
+  associated neighbour table entry is flushed and a new one created;</t>
   <t>otherwise, if the received nr is smaller (modulo 2^16) than the
   expected sequence number ne, then the sending node has increased its
   Hello interval without our noticing; the receiving node removes the last
@@ -2370,9 +2370,10 @@ is taken:
   "fast-forward").</t>
 </list>
 The receiving node then appends a 1 bit to the Hello history, resets the
-neighbour's hello timer, and sets ne to (nr + 1).  It then resets the
-neighbour's hello timer to 1.5 times the value advertised in the received
-Hello (the extra margin allows for the delay due to jitter).</t>
+neighbour's hello timer, and sets ne to (nr + 1).  If the Interval field
+of the received Hello is not zero, it resets the neighbour's hello timer
+to 1.5 times the advertised Interval (the extra margin allows for delay
+due to jitter).</t>
 
 <t>Whenever either hello timer associated to a neighbour expires, the
 local node adds a 0 bit to this neighbour's Hello history, and increments
@@ -2696,6 +2697,7 @@ doesn't matter when.</t>
 <t><list style="symbols">
 <t>Added Unicast Hellos.</t>
 <t>Added unscheduled (interval-less) Hellos.</t>
+<t>Changed Appendix A to consider Unicast and unscheduled Hellos.</t>
 <t>Changed Appendix B to agree with the reference implementation.</t>
 <t>Added optional algorithm to avoid the hold time.</t>
 <t>Changed the table of pending seqno requests to be indexed by router-id

@@ -999,27 +999,33 @@ whether it already has a routing table entry indexed by (neigh, prefix).</t>
 
 <t>If no such entry exists:
 <list style="symbols">
-  <t>if the update is unfeasible, it is ignored;</t>
-  <t>if the metric is infinite (the update is a retraction), the update is
-  ignored;</t>
+  <t>if the update is unfeasible, it MAY be ignored;</t>
+  <t>if the metric is infinite (the update is a retraction of a route we
+  do not know about), the update is ignored;</t>
   <t>otherwise, a new route table entry is created, indexed by (neigh,
-  prefix), with source equal to (router-id, prefix),
-  seqno equal to seqno and an advertised metric
-  equal to the metric carried by the update.</t>
+  prefix), with source equal to (router-id, prefix), seqno equal to seqno
+  and an advertised metric equal to the metric carried by the update.</t>
 </list>
 If such an entry exists:
 <list style="symbols">
-  <t>if the entry is currently installed and the update is unfeasible, then
-  the behaviour depends on whether the router-ids of the two entries match.
-  If the router-ids are different, the update is treated as though it were
-  a retraction (i.e., as though the metric were FFFF hexadecimal).  If the
-  router-ids are equal, the update is ignored;</t>
-  <t>otherwise (i.e., if either the update is feasible or the entry is not
-  currently installed), then the entry's sequence number, advertised
-  metric, metric, and router-id are updated and, unless the advertised
-  metric is infinite, the route's expiry timer is reset to a small multiple
-  of the Interval value included in the update.</t>
-</list></t>
+  <t>if the entry is currently selected, the update is unfeasible, and the
+  router-id of the update is equal to the router-id of the entry, then the
+  update MAY be silently ignored;</t>
+  <t>otherwise, the entry's sequence number, advertised metric, metric,
+  and router-id are updated and, if the advertised metric is not infinite,
+  the route's expiry timer is reset to a small multiple of the Interval
+  value included in the update.  If the update is unfeasible, then the
+  (now unfeasible) entry MUST be immediately unselected, and, if the
+  update caused the router-id of the entry to change, an update (possibly
+  a retraction) MUST be sent in a timely manner (see <xref
+  target="triggered-updates"/>).</t>
+</list>
+Note that the route table contains unfeasible routes, either because they
+were created by an unfeasible update or due to a metric fluctuation; such
+routes are never selected, since they are not known to be loop-free;
+should all the feasible routes become unusable, however, the unfeasible
+routes can be made feasible by sending requests along them (see <xref
+target="sending-requests"/>).</t>
 
 <t>When a route's expiry timer triggers, the behaviour depends on whether
 the route's metric is finite.  If the metric is finite, it is set to
@@ -2715,6 +2721,7 @@ doesn't matter when.</t>
 <t>Added optional algorithm to avoid the hold time.</t>
 <t>Changed the table of pending seqno requests to be indexed by router-id
 in addition to prefixes.</t>
+<t>Relaxed the route acquisition algorithm.</t>
 <t>Replaced minimal implementations by stub implementations.</t>
 <t>Added acknowledgements section.</t>
 </list></t>

@@ -1016,9 +1016,9 @@ If such an entry exists:
   a retraction) MUST be sent in a timely manner (see <xref
   target="triggered-updates"/>).</t>
 </list>
-Note that the route table contains unfeasible routes, either because they
-were created by an unfeasible update or due to a metric fluctuation; such
-routes are never selected, since they are not known to be loop-free;
+Note that the route table may contain unfeasible routes, either because
+they were created by an unfeasible update or due to a metric fluctuation.
+Such routes are never selected, since they are not known to be loop-free;
 should all the feasible routes become unusable, however, the unfeasible
 routes can be made feasible by sending requests along them (see <xref
 target="sending-requests"/>).</t>

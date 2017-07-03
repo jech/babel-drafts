@@ -758,44 +758,39 @@ histories become empty (see <xref target="cost-computation-examples"/>).</t>
 
 <section title="Reverse Reachability Detection">
 
-<t>Every Babel node sends periodic Hellos.  Each Hello TLV carries
-an increasing (modulo 2^16) sequence number and the interval between
-successive periodic packets of this type (unicast vs multicast).  Hello TLVs
-can be sent over both multicast or unicast, but the sequence number and
-interval are specific to this type and destination (interface in the case
-of multicast, neighbour in the case of unicast).</t>
+<t>Every Babel node sends Hello TLVs to its neighbours to indicate that it
+is alive, at regular or irregular intervals.  Each Hello TLV carries an
+increasing (modulo 2^16) sequence number and the time interval until the
+next Hello of the same type (see below).  If the time interval is set to
+0, then the Hello TLV does not establish a new promise &mdash; the timeout
+carried by the previous Hello of the same type still applies to the next
+Hello.  We say that a Hello is scheduled if it has a non-zero interval,
+and unscheduled otherwise.</t>
 
-<t>The dichotomy between Multicast and Unicast Hellos (and the fact that they
-have separate sequence numbers and intervals) allows implementations to
-use different intervals based on link properties.  Multicast Hellos
-allow discovery of new neighbours but may cause issues on link layers
-where multicast is degraded.  Unicast Hellos improve reliability on
-these networks.</t>
+<t>There are two kinds of Hellos: Multicast Hellos, which use
+a per-interface Hello counter, and Unicast Hellos, which use
+a per-neighbour counter.  A Multicast Hellos with a given seqno MUST be
+sent to all neighbours on a given interface, either by sending it to
+a multicast address or by sending it to one unicast address per neighbour.
+A Unicast Hello with given seqno should normally be sent to just one
+neighbour (over unicast), since the sequence numbers of different
+neighbours are not necessarily synchronised.</t>
 
-<t>Scheduled Hellos are defined as Hellos that carry a non-zero Interval.  Each
-node MUST parse both Unicast and Multicast Scheduled Hellos.  An
-implementation MUST send Scheduled Hellos, either Multicast or Unicast or
-both.  Any time a node sends a Scheduled Hello, it commits to sending another
-Scheduled Hello of the same type (unicast vs multicast) within the time
-window specified by the Interval field.</t>
+<t>Multicast Hellos sent over multicast can be used for node discovery;
+hence, a node SHOULD send periodic (scheduled) Multicast Hellos.  A node
+MAY send Unicast Hellos or unscheduled Hellos of either kind for any
+reason, such as reducing the amount of multicast traffic or improving
+reliability on link technologies with poor support for link-layer multicast.</t>
 
-<t>In addition to the periodic Scheduled Hello packets, a node MAY
-send Scheduled Hello packets ahead of schedule, e.g., to accelerate link
-cost estimation when a new neighbour is discovered, or when link conditions
-have suddenly changed.  In addition to these, a node MAY send Unscheduled
-Hello packets, which are defined as Hellos that carry an Interval of
-0.  Unscheduled Hellos can be used, for
-example, to transmit Hello sub-TLVs when the node is not sending Scheduled
-Hellos of this type.</t>
-
-<t>A node MAY change its scheduled Hello intervals.  The Hello interval MAY be
-decreased at any time; it SHOULD NOT be increased, except immediately
-before sending a Hello packet.  (Equivalently, a node SHOULD send an
-extra Scheduled Hello immediately after increasing its Hello interval.)</t>
+<t>A node MAY send a scheduled Hello ahead of time.  A node MAY change its
+scheduled Hello interval.  The Hello interval MAY be decreased at any
+time; it SHOULD NOT be increased, except immediately before sending
+a Hello packet.  (Equivalently, a node SHOULD send an extra Scheduled
+Hello immediately after increasing its Hello interval.)</t>
 
 <t>How to deal with received Hello TLVs and what statistics to maintain
 are considered local implementation matters; typically, a node will
-maintain some sort of history of recently received Hellos.  A possible
+maintain some sort of history of recently received Hellos.  A useful
 algorithm is described in <xref target="hello-history"/>.</t>
 
 <t>After receiving a Hello, or determining that it has missed one, the node

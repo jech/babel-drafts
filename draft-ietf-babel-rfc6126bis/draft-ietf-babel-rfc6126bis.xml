@@ -748,7 +748,7 @@ computation.</t>
 
 <t>Before it can exchange routing information with a neighbour, a Babel
 node MUST create an entry for that neighbour in the neighbour table.  When
-to do that is an implementation detail; suitable strategies include
+to do that is implementation-specific; suitable strategies include
 creating an entry when any Babel packet is received, or creating an entry
 when a Hello TLV is parsed.  Similarly, in order to conserve system
 resources, an implementation SHOULD discard an entry when it has been

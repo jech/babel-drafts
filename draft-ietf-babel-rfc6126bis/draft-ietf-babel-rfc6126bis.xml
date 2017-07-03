@@ -726,14 +726,14 @@ receiving nodes.</t>
 <t>When to request acknowledgements is a matter of local policy; the
 simplest strategy is to never request acknowledgements and to rely on
 periodic updates to ensure that any reachable routes are eventually
-propagated throughout the routing domain.  For increased efficiency, we
-suggest that acknowledged packets should be used in order to send urgent
-updates (<xref target="triggered-updates"/>) when the number of neighbours
-on a given interface is small.  Since Babel is designed to deal gracefully
-with packet loss on unreliable media, sending all packets with
-acknowledgement requests is not necessary, and not even recommended, as
-the acknowledgements cause additional traffic and may force additional
-Address Resolution Protocol (ARP) or Neighbour Discovery exchanges.</t>
+propagated throughout the routing domain.  For increased efficiency,
+acknowledged packets MAY be used in order to send urgent updates (<xref
+target="triggered-updates"/>) when the number of neighbours on a given
+interface is small.  Since Babel is designed to deal gracefully with
+packet loss on unreliable media, sending all packets with acknowledgement
+requests is not necessary, and NOT RECOMMENDED, as the acknowledgements
+cause additional traffic and may force additional Address Resolution
+Protocol (ARP) or Neighbour Discovery exchanges.</t>
 
 </section>
 
@@ -783,9 +783,10 @@ reliability on link technologies with poor support for link-layer multicast.</t>
 
 <t>A node MAY send a scheduled Hello ahead of time.  A node MAY change its
 scheduled Hello interval.  The Hello interval MAY be decreased at any
-time; it SHOULD NOT be increased, except immediately before sending
-a Hello packet.  (Equivalently, a node SHOULD send an extra Scheduled
-Hello immediately after increasing its Hello interval.)</t>
+time; it MAY be increased immediately before sending a Hello TLV, but
+SHOULD NOT be increased at other times.  (Equivalently, a node SHOULD send
+an extra Scheduled Hello immediately after increasing its Hello
+interval.)</t>
 
 <t>How to deal with received Hello TLVs and what statistics to maintain
 are considered local implementation matters; typically, a node will
@@ -811,8 +812,10 @@ exchange and to aggregate multiple IHUs in a single packet.</t>
 
 <t>In addition to the periodic IHUs, a node MAY, at any time, send an
 unscheduled IHU packet.  It MAY also, at any time, decrease its IHU
-interval, and it MAY increase its IHU interval immediately before sending an
-IHU.</t>
+interval, and it MAY increase its IHU interval immediately before sending
+an IHU, but SHOULD NOT increase it at any other time.  (Equivalently,
+a node SHOULD send an extra IHU immediately after increasing its Hello
+interval.)</t>
 
 <t>Every IHU TLV contains two pieces of data: the link's rxcost (reception
 cost) from the sender's perspective, used by the neighbour for computing
@@ -881,9 +884,10 @@ cause a routing loop, and the update is accepted.</t>
 
 <t>The feasibility condition is applied to all received updates.  The
 feasibility condition compares the metric in the received update with the
-metrics of the updates previously sent by the receiving node; updates with
-finite metrics large enough to cause a loop cause the resulting route to
-be unselected.</t>
+metrics of the updates previously sent by the receiving node; updates that
+fail the feasibility condition, and therefore have metrics large enough to
+cause a routing loop, are either discarded or prevent the resulting route
+from being selected.</t>
 
 <t>A feasibility distance is a pair (seqno, metric), where seqno is an
 integer modulo 2^16 and metric is a positive integer.  Feasibility
@@ -899,12 +903,12 @@ when
 </list>
 where sequence numbers are compared modulo 2^16.</t>
 
-<t>Given a source (p, plen, router-id), a node's feasibility distance for
-this source is the minimum, according to the ordering defined above, of the
-distances of all the finite updates ever sent by this particular node for
-the prefix (p, plen) and the given router-id.  Feasibility distances are
-maintained in the source table; the exact procedure is given in
-<xref target="maintaining-fd"/>.</t>
+<t>Given a source (prefix, plen, router-id), a node's feasibility distance
+for this source is the minimum, according to the ordering defined above,
+of the distances of all the finite updates ever sent by this particular
+node for the prefix (prefix, plen) and the given router-id.  Feasibility
+distances are maintained in the source table; the exact procedure is given
+in <xref target="maintaining-fd"/>.</t>
 
 <t>A received update is feasible when either it is a retraction (its metric
 is FFFF hexadecimal), or the advertised distance is strictly better, in the
@@ -1238,7 +1242,7 @@ spuriously expiring.</t>
 requests, which simply request an update for a given prefix, and seqno
 requests, which request an update for a given prefix with a specific
 sequence number.  The former are never forwarded; the latter are forwarded
-if they cannot be satisfied by a neighbour.</t>
+if they cannot be satisfied by the receiver.</t>
 
 <section title="Handling Requests">
 
@@ -1448,9 +1452,9 @@ applications of Babel.</t>
 </section>
 
 <section title="Router-Id">
-<t>A router-id is an arbitrary 8-octet.  A router-id MUST NOT consist of
-either all zeroes or all ones.  Router-ids SHOULD be assigned in modified
-EUI-64 format <xref target="ADDRARCH"/>.</t>
+<t>A router-id is an arbitrary 8-octet value.  A router-id MUST NOT
+consist of either all zeroes or all ones.  Router-ids SHOULD be assigned
+in modified EUI-64 format <xref target="ADDRARCH"/>.</t>
 </section>
 
 <section title="Address">

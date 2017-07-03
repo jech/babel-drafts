@@ -883,7 +883,8 @@ cause a routing loop, and the update is accepted.</t>
 <t>The feasibility condition is applied to all received updates.  The
 feasibility condition compares the metric in the received update with the
 metrics of the updates previously sent by the receiving node; updates with
-finite metrics large enough to cause a loop are discarded.</t>
+finite metrics large enough to cause a loop cause the resulting route to
+be unselected.</t>
 
 <t>A feasibility distance is a pair (seqno, metric), where seqno is an
 integer modulo 2^16 and metric is a positive integer.  Feasibility

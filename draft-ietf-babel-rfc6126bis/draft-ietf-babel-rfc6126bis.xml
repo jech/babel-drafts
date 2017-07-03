@@ -848,8 +848,8 @@ cost is a matter of local policy; as far as Babel's correctness is
 concerned, only the following conditions MUST be satisfied:
 <list style="symbols">
   <t>the cost is strictly positive;</t>
-  <t>if Hello TLVs of either kind were received recently, then the cost is
-  infinite;</t>
+  <t>if no Hello TLVs of either kind were received recently, then the cost
+  is infinite;</t>
   <t>if the txcost is infinite, then the cost is infinite.</t>
 </list></t>
 

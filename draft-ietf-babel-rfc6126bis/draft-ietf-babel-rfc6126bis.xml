@@ -473,11 +473,10 @@ configuration:
 
 <t>Suppose that node C fails.  If B forwards packets destined to C by
 following the default route, a routing loop will form, and persist until
-A learns of B's retraction of the direct route to C.  Babel avoids this
-pitfall by maintaining an "unreachable" route for a few minutes after
-a route is retracted; the time for which such a route must be maintained
-should be the worst-case propagation time of the retraction of the route
-to C.</t>
+A learns of B's retraction of the direct route to C.  B avoids this
+pitfall by installing an "unreachable" route after a route is retracted;
+this route is maintained until it can be guaranteed that the former route
+has been retracted by all of B's neighbours.</t>
 
 </section>
 

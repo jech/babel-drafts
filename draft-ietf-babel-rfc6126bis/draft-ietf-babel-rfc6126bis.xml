@@ -2577,20 +2577,20 @@ version is not backwards compatible with the original protocol.</t>
 a new TLV, or by adding a new sub-TLV to an existing TLV.  For example, an
 extension whose purpose is to attach additional data to route updates can
 be implemented either by creating a new "enriched" Update TLV, by adding
-a non-madatory sub-TLV to the Update TLV, or by adding a mandatory
+a non-mandatory sub-TLV to the Update TLV, or by adding a mandatory
 TLV.</t>
 
 <t>The various encodings are treated differently by implementations that
 do not understand the extension.  In the case of a new TLV or of a sub-TLV
-with the mandatory bit set, the whole unknown TLV is ignored by an
-implementation of the original protocol, while in the case of
-a non-mandatory sub-TLV, the TLV is parsed and acted upon, and the unknown
-sub-TLV is silently ignored.  Therefore, a non-mandatory sub-TLV should be
-used by extensions that extend the Update in a compatible manner (the
-extension data may be silently ignored), while a mandatory sub-TLV or
-a new TLV must be used by extensions that make incompatible extensions to
-the meaning of the TLV (the whole TLV must be thrown away if the extension
-data is not understood).</t>
+with the mandatory bit set, the whole TLV is ignored by implementations
+that do not implement the extension, while in the case of a non-mandatory
+sub-TLV, the TLV is parsed and acted upon, and only the unknown sub-TLV is
+silently ignored.  Therefore, a non-mandatory sub-TLV should be used by
+extensions that extend the Update in a compatible manner (the extension
+data may be silently ignored), while a mandatory sub-TLV or a new TLV must
+be used by extensions that make incompatible extensions to the meaning of
+the TLV (the whole TLV must be thrown away if the extension data is not
+understood).</t>
 
 <t>Experience shows that additional data tends to crop up in the most
 unexpected places.  Hence, it is recommended that extensions should define
@@ -2601,11 +2601,12 @@ TLVs with an unknown AE are ignored, just like unknown TLVs.  However,
 adding a new AE is often more involved than adding a new TLV, since it
 creates a new set of compression state.  Additionally, since the Next Hop
 TLV creates state specific to a given address family, as opposed to
-a given AE, which makes it difficult to add a new AE for a given
-address-family without breaking compatibility.  A similar issue arises
-with Update TLVs with unknown AEs establishing a new router-id (with
-ROUTER-ID flag set).  Therefore, defining new AEs must be done with care
-if compatibility with unextended implementations is required.</t>
+a given AE, a new AE for a previously defined address family must not be
+used in the Next Hop TLV if backwards compatibility is required.
+A similar issue arises with Update TLVs with unknown AEs establishing
+a new router-id (with ROUTER-ID flag set).  Therefore, defining new AEs
+must be done with care if compatibility with unextended implementations is
+required.</t>
 
 <t>The packet trailer &mdash; the space after the declared length of the
 packet but within the payload of the UDP datagram &mdash; was originally

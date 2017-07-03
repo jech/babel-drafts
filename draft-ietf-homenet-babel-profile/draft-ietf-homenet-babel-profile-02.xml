@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd" []>
+<?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
+<?rfc toc="yes"?>
+<?rfc tocdepth="2"?>
+<?rfc symrefs="yes"?>
+<?rfc sortrefs="yes" ?>
+<?rfc compact="no" ?>
+<rfc category="exp" docName="draft-ietf-homenet-babel-profile-02"
+     ipr="trust200902">
+<front>
+<title abbrev="Homenet Babel profile">Homenet profile of the Babel routing protocol</title>
+<author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek">
+<organization>IRIF, University of Paris-Diderot</organization>
+<address>
+<postal>
+<street>Case 7014</street>
+<city>75205 Paris Cedex 13</city>
+<region></region>
+<code></code>
+<country>France</country>
+</postal>
+<email>jch@irif.fr</email>
+</address>
+</author>
+
+<date day="3" month="July" year="2017"/>
+
+<abstract>
+<t>This document defines the subset of the Babel routing protocol
+<xref target="RFC6126"/> and its extensions that a Homenet router must
+implement, as well as the interactions between HNCP <xref target="RFC7788"/>
+and Babel.</t>
+</abstract>
+
+</front>
+
+<middle>
+
+<section title="Introduction">
+
+<t>The core of the Homenet protocol suite consists of HNCP 
+<xref target="RFC7788"/>, a protocol used for flooding configuration
+information and assigning prefixes to links, combined with the Babel
+routing protocol <xref target="RFC6126"/>.  Babel is an extensible,
+flexible and modular protocol: minimal implementations of Babel have been
+demonstrated that consist of a few hundred of lines of code, while the
+"large" implementation includes support for a number of extensions and
+consists of over ten thousand lines of C code.</t>
+
+<t>This document consists of two parts.  The first specifies the exact
+subset of the Babel protocol and its extensions that is required by an
+implementation of the Homenet protocol suite.  The second specifies how
+HNCP interacts with Babel.</t>
+
+<section title="Background">
+
+<t>The Babel routing protocol and its extensions are defined in a number
+of documents:
+<list style="symbols">
+<t>The body of RFC&nbsp;6126 <xref target="RFC6126"/> defines the core,
+unextended protocol.  It allows Babel's control data to be carried over
+either link-local IPv6 or IPv4, and in either case allows announcing both
+IPv4 and IPv6 routes.  It leaves link cost estimation, metric computation
+and route selection to the implementation.  Distinct implementations of
+core RFC&nbsp;6126 Babel will interoperate and maintain a set of loop-free
+forwarding paths, but given conflicting metrics or route selection
+policies may give rise to persistent oscillations.</t>
+<t>The informative Appendix&nbsp;A of RFC&nbsp;6126 suggests a simple and
+easy to implement algorithm for cost and metric computation that has been
+found to work satisfactorily in a wide range of topologies.</t>
+<t>While RFC&nbsp;6126 does not provide an algorithm for route selection,
+its Section&nbsp;3.6 suggests selecting the route with smallest metric
+with some hysteresis applied.  An algorithm that has been found to work
+well in practice is described in Section&nbsp;III.E of
+<xref target="DELAY-BASED"/>.</t>
+<t>The extension mechanism for Babel is defined in RFC&nbsp;7557 <xref
+target="RFC7557"/>.</t>
+<t>Four RFCs and Internet-Drafts define optional extensions to Babel:
+HMAC-based authentication <xref target="RFC7298"/>, source-specific
+routing <xref target="BABEL-SS"/>, radio interference aware routing <xref
+target="BABEL-Z"/>, and delay-based routing <xref target="BABEL-RTT"/>.
+All of these extensions interoperate with the core protocol as well as
+with each other.</t>
+</list>
+</t>
+
+</section>
+
+</section>
+
+<section title="The Homenet profile of Babel">
+
+<section title="Requirements">
+
+<t>REQ1: a Homenet implementation of Babel MUST encapsulate Babel control
+traffic in IPv6 packets sent to the IANA-assigned port 6696 and either the
+IANA-assigned multicast group ff02::1:6 or to a link-local unicast
+address.</t>
+
+<t><list style="empty"><t>Rationale: since Babel is able to carry both
+IPv4 and IPv6 routes over either IPv4 or IPv6, choosing the protocol used
+for carrying control traffic is a matter of preference.  Since IPv6 has
+some features that make implementations somewhat simpler and more reliable
+(notably link-local addresses), we require carrying control data over
+IPv6.</t></list></t>
+
+<t>REQ2: a Homenet implementation of Babel MUST implement the IPv6 subset
+of the protocol defined in the body of RFC&nbsp;6126.</t>
+
+<t><list style="empty"><t>Rationale: support for IPv6 routing is an
+essential component of the Homenet architecture.</t></list></t>
+
+<t>REQ3: a Homenet implementation of Babel SHOULD implement the IPv4
+subset of the protocol defined in the body of RFC&nbsp;6126.  Use of other
+techniques for acquiring IPv4 connectivity (such as multiple layers of
+NAT) is strongly discouraged.</t>
+
+<t><list style="empty"><t>Rationale: support for IPv4 will remain
+necessary for years to come, and even in pure IPv6 deployments, including
+code for supporting IPv4 has very little cost.  Since HNCP makes it easy
+to assign distinct IPv4 prefixes to the links in a network, it is not
+necessary to resort to multiple layers of NAT, with all of its
+problems.</t></list></t>
+
+<t>REQ4: a Homenet implementation of Babel MUST implement source-specific
+routing for IPv6, as defined in draft-boutier-babel-source-specific <xref
+target="BABEL-SS"/>.  This implies that it MUST implement the extension
+mechanism defined in RFC&nbsp;7557.</t>
+
+<t><list style="empty"><t>Rationale: source-specific routing is an
+essential component of the Homenet architecture.  The extension mechanism
+is required by source-specific routing.  Source-specific routing for IPv4
+is not required, since HNCP arranges things so that a single non-specific
+IPv4 default route is announced (Section&nbsp;6.5 of <xref
+target="RFC7788"/>).</t></list></t>
+
+<t>REQ5: a Homenet implementation of Babel MUST use metrics that are of
+a similar magnitude to the values suggested in Appendix&nbsp;A of
+RFC&nbsp;6126.  In particular, it SHOULD assign costs that are no less
+than 256 to wireless links, and SHOULD assign costs between 32 and 196 to
+lossless wired links.</t>
+
+<t><list style="empty"><t>Rationale: if two implementations of Babel
+choose very different values for link costs, combining routers from
+different vendors will cause sub-optimal routing.</t></list></t>
+
+<t>REQ6: a Homenet implementation of Babel SHOULD distinguish between
+wired and wireless links; if it is unable to determine whether a link is
+wired or wireless, it SHOULD make the worst-case hypothesis that the link
+is wireless.  It SHOULD dynamically probe the quality of wireless links
+and derive a suitable metric from its quality estimation.  The algorithm
+described in Appendix&nbsp;A of RFC&nbsp;6126 MAY be used.</t>
+
+<t><list style="empty"><t>Rationale: support for wireless transit links is
+a "killer feature" of Homenet, something that is requested by our users
+and easy to explain to our bosses.  In the absence of dynamically computed
+metrics, the routing protocol attempts to minimise the number of links
+crossed by a route, and therefore prefers long, lossy links to shorter,
+lossless ones.  In wireless networks, "hop-count routing is worst-path
+routing".</t></list></t>
+
+</section>
+
+<section title="Non-requirements">
+
+<t>NR1: a Homenet implementation of Babel MAY perform route selection by
+applying hysteresis to route metrics, as suggested in Section&nbsp;3.6 of
+RFC&nbsp;6126 and described in detail in Section&nbsp;III.E of
+<xref target="BABEL-RTT"/>.  However, it MAY simply pick the route with
+the smallest metric.</t>
+
+<t><list style="empty"><t>Rationale: hysteresis is only useful in
+congested and highly dynamic networks.  In a typical home network, stable
+and uncongested, the feedback loop that hysteresis compensates for does
+not occur.</t></list></t>
+
+<t>NR2: a Homenet implementation of Babel MAY include support for other
+extensions to the protocol, as long as they are known to interoperate with
+both the core protocol and source-specific routing.</t>
+
+<t><list style="empty"><t>Rationale: a number of extensions to the Babel
+routing protocol have been defined over the years; however, they are
+useful in fairly specific situations, such as routing over global-scale
+overlay networks <xref target="BABEL-RTT"/> or multi-hop wireless networks
+with multiple radio frequencies <xref target="BABEL-Z"/>.  Hence, with the
+exception of source-specific routing, no extensions are required for
+Homenet.</t></list></t>
+
+</section>
+
+</section>
+
+<section title="Interactions between HNCP and Babel">
+
+<t>The Homenet architecture cleanly separates between configuration, which
+is done by HNCP, and routing, which is done by Babel.  While the coupling
+between the two protocols is deliberately kept to a minimum, some
+interactions are unavoidable.</t>
+
+<t>All the interactions between HNCP and Babel consist of HNCP causing
+Babel to perform an announcement on its behalf (in particular, under no
+circumstances does Babel cause HNCP to perform an action).  How this is
+realised is an implementation detail that is outside the scope of this
+document: while it could conceivably be done using a private communication
+channel between HNCP and Babel, existing implementations have HNCP install
+a route in the operating system's kernel which is later picked up by
+Babel using the existing redistribution mechanisms.</t>
+
+<section title="Requirements">
+
+<t>REQ7: if an HNCP node receives a DHCPv6 prefix delegation for prefix
+P and publishes an External-Connection TLV containing a Delegated-Prefix
+TLV with prefix P and no Prefix-Policy TLV, then it MUST announce
+a source-specific default route with source prefix P over Babel.</t>
+
+<t><list style="empty"><t>Rationale: source-specific routes are the main
+tool that Homenet uses to enable optimal routing in the presence of
+multiple IPv6 prefixes.  External connections with non-trivial prefix
+policies are explicitly excluded from this requirement, since their exact
+behaviour is application-specific.</t></list></t>
+
+<t>REQ8: if an HNCP node receives a DHCPv4 lease with an IPv4 address and
+wins the election for NAT gateway, then it MUST act as a NAT gateway and
+MUST announce a (non-specific) IPv4 default route over Babel.</t>
+
+<t><list style="empty"><t>Rationale: the Homenet architecture does not use
+source-specific routing for IPv4; instead, HNCP elects a single NAT
+gateway and publishes a single default route towards that gateway
+(<xref target="RFC7788"/> 7788 Section 6.5).</t></list></t>
+
+<t>REQ9: if an HNCP node assigns a prefix P to an attached link and
+announces P in an Assigned-Prefix TLV, then it MUST announce a route towards
+P over Babel.</t>
+
+<t><list style="empty"><t>Rationale: prefixes assigned to links must be
+routable within the Homenet.</t></list></t>
+
+</section>
+
+<section title="Non-requirements">
+
+<t>NR3: an HNCP node that receives a DHCPv6 prefix delegation MAY announce
+a non-specific IPv6 default route over Babel in addition to the
+source-specific default route mandated by requirement REQ7.</t>
+
+<t><list style="empty"><t>Rationale: since the source-specific default
+route is more specific than the non-specific default route, the former
+will override the latter if all nodes implement source-specific routing.
+Announcing an additional non-specific route is allowed, since doing that
+causes no harm and might simplify operations in some circumstances,
+e.g.&nbsp;when interoperating with a routing protocol that does not
+support source-specific routing.</t></list></t>
+
+<t>NR4: an HNCP node that receives a DHCPv4 lease with an IPv4 address and
+wins the election for NAT gateway SHOULD NOT announce a source-specific
+IPv4 default route.</t>
+
+<t><list style="empty"><t>Homenet does not require support for IPv4
+source-specific routing.  Announcing IPv4 source-specific routes will not
+cause routing pathologies (blackholes or routing loops), but it might
+cause packets sourced in different parts of the Homenet to follow
+different paths, with all the confusion that this entails.</t></list></t>
+
+</section>
+
+</section>
+
+<section title="Security Considerations">
+
+<t>Both HNCP and Babel carry their control data in IPv6 packets with
+a link-local source address, and implementations are required to drop
+packets sent from a global address.  Hence, they are only susceptible to
+attacks from a directly connected link on which the HNCP and Babel
+implementations are listening.</t>
+
+<t>The security of a Homenet network relies on having a set of trusted
+"internal" links that are secured at a lower layer (either physically or
+at the link layer); HNCP and Babel packets are only accepted when they
+originate on these trusted links (see Section&nbsp;5 of <xref
+target="RFC7788"/>).  External, leaf and guest links are not trusted, and
+any HNCP or Babel packets that are received on such links are ignored.</t>
+
+<t>If untrusted links are used for transit, which is NOT RECOMMENDED, and
+therefore need to carry HNCP and Babel traffic, then HNCP and Babel MUST
+be secured using an upper-layer security protocol.  While both HNCP and
+Babel support cryptographic authentication, at the time of writing no
+protocol for autonomous configuration of HNCP and Babel security has been
+defined.</t>
+
+</section>
+
+<section title="Acknowledgments">
+
+<t>A number of people have helped with definining the requirements listed
+in this document.  I am especially indebted to Markus Stenberg for his
+help.</t>
+
+</section>
+
+</middle>
+
+<back>
+
+<references title="Normative References">
+
+<reference anchor="RFC6126"><front>
+<title>The Babel Routing Protocol</title>
+<author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
+<date month="February" year="2011"/>
+</front>
+<seriesInfo name="RFC" value="6126"/>
+</reference>
+
+<reference anchor='RFC7557'><front>
+<title>Extension Mechanism for the Babel Routing Protocol</title>
+<author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
+<date day="28" month="May" year="2015"/>
+</front>
+<seriesInfo name="RFC" value="7557"/>
+</reference>
+
+<reference anchor="RFC7788"><front>
+<title>Home Networking Control Protocol</title>
+<author initials="M." surname="Stenberg" fullname="M. Stenberg"/>
+<author initials="S." surname="Barth" fullname="S. Barth"/>
+<author initials="P." surname="Pfister" fullname="P. Pfister"/>
+<date year="2016" month="April"/>
+</front>
+<seriesInfo name="RFC" value="7788"/>
+<seriesInfo name="DOI" value="10.17487/RFC7788"/>
+</reference>
+
+<reference anchor="BABEL-SS">
+<front>
+<title>Source-Specific Routing in Babel</title>
+<author initials='M' surname='Boutier' fullname='Matthieu Boutier'></author>
+<author initials='J' surname='Chroboczek' fullname='Juliusz Chroboczek'></author>
+<date month='January' day='5' year='2015' />
+</front>
+<seriesInfo name='Internet-Draft' value='draft-boutier-babel-source-specific-01' />
+</reference>
+
+</references>
+
+<references title="Informative References">
+
+<reference anchor='RFC7298'><front>
+<title>Babel Hashed Message Authentication Code (HMAC) Cryptographic Authentication</title>
+<author initials='D.' surname='Ovsienko' fullname='D. Ovsienko'></author>
+<date year='2014' month='July' />
+</front>
+<seriesInfo name='RFC' value='7298' />
+</reference>
+
+<reference anchor="BABEL-RTT">
+<front>
+<title>Delay-based Metric Extension for the Babel Routing Protocol</title>
+<author initials='B' surname='Jonglez' fullname='Baptiste Jonglez'></author>
+<author initials='J' surname='Chroboczek' fullname='Juliusz Chroboczek'></author>
+<date month='May' day='27' year='2015' />
+</front>
+<seriesInfo name='Internet-Draft' value='draft-jonglez-babel-rtt-extension-01' />
+</reference>
+
+<reference anchor="BABEL-Z"><front>
+<title>Diversity Routing for the Babel Routing Protocol</title>
+<author initials='J' surname='Chroboczek' fullname='Juliusz Chroboczek'></author>
+<date month='February' day='15' year='2016' />
+</front>
+<seriesInfo name='Internet-Draft' value='draft-chroboczek-babel-diversity-routing-01'/>
+</reference>
+
+<reference anchor="DELAY-BASED"><front>
+<title>A delay-based routing metric</title>
+<author fullname="Baptiste Jonglez" initials="B." surname="Jonglez"/>
+<author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
+<date month="March" year="2014"/>
+</front>
+<annotation>Available online from http://arxiv.org/abs/1403.3488</annotation>
+</reference>
+
+</references>
+
+</back>
+
+</rfc>

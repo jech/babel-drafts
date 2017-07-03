@@ -585,9 +585,9 @@ sent.  (Note that an interface's
 Multicast Hello seqno is unrelated to the node's seqno.)</t>
 
 <t>There are two timers associated with each interface table entry &mdash;
-the multicast hello timer, which governs the sending of Scheduled Multicast Hello and IHU
-packets, and the update timer, which governs the sending of periodic route
-updates.</t>
+the multicast hello timer, which governs the sending of scheduled
+Multicast Hello and IHU packets, and the update timer, which governs the
+sending of periodic route updates.</t>
 
 </section>
 
@@ -622,10 +622,9 @@ Multicast Hello seqno.)</t>
 </t>
 
 <t>There are three timers associated with each neighbour entry &mdash; the
-multicast hello timer, which is initialised from the interval value carried
-by Scheduled Multicast Hello
-TLVs, the unicast hello timer, which is initialised from the interval
-value carried by Scheduled Unicast Hello
+multicast hello timer, which is initialised from the interval value
+carried by scheduled Multicast Hello TLVs, the unicast hello timer, which
+is initialised from the interval value carried by scheduled Unicast Hello
 TLVs, and the IHU timer, which is initialised to a small multiple of the
 interval carried in IHU TLVs.</t>
 
@@ -785,7 +784,7 @@ reliability on link technologies with poor support for link-layer multicast.</t>
 scheduled Hello interval.  The Hello interval MAY be decreased at any
 time; it MAY be increased immediately before sending a Hello TLV, but
 SHOULD NOT be increased at other times.  (Equivalently, a node SHOULD send
-an extra Scheduled Hello immediately after increasing its Hello
+an extra scheduled Hello immediately after increasing its Hello
 interval.)</t>
 
 <t>How to deal with received Hello TLVs and what statistics to maintain
@@ -1738,11 +1737,11 @@ handling of this TLV (see below).</t>
 sending node's outgoing Unicast Hello seqno for this neighbour.  Otherwise,
 it is the sending node's outgoing Multicast Hello seqno for this
 interface.</t>
-<t hangText="Interval">If non-zero, this is an
-upper bound, expressed in centiseconds, on the
-time after which the sending node will send a new Scheduled Hello TLV with the same
-setting of the UNICAST flag.  If this is 0, then this Hello represents an
-Unscheduled Hello.  If this is not 0, this Hello represents a Scheduled Hello.</t>
+<t hangText="Interval">If non-zero, this is an upper bound, expressed in
+centiseconds, on the time after which the sending node will send a new
+scheduled Hello TLV with the same setting of the UNICAST flag.  If this is
+0, then this Hello represents an unscheduled Hello, and doesn't carry any
+new information about times at which Hellos are sent.</t>
 </list></t>
 
 
@@ -1763,18 +1762,14 @@ represents a Unicast Hello, otherwise it represents a Multicast Hello.</t>
 </t>
 
 <t>Every time a Hello is sent, the corresponding seqno counter MUST be
-incremented.  Since there is a single seqno counter
-for all the Multicast Hellos sent by a given
-node over a given interface, if the UNICAST flag is not set, this TLV MUST
-be sent to all neighbors on this link, which can be achieved by sending
-to a multicast destination, or repeatedly sending unicast to all known
-neighbours.  Similarly, if the UNICAST flag is set, this
-TLV MUST be sent to a single neighbour, which can achieved by sending
-to a unicast destination.  In order to avoid large discontinuities in link quality,
-multiple Hello TLVs SHOULD NOT be sent in the same packet.</t>
-
-<t>If the Interval is 0, then this Hello represents an Unscheduled
-Hello.</t>
+incremented.  Since there is a single seqno counter for all the Multicast
+Hellos sent by a given node over a given interface, if the UNICAST flag is
+not set, this TLV MUST be sent to all neighbors on this link, which can be
+achieved by sending to a multicast destination, or repeatedly sending
+unicast to all known neighbours.  Similarly, if the UNICAST flag is set,
+this TLV MUST be sent to a single neighbour, which can achieved by sending
+to a unicast destination.  In order to avoid large discontinuities in link
+quality, multiple Hello TLVs SHOULD NOT be sent in the same packet.</t>
 
 <t>This TLV is self-terminating, and allows sub-TLVs.</t>
 

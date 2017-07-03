@@ -2651,10 +2651,10 @@ table.</t>
 <t>No matter how primitive, a stub implementation MUST parse sub-TLVs of
 all the TLVs that it understands and check for the mandatory bit.  It MUST
 answer acknowledgement requests and MUST participate in the Hello/IHU
-protocol (it MUST parse both Unicast and Multicast Hellos and send
-Scheduled Hellos, either Multicast, or Unicast, or both).  It MUST also be
-able to reply to seqno requests for routes that it announces and SHOULD be
-able to reply to route requests.</t>
+protocol (it MUST parse both Unicast and Multicast Hellos, and SHOULD send
+scheduled Hellos, preferably over multicast in order to make it
+discoverable).  It MUST also be able to reply to seqno requests for routes
+that it announces and SHOULD be able to reply to route requests.</t>
 
 <t>Experiments show that an IPv6-only stub implementation of Babel can be
 written in less than 1000 lines of C code and compile to 13&nbsp;kB of

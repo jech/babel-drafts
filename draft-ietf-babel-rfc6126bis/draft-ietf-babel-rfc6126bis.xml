@@ -2346,7 +2346,7 @@ target="additive-metric"/>).</t>
 <section title="Maintaining Hello History" anchor="hello-history">
 
 <t>For each neighbour, the sample implementation of Babel maintains two
-sets of a Hello history, one for each kind of Hello, and an expected
+sets of Hello history, one for each kind of Hello, and an expected
 sequence number, one for Multicast and one for Unicast Hellos.  Each Hello
 history is a vector of 16 bits, where a 1 value represents a received
 Hello, and a 0 value a missed Hello.  For each kind of Hello, the expected
@@ -2363,7 +2363,7 @@ comparison, one of the following actions is taken:
   associated neighbour table entry is flushed and a new one created;</t>
   <t>otherwise, if the received nr is smaller (modulo 2^16) than the
   expected sequence number ne, then the sending node has increased its
-  Hello interval without our noticing; the receiving node removes the last
+  Hello interval without us noticing; the receiving node removes the last
   (ne - nr) entries from this neighbour's Hello history (we "undo
   history");</t>
   <t>otherwise, if nr is larger (modulo 2^16) than ne, then the sending
@@ -2377,23 +2377,20 @@ of the received Hello is not zero, it resets the neighbour's hello timer
 to 1.5 times the advertised Interval (the extra margin allows for delay
 due to jitter).</t>
 
-<t>Whenever either hello timer associated to a neighbour expires, the
+<t>Whenever either Hello timer associated to a neighbour expires, the
 local node adds a 0 bit to this neighbour's Hello history, and increments
 the expected Hello number.  If both Hello histories are empty (they
 contain 0 bits only), the neighbour entry is flushed; otherwise, the
 neighbour's hello timer is reset to the value advertised in the last Hello
 of that kind received from this neighbour (no extra margin is necessary in
 this case, since jitter was already taken into account when computing the
-timeout that expired).</t>
+timeout that has just expired).</t>
 
 </section>
 
 <section title="Cost Computation" anchor="cost-computation-examples">
 
-<t>This section discusses how to compute costs based on Hello
-history.  This can be achieved independently for both Multicast and Unicast
-Hellos.  There are many ways to combine both costs into a single one,
-the simplest being to use the minimum of both costs.</t>
+<t>This section discusses how to compute costs based on Hello history.</t>
 
 <section title="k-out-of-j" anchor="k-j">
 
@@ -2413,7 +2410,9 @@ k-out-of-j twice for each neighbour, once on the Unicast and once on the
 Multicast Hello history.  If either of the instances of k-out-of-j
 indicates that the link is up, then the link is assumed to be up, and the
 rxcost is set to K; if both instances indicate that the link is down, then
-the link is assumed to be down, and the rxcost is set to infinity.</t>
+the link is assumed to be down, and the rxcost is set to infinity.  In
+other words, the resulting rxcost is the minimum of the rxcosts yielded by
+the two instances of k-out-of-j link sensing.</t>
 
 <t>The cost of a link performing k-out-of-j link sensing is defined as
 follows:
@@ -2459,7 +2458,7 @@ or, equivalently,
 <t>Since the IEEE&nbsp;802.11 MAC performs ARQ on unicast frames, unicast
 frames do not provide a useful measure of link quality, and therefore ETX
 ignores the Unicast Hello history.  Thus, a node performing ETX
-link-quality estimation will not route through nodes that don't send
+link-quality estimation will not route through nodes unless they send
 periodic Multicast Hellos (possibly in addition to Unicast Hellos).</t>
 
 </section>
@@ -2467,6 +2466,10 @@ periodic Multicast Hellos (possibly in addition to Unicast Hellos).</t>
 </section>
 
 <section title="Metric Computation" anchor="metric-computation-examples">
+
+<t>As described in <xref target="metric-computation"/>, the metric
+advertised by a neighbour is combined with the link cost to yield
+a metric.</t>
 
 <section title="Additive Metrics" anchor="additive-metric">
 

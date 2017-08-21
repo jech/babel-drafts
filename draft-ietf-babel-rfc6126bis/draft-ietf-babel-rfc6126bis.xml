@@ -2175,6 +2175,41 @@ by the Babel protocol.</t>
 <t>IANA has registered the IPv6 multicast group ff02:0:0:0:0:0:1:6 and the
 IPv4 multicast group 224.0.0.111 for use by the Babel protocol.</t>
 
+<t>IANA has created a registry called "Babel TLV Types".  The values in
+this registry are not changed by this specification.</t>
+
+<t>IANA has created a registry called "Babel sub-TLV Types".  Due to the
+addition of a Mandatory bit to the Babel protocol, the values in the
+"Babel sub-TLV Types" registry are amended as follows:</t>
+
+<texttable>
+<ttcol>Type</ttcol><ttcol>Name</ttcol><ttcol>Reference</ttcol>
+<c>0</c><c>Pad1</c><c>this document</c>
+<c>1</c><c>PadN</c><c>this document</c>
+<c>112-126</c><c>Reserved for Experimental Use</c><c>this document</c>
+<c>127</c><c>Reserved for expansion of the type space</c><c>this document</c>
+<c>240-254</c><c>Reserved for Experimental Use</c><c>this document</c>
+<c>255</c><c>Reserved for expansion of the type space</c><c>this document</c>
+</texttable>
+
+<t>Existing assignments in the "Babel sub-TLV Types" registry in the range
+2 to 111 are not changed by this specification.  The values 224 through
+239, previously reserved for Experimental Use, are now unassigned.</t>
+
+<t>IANA has created a registry called "Babel Flags Values".  IANA is
+instructed to rename this registry to "Babel Update Flags Values", with
+its contents unchanged.</t>
+
+<t>IANA is instructed to create a new registry called "Babel Hello Flags
+Values".  The allocation policy for this registry is Specification
+Required <xref target="RFC5226"/>.  The initial values in this registry
+are as follows:</t>
+<texttable>
+<ttcol>Bit</ttcol><ttcol>Name</ttcol><ttcol>Reference</ttcol>
+<c>0</c><c>Unicast</c><c>this document</c>
+<c>1-15</c><c>Unassigned</c><c></c>
+</texttable>
+
 </section>
 
 <section title="Security Considerations">
@@ -2233,6 +2268,16 @@ address compression technique was inspired by <xref target="PACKETBB"/>.</t>
   <seriesInfo name="RFC" value="4291"/>
 </reference>
 
+<reference anchor="RFC5226">
+<front>
+<title>Guidelines for Writing an IANA Considerations Section in RFCs</title>
+<author initials='T.' surname='Narten' fullname='T. Narten'></author>
+<author initials='H.' surname='Alvestrand' fullname='H. Alvestrand'></author>
+<date year='2008' month='May' />
+</front>
+<seriesInfo name='BCP' value='26' />
+<seriesInfo name='RFC' value='5226' />
+</reference>
 </references>
 
 <references title="Informative References">
@@ -2730,6 +2775,7 @@ any opinion about Unicast Hellos.</t>
 <t>Clarified that Seqno Requests are for a finite-metric Update.</t>
 <t>Clarified that sub-TLVs Pad1 and PadN are allowed within any TLV that
 allows sub-TLVs.</t>
+<t>Updated IANA Considerations.</t>
 <t>Updated Security Considerations.</t>
 <t>Large number of minor wording changes and clarifications.</t>
 </list></t>

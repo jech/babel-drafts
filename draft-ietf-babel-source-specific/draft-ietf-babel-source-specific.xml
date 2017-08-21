@@ -47,8 +47,8 @@ extension to the Standard Track's Babel routing protocol defined in <xref
 target="BABEL"/>.  It is incompatible with the Experimental Track's Babel
 <xref target="RFC6126"/>.</t>
 
-<t>Note that source-specific routing is also known as Source Address
-Dependent Routing, SAD Routing, SADR, Destination/Source Routing or
+<t>Source-specific routing is also known as Source Address Dependent
+Routing, SAD Routing, SADR, Destination/Source Routing or
 Source/Destination Routing.</t>
 </abstract>
 

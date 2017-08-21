@@ -24,7 +24,7 @@
 </address>
 </author>
 
-<date day="3" month="July" year="2017"/>
+<date day="21" month="August" year="2017"/>
 
 <abstract>
 <t>Babel is a loop-avoiding distance-vector routing protocol that is
@@ -67,7 +67,7 @@ a technique pioneered by Destination-Sequenced Distance-Vector routing
   disappears in a time proportional to its diameter, and never again (up
   to an arbitrary garbage-collection (GC) time) will the routers involved
   participate in a routing loop for the same prefix;</t>
-<t>assuming reasonable packet loss rates, any routing black-holes that
+<t>assuming bounded packet loss rates, any routing black-holes that
   may appear after a mobility event are corrected in a time at most
   proportional to the network's diameter.</t>
 </list>
@@ -84,7 +84,7 @@ is low on battery may choose to use larger time constants (hello and update
 intervals, etc.) than a node that has access to wall power.  Conversely, a
 node that detects high levels of mobility may choose to use smaller time
 constants.  The ability to build such heterogeneous networks makes Babel
-particularly adapted to the wireless environment.</t>
+particularly adapted to the unmanaged and wireless environment.</t>
 
 <t>Finally, Babel is a hybrid routing protocol, in the sense that it can
 carry routes for multiple network-layer protocols (IPv4 and IPv6),
@@ -103,14 +103,14 @@ target="OSPF"/>, IS-IS <xref target="IS-IS"/>, or the Enhanced Interior
 Gateway Routing Protocol (EIGRP) <xref target="EIGRP"/> might be more
 suitable.</t>
 
-<t>Second, Babel does impose a hold time when a prefix is retracted (<xref
-target="hold-time"/>).  While this hold time does not apply to the exact
+<t>Second, unless the optional algorithm described in <xref
+target="hold-time"/> is implemented, Babel does impose a hold time when
+a prefix is retracted.  While this hold time does not apply to the exact
 prefix being retracted, and hence does not prevent fast reconvergence
 should it become available again, it does apply to any shorter prefix that
-covers it.  Hence, if a previously deaggregated prefix becomes aggregated,
-it will be unreachable for a few hundred milliseconds up to a few minutes,
-depending on the implementation.  This may make some implementations of
-Babel unsuitable for use in networks that implement automatic prefix
+covers it.  This may make those implementations of Babel that do not
+implement the optional algorithm described in <xref target="hold-time"/>
+unsuitable for use in networks that implement automatic prefix
 aggregation.</t>
 
 </section>
@@ -127,11 +127,11 @@ document are to be interpreted as described in <xref target="RFC2119"/>.</t>
 
 <section title="Conceptual Description of the Protocol">
 
-<t>Babel is a mostly loop-free distance vector protocol: it is based on
-the Bellman-Ford protocol, just like the venerable RIP <xref
-target="RIP"/>, but includes a number of refinements that either prevent
-loop formation altogether, or ensure that a loop disappears in a timely
-manner and doesn't form again.</t>
+<t>Babel is a loop-avoiding distance vector protocol: it is based on the
+Bellman-Ford protocol, just like the venerable RIP <xref target="RIP"/>,
+but includes a number of refinements that either prevent loop formation
+altogether, or ensure that a loop disappears in a timely manner and
+doesn't form again.</t>
 
 <t>Conceptually, Bellman-Ford is executed in parallel for every source of
 routing information (destination of data traffic).  In the following
@@ -147,8 +147,8 @@ B.</t>
 
 <t>Given a route between any two nodes, the metric of the route is the sum
 of the costs of all the edges along the route.  The goal of the routing
-algorithm is to compute, for every source S, the tree of the routes of
-lowest metric to S.</t>
+algorithm is to compute, for every source S, the tree of routes of lowest
+metric to S.</t>
 
 <t>Costs and metrics need not be integers.  In general, they can be values
 in any algebra that satisfies two fairly general conditions
@@ -191,7 +191,7 @@ be used immediately if the selected route were to fail.</t>
 
 <t>It is well known that a naive application of Bellman-Ford to distributed
 routing can cause transient loops after a topology change.  Consider for
-example the following diagram:
+example the following topology:
 <figure><artwork><![CDATA[
          B
       1 /|
@@ -233,21 +233,21 @@ announcements unless they can prove that accepting them cannot
 possibly cause a routing loop.</t>
 
 <t>More formally, we define a condition over route announcements, known as
-the feasibility condition, that guarantees the absence of routing loops
+the "feasibility condition", that guarantees the absence of routing loops
 whenever all routers ignore route updates that do not satisfy the
-feasibility condition.  In effect, this makes Bellman-Ford into a family of
-routing algorithms, parameterised by the feasibility condition.</t>
+feasibility condition.  In effect, this makes Bellman-Ford into a family
+of routing algorithms, parameterised by the feasibility condition.</t>
 
 <t>Many different feasibility conditions are possible.  For example, BGP
 can be modelled as being a distance-vector protocol with a (rather
 drastic) feasibility condition: a routing update is only accepted when the
 receiving node's AS number is not included in the update's AS-Path
 attribute (note that BGP's feasibility condition does not ensure the
-absence of transitory "micro-loops" during reconvergence).</t>
+absence of transient "micro-loops" during reconvergence).</t>
 
-<t>Another simple feasibility condition, used in Destination-Sequenced
-Distance-Vector (DSDV) routing <xref target="DSDV"/> and in Ad hoc
-On-Demand Distance Vector (AODV) routing, stems from the following
+<t>Another simple feasibility condition, used in the Destination-Sequenced
+Distance-Vector (DSDV) routing protocol <xref target="DSDV"/> and in the
+Ad hoc On-Demand Distance Vector (AODV) protocol, stems from the following
 observation: a routing loop can only arise after a router has switched to
 a route with a larger metric than the route that it had previously
 selected.  Hence, one could decide that a route is feasible only when its
@@ -259,12 +259,12 @@ following invariant is always preserved: if A has selected B as its
 successor, then D(B) &lt; D(A), which implies that the forwarding graph is
 loop-free.</t>
 
-<t>Babel uses a slightly more refined feasibility condition, used in EIGRP
-<xref target="DUAL"/>.  Given a router A, define the feasibility distance
-of A, written FD(A), as the smallest metric that A has ever advertised for
-S to any of its neighbours.  An update sent by a neighbour B of A is
-feasible when the metric D(B) advertised by B is strictly smaller than A's
-feasibility distance, i.e., when D(B) &lt; FD(A).</t>
+<t>Babel uses a slightly more refined feasibility condition, derived from
+EIGRP <xref target="DUAL"/>.  Given a router A, define the feasibility
+distance of A, written FD(A), as the smallest metric that A has ever
+advertised for S to any of its neighbours.  An update sent by a neighbour
+B of A is feasible when the metric D(B) advertised by B is strictly
+smaller than A's feasibility distance, i.e., when D(B) &lt; FD(A).</t>
 
 <t>It is easy to see that this latter condition is no more restrictive than
 DSDV-feasibility.  Suppose that node A obeys DSDV-feasibility; then D(A) is
@@ -327,12 +327,11 @@ S  |1
 </t>
 
 <t>The only route available from A to S, the one that goes through B, is
-not feasible: A suffers from a spurious starvation.</t>
-
-<t>At this point, the whole network must be rebooted in order to solve the
-starvation; this is essentially what EIGRP does when it performs a global
-synchronisation of all the routers in the network with the source (the
-"active" phase of EIGRP).</t>
+not feasible: A suffers from spurious starvation.  At this point, the
+whole network must be rebooted in order to solve the starvation; this is
+essentially what EIGRP does when it performs a global synchronisation of
+all the routers in the network with the source (the "active" phase of
+EIGRP).</t>
 
 <t>Babel reacts to starvation in a less drastic manner, by using sequenced
 routes, a technique introduced by DSDV and adopted by AODV.  In addition to
@@ -372,10 +371,10 @@ S  |1
 ]]></artwork></figure>
 at which point the route through B becomes feasible again.</t>
 
-<t>Note that while sequence numbers are used for determining
-feasibility, they are not necessarily used in route selection: a node
-will normally ignore the sequence number when selecting a route
-(<xref target="route-selection"/>).</t>
+<t>Note that while sequence numbers are used for determining feasibility,
+they are not necessarily used in route selection: a node will normally
+ignore the sequence number when selecting the best route to a given
+destination (<xref target="route-selection"/>).</t>
 
 </section>
 
@@ -412,7 +411,7 @@ they forward.</t>
 
 <t>The above discussion assumes that every prefix is originated by a single
 router.  In real networks, however, it is often necessary to have a single
-prefix originated by multiple routers; for example, the default route will
+prefix originated by multiple routers: for example, the default route will
 be originated by all of the edge routers of a routing domain.</t>
 
 <t>Since synchronising sequence numbers between distinct routers is
@@ -427,7 +426,7 @@ loop-freedom when a prefix is originated by multiple routers, but any
 loops will be broken in a time at most proportional to the diameter of the
 loop &mdash; as soon as an update has "gone around" the routing loop.</t>
 
-<t>Consider for example the following diagram, where A has selected the
+<t>Consider for example the following topology, where A has selected the
 default route through S, and B has selected the one through S':
 <figure><artwork><![CDATA[
            1     1     1
@@ -445,7 +444,7 @@ become unfeasible for A.</t>
 <t>In effect, the routing loop disappears at the latest when routing
 information has gone around the loop.  Since this process can be delayed by
 lost packets, Babel makes certain efforts to ensure that updates are sent
-reliably after a router-id change.</t>
+reliably after a router-id change <xref target="triggered-updates"/>.</t>
 
 <t>Additionally, after the routers have advertised the two routes, both
 sources will be in their source tables, which will prevent them from ever
@@ -476,7 +475,7 @@ following the default route, a routing loop will form, and persist until
 A learns of B's retraction of the direct route to C.  B avoids this
 pitfall by installing an "unreachable" route after a route is retracted;
 this route is maintained until it can be guaranteed that the former route
-has been retracted by all of B's neighbours.</t>
+has been retracted by all of B's neighbours (<xref target="hold-time"/>).</t>
 
 </section>
 
@@ -499,13 +498,13 @@ sub-TLVs.</t>
 
 <t>The source address of a Babel packet is always a unicast address,
 link-local in the case of IPv6.  Babel packets may be sent to a well-known
-(link-local) multicast address or to
-a (link-local) unicast address.  In normal operation, a Babel speaker sends
-both multicast and unicast packets to its neighbours.</t>
+(link-local) multicast address or to a (link-local) unicast address.  In
+normal operation, a Babel speaker sends both multicast and unicast packets
+to its neighbours.</t>
 
 <t>With the exception of Hello TLVs and acknowledgements, all Babel TLVs
 can be sent to either unicast or multicast addresses, and their semantics
-does not depend on whether the destination was a unicast or multicast
+does not depend on whether the destination is a unicast or a multicast
 address.  Hence, a Babel speaker does not need to determine the destination
 address of a packet that it receives in order to interpret it.</t>
 
@@ -527,15 +526,20 @@ manner.</t>
 
 <section title="Data Structures">
 
-<t>Every Babel speaker maintains a number of data structures.  All of
-these data structures consist of familiar data types &mdash; integers, IP
-addresses, etc. &mdash; with the exception of sequence numbers.</t>
+<t>In this section, we give a description of the data structures that
+every Babel speaker maintains.  This description is conceptual: a Babel
+speaker may use different data structures as long as the resulting
+protocol is the same as the one described in this document.  For example,
+rather than maintaining a single table containing both selected and
+unselected (fallback) routes, as described in <xref target="route-table"/>
+belong, an actual implementation would probably use two tables, one with
+selected routes and one with fallback routes.</t>
 
 <section title="Sequence number arithmetic" anchor="sequence-number">
 
 <t>Sequence numbers (seqnos) appear in a number of Babel data structures,
 and they are interpreted as integers modulo 2^16.  For the purposes of
-this document, arithmetic on serial numbers is defined as follows.</t>
+this document, arithmetic on sequence numbers is defined as follows.</t>
 
 <t>Given a seqno s and an integer n, the sum of s and n is defined by
 <list style="empty">
@@ -578,10 +582,9 @@ their selected routes fail.</t>
 
 <t>The interface table contains the list of interfaces on which the node
 speaks the Babel protocol.  Every interface table entry contains the
-interface's outgoing Multicast Hello seqno, a 16-bit integer that is
-sent with each Multicast Hello TLV
-on this interface and is incremented (modulo 2^16) whenever a Multicast Hello is
-sent.  (Note that an interface's
+interface's outgoing Multicast Hello seqno, a 16-bit integer that is sent
+with each Multicast Hello TLV on this interface and is incremented (modulo
+2^16) whenever a Multicast Hello is sent.  (Note that an interface's
 Multicast Hello seqno is unrelated to the node's seqno.)</t>
 
 <t>There are two timers associated with each interface table entry &mdash;
@@ -600,10 +603,10 @@ entry contains the following data:
 <list style="symbols">
 <t>the local node's interface over which this neighbour is reachable;</t>
 <t>the address of the neighbouring interface;</t>
-<t>a history of recently received Multicast Hello packets from this neighbour; this
-can, for example, be a sequence of n bits, for some small value n,
-indicating which of the n hellos most recently sent by this neighbour have
-been received by the local node;</t>
+<t>a history of recently received Multicast Hello packets from this
+neighbour; this can, for example, be a sequence of n bits, for some small
+value n, indicating which of the n hellos most recently sent by this
+neighbour have been received by the local node;</t>
 <t>a history of recently received Unicast Hello packets from this neighbour;</t>
 <t>the "transmission cost" value from the last IHU packet received from
 this neighbour, or FFFF hexadecimal (infinity) if the IHU hold timer for
@@ -631,8 +634,8 @@ interval carried in IHU TLVs.</t>
 <t>Note that the neighbour table is indexed by IP addresses, not by
 router-ids: neighbourship is a relationship between interfaces, not between
 nodes.  Therefore, two nodes with multiple interfaces can participate in
-multiple neighbourship relationships, a fairly common situation when
-wireless nodes with multiple radios are involved.</t>
+multiple neighbourship relationships, a situation that can notably arise
+when wireless nodes with multiple radios are involved.</t>
 
 </section>
 
@@ -655,7 +658,7 @@ on the order of minutes and reset as specified in <xref target="maintaining-fd"/
 
 </section>
 
-<section title="The Route Table">
+<section title="The Route Table" anchor="route-table">
 
 <t>The route table contains the routes known to this node.  It is indexed
 by triples of the form (prefix, plen, neighbour), and every route table
@@ -675,11 +678,6 @@ it is currently being used for forwarding and is being advertised.</t>
 <t>There is one timer associated with each route table entry &mdash; the
 route expiry timer.  It is initialised and reset as specified in
 <xref target="route-acquisition"/>.</t>
-
-<t>Of course, the data structure described above is conceptual: actual
-implementations will likely use a different data structure, for example
-a table of installed routes and a set of redundant ones, or some more
-complicated data structure.</t>
 
 <t>Note that there are two distinct (seqno, metric) pairs associated to
 each route: the route's distance, which is stored in the route table, and
@@ -712,7 +710,7 @@ both the resending of requests and their expiry.</t>
 
 <section title="Acknowledged Packets" anchor="acknowledged-packets">
 
-<t>A Babel speaker may request that any neighbour receiving a given packet
+<t>A Babel speaker may request that a neighbour receiving a given packet
 reply with an explicit acknowledgement within a given time.  While the use
 of acknowledgement requests is optional, every Babel speaker MUST be able
 to reply to such a request.</t>
@@ -725,14 +723,15 @@ receiving nodes.</t>
 <t>When to request acknowledgements is a matter of local policy; the
 simplest strategy is to never request acknowledgements and to rely on
 periodic updates to ensure that any reachable routes are eventually
-propagated throughout the routing domain.  For increased efficiency,
-acknowledged packets MAY be used in order to send urgent updates (<xref
-target="triggered-updates"/>) when the number of neighbours on a given
-interface is small.  Since Babel is designed to deal gracefully with
-packet loss on unreliable media, sending all packets with acknowledgement
-requests is not necessary, and NOT RECOMMENDED, as the acknowledgements
-cause additional traffic and may force additional Address Resolution
-Protocol (ARP) or Neighbour Discovery exchanges.</t>
+propagated throughout the routing domain.  In order to improve convergence
+speed and reduce the amount of control traffic, acknowledged packets MAY
+be used in order to send urgent updates (<xref target="triggered-updates"/>)
+and retractions (<xref target="hold-time"/>), especially when the number
+of neighbours on a given interface is small.  Since Babel is designed to
+deal gracefully with packet loss on unreliable media, sending all packets
+with acknowledgement requests is not necessary, and NOT RECOMMENDED, as
+the acknowledgements cause additional traffic and may force additional
+Address Resolution Protocol (ARP) or Neighbour Discovery (ND) exchanges.</t>
 
 </section>
 
@@ -754,43 +753,45 @@ unused for long enough; suitable strategies include dropping the neighbour
 after a timeout, and dropping a neighbour when the associated Hello
 histories become empty (see <xref target="cost-computation-examples"/>).</t>
 
-<section title="Reverse Reachability Detection">
+<section title="Reverse Reachability Detection" anchor="reverse-reachability">
 
 <t>Every Babel node sends Hello TLVs to its neighbours to indicate that it
 is alive, at regular or irregular intervals.  Each Hello TLV carries an
-increasing (modulo 2^16) sequence number and the time interval until the
-next Hello of the same type (see below).  If the time interval is set to
-0, then the Hello TLV does not establish a new promise &mdash; the timeout
-carried by the previous Hello of the same type still applies to the next
-Hello.  We say that a Hello is scheduled if it has a non-zero interval,
-and unscheduled otherwise.</t>
+increasing (modulo 2^16) sequence number and an upper bound on the time
+interval until the next Hello of the same type (see below).  If the time
+interval is set to 0, then the Hello TLV does not establish a new promise:
+the deadline carried by the previous Hello of the same type still applies
+to the next Hello.  We say that a Hello is "scheduled" if it carries
+a non-zero interval, and "unscheduled" otherwise.</t>
 
 <t>There are two kinds of Hellos: Multicast Hellos, which use
 a per-interface Hello counter, and Unicast Hellos, which use
-a per-neighbour counter.  A Multicast Hellos with a given seqno MUST be
+a per-neighbour counter.  A Multicast Hello with a given seqno MUST be
 sent to all neighbours on a given interface, either by sending it to
-a multicast address or by sending it to one unicast address per neighbour.
-A Unicast Hello with given seqno should normally be sent to just one
-neighbour (over unicast), since the sequence numbers of different
-neighbours are not necessarily synchronised.</t>
+a multicast address or by sending it to one unicast address per neighbour
+(hence, the term "Multicast Hello" is a slight misnomer).  A Unicast Hello
+carrying a given seqno should normally be sent to just one neighbour (over
+unicast), since the sequence numbers of different neighbours are not
+in general synchronised.</t>
 
-<t>Multicast Hellos sent over multicast can be used for node discovery;
-hence, a node SHOULD send periodic (scheduled) Multicast Hellos.  A node
-MAY send Unicast Hellos or unscheduled Hellos of either kind for any
-reason, such as reducing the amount of multicast traffic or improving
-reliability on link technologies with poor support for link-layer multicast.</t>
+<t>Multicast Hellos sent over multicast can be used for neighbour
+discovery; hence, a node SHOULD send periodic (scheduled) Multicast Hellos
+unless neighbour discovery is performed by means outside of the Babel
+protocol.  A node MAY send Unicast Hellos or unscheduled Hellos of either
+kind for any reason, such as reducing the amount of multicast traffic or
+improving reliability on link technologies with poor support for
+link-layer multicast.</t>
 
 <t>A node MAY send a scheduled Hello ahead of time.  A node MAY change its
 scheduled Hello interval.  The Hello interval MAY be decreased at any
 time; it MAY be increased immediately before sending a Hello TLV, but
 SHOULD NOT be increased at other times.  (Equivalently, a node SHOULD send
-an extra scheduled Hello immediately after increasing its Hello
-interval.)</t>
+a scheduled Hello immediately after increasing its Hello interval.)</t>
 
 <t>How to deal with received Hello TLVs and what statistics to maintain
 are considered local implementation matters; typically, a node will
-maintain some sort of history of recently received Hellos.  A useful
-algorithm is described in <xref target="hello-history"/>.</t>
+maintain some sort of history of recently received Hellos.  An example of
+a suitable algorithm is described in <xref target="hello-history"/>.</t>
 
 <t>After receiving a Hello, or determining that it has missed one, the node
 recomputes the association's cost (<xref target="cost-computation"/>) and
@@ -807,7 +808,7 @@ in order to reduce the amount of routing traffic in dense networks; in
 particular, they SHOULD be sent less often than Hellos over links with
 little packet loss.  While IHUs are conceptually unicast, they MAY be
 sent to a multicast address in order to avoid an ARP or Neighbour Discovery
-exchange and to aggregate multiple IHUs in a single packet.</t>
+exchange and to aggregate multiple IHUs into a single packet.</t>
 
 <t>In addition to the periodic IHUs, a node MAY, at any time, send an
 unscheduled IHU packet.  It MAY also, at any time, decrease its IHU
@@ -819,12 +820,11 @@ interval.)</t>
 <t>Every IHU TLV contains two pieces of data: the link's rxcost (reception
 cost) from the sender's perspective, used by the neighbour for computing
 link costs (<xref target="cost-computation"/>), and the interval between
-periodic IHU packets.  A node receiving an IHU updates the value of the
-sending neighbour's txcost (transmission cost), from its perspective, to
-the value contained in the IHU, and resets this neighbour's IHU timer to
-a small multiple of the value received in the IHU.</t>
-
-<t>When a neighbour's IHU timer expires, its txcost is set to infinity.</t>
+periodic IHU packets.  A node receiving an IHU sets the value of the
+txcost (transmission cost) maintained in the neighbour table to the value
+contained in the IHU, and resets the IHU timer associated to this neighbour
+to a small multiple of the interval value received in the IHU.  When
+a neighbour's IHU timer expires, the neighbour's txcost is set to infinity.</t>
 
 <t>After updating a neighbour's txcost, the receiving node recomputes the
 neighbour's cost (<xref target="cost-computation"/>) and runs the route
@@ -835,14 +835,20 @@ selection procedure (<xref target="route-selection"/>).</t>
 <section title="Cost Computation" anchor="cost-computation">
 
 <t>A neighbourship association's link cost is computed from the values
-maintained in the neighbour table &mdash; namely, the statistics kept in
-the neighbour table about the reception of Hellos, and the txcost computed
-from received IHU packets.</t>
+maintained in the neighbour table: the statistics kept in the neighbour
+table about the reception of Hellos, and the txcost computed from received
+IHU packets.</t>
 
 <t>For every neighbour, a Babel node computes a value known as this
 neighbour's rxcost.  This value is usually derived from the Hello history,
 which may be combined with other data, such as statistics maintained by
 the link layer.  The rxcost is sent to a neighbour in each IHU.</t>
+
+<t>Since nodes do not necessarily send periodic Unicast Hellos but do
+usually send periodic Multicast Hellos (<xref target="reverse-reachability"/>),
+a node SHOULD use an algorithm that yields a finite rxcost when only
+Multicast Hellos are received, unless interoperability with nodes that
+only send Multicast Hellos is not required.</t>
 
 <t>How the txcost and rxcost are combined in order to compute a link's
 cost is a matter of local policy; as far as Babel's correctness is
@@ -874,10 +880,10 @@ originating router seqno, and metric is the announced metric.</t>
 <t>Before being accepted, an update is checked against the feasibility
 condition (<xref target="feasibility-condition"/>), which ensures that the
 route does not create a routing loop.  If the feasibility condition is not
-satisfied, the update is either ignored or treated as a retraction,
-depending on some other conditions (<xref target="route-acquisition"/>).
-If the feasibility condition is satisfied, then the update cannot possibly
-cause a routing loop, and the update is accepted.</t>
+satisfied, the update is either ignored or prevents the route from being
+selected, as described in <xref target="route-acquisition"/>.  If the
+feasibility condition is satisfied, then the update cannot possibly cause
+a routing loop.</t>
 
 <section title="The Feasibility Condition" anchor="feasibility-condition">
 
@@ -885,7 +891,7 @@ cause a routing loop, and the update is accepted.</t>
 feasibility condition compares the metric in the received update with the
 metrics of the updates previously sent by the receiving node; updates that
 fail the feasibility condition, and therefore have metrics large enough to
-cause a routing loop, are either discarded or prevent the resulting route
+cause a routing loop, are either ignored or prevent the resulting route
 from being selected.</t>
 
 <t>A feasibility distance is a pair (seqno, metric), where seqno is an
@@ -906,7 +912,7 @@ where sequence numbers are compared modulo 2^16.</t>
 for this source is the minimum, according to the ordering defined above,
 of the distances of all the finite updates ever sent by this particular
 node for the prefix (prefix, plen) and the given router-id.  Feasibility
-distances are maintained in the source table; the exact procedure is given
+distances are maintained in the source table, the exact procedure is given
 in <xref target="maintaining-fd"/>.</t>
 
 <t>A received update is feasible when either it is a retraction (its metric
@@ -931,7 +937,9 @@ following conditions holds:
 
 <t>Note that the feasibility condition considers the metric advertised by
 the neighbour, not the route's metric; hence, a fluctuation in
-a neighbour's cost cannot render a selected route unfeasible.</t>
+a neighbour's cost cannot render a selected route unfeasible.  Note
+further that retractions (updates with infinite metric) are always
+feasible, since they cannot possibly cause a routing loop.</t>
 
 </section>
 
@@ -952,10 +960,10 @@ Additionally, the metric SHOULD satisfy the following condition:
   <t>M is isotonic: if m &le; m', then M(c, m) &le; M(c, m').</t>
 </list>
 Note that while strict monotonicity is essential to the integrity of the
-network (persistent routing loops may appear if it is not satisfied),
-isotonicity is not: if it is not satisfied, Babel will still converge to a
-locally optimal routing table, but might not reach a global optimum (in
-fact, such a global optimum may not even exist).</t>
+network (persistent routing loops may arise if it is not satisfied),
+isotonicity is not: if it is not satisfied, Babel will still converge to
+a loop-free configuration, but might not reach a global optimum (in fact,
+a global optimum may not even exist).</t>
 
 <t>As with cost computation, not all strategies for computing route
 metrics will give good results.  In particular, some metrics are more
@@ -1008,13 +1016,13 @@ If such an entry exists:
 <list style="symbols">
   <t>if the entry is currently selected, the update is unfeasible, and the
   router-id of the update is equal to the router-id of the entry, then the
-  update MAY be silently ignored;</t>
+  update MAY be ignored;</t>
   <t>otherwise, the entry's sequence number, advertised metric, metric,
   and router-id are updated and, if the advertised metric is not infinite,
   the route's expiry timer is reset to a small multiple of the Interval
   value included in the update.  If the update is unfeasible, then the
-  (now unfeasible) entry MUST be immediately unselected, and, if the
-  update caused the router-id of the entry to change, an update (possibly
+  (now unfeasible) entry MUST be immediately unselected.  If the update
+  caused the router-id of the entry to change, an update (possibly
   a retraction) MUST be sent in a timely manner (see <xref
   target="triggered-updates"/>).</t>
 </list>
@@ -1022,8 +1030,8 @@ Note that the route table may contain unfeasible routes, either because
 they were created by an unfeasible update or due to a metric fluctuation.
 Such routes are never selected, since they are not known to be loop-free;
 should all the feasible routes become unusable, however, the unfeasible
-routes can be made feasible by sending requests along them (see <xref
-target="sending-requests"/>).</t>
+routes can be made feasible and therefore possible to select by sending
+requests along them (see <xref target="sending-requests"/>).</t>
 
 <t>When a route's expiry timer triggers, the behaviour depends on whether
 the route's metric is finite.  If the metric is finite, it is set to
@@ -1044,28 +1052,29 @@ be used for routing packets destined to P without running the risk of
 creating a routing loop (<xref target="overlapping-prefixes"/>).</t>
 
 <t>To avoid this issue, whenever a prefix P is retracted, a routing table
-entry with infinite metric is inserted as described in <xref
+entry with infinite metric is maintained as described in <xref
 target="route-acquisition"/> above.  As long as this entry is maintained,
 packets destined to an address within P MUST NOT be forwarded by following
 a route for a shorter prefix.  This entry is removed as soon as
 a finite-metric update for prefix P is received and the resulting route
 selected.  If no such update is forthcoming, the infinite metric entry
-MUST be maintained at least until it is guaranteed that no neighbour has
+SHOULD be maintained at least until it is guaranteed that no neighbour has
 selected the current node as next-hop for prefix P.  This can be achieved
 by either:
 <list style="symbols">
 <t>waiting until the route's expiry timer has expired (<xref
-target="route-acquisition"/>)</t>
+target="route-acquisition"/>);</t>
 <t>sending a retraction with an acknowledgement request (<xref
-target="acknowledged-packets"/>) to every neighbour that has not
+target="acknowledged-packets"/>) to every reachable neighbour that has not
 explicitly retracted prefix P and waiting for all acknowledgements.</t>
 </list>
 The former option is simpler and ensures that at that point, any routes
 for prefix P pointing at the current node have expired.  However, since
 the expiry time can be as high as a few minutes, doing that prevents
 automatic aggregation by creating spurious black-holes for aggregated
-routes.  The latter option is RECOMMENDED as it reduces convergence
-time.</t>
+routes.  The latter option is RECOMMENDED as it dramatically reduces the
+time for which a prefix is unreachable in the presence of aggregated
+routes.</t>
 
 </section>
 
@@ -1088,21 +1097,21 @@ Note, however, that Babel does not naturally guarantee the stability of
 routing, and configuring conflicting route selection policies on different
 routers may lead to persistent route oscillation.</t>
 
-<t>Defining a good route selection policy for Babel is an open research
-problem.  Route selection can take into account multiple mutually
-contradictory criteria; in roughly decreasing order of importance, these
-are:
+<t>Route selection is a difficult problem, since a good route selection
+policy needs to take into account multiple mutually contradictory
+criteria; in roughly decreasing order of importance, these are:
 <list style="symbols">
   <t>routes with a small metric should be preferred over routes with a large
     metric;</t>
   <t>switching router-ids should be avoided;</t>
-  <t>routes through stable neighbours should be preferred over routes
+  <t>routes through stable neighbours should be preferred to routes
     through unstable ones;</t>
-  <t>stable routes should be preferred over unstable ones;</t>
+  <t>stable routes should be preferred to unstable ones;</t>
   <t>switching next hops should be avoided.</t>
 </list>
-A simple strategy is to choose the feasible route with the smallest metric,
-with a small amount of hysteresis applied to avoid switching router-ids.</t>
+A simple but useful strategy is to choose the feasible route with the
+smallest metric, with a small amount of hysteresis applied to avoid
+switching router-ids too often.</t>
 
 <t>After the route selection procedure is run, triggered updates
 (<xref target="triggered-updates"/>) and requests
@@ -1112,23 +1121,23 @@ with a small amount of hysteresis applied to avoid switching router-ids.</t>
 
 <section title="Sending Updates">
 
-<t>A Babel speaker advertises to its neighbours its set of selected routes.
-Normally, this is done by sending one or more multicast packets containing
-Update TLVs on all of its connected interfaces; however, on link
-technologies where multicast is significantly more expensive than unicast,
-a node MAY choose to send multiple copies of updates in unicast packets
-when the number of neighbours is small.</t>
+<t>A Babel speaker advertises to its neighbours its set of selected
+routes.  Normally, this is done by sending one or more multicast packets
+containing Update TLVs on all of its connected interfaces; however, on
+link technologies where multicast is significantly more expensive than
+unicast, a node MAY choose to send multiple copies of updates in unicast
+packets, especially when the number of neighbours is small.</t>
 
 <t>Additionally, in order to ensure that any black-holes are reliably
 cleared in a timely manner, a Babel node sends retractions (updates with an
 infinite metric) for any recently retracted prefixes.</t>
 
 <t>If an update is for a route injected into the Babel domain by the local
-node (e.g., the address of a local interface, the prefix of a directly
-attached network, or redistributed from a different routing protocol), the
-router-id is set to the local id, the metric is set to some arbitrary
-finite value (typically 0), and the seqno is set to the local router's
-sequence number.</t>
+node (e.g., it carries the address of a local interface, the prefix of
+a directly attached network, or a prefix redistributed from a different
+routing protocol), the router-id is set to the local node's router-id, the
+metric is set to some arbitrary finite value (typically 0), and the seqno
+is set to the local router's sequence number.</t>
 
 <t>If an update is for a route learned from another Babel speaker, the
 router-id and sequence number are copied from the routing table entry, and
@@ -1147,7 +1156,7 @@ infrequently.</t>
 
 <section title="Triggered Updates" anchor="triggered-updates">
 
-<t>In addition to the periodic routing updates, a Babel speaker sends
+<t>In addition to periodic routing updates, a Babel speaker sends
 unscheduled, or triggered, updates in order to inform its neighbours of
 a significant change in the network topology.</t>
 
@@ -1155,7 +1164,8 @@ a significant change in the network topology.</t>
 indicative of a routing loop in formation; hence, a node MUST send a
 triggered update in a timely manner whenever it changes the selected
 router-id for a given destination.  Additionally, it SHOULD make a
-reasonable attempt at ensuring that all neighbours receive this update.</t>
+reasonable attempt at ensuring that all reachable neighbours receive this
+update.</t>
 
 <t>There are two strategies for ensuring that.  If the number of neighbours
 is small, then it is reasonable to send the update together with an
@@ -1174,12 +1184,12 @@ a reasonable attempt at ensuring that all neighbours receive this
 retraction.</t>
 
 <t>Finally, a node MAY send a triggered update when the metric for a given
-prefix changes in a significant manner, either due to a received update or
-because a link cost has changed.  A node SHOULD NOT send triggered updates
-for other reasons, such as when there is a minor fluctuation in a route's
-metric, when the selected next hop changes, or to propagate a new sequence
-number (except to satisfy a request, as specified in
-<xref target="requests"/>).</t>
+prefix changes in a significant manner, due to a received update, because
+a link's cost has changed, or because a different next hop has been
+selected.  A node SHOULD NOT send triggered updates for other reasons,
+such as when there is a minor fluctuation in a route's metric, when the
+selected next hop changes, or to propagate a new sequence number (except
+to satisfy a request, as specified in <xref target="requests"/>).</t>
 
 </section>
 
@@ -1203,7 +1213,8 @@ is updated as follows:
 </list></t>
 
 <t>The garbage-collection timer for the entry is then reset.  Note that
-the garbage-collection timer is not reset when a retraction is sent.</t>
+the garbage-collection timer is not reset (and the feasibility distance is
+not updated) when a retraction (an update with infinite metric) is sent.</t>
 
 <t>When the garbage-collection timer expires, the entry is removed from
 the source table.</t>
@@ -1212,12 +1223,12 @@ the source table.</t>
 
 <section title="Split Horizon">
 
-<t>When running over a transitive, symmetric link technology, e.g., a
-point-to-point link or a wired LAN technology such as Ethernet, a Babel
-node SHOULD use an optimisation known as split horizon.  When split horizon
-is used on a given interface, a routing update is not sent on this
-particular interface when the advertised route was learnt from a neighbour
-over the same interface.</t>
+<t>When running over a transitive, symmetric link technology, e.g.,
+a point-to-point link or a wired LAN technology such as Ethernet, a Babel
+node SHOULD use an optimisation known as split horizon.  When split
+horizon is used on a given interface, a routing update for prefix P is not
+sent on the particular interface over which the selected route towards
+prefix P was learnt.</t>
 
 <t>Split horizon SHOULD NOT be applied to an interface unless the interface
 is known to be symmetric and transitive; in particular, split horizon is
@@ -1229,11 +1240,11 @@ multicast.</t>
 
 </section>
 
-<section title="Explicit Route Requests" anchor="requests">
+<section title="Explicit Requests" anchor="requests">
 
 <t>In normal operation, a node's routing table is populated by the regular
 and triggered updates sent by its neighbours.  Under some circumstances,
-however, a node sends explicit requests to cause a resynchronisation
+however, a node sends explicit requests in order to cause a resynchronisation
 with the source after a mobility event or to prevent a route from
 spuriously expiring.</t>
 
@@ -1249,7 +1260,7 @@ if they cannot be satisfied by the receiver.</t>
 update in reply to the request, as described in the following sections.  If
 this causes an update to be sent, the update is either sent to a multicast
 address on the interface on which the request was received, or to the
-unicast address of the neighbour that sent the update.</t>
+unicast address of the neighbour that sent the request.</t>
 
 <t>The exact behaviour is different for route requests and seqno requests.</t>
 
@@ -1271,31 +1282,32 @@ routing table dump.</t>
 number, it checks whether its routing table contains a selected entry for
 that prefix.  If a selected route for the given prefix exists, it has
 finite metric, and either the router-ids are different or the router-ids
-are equal and the entry's sequence number is no smaller than the requested
-sequence number, the node MUST send an update for the given prefix.  If
-the router-ids match but the requested seqno is larger (modulo 2^16) than
-the route entry's, the node compares the router-id against its own
-router-id.  If the router-id is its own, then it increases its sequence
-number by 1 and sends an update.  A node MUST NOT increase its sequence
-number by more than 1 in response to a seqno request.</t>
+are equal and the entry's sequence number is no smaller (modulo 2^16) than
+the requested sequence number, the node MUST send an update for the given
+prefix.  If the router-ids match but the requested seqno is larger (modulo
+2^16) than the route entry's, the node compares the router-id against its
+own router-id.  If the router-id is its own, then it increases its
+sequence number by 1 (modulo 2^16) and sends an update.  A node MUST NOT
+increase its sequence number by more than 1 in response to a seqno
+request.</t>
 
 <t>Otherwise, if the requested router-id is not its own, the received
-request's hop count is 2 or more, and the node has a route (not
-necessarily a feasible one) for the requested prefix that does not use the
-requestor as a next hop, the node MUST forward the request if it has
-a feasible route to the requested prefix and it is advertising this prefix
-to neighbours, and SHOULD forward the request if it has a (not necessarily
-feasible) route to the requested prefix.  It does so by decreasing the hop
-count and sending the request in a unicast packet destined to a neighbour
-that advertises the given prefix and that is not the neighbour from which
-the request was received.</t>
+request's hop count is 2 or more, then the node MUST forward the request
+if it has a feasible route to the requested prefix that does not use the
+sender of the request as a next hop, and it is advertising this prefix to
+neighbours, and SHOULD forward the request if it has a (not necessarily
+feasible) route to the requested prefix that does not use the sender of
+the request as a next hop.  It does so by decrementing the hop count and
+sending the request in a unicast packet destined to a neighbour that
+advertises the given prefix and that is not the neighbour from which the
+request was received.</t>
 
 <t>A node SHOULD maintain a list of recently forwarded seqno requests and
 forward the reply (an update with a sufficiently large seqno) in a timely
 manner.  A node SHOULD compare every incoming seqno request against its
 list of recently forwarded seqno requests and avoid forwarding it if it is
 redundant (i.e., if it has recently sent a request with the same prefix,
-router-id and a seqno that is not smaller).</t>
+router-id and a seqno that is not smaller modulo 2^16).</t>
 
 <t>Since the request-forwarding mechanism does not necessarily obey the
 feasibility condition, it may get caught in routing loops; hence, requests
@@ -1305,10 +1317,8 @@ initial hop count need not be kept particularly low, and performing an
 expanding horizon search is not necessary.  A single request MUST NOT be
 duplicated: it MUST NOT be forwarded to a multicast address, and it MUST
 NOT be forwarded to multiple neighbours.  However, if a seqno request is
-resent, the subsequent copies MAY be sent to a different neighbour than
-the initial one.  If the route corresponding to a seqno request is
-unselected between retransmissions, the node SHOULD stop retransmitting
-requests for it.</t>
+resent by its originator, the subsequent copies MAY be forwarded to
+a different neighbour than the initial one.</t>
 
 </section>
 
@@ -1339,20 +1349,20 @@ that advertised these routes, and SHOULD send it to all of them; in any
 case, it MAY send the request to any other neighbours, whether they
 advertise a route to the requested destination or not.  A simple
 implementation strategy is therefore to unconditionally multicast the
-request over all attached interfaces.</t>
+request over all interfaces.</t>
 
 <t>Similar requests will be sent by other nodes that are affected by the
 route's loss.  If the network is still connected, and assuming no packet
 loss, then at least one of these requests will be forwarded to the source,
-resulting in a route being advertised with a new sequence number.  (Note
-that, due to duplicate suppression, only a small number of such requests
-will actually reach the source.)</t>
+resulting in a route being advertised with a new sequence number.  (Due to
+duplicate suppression, only a small number of such requests will actually
+reach the source.)</t>
 
 <t>In order to compensate for packet loss, a node SHOULD repeat such
 a request a small number of times if no route becomes feasible within
 a short time.  Under heavy packet loss, however, all such requests might
-be lost; in that case, the second mechanism in the next section will
-eventually ensure that a new seqno is received.</t>
+be lost; in that case, the mechanism in the next section will eventually
+ensure that a new seqno is received.</t>
 
 </section>
 
@@ -1361,10 +1371,10 @@ eventually ensure that a new seqno is received.</t>
 <t>When a route's metric increases, a node might receive an unfeasible
 update for a route that it has currently selected.  As specified in
 <xref target="feasibility-condition"/>, the receiving node will either
-ignore the update or retract the route.</t>
+ignore the update or unselect the route.</t>
 
 <t>In order to keep routes from spuriously expiring because they have
-become unfeasible, a node SHOULD send a unicast seqno request whenever it
+become unfeasible, a node SHOULD send a unicast seqno request when it
 receives an unfeasible update for a route that is currently selected.  The
 requested sequence number is computed from the source table as above.</t>
 
@@ -1379,19 +1389,19 @@ that advertised the preferable update.</t>
 
 <section title="Preventing Routes from Expiring" anchor="request-expiring">
 
-<t>In normal operation, a route's expiry timer should never trigger: since
+<t>In normal operation, a route's expiry timer never triggers: since
 a route's hold time is computed from an explicit interval included in
 Update TLVs, a new update (possibly a retraction) should arrive in time to
 prevent a route from expiring.</t>
 
 <t>In the presence of packet loss, however, it may be the case that no
-update is successfully received for an extended period of time, causing a
-route to expire.  In order to avoid such spurious expiry, shortly before a
-selected route expires, a Babel node SHOULD send a unicast route request to
-the neighbour that advertised this route; since nodes always send
-retractions in response to non-wildcard route requests
+update is successfully received for an extended period of time, causing
+a route to expire.  In order to avoid such spurious expiry, shortly before
+a selected route expires, a Babel node SHOULD send a unicast route request
+to the neighbour that advertised this route; since nodes always send
+either updates or retractions in response to non-wildcard route requests
 (<xref target="handling-route-requests"/>), this will usually result in
-either the route being refreshed or a retraction being received.</t>
+either the route being refreshed or retracted.</t>
 
 </section>
 
@@ -1400,9 +1410,9 @@ either the route being refreshed or a retraction being received.</t>
 <t>In order to speed up convergence after a mobility event, a node MAY
 send a unicast wildcard request after acquiring a new neighbour.
 Additionally, a node MAY send a small number of multicast wildcard
-requests shortly after booting.  Note that doing that carelessly can cause
-serious congestion when a whole network is rebooted, especially on link
-layers with high per-packet overhead (e.g., IEEE&nbsp;802.11).</t>
+requests shortly after booting.  Note however that doing that carelessly
+can cause serious congestion when a whole network is rebooted, especially
+on link layers with high per-packet overhead (e.g., IEEE&nbsp;802.11).</t>
 
 </section>
 
@@ -1419,24 +1429,25 @@ hop count set to 1, destined to a well-known multicast address or to
 a unicast address, over IPv4 or IPv6; in the case of IPv6, these addresses
 are link-local.  Both the source and destination UDP port are set to
 a well-known port number.  A Babel packet MUST be silently ignored unless
-its source address is either a link-local IPv6 address, or an IPv4 address
+its source address is either a link-local IPv6 address or an IPv4 address
 belonging to the local network, and its source port is the well-known Babel
-port.  Babel packets MUST NOT be sent as IPv6 Jumbograms.</t>
+port.  It MAY be silently ignored if its destination address is a global
+IPv6 address.</t>
 
 <t>In order to minimise the number of packets being sent while avoiding
-lower-layer fragmentation, a Babel node SHOULD attempt to maximise the size
-of the packets it sends, up to the outgoing interface's MTU adjusted for
-lower-layer headers (28 octets for UDP/IPv4, 48 octets for UDP/IPv6).  It
-MUST NOT send packets larger than the attached interface's MTU (adjusted
-for lower-layer headers) or 512 octets, whichever is larger, but not
-exceeding 2^16 - 1 adjusted for lower-layer headers.  Every Babel speaker
-MUST be able to receive packets that are as large as any attached
-interface's MTU (adjusted for lower-layer headers) or 512 octets, whichever
-is larger.</t>
+lower-layer fragmentation, a Babel node SHOULD attempt to maximise the
+size of the packets it sends, up to the outgoing interface's MTU adjusted
+for lower-layer headers (28 octets for UDP over IPv4, 48 octets for UDP
+over IPv6).  It MUST NOT send packets larger than the attached interface's
+MTU (adjusted for lower-layer headers) or 512 octets, whichever is larger,
+but not exceeding 2^16 - 1 (adjusted for lower-layer headers).  Every Babel
+speaker MUST be able to receive packets that are as large as any attached
+interface's MTU (adjusted for lower-layer headers) or 512 octets,
+whichever is larger.  Babel packets MUST NOT be sent in IPv6 Jumbograms.</t>
 
 <t>In order to avoid global synchronisation of a Babel network and to
 aggregate multiple TLVs into large packets, a Babel node MUST buffer every
-TLV and delay sending a UDP packet by a small, randomly chosen delay <xref
+TLV and delay sending a packet by a small, randomly chosen delay <xref
 target="JITTER"/>.  In order to allow accurate computation of packet loss
 rates, this delay MUST NOT be larger than half the advertised Hello
 interval.</t>
@@ -1473,8 +1484,9 @@ is 8 octets long, a prefix of fe80::/64 is implied.</t>
 </list>
 </t>
 
-<t>The address family of an address is either IPv4 or IPv6; it is undefined
-for AE 0, IPv4 for AE 1, and IPv6 for AE 2 and 3.</t>
+<t>The address family associated to an address encoding is either IPv4 or
+IPv6; it is undefined for AE 0, IPv4 for AE 1, and IPv6 for AEs 2 and
+3.</t>
 
 </section>
 
@@ -1508,7 +1520,7 @@ packets with a first octet different from 42 MUST be silently ignored.</t>
   protocol.  Packets with a second octet different from 2 MUST be silently
   ignored.</t>
 <t hangText="Body length">The length in octets of the body following the
-  packet header.</t>
+  packet header (excluding the Magic, Version and Body length fields).</t>
 <t hangText="Body">The packet body; a sequence of TLVs.</t>
 </list></t>
 
@@ -1546,7 +1558,7 @@ selected TLV types, an optional list of sub-TLVs.</t>
 
 <t>Every TLV carries an explicit length in its header; however, most TLVs
 are self-terminating, in the sense that it is possible to determine the
-length of the body without reference to the explicit TLV length.  If a TLV
+length of the body without reference to the explicit Length field.  If a TLV
 has a self-terminating format, then it MAY allow a sequence of sub-TLVs to
 follow the body.</t>
 
@@ -1575,7 +1587,7 @@ indicates how to handle unknown sub-TLVs.  If the mandatory bit is not
 set, then an unknown sub-TLV MUST be silently ignored, and the rest of the
 TLV processed normally.  If the mandatory bit is set, then the whole
 enclosing TLV MUST be silently ignored (except for updating the parser
-state by a Router-ID, Next-Hop or Update TLV, see <xref target="router-id"/>,
+state by a Router-Id, Next-Hop or Update TLV, see <xref target="router-id"/>,
 <xref target="next-hop"/>, and <xref target="update"/>).</t>
 
 </section>
@@ -1583,24 +1595,24 @@ state by a Router-ID, Next-Hop or Update TLV, see <xref target="router-id"/>,
 <section title="Parser state">
 
 <t>Babel uses a stateful parser: a TLV may refer to data from a previous
-TLV.  Babel's parser state consists of the following pieces of data:
+TLV.  The parser state consists of the following pieces of data:
 <list style="symbols">
   <t>for each address encoding that allows compression, the current
   default prefix; this is undefined at the start of the packet, and is
-  updated by an Update TLV with the PREFIX flag set
+  updated by each Update TLV with the Prefix flag set
   (<xref target="update"/>);</t>
   <t>for each address family (IPv4 or IPv6), the current next-hop; this is
   the source address of the enclosing packet for the matching address
-  family at the start of a packet, and is updated by the Next-Hop TLV
+  family at the start of a packet, and is updated by each Next-Hop TLV
   (<xref target="next-hop"/>);</t>
   <t>the current router-id; this is undefined at the start of the packet,
-  and is updated by both the Router-ID TLV (<xref target="router-id"/>)
-  and the Update TLV with ROUTER-ID flag set.</t>
+  and is updated by each Router-ID TLV (<xref target="router-id"/>)
+  and by each Update TLV with Router-Id flag set.</t>
 </list></t>
 
 <t>Since the parser state is separate from the bulk of Babel's state, and
-for correct parsing must be identical across implementations, it is
-updated before checking for mandatory TLVs: parsing a TLV updates the
+since for correct parsing it must be identical across implementations, it
+is updated before checking for mandatory TLVs: parsing a TLV MUST update the
 parser state even if the TLV is otherwise ignored due to an unknown
 mandatory sub-TLV.</t>
 
@@ -1675,7 +1687,7 @@ Length fields.</t>
 receiver's Acknowledgement TLV.</t>
 <t hangText="Interval">A time interval in centiseconds after which the
 sender will assume that this packet has been lost.  This MUST NOT be 0.
-The receiver MUST send an acknowledgement before this time has elapsed
+The receiver MUST send an Acknowledgement TLV before this time has elapsed
 (with a margin allowing for propagation time). </t>
 </list></t>
 
@@ -1733,13 +1745,12 @@ neighbour's reception cost.</t>
 Length fields.</t>
 <t hangText="Flags">The individual bits of this field specify special
 handling of this TLV (see below).</t>
-<t hangText="Seqno">If the UNICAST flag is set, this is the value of the
+<t hangText="Seqno">If the Unicast flag is set, this is the value of the
 sending node's outgoing Unicast Hello seqno for this neighbour.  Otherwise,
-it is the sending node's outgoing Multicast Hello seqno for this
-interface.</t>
+it is the sending node's outgoing Multicast Hello seqno for this interface.</t>
 <t hangText="Interval">If non-zero, this is an upper bound, expressed in
 centiseconds, on the time after which the sending node will send a new
-scheduled Hello TLV with the same setting of the UNICAST flag.  If this is
+scheduled Hello TLV with the same setting of the Unicast flag.  If this is
 0, then this Hello represents an unscheduled Hello, and doesn't carry any
 new information about times at which Hellos are sent.</t>
 </list></t>
@@ -1751,25 +1762,23 @@ new information about times at which Hellos are sent.</t>
 |U|X|X|X|X|X|X|X|X|X|X|X|X|X|X|X|
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ]]></artwork></figure>
-In the description below, a bit being 'set' means its value is '1',
-while 'cleared' means its value is '0'.  'X' bits MUST be cleared
-when sending and MUST be ignored on receipt.  Every node MUST be able
-to interpret the UNICAST flag.
 <list style="symbols">
-<t>U (UNICAST) flag (8000 hexadecimal): if set, then this Hello
-represents a Unicast Hello, otherwise it represents a Multicast Hello.</t>
+<t>U (Unicast) flag (8000 hexadecimal): if set, then this Hello
+represents a Unicast Hello, otherwise it represents a Multicast Hello;</t>
+<t>X: all other bits MUST be sent as 0 and silently ignored on reception.</t>
 </list>
 </t>
 
 <t>Every time a Hello is sent, the corresponding seqno counter MUST be
 incremented.  Since there is a single seqno counter for all the Multicast
-Hellos sent by a given node over a given interface, if the UNICAST flag is
+Hellos sent by a given node over a given interface, if the Unicast flag is
 not set, this TLV MUST be sent to all neighbors on this link, which can be
-achieved by sending to a multicast destination, or repeatedly sending
-unicast to all known neighbours.  Similarly, if the UNICAST flag is set,
-this TLV MUST be sent to a single neighbour, which can achieved by sending
-to a unicast destination.  In order to avoid large discontinuities in link
-quality, multiple Hello TLVs SHOULD NOT be sent in the same packet.</t>
+achieved by sending to a multicast destination, or by sending multiple
+packets to the unicast addresses of all reachable neighbours.  Conversely,
+if the Unicast flag is set, this TLV MUST be sent to a single neighbour,
+which can achieved by sending to a unicast destination.  In order to avoid
+large discontinuities in link quality, multiple Hello TLVs SHOULD NOT be
+sent in the same packet.</t>
 
 <t>This TLV is self-terminating, and allows sub-TLVs.</t>
 
@@ -1815,13 +1824,13 @@ specified by the AE field.  Address compression is not allowed.</t>
 </list></t>
 
 <t>Conceptually, an IHU is destined to a single neighbour.  However, IHU
-TLVs contain an explicit destination address, and it MAY be sent to
+TLVs contain an explicit destination address, and MAY be sent to
 a multicast address, as this allows aggregation of IHUs destined to
 distinct neighbours into a single packet and avoids the need for an ARP or
 Neighbour Discovery exchange when a neighbour is not being used for data
 traffic.</t>
 
-<t>IHU TLVs with an unknown value for the AE field MUST be silently
+<t>IHU TLVs with an unknown value in the AE field MUST be silently
 ignored.</t>
 
 <t>This TLV is self-terminating, and allows sub-TLVs.</t>
@@ -1873,9 +1882,9 @@ Update TLVs.  This MUST NOT consist of all zeroes or all ones.</t>
 ]]></artwork></figure>
 
 <t>A Next Hop TLV establishes a next-hop address for a given address
-family (IPv4 or IPv6) that is implied by subsequent Update TLVs.  This TLV
-sets up the next-hop for subsequent Update TLVs even if it is ignored due
-to an unknown mandatory sub-TLV.</t>
+family (IPv4 or IPv6) that is implied in subsequent Update TLVs.  This TLV
+sets up the next-hop for subsequent Update TLVs even if it is otherwise
+ignored due to an unknown mandatory sub-TLV.</t>
 
 <t>Fields :
 <list style="hanging" hangIndent="10">
@@ -1890,8 +1899,9 @@ TLVs, for this address family.</t>
 </list></t>
 
 <t>When the address family matches the network-layer protocol that this
-packet is transported over, a Next Hop TLV is not needed: in that case, the
-next hop is taken to be the source address of the packet.</t>
+packet is transported over, a Next Hop TLV is not needed: in the absence
+of a Next Hop TLV in a given address family, the next hop address is taken
+to be the source address of the packet.</t>
 
 <t>Next Hop TLVs with an unknown value for the AE field MUST be silently
 ignored.</t>
@@ -1916,9 +1926,9 @@ ignored.</t>
 +-+-+-+-+-+-+-+-+-+-+-+-
 ]]></artwork></figure>
 
-<t>An Update TLV advertises or retracts a route.  As an optimisation, this
-can also have the side effect of establishing a new implied router-id and
-a new default prefix.</t>
+<t>An Update TLV advertises or retracts a route.  As an optimisation, it
+can optionally have the side effect of establishing a new implied
+router-id and a new default prefix.</t>
 
 <t>Fields :
 <list style="hanging" hangIndent="10">
@@ -1931,19 +1941,18 @@ handling of this TLV (see below).</t>
 <t hangText="Plen">The length of the advertised prefix.</t>
 <t hangText="Omitted">The number of octets that have been omitted at
 the beginning of the advertised prefix and that should be taken from a
-preceding Update TLV with the PREFIX flag set.</t>
+preceding Update TLV in the same address family with the Prefix flag set.</t>
 <t hangText="Interval">An upper bound, expressed in centiseconds, on the
 time after which the sending node will send a new update for this prefix.
-This MUST NOT be 0 and SHOULD NOT be less than 10.  The receiving node
-will use this value to compute a hold time for this routing table entry.
-The value FFFF hexadecimal (infinity) expresses that this announcement will
-not be repeated unless a request is received (<xref
-target="request-expiring"/>).</t>
+This MUST NOT be 0.  The receiving node will use this value to compute
+a hold time for this routing table entry.  The value FFFF hexadecimal
+(infinity) expresses that this announcement will not be repeated unless
+a request is received (<xref target="request-expiring"/>).</t>
 <t hangText="Seqno">The originator's sequence number for this update.</t>
 <t hangText="Metric">The sender's metric for this route.  The value FFFF
 hexadecimal (infinity) means that this is a route retraction.</t>
 <t hangText="Prefix">The prefix being advertised.  This field's size is
-(Plen/8 - Omitted) rounded upwards.</t>
+(Plen/8&nbsp;-&nbsp;Omitted) rounded upwards.</t>
 </list></t>
 
 <t>The Flags field is interpreted as follows:
@@ -1952,16 +1961,12 @@ hexadecimal (infinity) means that this is a route retraction.</t>
 |P|R|X|X|X|X|X|X|
 +-+-+-+-+-+-+-+-+
 ]]></artwork></figure>
-In the description below, a bit being 'set' means its value is '1',
-while 'cleared' means its value is '0'.  'X' bits MUST be cleared
-when sending and MUST be ignored on receipt.  Every node MUST be able
-to interpret the PREFIX and ROUTER-ID flags.
 <list style="symbols">
-<t>P (PREFIX) flag (80 hexadecimal): if set, then this Update
+<t>P (Prefix) flag (80 hexadecimal): if set, then this Update
 establishes a new default prefix for subsequent Update TLVs with a matching
 address encoding within the same packet, even if this TLV is otherwise
 ignored due to an unknown mandatory sub-TLV;</t>
-<t>R (ROUTER-ID) flag (40 hexadecimal): if set, then this TLV establishes
+<t>R (Router-Id) flag (40 hexadecimal): if set, then this TLV establishes
 a new default router-id for this TLV and subsequent Update TLVs in the
 same packet, even if this TLV is otherwise ignored due to an unknown
 mandatory sub-TLV.  This router-id is computed from the first address of
@@ -1975,13 +1980,14 @@ the advertised prefix as follows:
   example, for an IPv4 address, the router-id consists of 4 octets of
   zeroes followed by the IPv4 address.</t>
 </list></t>
+<t>X: all other bits MUST be sent as 0 and silently ignored on reception.</t>
 </list>
 </t>
 
 <t>The prefix being advertised by an Update TLV is computed as follows:
 <list style="symbols">
 <t>the first Omitted octets of the prefix are taken from the previous
-Update TLV with the PREFIX flag set and the same address encoding,
+Update TLV with the Prefix flag set and the same address encoding,
 even if it was ignored due to an unknown mandatory sub-TLV;</t>
 <t>the next (Plen/8 - Omitted) rounded upwards octets are taken from the
 Prefix field;</t>
@@ -1992,9 +1998,9 @@ Omitted MUST be 0)</t>
 
 <t>If the Metric field is finite, the router-id of the originating node
 for this announcement is taken from the prefix advertised by this Update
-if the ROUTER-ID flag is set, computed
+if the Router-Id flag is set, computed
 as described above.  Otherwise, it is taken either from the preceding
-Router-Id packet, or the preceding Update packet with the ROUTER-ID flag
+Router-Id packet, or the preceding Update packet with the Router-Id flag
 set, whichever comes last, even if that TLV is otherwise ignored due to an
 unknown mandatory sub-TLV.</t>
 
@@ -2005,13 +2011,13 @@ sub-TLV; if no such TLV exists, it is taken from the network-layer source
 address of this packet.</t>
 
 <t>If the metric field is FFFF hexadecimal, this TLV specifies
-a retraction.  In that case, the current router-id and the Seqno are not
+a retraction.  In that case, the router-id, next-hop and seqno are not
 used.  AE MAY then be 0, in which case this Update retracts all of the
-routes previously advertised on this interface.  If the metric is
-finite, AE MUST NOT be 0.  If the metric is infinite and AE is 0, Plen
-and Omitted MUST both be 0.</t>
+routes previously advertised by the sending interface.  If the metric is
+finite, AE MUST NOT be 0.  If the metric is infinite and AE is 0, Plen and
+Omitted MUST both be 0.</t>
 
-<t>Update TLVs with an unknown value for the AE field MUST be silently
+<t>Update TLVs with an unknown value in the AE field MUST be silently
 ignored.</t>
 
 <t>This TLV is self-terminating, and allows sub-TLVs.</t>
@@ -2046,12 +2052,10 @@ request).</t>
 Plen/8 rounded upwards.</t>
 </list></t>
 
-<t>A Request TLV prompts the receiving node to send an update message for
-the prefix specified by the AE, Plen, and Prefix fields, or a full dump of
-its routing table if AE is 0 (in which case Plen MUST be 0 and Prefix is of
-length 0).  A Request may be sent to a unicast address if it is destined to
-a single node, or to a multicast address if the request is destined to all
-of the neighbours of the sending interface.</t>
+<t>A Request TLV prompts the receiver to send an update message (possibly
+a retraction) for the prefix specified by the AE, Plen, and Prefix fields,
+or a full dump of its routing table if AE is 0 (in which case Plen MUST be
+0 and Prefix is of length 0).</t>
 
 <t>This TLV is self-terminating, and allows sub-TLVs.</t>
 
@@ -2096,13 +2100,13 @@ NOT consist of all zeroes or all ones.</t>
 Plen/8 rounded upwards.</t>
 </list></t>
 
-<t>A Seqno Request TLV prompts the receiving node to send an Update for
-the prefix specified by the AE, Plen, and Prefix fields, with either
-a router-id different from what is specified by the Router-Id field, or
-a Seqno no less (modulo 2^16) than what is specified by the Seqno field.
-If this request cannot be satisfied locally, then it is forwarded
-according to the rules set out in <xref
-target="handling-seqno-requests"/>.</t>
+<t>A Seqno Request TLV prompts the receiving node to send a finite-metric
+Update for the prefix specified by the AE, Plen, and Prefix fields, with
+either a router-id different from what is specified by the Router-Id
+field, or a Seqno no less (modulo 2^16) than what is specified by the
+Seqno field.  If this request cannot be satisfied locally, then it is
+forwarded according to the rules set out in
+ <xref target="handling-seqno-requests"/>.</t>
 
 <t>While a Seqno Request MAY be sent to a multicast address, it MUST NOT be
 forwarded to a multicast address and MUST NOT be forwarded to more than
@@ -2131,7 +2135,8 @@ one neighbour.  A request MUST NOT be forwarded if its Hop Count field is
 <t hangText="Type">Set to 0 to indicate a Pad1 sub-TLV.</t>
 </list></t>
 
-<t>This sub-TLV is silently ignored on reception.</t>
+<t>This sub-TLV is silently ignored on reception.  It is allowed within
+any TLV that allows sub-TLVs.</t>
 
 </section>
 
@@ -2153,7 +2158,8 @@ Type and Length fields.</t>
 <t hangText="MBZ">Set to 0 on transmission.</t>
 </list></t>
 
-<t>This sub-TLV is silently ignored on reception.</t>
+<t>This sub-TLV is silently ignored on reception.  It is allowed within
+any TLV that allows sub-TLVs.</t>
 
 </section>
 
@@ -2328,17 +2334,17 @@ address compression technique was inspired by <xref target="PACKETBB"/>.</t>
 <t>The strategy for computing link costs and route metrics is a local
 matter; Babel itself only requires that it comply with the conditions given
 in <xref target="cost-computation"/> and
-<xref target="metric-computation"/>.  Different nodes MAY use different
-strategies in a single network and MAY use different strategies on
+<xref target="metric-computation"/>.  Different nodes may use different
+strategies in a single network and may use different strategies on
 different interface types.  This section gives a few examples of such
 strategies.</t>
 
 <t>The sample implementation of Babel sends periodic Multicast Hellos, and
 never sends Unicast Hellos.  It maintains statistics about the last 16
-received Multicast Hello TLVs of each kind (<xref
-target="hello-history"/>), computes costs by using the 2-out-of-3 strategy
-(<xref target="k-j"/>) on wired links, and ETX (<xref target="etx"/>) on
-wireless links.  It uses an additive algebra for metric computation (<xref
+received Hello TLVs of each kind (<xref target="hello-history"/>),
+computes costs by using the 2-out-of-3 strategy (<xref target="k-j"/>) on
+wired links, and ETX (<xref target="etx"/>) on wireless links.  It uses an
+additive algebra for metric computation (<xref
 target="additive-metric"/>).</t>
 
 <section title="Maintaining Hello History" anchor="hello-history">
@@ -2358,7 +2364,7 @@ comparison, one of the following actions is taken:
 <list style="symbols">
   <t>if the two differ by more than 16 (modulo 2^16), then the sending
   node has probably rebooted and lost its sequence number; the whole
-  associated neighbour table entry is flushed and a new one created;</t>
+  associated neighbour table entry is flushed and a new one is created;</t>
   <t>otherwise, if the received nr is smaller (modulo 2^16) than the
   expected sequence number ne, then the sending node has increased its
   Hello interval without us noticing; the receiving node removes the last
@@ -2369,17 +2375,16 @@ comparison, one of the following actions is taken:
   receiving node adds (nr - ne) 0 bits to the Hello history (we
   "fast-forward").</t>
 </list>
-The receiving node then appends a 1 bit to the Hello history, resets the
-neighbour's hello timer, and sets ne to (nr + 1).  If the Interval field
-of the received Hello is not zero, it resets the neighbour's hello timer
-to 1.5 times the advertised Interval (the extra margin allows for delay
-due to jitter).</t>
+The receiving node then appends a 1 bit to the Hello history and sets ne
+to (nr + 1).  If the Interval field of the received Hello is not zero, it
+resets the neighbour's hello timer to 1.5 times the advertised Interval
+(the extra margin allows for delay due to jitter).</t>
 
 <t>Whenever either Hello timer associated to a neighbour expires, the
 local node adds a 0 bit to this neighbour's Hello history, and increments
 the expected Hello number.  If both Hello histories are empty (they
 contain 0 bits only), the neighbour entry is flushed; otherwise, the
-neighbour's hello timer is reset to the value advertised in the last Hello
+relevant hello timer is reset to the value advertised in the last Hello
 of that kind received from this neighbour (no extra margin is necessary in
 this case, since jitter was already taken into account when computing the
 timeout that has just expired).</t>
@@ -2428,20 +2433,20 @@ follows:
 links exhibit continuous variation of the link quality.  Naive application
 of hop-count routing in networks that use wireless links for transit tends
 to select long, lossy links in preference to shorter, lossless links,
-which can dramatically reduce throughput.  For that reason, it is
-essential that a routing protocol designed to support wireless links
-perform some form of link-quality estimation.</t>
+which can dramatically reduce throughput.  For that reason, a routing
+protocol designed to support wireless links must perform some form of
+link-quality estimation.</t>
 
 <t>ETX <xref target="ETX"/> is a simple link-quality estimation algorithm
-that is designed to work well with the IEEE&nbsp;802.11 MAC.  The
-IEEE&nbsp;802.11 MAC performs ARQ and rate adaptation on unicast frames,
-but not on multicast frames, which are sent at a fixed rate with no ARQ;
-therefore, measuring the loss rate of multicast frames yields a useful
-estimate of a link's quality.</t>
+that is designed to work well with the IEEE&nbsp;802.11 MAC.  By default,
+the IEEE&nbsp;802.11 MAC performs ARQ and rate adaptation on unicast
+frames, but not on multicast frames, which are sent at a fixed rate with
+no ARQ; therefore, measuring the loss rate of multicast frames yields
+a useful estimate of a link's quality.</t>
 
 <t>A node performing ETX link quality estimation uses a neighbour's
 Multicast Hello history to compute an estimate, written beta, of the
-probability that a Hello TLV is successfully received.  Beta can be simply
+probability that a Hello TLV is successfully received.  Beta can be
 computed as the fraction of 1 bits within a small number (say, 6) of the
 most recent entries in the Multicast Hello history, or it can be an
 exponential average, or some combination of both approaches.</t>
@@ -2456,8 +2461,9 @@ or, equivalently,
 <t>Since the IEEE&nbsp;802.11 MAC performs ARQ on unicast frames, unicast
 frames do not provide a useful measure of link quality, and therefore ETX
 ignores the Unicast Hello history.  Thus, a node performing ETX
-link-quality estimation will not route through nodes unless they send
-periodic Multicast Hellos (possibly in addition to Unicast Hellos).</t>
+link-quality estimation will not route through neighbouring nodes unless
+they send periodic Multicast Hellos (possibly in addition to Unicast
+Hellos).</t>
 
 </section>
 
@@ -2477,7 +2483,7 @@ links.  More formally, if a neighbour advertises a route with metric m over
 a link with cost c, then the resulting route has metric M(c, m) = c +
 m.</t>
 
-<t>A multiplicative metric can be converted to an additive one by taking
+<t>A multiplicative metric can be converted into an additive one by taking
 the logarithm (in some suitable base) of the link costs.</t>
 
 </section>
@@ -2497,20 +2503,6 @@ M(c, m) = k + c + m, where k depends on the battery status.</t>
 the value k must be greater than -c.</t>
 
 </section>
-
-</section>
-
-<section title="Properties of Multicast and Unicast Hellos">
-
-<t>While Multicast and Unicast Hellos can be used together by implementations,
-how their timers differ is a local matter.  On reliable wired links, a node
-may choose to only use Multicast Hellos, as they are sufficient for discovery
-and reachability detection, and Unicast Hellos offer close to no benefits
-in those scenarios.  On unreliable wireless links where multicast has worse
-performance than unicast, a node may rely more on Unicast Hellos and send
-them alongside every unicast IHU it sends; it may also use a higher
-Multicast Hello Interval as they are no longer necessary for reachability
-detection but still allow discovery of new neighbours.</t>
 
 </section>
 
@@ -2568,15 +2560,18 @@ compatible manner:
 <t>using the packet trailer.</t>
 </list></t>
 
-<t>New versions of the Babel protocol should only be defined if the new
-version is not backwards compatible with the original protocol.</t>
+<t>This appendix is intended to guide designers of protocol extensions in
+chosing a particular encoding.</t>
+
+<t>The version number in the Babel header should only be increased if the
+new version is not backwards compatible with the original protocol.</t>
 
 <t>In many cases, an extension could be implemented either by defining
 a new TLV, or by adding a new sub-TLV to an existing TLV.  For example, an
 extension whose purpose is to attach additional data to route updates can
 be implemented either by creating a new "enriched" Update TLV, by adding
 a non-mandatory sub-TLV to the Update TLV, or by adding a mandatory
-TLV.</t>
+sub-TLV.</t>
 
 <t>The various encodings are treated differently by implementations that
 do not understand the extension.  In the case of a new TLV or of a sub-TLV
@@ -2590,28 +2585,27 @@ be used by extensions that make incompatible extensions to the meaning of
 the TLV (the whole TLV must be thrown away if the extension data is not
 understood).</t>
 
-<t>Experience shows that additional data tends to crop up in the most
-unexpected places.  Hence, it is recommended that extensions should define
-self-terminating TLVs, and allow attaching sub-TLVs to them.</t>
+<t>Experience shows that the need for additional data tends to crop up in
+the most unexpected places.  Hence, it is recommended that extensions that
+define new TLVs should make them self-terminating, and allow attaching
+sub-TLVs to them.</t>
 
 <t>Adding a new AE is essentially equivalent to adding a new TLV: Update
 TLVs with an unknown AE are ignored, just like unknown TLVs.  However,
-adding a new AE is often more involved than adding a new TLV, since it
-creates a new set of compression state.  Additionally, since the Next Hop
-TLV creates state specific to a given address family, as opposed to
-a given AE, a new AE for a previously defined address family must not be
-used in the Next Hop TLV if backwards compatibility is required.
-A similar issue arises with Update TLVs with unknown AEs establishing
-a new router-id (with ROUTER-ID flag set).  Therefore, defining new AEs
-must be done with care if compatibility with unextended implementations is
-required.</t>
+adding a new AE is more involved than adding a new TLV, since it creates
+a new set of compression state.  Additionally, since the Next Hop TLV
+creates state specific to a given address family, as opposed to a given
+AE, a new AE for a previously defined address family must not be used in
+the Next Hop TLV if backwards compatibility is required.  A similar issue
+arises with Update TLVs with unknown AEs establishing a new router-id
+(with Router-Id flag set).  Therefore, defining new AEs must be done with
+care if compatibility with unextended implementations is required.</t>
 
-<t>The packet trailer &mdash; the space after the declared length of the
-packet but within the payload of the UDP datagram &mdash; was originally
-intended to carry a cryptographic signature.  However, at this time no
-extension has used it, and therefore we refrain from making any
-recommendations about its use due to the lack of implementation
-experience.</t>
+<t>The packet trailer (the space after the declared length of the packet
+but within the payload of the UDP datagram) was originally intended to
+carry a cryptographic signature.  However, no extension has used it to
+date, and therefore we refrain from making any recommendations about its
+use due to the lack of implementation experience.</t>
 
 </section>
 
@@ -2646,15 +2640,13 @@ attached links, it cannot possibly participate in a routing loop, and
 hence it need not evaluate the feasibility condition or maintain a source
 table.</t>
 
-<t>No matter how primitive, a stub implementation MUST parse sub-TLVs of
-all the TLVs that it understands and check for the mandatory bit.  It MUST
-answer acknowledgement requests and MUST participate in the Hello/IHU
-protocol (it MUST parse both Unicast and Multicast Hellos, and SHOULD send
-scheduled Hellos, preferably over multicast in order to make it
-discoverable).  It MUST also be able to reply to seqno requests for routes
-that it announces and SHOULD be able to reply to route requests.</t>
+<t>No matter how primitive, a stub implementation MUST parse sub-TLVs
+attached to any TLVs that it understands and check for the mandatory bit.
+It MUST answer acknowledgement requests and MUST participate in the
+Hello/IHU protocol.  It MUST also be able to reply to seqno requests for
+routes that it announces and SHOULD be able to reply to route requests.</t>
 
-<t>Experiments show that an IPv6-only stub implementation of Babel can be
+<t>Experience shows that an IPv6-only stub implementation of Babel can be
 written in less than 1000 lines of C code and compile to 13&nbsp;kB of
 text on 32-bit CISC architecture.</t>
 
@@ -2724,6 +2716,21 @@ in addition to prefixes.</t>
 <t>Added acknowledgements section.</t>
 </list></t>
 
+</section>
+
+<section title="Changes since draft-ietf-babel-rfc6126bis-03">
+
+<t><list style="symbols">
+<t>Clarified that all the data structures are conceptual.</t>
+<t>Made sending and receiving Multicast Hellos a SHOULD, avoids expressing
+any opinion about Unicast Hellos.</t>
+<t>Removed opinion about Multicast vs. Unicast Hellos (Appendix A.4).</t>
+<t>Made hold-time into a SHOULD rather than MUST.</t>
+<t>Clarified that Seqno Requests are for a finite-metric Update.</t>
+<t>Clarified that sub-TLVs Pad1 and PadN are allowed within any TLV that
+allows sub-TLVs.</t>
+<t>Large number of minor wording changes and clarifications.</t>
+</list></t>
 </section>
 
 </section>

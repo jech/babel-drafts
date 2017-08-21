@@ -6,7 +6,7 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="yes" ?>
-<rfc category="std" docName="draft-ietf-babel-source-specific-00"
+<rfc category="std" docName="draft-ietf-babel-source-specific-01"
 ipr="trust200902" updates="6126bis">
 <front>
 <title>Source-Specific Routing in Babel</title>
@@ -37,7 +37,7 @@ ipr="trust200902" updates="6126bis">
 </address>
 </author>
 
-<date day="11" month="August" year="2017"/>
+<date day="21" month="August" year="2017"/>
 
 <abstract>
 <t>Source-specific routing is an extension to traditional next-hop routing

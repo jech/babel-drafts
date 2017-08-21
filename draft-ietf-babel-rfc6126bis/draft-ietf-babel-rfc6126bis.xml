@@ -2181,11 +2181,12 @@ IPv4 multicast group 224.0.0.111 for use by the Babel protocol.</t>
 
 <t>As defined in this document, Babel is a completely insecure protocol.
 Any attacker can attract data traffic by advertising routes with a low
-metric.  This particular issue can be solved either by lower-layer security
-mechanisms (e.g., IPsec or link-layer security), or by appending a
-cryptographic key to Babel packets; the provision of ignoring any data
-contained within a Babel packet beyond the body length declared by the
-header is designed for just such a purpose.</t>
+metric or a high seqno.  This issue can be solved either by a lower-layer
+security mechanisms (e.g. link-layer security), or by deploying a suitable
+authentication mechanism within Babel itself.  With the exception of Hello
+TLVs used for discovery, Babel control traffic can be carried over
+unicast, which makes it possible to protect Babel traffic with a protocol
+that can only protect unicast data, for example IKEv2 or DTLS.</t>
 
 <t>The information that a Babel node announces to the whole routing domain
 is often sufficient to determine a mobile node's physical location with
@@ -2729,6 +2730,7 @@ any opinion about Unicast Hellos.</t>
 <t>Clarified that Seqno Requests are for a finite-metric Update.</t>
 <t>Clarified that sub-TLVs Pad1 and PadN are allowed within any TLV that
 allows sub-TLVs.</t>
+<t>Updated Security Considerations.</t>
 <t>Large number of minor wording changes and clarifications.</t>
 </list></t>
 </section>

@@ -688,11 +688,11 @@ all routes with the same source.</t>
 
 <section title="The Table of Pending Seqno Requests">
 
-<t>The table of pending seqno requests contains a list of seqno requests that
-the local node has sent (either because they have been originated
+<t>The table of pending seqno requests contains a list of seqno requests
+that the local node has sent (either because they have been originated
 locally, or because they were forwarded) and to which no reply has been
-received yet.  This table is indexed by prefixes and router-ids, and every entry in
-this table contains the following data:
+received yet.  This table is indexed by triples of the form (prefix, plen,
+router-id), and every entry in this table contains the following data:
 <list style="symbols">
 <t>the prefix, router-id, and seqno being requested;</t>
 <t>the neighbour, if any, on behalf of which we are forwarding this
@@ -928,7 +928,7 @@ source.  More precisely, a route advertisement carrying the quintuple
 following conditions holds:
 <list style="symbols">
   <t>metric is infinite; or</t>
-  <t>no entry exists in the source table indexed by (router-id, prefix, plen);
+  <t>no entry exists in the source table indexed by (prefix, plen, router-id);
   or</t>
   <t>an entry (prefix, plen, router-id, seqno', metric') exists in the
     source table, and either
@@ -1004,18 +1004,19 @@ optionally be derived from the low-order bits of the advertised prefix.</t>
 
 <section title="Route Acquisition" anchor="route-acquisition">
 
-<t>When a Babel node receives an update (router-id, prefix, seqno, metric)
+<t>When a Babel node receives an update (prefix, plen, router-id, seqno, metric)
 from a neighbour neigh with a link cost value equal to cost, it checks
-whether it already has a routing table entry indexed by (neigh, prefix).</t>
+whether it already has a routing table entry indexed by (prefix, plen).</t>
 
 <t>If no such entry exists:
 <list style="symbols">
   <t>if the update is unfeasible, it MAY be ignored;</t>
   <t>if the metric is infinite (the update is a retraction of a route we
   do not know about), the update is ignored;</t>
-  <t>otherwise, a new route table entry is created, indexed by (neigh,
-  prefix), with source equal to (router-id, prefix), seqno equal to seqno
-  and an advertised metric equal to the metric carried by the update.</t>
+  <t>otherwise, a new route table entry is created, indexed by (prefix,
+  plen, neigh), with source equal to (prefix, plen, router-id), seqno
+  equal to seqno and an advertised metric equal to the metric carried by
+  the update.</t>
 </list>
 If such an entry exists:
 <list style="symbols">
@@ -1271,10 +1272,10 @@ unicast address of the neighbour that sent the request.</t>
 
 <section title="Route Requests" anchor="handling-route-requests">
 
-<t>When a node receives a route request for a prefix (prefix, plen), it
-checks its route table for a selected route to this exact prefix.  If such
-a route exists, it MUST send an update; if such a route does not, it MUST
-send a retraction for that prefix.</t>
+<t>When a node receives a route request for a given prefix, it checks its
+route table for a selected route to this exact prefix.  If such a route
+exists, it MUST send an update; if such a route does not, it MUST send
+a retraction for that prefix.</t>
 
 <t>When a node receives a wildcard route request, it SHOULD send a full
 routing table dump.</t>

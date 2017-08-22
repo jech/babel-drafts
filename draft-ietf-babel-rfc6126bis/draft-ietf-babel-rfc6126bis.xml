@@ -502,7 +502,7 @@ link-local in the case of IPv6.  Babel packets may be sent to a well-known
 normal operation, a Babel speaker sends both multicast and unicast packets
 to its neighbours.</t>
 
-<t>With the exception of Hello TLVs and acknowledgements, all Babel TLVs
+<t>With the exception of Hello TLVs and acknowledgments, all Babel TLVs
 can be sent to either unicast or multicast addresses, and their semantics
 does not depend on whether the destination is a unicast or a multicast
 address.  Hence, a Babel speaker does not need to determine the destination
@@ -515,7 +515,7 @@ multiple Babel speakers across a network <xref target="JITTER"/>, and
 it allows for the aggregation of multiple TLVs into a single packet.</t>
 
 <t>The exact delay and amount of jitter applied to a packet depends on
-whether it contains any urgent TLVs.  Acknowledgement TLVs MUST be sent
+whether it contains any urgent TLVs.  Acknowledgment TLVs MUST be sent
 before the deadline specified in the corresponding request.  The particular
 class of updates specified in <xref target="triggered-updates"/> MUST be
 sent in a timely manner.  The particular class of request and update TLVs
@@ -708,30 +708,32 @@ both the resending of requests and their expiry.</t>
 </section>
 </section>
 
-<section title="Acknowledged Packets" anchor="acknowledged-packets">
+<section title="Acknowledgments and acknowledgment requests"
+         anchor="acknowledgments">
 
 <t>A Babel speaker may request that a neighbour receiving a given packet
-reply with an explicit acknowledgement within a given time.  While the use
-of acknowledgement requests is optional, every Babel speaker MUST be able
+reply with an explicit acknowledgment within a given time.  While the use
+of acknowledgment requests is optional, every Babel speaker MUST be able
 to reply to such a request.</t>
 
-<t>An acknowledgement MUST be sent to a unicast destination.  On the other
-hand, acknowledgement requests may be sent to either unicast or multicast
-destinations, in which case they request an acknowledgement from all of the
+<t>An acknowledgment MUST be sent to a unicast destination.  On the other
+hand, acknowledgment requests may be sent to either unicast or multicast
+destinations, in which case they request an acknowledgment from all of the
 receiving nodes.</t>
 
-<t>When to request acknowledgements is a matter of local policy; the
-simplest strategy is to never request acknowledgements and to rely on
+<t>When to request acknowledgments is a matter of local policy; the
+simplest strategy is to never request acknowledgments and to rely on
 periodic updates to ensure that any reachable routes are eventually
 propagated throughout the routing domain.  In order to improve convergence
-speed and reduce the amount of control traffic, acknowledged packets MAY
-be used in order to send urgent updates (<xref target="triggered-updates"/>)
-and retractions (<xref target="hold-time"/>), especially when the number
-of neighbours on a given interface is small.  Since Babel is designed to
-deal gracefully with packet loss on unreliable media, sending all packets
-with acknowledgement requests is not necessary, and NOT RECOMMENDED, as
-the acknowledgements cause additional traffic and may force additional
-Address Resolution Protocol (ARP) or Neighbour Discovery (ND) exchanges.</t>
+speed and reduce the amount of control traffic, acknowledgment requests
+MAY be used in order to reliably send urgent updates (<xref
+target="triggered-updates"/>) and retractions (<xref target="hold-time"/>),
+especially when the number of neighbours on a given interface is small.
+Since Babel is designed to deal gracefully with packet loss on unreliable
+media, sending all packets with acknowledgment requests is not necessary,
+and NOT RECOMMENDED, as the acknowledgments cause additional traffic and
+may force additional Address Resolution Protocol (ARP) or Neighbour
+Discovery (ND) exchanges.</t>
 
 </section>
 
@@ -1064,9 +1066,9 @@ by either:
 <list style="symbols">
 <t>waiting until the route's expiry timer has expired (<xref
 target="route-acquisition"/>);</t>
-<t>sending a retraction with an acknowledgement request (<xref
-target="acknowledged-packets"/>) to every reachable neighbour that has not
-explicitly retracted prefix P and waiting for all acknowledgements.</t>
+<t>sending a retraction with an acknowledgment request (<xref
+target="acknowledgments"/>) to every reachable neighbour that has not
+explicitly retracted prefix P and waiting for all acknowledgments.</t>
 </list>
 The former option is simpler and ensures that at that point, any routes
 for prefix P pointing at the current node have expired.  However, since
@@ -1169,9 +1171,9 @@ update.</t>
 
 <t>There are two strategies for ensuring that.  If the number of neighbours
 is small, then it is reasonable to send the update together with an
-acknowledgement request; the update is resent until all neighbours have
+acknowledgment request; the update is resent until all neighbours have
 acknowledged the packet, up to some number of times.  If the number of
-neighbours is large, however, requesting acknowledgements from all of them
+neighbours is large, however, requesting acknowledgments from all of them
 might cause a non-negligible amount of network traffic; in that case, it
 may be preferable to simply repeat the update some reasonable number of
 times (say, 5 for wireless and 2 for wired links).</t>
@@ -1661,7 +1663,7 @@ Length fields.</t>
 
 </section>
 
-<section title="Acknowledgement Request">
+<section title="Acknowledgment Request">
 
 <figure><artwork><![CDATA[
 0                   1                   2                   3
@@ -1673,21 +1675,21 @@ Length fields.</t>
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ]]></artwork></figure>
 
-<t>This TLV requests that the receiver send an Acknowledgement TLV
+<t>This TLV requests that the receiver send an Acknowledgment TLV
 within the number of centiseconds specified by the Interval field.</t>
 
 <t>Fields :
 <list style="hanging" hangIndent="10">
-<t hangText="Type">Set to 2 to indicate an Acknowledgement Request TLV.</t>
+<t hangText="Type">Set to 2 to indicate an Acknowledgment Request TLV.</t>
 <t hangText="Length">The length of the body, exclusive of the Type and
 Length fields.</t>
 <t hangText="Reserved">Sent as 0 and MUST be ignored on
   reception.</t>
 <t hangText="Nonce">An arbitrary value that will be echoed in the
-receiver's Acknowledgement TLV.</t>
+receiver's Acknowledgment TLV.</t>
 <t hangText="Interval">A time interval in centiseconds after which the
 sender will assume that this packet has been lost.  This MUST NOT be 0.
-The receiver MUST send an Acknowledgement TLV before this time has elapsed
+The receiver MUST send an Acknowledgment TLV before this time has elapsed
 (with a margin allowing for propagation time). </t>
 </list></t>
 
@@ -1695,7 +1697,7 @@ The receiver MUST send an Acknowledgement TLV before this time has elapsed
 
 </section>
 
-<section title="Acknowledgement">
+<section title="Acknowledgment">
 
 <figure><artwork><![CDATA[
 0                   1                   2                   3
@@ -1705,15 +1707,15 @@ The receiver MUST send an Acknowledgement TLV before this time has elapsed
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ]]></artwork></figure>
 
-<t>This TLV is sent by a node upon receiving an Acknowledgement Request.</t>
+<t>This TLV is sent by a node upon receiving an Acknowledgment Request.</t>
 
 <t>Fields :
 <list style="hanging" hangIndent="10">
-<t hangText="Type">Set to 3 to indicate an Acknowledgement TLV.</t>
+<t hangText="Type">Set to 3 to indicate an Acknowledgment TLV.</t>
 <t hangText="Length">The length of the body, exclusive of the Type and
 Length fields.</t>
-<t hangText="Nonce">Set to the Nonce value of the Acknowledgement Request
-that prompted this Acknowledgement.</t>
+<t hangText="Nonce">Set to the Nonce value of the Acknowledgment Request
+that prompted this Acknowledgment.</t>
 </list></t>
 
 <t>Since nonce values are not globally unique, this TLV MUST be sent to
@@ -2688,7 +2690,7 @@ table.</t>
 
 <t>No matter how primitive, a stub implementation MUST parse sub-TLVs
 attached to any TLVs that it understands and check for the mandatory bit.
-It MUST answer acknowledgement requests and MUST participate in the
+It MUST answer acknowledgment requests and MUST participate in the
 Hello/IHU protocol.  It MUST also be able to reply to seqno requests for
 routes that it announces and SHOULD be able to reply to route requests.</t>
 
@@ -2759,7 +2761,7 @@ doesn't matter when.</t>
 in addition to prefixes.</t>
 <t>Relaxed the route acquisition algorithm.</t>
 <t>Replaced minimal implementations by stub implementations.</t>
-<t>Added acknowledgements section.</t>
+<t>Added acknowledgments section.</t>
 </list></t>
 
 </section>

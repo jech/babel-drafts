@@ -763,8 +763,11 @@ increasing (modulo 2^16) sequence number and an upper bound on the time
 interval until the next Hello of the same type (see below).  If the time
 interval is set to 0, then the Hello TLV does not establish a new promise:
 the deadline carried by the previous Hello of the same type still applies
-to the next Hello.  We say that a Hello is "scheduled" if it carries
-a non-zero interval, and "unscheduled" otherwise.</t>
+to the next Hello (if the most recent scheduled Hello of the right kind
+was received at time t0 and carried interval i, then the previous promise
+of sending another Hello before time t0&nbsp;+&nbsp;i still holds).  We
+say that a Hello is "scheduled" if it carries a non-zero interval, and
+"unscheduled" otherwise.</t>
 
 <t>There are two kinds of Hellos: Multicast Hellos, which use
 a per-interface Hello counter, and Unicast Hellos, which use

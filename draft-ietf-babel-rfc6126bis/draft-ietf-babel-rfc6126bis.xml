@@ -2219,7 +2219,7 @@ are as follows:</t>
 <t>As defined in this document, Babel is a completely insecure protocol.
 Any attacker can attract data traffic by advertising routes with a low
 metric or a high seqno.  This issue can be solved either by a lower-layer
-security mechanisms (e.g. link-layer security), or by deploying a suitable
+security mechanism (e.g. link-layer security), or by deploying a suitable
 authentication mechanism within Babel itself.  With the exception of Hello
 TLVs used for discovery, Babel control traffic can be carried over
 unicast, which makes it possible to protect Babel traffic with a protocol

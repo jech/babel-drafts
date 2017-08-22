@@ -658,10 +658,10 @@ on the order of minutes and reset as specified in <xref target="maintaining-fd"/
 
 </section>
 
-<section title="The Route Table" anchor="route-table">
+<section title="The Routing Table" anchor="route-table">
 
-<t>The route table contains the routes known to this node.  It is indexed
-by triples of the form (prefix, plen, neighbour), and every route table
+<t>The routing table contains the routes known to this node.  It is indexed
+by triples of the form (prefix, plen, neighbour), and every routing table
 entry contains the following data:
 <list style="symbols">
 <t>the source (prefix, plen, router-id) for which this route is advertised;</t>
@@ -675,12 +675,12 @@ it is currently being used for forwarding and is being advertised.</t>
 </list>
 </t>
 
-<t>There is one timer associated with each route table entry &mdash; the
+<t>There is one timer associated with each routing table entry &mdash; the
 route expiry timer.  It is initialised and reset as specified in
 <xref target="route-acquisition"/>.</t>
 
 <t>Note that there are two distinct (seqno, metric) pairs associated to
-each route: the route's distance, which is stored in the route table, and
+each route: the route's distance, which is stored in the routing table, and
 the feasibility distance, stored in the source table and shared between
 all routes with the same source.</t>
 
@@ -1013,7 +1013,7 @@ whether it already has a routing table entry indexed by (prefix, plen).</t>
   <t>if the update is unfeasible, it MAY be ignored;</t>
   <t>if the metric is infinite (the update is a retraction of a route we
   do not know about), the update is ignored;</t>
-  <t>otherwise, a new route table entry is created, indexed by (prefix,
+  <t>otherwise, a new routing table entry is created, indexed by (prefix,
   plen, neigh), with source equal to (prefix, plen, router-id), seqno
   equal to seqno and an advertised metric equal to the metric carried by
   the update.</t>
@@ -1032,7 +1032,7 @@ If such an entry exists:
   a retraction) MUST be sent in a timely manner (see <xref
   target="triggered-updates"/>).</t>
 </list>
-Note that the route table may contain unfeasible routes, either because
+Note that the routing table may contain unfeasible routes, either because
 they were created by an unfeasible update or due to a metric fluctuation.
 Such routes are never selected, since they are not known to be loop-free;
 should all the feasible routes become unusable, however, the unfeasible
@@ -1042,7 +1042,7 @@ requests along them (see <xref target="sending-requests"/>).</t>
 <t>When a route's expiry timer triggers, the behaviour depends on whether
 the route's metric is finite.  If the metric is finite, it is set to
 infinity and the expiry timer is reset.  If the metric is already infinite,
-the route is flushed from the route table.</t>
+the route is flushed from the routing table.</t>
 
 <t>After the routing table is updated, the route selection procedure
 (<xref target="route-selection"/>) is run.</t>
@@ -1273,7 +1273,7 @@ unicast address of the neighbour that sent the request.</t>
 <section title="Route Requests" anchor="handling-route-requests">
 
 <t>When a node receives a route request for a given prefix, it checks its
-route table for a selected route to this exact prefix.  If such a route
+routing table for a selected route to this exact prefix.  If such a route
 exists, it MUST send an update; if such a route does not, it MUST send
 a retraction for that prefix.</t>
 
@@ -2666,7 +2666,7 @@ use due to the lack of implementation experience.</t>
 <t>Babel is a fairly economic protocol.  Updates take between 12 and 40
 octets per destination, depending on the address family and how successful
 compression is; in a double-stack flat network, an average of less than 24
-octets per destination is typical.  The route table occupies about 35
+octets per destination is typical.  The routing table occupies about 35
 octets per IPv6 entry.  To put these values into perspective, a single
 full-size Ethernet frame can carry some 65 route updates, and a megabyte
 of memory can contain a 20000-entry routing table and the associated
@@ -2743,7 +2743,7 @@ the Router-Id field.</t>
 <t>Added <xref target="extensions"/>.</t>
 <t>Added a mandatory bit in sub-TLVs.</t>
 <t>Changed compression state to be per-AF rather than per-AE.</t>
-<t>Added implementation hint for the route table.</t>
+<t>Added implementation hint for the routing table.</t>
 <t>Clarified how router-ids are computed when bit 0x40 is set in Updates.</t>
 <t>Relaxed the conditions for sending requests, and tightened the
 conditions for forwarding requests.</t>

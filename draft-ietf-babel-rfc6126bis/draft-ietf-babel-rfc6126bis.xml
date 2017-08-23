@@ -2297,7 +2297,7 @@ by <xref target="PACKETBB"/>.</t>
 <reference anchor="JITTER"><front>
     <title>The synchronization of periodic routing messages</title>
     <author fullname="Sally Floyd" initials="S." surname="Floyd"/>
-    <author fullname="Van Jacobsno" initials="V." surname="Jacobson"/>
+    <author fullname="Van Jacobson" initials="V." surname="Jacobson"/>
     <date month="April" year="1994"/>
   </front>
   <seriesInfo name="IEEE/ACM Transactions on Networking" value="2, 2, 122-136"/>

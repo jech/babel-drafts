@@ -7,7 +7,8 @@
 <?rfc sortrefs="yes" ?>
 <?rfc compact="no" ?>
 <rfc category="std" docName="draft-ietf-babel-rfc6126bis-03"
-     ipr="trust200902">
+     ipr="trust200902"
+     obsoletes="6126,7557">
 <front>
 <title>The Babel Routing Protocol</title>
 <author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek">
@@ -2216,6 +2217,10 @@ are as follows:</t>
 <c>1-15</c><c>Unassigned</c><c></c>
 </texttable>
 
+<t>IANA is instructed to replace all references to RFCs&nbsp;6126 and 7557
+in all of the registries mentioned above by references to this document.</t>
+
+
 </section>
 
 <section title="Security Considerations">
@@ -2246,9 +2251,9 @@ packets are carried over IPv4.</t>
 
 <t>A number of people have contributed text and ideas to this
 specification.  I am particularly indebted to Matthieu Boutier, Gwendoline
-Chouasne, Margaret Cullen, Toke Hoiland-Jorgensen, and especially David
-Schinazi.  The address compression technique was inspired by <xref
-target="PACKETBB"/>.</t>
+Chouasne, Margaret Cullen, Donald Eastlake, Toke Hoiland-Jorgensen, and
+especially David Schinazi.  The address compression technique was inspired
+by <xref target="PACKETBB"/>.</t>
 
 </section>
 
@@ -2292,7 +2297,7 @@ target="PACKETBB"/>.</t>
 <reference anchor="JITTER"><front>
     <title>The synchronization of periodic routing messages</title>
     <author fullname="Sally Floyd" initials="S." surname="Floyd"/>
-    <author fullname="Van Jacobson" initials="V." surname="Jacobson"/>
+    <author fullname="Van Jacobsno" initials="V." surname="Jacobson"/>
     <date month="April" year="1994"/>
   </front>
   <seriesInfo name="IEEE/ACM Transactions on Networking" value="2, 2, 122-136"/>

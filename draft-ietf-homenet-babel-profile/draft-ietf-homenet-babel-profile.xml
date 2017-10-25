@@ -28,7 +28,7 @@
 
 <abstract>
 <t>This document defines the subset of the Babel routing protocol
-<xref target="RFC6126"/> and its extensions that a Homenet router must
+<xref target="RFC6126bis"/> and its extensions that a Homenet router must
 implement, as well as the interactions between HNCP <xref target="RFC7788"/>
 and Babel.</t>
 </abstract>
@@ -42,7 +42,7 @@ and Babel.</t>
 <t>The core of the Homenet protocol suite consists of HNCP 
 <xref target="RFC7788"/>, a protocol used for flooding configuration
 information and assigning prefixes to links, combined with the Babel
-routing protocol <xref target="RFC6126"/>.  Babel is an extensible,
+routing protocol <xref target="RFC6126bis"/>.  Babel is an extensible,
 flexible and modular protocol: minimal implementations of Babel have been
 demonstrated that consist of a few hundred of lines of code, while the
 "large" implementation includes support for a number of extensions and
@@ -58,7 +58,7 @@ HNCP interacts with Babel.</t>
 <t>The Babel routing protocol and its extensions are defined in a number
 of documents:
 <list style="symbols">
-<t>The body of RFC&nbsp;6126 <xref target="RFC6126"/> defines the core,
+<t>The body of RFC&nbsp;6126 <xref target="RFC6126bis"/> defines the core,
 unextended protocol.  It allows Babel's control data to be carried over
 either link-local IPv6 or IPv4, and in either case allows announcing both
 IPv4 and IPv6 routes.  It leaves link cost estimation, metric computation
@@ -304,7 +304,7 @@ help.</t>
 
 <references title="Normative References">
 
-<reference anchor="BABEL"><front>
+<reference anchor="RFC6126bis"><front>
 <title>The Babel Routing Protocol</title>
 <author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
 <date month="May" year="2017"/>
@@ -336,9 +336,9 @@ help.</t>
 <title>Source-Specific Routing in Babel</title>
 <author initials='M' surname='Boutier' fullname='Matthieu Boutier'></author>
 <author initials='J' surname='Chroboczek' fullname='Juliusz Chroboczek'></author>
-<date day="03" month="July" year="2017"/>
+<date day="21" month="August" year="2017"/>
 </front>
-<seriesInfo name='Internet-Draft' value='draft-boutier-babel-source-specific-03'/>
+<seriesInfo name='Internet-Draft' value='draft-ietf-babel-source-specific-01'/>
 </reference>
 
 </references>

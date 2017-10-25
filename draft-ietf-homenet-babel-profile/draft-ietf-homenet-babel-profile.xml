@@ -6,7 +6,7 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="no" ?>
-<rfc category="exp" docName="draft-ietf-homenet-babel-profile-02"
+<rfc category="exp" docName="draft-ietf-homenet-babel-profile-03"
      ipr="trust200902">
 <front>
 <title abbrev="Homenet Babel profile">Homenet profile of the Babel routing protocol</title>
@@ -24,7 +24,7 @@
 </address>
 </author>
 
-<date day="3" month="July" year="2017"/>
+<date day="25" month="October" year="2017"/>
 
 <abstract>
 <t>This document defines the subset of the Babel routing protocol

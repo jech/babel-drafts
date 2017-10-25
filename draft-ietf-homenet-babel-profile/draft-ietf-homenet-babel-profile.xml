@@ -304,12 +304,12 @@ help.</t>
 
 <references title="Normative References">
 
-<reference anchor="RFC6126"><front>
+<reference anchor="BABEL"><front>
 <title>The Babel Routing Protocol</title>
 <author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
-<date month="February" year="2011"/>
+<date month="May" year="2017"/>
 </front>
-<seriesInfo name="RFC" value="6126"/>
+<seriesInfo name="Internet Draft" value="draft-ietf-babel-rfc6126bis-02"/>
 </reference>
 
 <reference anchor='RFC7557'><front>
@@ -336,9 +336,9 @@ help.</t>
 <title>Source-Specific Routing in Babel</title>
 <author initials='M' surname='Boutier' fullname='Matthieu Boutier'></author>
 <author initials='J' surname='Chroboczek' fullname='Juliusz Chroboczek'></author>
-<date month='January' day='5' year='2015' />
+<date day="03" month="July" year="2017"/>
 </front>
-<seriesInfo name='Internet-Draft' value='draft-boutier-babel-source-specific-01' />
+<seriesInfo name='Internet-Draft' value='draft-boutier-babel-source-specific-03'/>
 </reference>
 
 </references>

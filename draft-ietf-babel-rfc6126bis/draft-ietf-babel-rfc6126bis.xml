@@ -24,6 +24,19 @@
 <email>jch@irif.fr</email>
 </address>
 </author>
+<author fullname="David Schinazi" initials="D." surname="Schinazi">
+<organization>Apple Inc.</organization>
+<address>
+<postal>
+<street>1 Infinite Loop</street>
+<city>Cupertino</city>
+<region>California</region>
+<code>95014</code>
+<country>US</country>
+</postal>
+<email>dschinazi@apple.com</email>
+</address>
+</author>
 
 <date day="21" month="August" year="2017"/>
 

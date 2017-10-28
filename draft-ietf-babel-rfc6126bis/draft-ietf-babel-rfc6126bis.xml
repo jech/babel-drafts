@@ -1466,7 +1466,7 @@ interface's MTU (adjusted for lower-layer headers) or 512 octets,
 whichever is larger.  Babel packets MUST NOT be sent in IPv6 Jumbograms.</t>
 
 <t>In order to avoid global synchronisation of a Babel network and to
-aggregate multiple TLVs into large packets, a Babel node MUST buffer every
+aggregate multiple TLVs into large packets, a Babel node SHOULD buffer every
 TLV and delay sending a packet by a small, randomly chosen delay <xref
 target="JITTER"/>.  In order to allow accurate computation of packet loss
 rates, this delay MUST NOT be larger than half the advertised Hello
@@ -2803,6 +2803,7 @@ allows sub-TLVs.</t>
 <t>Updated IANA Considerations.</t>
 <t>Updated Security Considerations.</t>
 <t>Renamed routing table back to route table.</t>
+<t>Made buffering outgoing updates a SHOULD.</t>
 <t>A number of minor wording changes and clarifications.</t>
 </list></t>
 </section>

@@ -672,10 +672,10 @@ on the order of minutes and reset as specified in <xref target="maintaining-fd"/
 
 </section>
 
-<section title="The Routing Table" anchor="route-table">
+<section title="The Route Table" anchor="route-table">
 
-<t>The routing table contains the routes known to this node.  It is indexed
-by triples of the form (prefix, plen, neighbour), and every routing table
+<t>The route table contains the routes known to this node.  It is indexed
+by triples of the form (prefix, plen, neighbour), and every route table
 entry contains the following data:
 <list style="symbols">
 <t>the source (prefix, plen, router-id) for which this route is advertised;</t>
@@ -689,12 +689,12 @@ it is currently being used for forwarding and is being advertised.</t>
 </list>
 </t>
 
-<t>There is one timer associated with each routing table entry &mdash; the
+<t>There is one timer associated with each route table entry &mdash; the
 route expiry timer.  It is initialised and reset as specified in
 <xref target="route-acquisition"/>.</t>
 
 <t>Note that there are two distinct (seqno, metric) pairs associated to
-each route: the route's distance, which is stored in the routing table, and
+each route: the route's distance, which is stored in the route table, and
 the feasibility distance, stored in the source table and shared between
 all routes with the same source.</t>
 
@@ -1020,14 +1020,14 @@ optionally be derived from the low-order bits of the advertised prefix.</t>
 
 <t>When a Babel node receives an update (prefix, plen, router-id, seqno, metric)
 from a neighbour neigh with a link cost value equal to cost, it checks
-whether it already has a routing table entry indexed by (prefix, plen).</t>
+whether it already has a route table entry indexed by (prefix, plen).</t>
 
 <t>If no such entry exists:
 <list style="symbols">
   <t>if the update is unfeasible, it MAY be ignored;</t>
   <t>if the metric is infinite (the update is a retraction of a route we
   do not know about), the update is ignored;</t>
-  <t>otherwise, a new routing table entry is created, indexed by (prefix,
+  <t>otherwise, a new entry is created in the route table, indexed by (prefix,
   plen, neigh), with source equal to (prefix, plen, router-id), seqno
   equal to seqno and an advertised metric equal to the metric carried by
   the update.</t>
@@ -1046,7 +1046,7 @@ If such an entry exists:
   a retraction) MUST be sent in a timely manner (see <xref
   target="triggered-updates"/>).</t>
 </list>
-Note that the routing table may contain unfeasible routes, either because
+Note that the route table may contain unfeasible routes, either because
 they were created by an unfeasible update or due to a metric fluctuation.
 Such routes are never selected, since they are not known to be loop-free;
 should all the feasible routes become unusable, however, the unfeasible
@@ -1056,9 +1056,9 @@ requests along them (see <xref target="sending-requests"/>).</t>
 <t>When a route's expiry timer triggers, the behaviour depends on whether
 the route's metric is finite.  If the metric is finite, it is set to
 infinity and the expiry timer is reset.  If the metric is already infinite,
-the route is flushed from the routing table.</t>
+the route is flushed from the route table.</t>
 
-<t>After the routing table is updated, the route selection procedure
+<t>After the route table is updated, the route selection procedure
 (<xref target="route-selection"/>) is run.</t>
 
 </section>
@@ -1071,7 +1071,7 @@ and a shorter prefix P' that covers P is reachable, P' cannot in general
 be used for routing packets destined to P without running the risk of
 creating a routing loop (<xref target="overlapping-prefixes"/>).</t>
 
-<t>To avoid this issue, whenever a prefix P is retracted, a routing table
+<t>To avoid this issue, whenever a prefix P is retracted, a route table
 entry with infinite metric is maintained as described in <xref
 target="route-acquisition"/> above.  As long as this entry is maintained,
 packets destined to an address within P MUST NOT be forwarded by following
@@ -1160,7 +1160,7 @@ metric is set to some arbitrary finite value (typically 0), and the seqno
 is set to the local router's sequence number.</t>
 
 <t>If an update is for a route learned from another Babel speaker, the
-router-id and sequence number are copied from the routing table entry, and
+router-id and sequence number are copied from the route table entry, and
 the metric is computed as specified in <xref target="metric-computation"/>.</t>
 
 <section title="Periodic Updates">
@@ -1262,7 +1262,7 @@ multicast.</t>
 
 <section title="Explicit Requests" anchor="requests">
 
-<t>In normal operation, a node's routing table is populated by the regular
+<t>In normal operation, a node's route table is populated by the regular
 and triggered updates sent by its neighbours.  Under some circumstances,
 however, a node sends explicit requests in order to cause a resynchronisation
 with the source after a mobility event or to prevent a route from
@@ -1287,19 +1287,19 @@ unicast address of the neighbour that sent the request.</t>
 <section title="Route Requests" anchor="handling-route-requests">
 
 <t>When a node receives a route request for a given prefix, it checks its
-routing table for a selected route to this exact prefix.  If such a route
+route table for a selected route to this exact prefix.  If such a route
 exists, it MUST send an update; if such a route does not, it MUST send
 a retraction for that prefix.</t>
 
 <t>When a node receives a wildcard route request, it SHOULD send a full
-routing table dump.</t>
+route table dump.</t>
 
 </section>
 
 <section title="Seqno Requests" anchor="handling-seqno-requests">
 
 <t>When a node receives a seqno request for a given router-id and sequence
-number, it checks whether its routing table contains a selected entry for
+number, it checks whether its route table contains a selected entry for
 that prefix.  If a selected route for the given prefix exists, it has
 finite metric, and either the router-ids are different or the router-ids
 are equal and the entry's sequence number is no smaller (modulo 2^16) than
@@ -1965,7 +1965,7 @@ preceding Update TLV in the same address family with the Prefix flag set.</t>
 <t hangText="Interval">An upper bound, expressed in centiseconds, on the
 time after which the sending node will send a new update for this prefix.
 This MUST NOT be 0.  The receiving node will use this value to compute
-a hold time for this routing table entry.  The value FFFF hexadecimal
+a hold time for the route table entry.  The value FFFF hexadecimal
 (infinity) expresses that this announcement will not be repeated unless
 a request is received (<xref target="request-expiring"/>).</t>
 <t hangText="Seqno">The originator's sequence number for this update.</t>
@@ -2057,7 +2057,7 @@ ignored.</t>
 ]]></artwork></figure>
 
 <t>A Route Request TLV prompts the receiver to send an update for a given
-prefix, or a full routing table dump.</t>
+prefix, or a full route table dump.</t>
 
 <t>Fields :
 <list style="hanging" hangIndent="10">
@@ -2065,7 +2065,7 @@ prefix, or a full routing table dump.</t>
 <t hangText="Length">The length of the body, exclusive of the Type and
 Length fields.</t>
 <t hangText="AE">The encoding of the Prefix field.  The value 0 specifies
-that this is a request for a full routing table dump (a wildcard
+that this is a request for a full route table dump (a wildcard
 request).</t>
 <t hangText="Plen">The length of the requested prefix.</t>
 <t hangText="Prefix">The prefix being requested.  This field's size is
@@ -2074,7 +2074,7 @@ Plen/8 rounded upwards.</t>
 
 <t>A Request TLV prompts the receiver to send an update message (possibly
 a retraction) for the prefix specified by the AE, Plen, and Prefix fields,
-or a full dump of its routing table if AE is 0 (in which case Plen MUST be
+or a full dump of its route table if AE is 0 (in which case Plen MUST be
 0 and Prefix is of length 0).</t>
 
 <t>This TLV is self-terminating, and allows sub-TLVs.</t>
@@ -2685,10 +2685,10 @@ use due to the lack of implementation experience.</t>
 <t>Babel is a fairly economic protocol.  Updates take between 12 and 40
 octets per destination, depending on the address family and how successful
 compression is; in a double-stack flat network, an average of less than 24
-octets per destination is typical.  The routing table occupies about 35
+octets per destination is typical.  The route table occupies about 35
 octets per IPv6 entry.  To put these values into perspective, a single
 full-size Ethernet frame can carry some 65 route updates, and a megabyte
-of memory can contain a 20000-entry routing table and the associated
+of memory can contain a 20000-entry route table and the associated
 source table.</t>
 
 <t>Babel is also a reasonably simple protocol.  The sample implementation
@@ -2802,7 +2802,8 @@ any opinion about Unicast Hellos.</t>
 allows sub-TLVs.</t>
 <t>Updated IANA Considerations.</t>
 <t>Updated Security Considerations.</t>
-<t>Large number of minor wording changes and clarifications.</t>
+<t>Renamed routing table back to route table.</t>
+<t>A number of minor wording changes and clarifications.</t>
 </list></t>
 </section>
 

@@ -2263,10 +2263,10 @@ packets are carried over IPv4.</t>
 <section title="Acknowledgments">
 
 <t>A number of people have contributed text and ideas to this
-specification.  I am particularly indebted to Matthieu Boutier, Gwendoline
-Chouasne, Margaret Cullen, Donald Eastlake, Toke Hoiland-Jorgensen, and
-especially David Schinazi.  The address compression technique was inspired
-by <xref target="PACKETBB"/>.</t>
+specification.  The authors are particularly indebted to Matthieu Boutier,
+Gwendoline Chouasne, Margaret Cullen, Donald Eastlake and Toke
+Hoiland-Jorgensen.  The address compression technique was inspired by
+<xref target="PACKETBB"/>.</t>
 
 </section>
 

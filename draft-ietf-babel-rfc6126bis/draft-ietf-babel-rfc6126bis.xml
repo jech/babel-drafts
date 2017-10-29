@@ -1020,7 +1020,7 @@ optionally be derived from the low-order bits of the advertised prefix.</t>
 
 <t>When a Babel node receives an update (prefix, plen, router-id, seqno, metric)
 from a neighbour neigh with a link cost value equal to cost, it checks
-whether it already has a route table entry indexed by (prefix, plen).</t>
+whether it already has a route table entry indexed by (prefix, plen, neigh).</t>
 
 <t>If no such entry exists:
 <list style="symbols">

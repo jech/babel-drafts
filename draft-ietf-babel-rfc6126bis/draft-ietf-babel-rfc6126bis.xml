@@ -498,11 +498,11 @@ has been retracted by all of B's neighbours (<xref target="hold-time"/>).</t>
 <section title="Protocol Operation">
 
 <t>Every Babel speaker is assigned a router-id, which is an arbitrary
-string of 8 octets that is assumed unique across the routing domain.  We
-suggest that router-ids should be assigned in modified EUI-64
-format <xref target="ADDRARCH"/>.  (As a matter of fact, the protocol
-encoding is slightly more compact when router-ids are assigned in the same
-manner as the IPv6 layer assigns host IDs.)</t>
+string of 8 octets that is assumed unique across the routing domain.  For
+example, routers-ids could be assigned randomly, or they could derived
+from a link-layer address.  (The protocol encoding is slightly more
+compact when router-ids are assigned in the same manner as the IPv6 layer
+assigns host IDs.)</t>
 
 <section title="Message Transmission and Reception">
 
@@ -1483,8 +1483,7 @@ applications of Babel.</t>
 
 <section title="Router-Id">
 <t>A router-id is an arbitrary 8-octet value.  A router-id MUST NOT
-consist of either all zeroes or all ones.  Router-ids SHOULD be assigned
-in modified EUI-64 format <xref target="ADDRARCH"/>.</t>
+consist of either all zeroes or all ones.</t>
 </section>
 
 <section title="Address">
@@ -2284,15 +2283,6 @@ Hoiland-Jorgensen.  The address compression technique was inspired by
   <seriesInfo name="RFC" value="2119"/>
 </reference>
 
-<reference anchor="ADDRARCH"><front>
-    <title>IP Version 6 Addressing Architecture</title>
-    <author fullname="Robert M. Hinden" initials="R. M." surname="Hinden"/>
-    <author fullname="Stephen E. Deering" initials="S. E." surname="Deering"/>
-    <date month="February" year="2006"/>
-  </front>
-  <seriesInfo name="RFC" value="4291"/>
-</reference>
-
 <reference anchor="RFC5226">
 <front>
 <title>Guidelines for Writing an IANA Considerations Section in RFCs</title>
@@ -2804,6 +2794,7 @@ allows sub-TLVs.</t>
 <t>Updated Security Considerations.</t>
 <t>Renamed routing table back to route table.</t>
 <t>Made buffering outgoing updates a SHOULD.</t>
+<t>Weakened advice to use modified EUI-64 in router-ids.</t>
 <t>A number of minor wording changes and clarifications.</t>
 </list></t>
 </section>

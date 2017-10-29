@@ -2599,6 +2599,8 @@ Unicast Hellos;</t>
 <t>IHU Hold Time: 3.5 times the advertised IHU interval.</t>
 <t>Route Expiry Time: 3.5 times the advertised update interval.</t>
 <t>Source GC time: 3 minutes.</t>
+<t>Request timeout: initially 2 seconds, doubled every time a request is
+resent, up to a maximum of three times.</t>
 </list></t>
 
 <t>The amount of jitter applied to a packet depends on whether it contains
@@ -2795,6 +2797,7 @@ allows sub-TLVs.</t>
 <t>Renamed routing table back to route table.</t>
 <t>Made buffering outgoing updates a SHOULD.</t>
 <t>Weakened advice to use modified EUI-64 in router-ids.</t>
+<t>Added information about sending requests to Appendix B.</t>
 <t>A number of minor wording changes and clarifications.</t>
 </list></t>
 </section>

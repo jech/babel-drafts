@@ -38,7 +38,7 @@
 </address>
 </author>
 
-<date day="28" month="October" year="2017"/>
+<date day="29" month="October" year="2017"/>
 
 <abstract>
 <t>Babel is a loop-avoiding distance-vector routing protocol that is
@@ -76,11 +76,11 @@ a technique pioneered by Destination-Sequenced Distance-Vector routing
 <list style="symbols">
 <t>when every prefix is originated by at most one router, Babel never
   suffers from routing loops;</t>
-<t>when a prefix is originated by multiple routers, Babel may occasionally
-  create a transient routing loop for this particular prefix; this loop
-  disappears in a time proportional to its diameter, and never again (up
-  to an arbitrary garbage-collection (GC) time) will the routers involved
-  participate in a routing loop for the same prefix;</t>
+<t>when a single prefix is originated by multiple routers, Babel may
+  occasionally create a transient routing loop for this particular prefix;
+  this loop disappears in a time proportional to its diameter, and never
+  again (up to an arbitrary garbage-collection (GC) time) will the routers
+  involved participate in a routing loop for the same prefix;</t>
 <t>assuming bounded packet loss rates, any routing black-holes that
   may appear after a mobility event are corrected in a time at most
   proportional to the network's diameter.</t>
@@ -504,7 +504,8 @@ from a link-layer address.  (The protocol encoding is slightly more
 compact when router-ids are assigned in the same manner as the IPv6 layer
 assigns host IDs.)</t>
 
-<section title="Message Transmission and Reception">
+<section title="Message Transmission and Reception"
+         anchor="transmission-reception">
 
 <t>Babel protocol packets are sent in the body of a UDP datagram.  Each
 Babel packet consists of zero or more TLVs.  Most TLVs may contain
@@ -1121,7 +1122,7 @@ routers may lead to persistent route oscillation.</t>
 policy needs to take into account multiple mutually contradictory
 criteria; in roughly decreasing order of importance, these are:
 <list style="symbols">
-  <t>routes with a small metric should be preferred over routes with a large
+  <t>routes with a small metric should be preferred to routes with a large
     metric;</t>
   <t>switching router-ids should be avoided;</t>
   <t>routes through stable neighbours should be preferred to routes
@@ -1233,8 +1234,9 @@ is updated as follows:
 </list></t>
 
 <t>The garbage-collection timer for the entry is then reset.  Note that
-the garbage-collection timer is not reset (and the feasibility distance is
-not updated) when a retraction (an update with infinite metric) is sent.</t>
+the feasibility distance is not updated and the garbage-collection timer
+is not reset when a retraction (an update with infinite metric) is
+sent.</t>
 
 <t>When the garbage-collection timer expires, the entry is removed from
 the source table.</t>
@@ -1288,11 +1290,12 @@ unicast address of the neighbour that sent the request.</t>
 
 <t>When a node receives a route request for a given prefix, it checks its
 route table for a selected route to this exact prefix.  If such a route
-exists, it MUST send an update; if such a route does not, it MUST send
-a retraction for that prefix.</t>
+exists, it MUST send an update (over unicast or over multicast); if such
+a route does not, it MUST send a retraction for that prefix.</t>
 
 <t>When a node receives a wildcard route request, it SHOULD send a full
-route table dump.</t>
+route table dump.  Full route dumps MAY be rate-limited, especially if
+they are sent over multicast.</t>
 
 </section>
 
@@ -1357,11 +1360,11 @@ another feasible route for the same prefix.  It may be the case, however,
 that no such routes are available.</t>
 
 <t>A node that has lost all feasible routes to a given destination but
-still has unexpired unfeasible routes to that destination, MUST send
+still has unexpired unfeasible routes to that destination MUST send
 a seqno request; if it doesn't have any such routes, it MAY still send
 a seqno request.  The router-id of the request is set to the router-id of
 the route that it has just lost, and the requested seqno is the value
-contained in the source table, plus 1.</t>
+contained in the source table plus 1.</t>
 
 <t>If the node has any (unfeasible) routes to the requested destination,
 then it MUST send the request to at least one of the next-hop neighbours
@@ -1380,9 +1383,9 @@ reach the source.)</t>
 
 <t>In order to compensate for packet loss, a node SHOULD repeat such
 a request a small number of times if no route becomes feasible within
-a short time.  Under heavy packet loss, however, all such requests might
-be lost; in that case, the mechanism in the next section will eventually
-ensure that a new seqno is received.</t>
+a short time.  In the presence of heavy packet loss, however, all such
+requests might be lost; in that case, the mechanism in the next section
+will eventually ensure that a new seqno is received.</t>
 
 </section>
 
@@ -1396,7 +1399,8 @@ ignore the update or unselect the route.</t>
 <t>In order to keep routes from spuriously expiring because they have
 become unfeasible, a node SHOULD send a unicast seqno request when it
 receives an unfeasible update for a route that is currently selected.  The
-requested sequence number is computed from the source table as above.</t>
+requested sequence number is computed from the source table as in <xref
+target="avoiding-starvation"/> above.</t>
 
 <t>Additionally, since metric computation does not necessarily coincide
 with the delay in propagating updates, a node might receive an unfeasible
@@ -1421,7 +1425,7 @@ a selected route expires, a Babel node SHOULD send a unicast route request
 to the neighbour that advertised this route; since nodes always send
 either updates or retractions in response to non-wildcard route requests
 (<xref target="handling-route-requests"/>), this will usually result in
-either the route being refreshed or retracted.</t>
+the route being either refreshed or retracted.</t>
 
 </section>
 
@@ -1459,10 +1463,10 @@ lower-layer fragmentation, a Babel node SHOULD attempt to maximise the
 size of the packets it sends, up to the outgoing interface's MTU adjusted
 for lower-layer headers (28 octets for UDP over IPv4, 48 octets for UDP
 over IPv6).  It MUST NOT send packets larger than the attached interface's
-MTU (adjusted for lower-layer headers) or 512 octets, whichever is larger,
-but not exceeding 2^16 - 1 (adjusted for lower-layer headers).  Every Babel
+MTU adjusted for lower-layer headers or 512 octets, whichever is larger,
+but not exceeding 2^16 - 1 adjusted for lower-layer headers.  Every Babel
 speaker MUST be able to receive packets that are as large as any attached
-interface's MTU (adjusted for lower-layer headers) or 512 octets,
+interface's MTU adjusted for lower-layer headers or 512 octets,
 whichever is larger.  Babel packets MUST NOT be sent in IPv6 Jumbograms.</t>
 
 <t>In order to avoid global synchronisation of a Babel network and to
@@ -2191,7 +2195,7 @@ any TLV that allows sub-TLVs.</t>
 <t>IANA has registered the UDP port number 6696, called "babel", for use
 by the Babel protocol.</t>
 
-<t>IANA has registered the IPv6 multicast group ff02:0:0:0:0:0:1:6 and the
+<t>IANA has registered the IPv6 multicast group ff02::1:6 and the
 IPv4 multicast group 224.0.0.111 for use by the Babel protocol.</t>
 
 <t>IANA has created a registry called "Babel TLV Types".  The values in
@@ -2244,7 +2248,7 @@ security mechanism (e.g. link-layer security), or by deploying a suitable
 authentication mechanism within Babel itself.  With the exception of Hello
 TLVs used for discovery, Babel control traffic can be carried over
 unicast, which makes it possible to protect Babel traffic with a protocol
-that can only protect unicast data, for example IPsec with IKEv2 or DTLS.</t>
+that can only protect unicast data, for example IPsec with IKEv2, or DTLS.</t>
 
 <t>The information that a Babel node announces to the whole routing domain
 is often sufficient to determine a mobile node's physical location with
@@ -2394,19 +2398,17 @@ Hoiland-Jorgensen.  The address compression technique was inspired by
 
 <t>The strategy for computing link costs and route metrics is a local
 matter; Babel itself only requires that it comply with the conditions given
-in <xref target="cost-computation"/> and
-<xref target="metric-computation"/>.  Different nodes may use different
-strategies in a single network and may use different strategies on
-different interface types.  This section gives a few examples of such
-strategies.</t>
+in <xref target="cost-computation"/> and <xref target="metric-computation"/>.
+Different nodes may use different strategies in a single network and may
+use different strategies on different interface types.  This section describes
+the strategies used by the sample implementation of Babel.</t>
 
 <t>The sample implementation of Babel sends periodic Multicast Hellos, and
 never sends Unicast Hellos.  It maintains statistics about the last 16
 received Hello TLVs of each kind (<xref target="hello-history"/>),
 computes costs by using the 2-out-of-3 strategy (<xref target="k-j"/>) on
 wired links, and ETX (<xref target="etx"/>) on wireless links.  It uses an
-additive algebra for metric computation (<xref
-target="additive-metric"/>).</t>
+additive algebra for metric computation (<xref target="additive-metric"/>).</t>
 
 <section title="Maintaining Hello History" anchor="hello-history">
 
@@ -2560,8 +2562,7 @@ update with metric m over a link with cost c, it might compute a metric
 M(c, m) = k + c + m, where k depends on the battery status.</t>
 
 <t>In order to preserve strict monotonicity
-(<xref target="metric-computation"/>),
-the value k must be greater than -c.</t>
+(<xref target="metric-computation"/>), the value k must be greater than -c.</t>
 
 </section>
 
@@ -2574,8 +2575,7 @@ the value k must be greater than -c.</t>
 <t>The choice of time constants is a trade-off between fast detection of
 mobility events and protocol overhead.  Two implementations of Babel with
 different time constants will interoperate, although the resulting
-convergence time will most likely be dictated by the slowest of the two
-implementations.</t>
+convergence time will most likely be dictated by the slower of the two.</t>
 
 <t>Experience with the sample implementation of Babel indicates that the
 Hello interval is the most important time constant: a mobility event is
@@ -2604,9 +2604,10 @@ resent, up to a maximum of three times.</t>
 </list></t>
 
 <t>The amount of jitter applied to a packet depends on whether it contains
-any urgent TLVs or not.  Urgent triggered updates and urgent requests are
-delayed by no more than 200ms; other TLVs are delayed by no more than
-one-half the Multicast Hello interval.</t>
+any urgent TLVs or not (<xref target="transmission-reception"/>).  Urgent
+triggered updates and urgent requests are delayed by no more than 200ms;
+acknowledgments, by no more than the associated deadline; and other TLVs
+by no more than one-half the Multicast Hello interval.</t>
 
 </section>
 
@@ -2660,9 +2661,10 @@ a new set of compression state.  Additionally, since the Next Hop TLV
 creates state specific to a given address family, as opposed to a given
 AE, a new AE for a previously defined address family must not be used in
 the Next Hop TLV if backwards compatibility is required.  A similar issue
-arises with Update TLVs with unknown AEs establishing a new router-id
-(with Router-Id flag set).  Therefore, defining new AEs must be done with
-care if compatibility with unextended implementations is required.</t>
+arises with Update TLVs with unknown AEs establishing a new router-id (due
+to the Router-Id flag being set).  Therefore, defining new AEs must be
+done with care if compatibility with unextended implementations is
+required.</t>
 
 <t>The packet trailer (the space after the declared length of the packet
 but within the payload of the UDP datagram) was originally intended to
@@ -2677,11 +2679,10 @@ use due to the lack of implementation experience.</t>
 <t>Babel is a fairly economic protocol.  Updates take between 12 and 40
 octets per destination, depending on the address family and how successful
 compression is; in a double-stack flat network, an average of less than 24
-octets per destination is typical.  The route table occupies about 35
-octets per IPv6 entry.  To put these values into perspective, a single
-full-size Ethernet frame can carry some 65 route updates, and a megabyte
-of memory can contain a 20000-entry route table and the associated
-source table.</t>
+octets per update is typical.  The route table occupies about 35 octets
+per IPv6 entry.  To put these values into perspective, a single full-size
+Ethernet frame can carry some 65 route updates, and a megabyte of memory
+can contain a 20000-entry route table and the associated source table.</t>
 
 <t>Babel is also a reasonably simple protocol.  The sample implementation
 consists of less than 12&nbsp;000 lines of C code, and it compiles to less
@@ -2704,7 +2705,7 @@ hence it need not evaluate the feasibility condition or maintain a source
 table.</t>
 
 <t>No matter how primitive, a stub implementation MUST parse sub-TLVs
-attached to any TLVs that it understands and check for the mandatory bit.
+attached to any TLVs that it understands and check the mandatory bit.
 It MUST answer acknowledgment requests and MUST participate in the
 Hello/IHU protocol.  It MUST also be able to reply to seqno requests for
 routes that it announces and SHOULD be able to reply to route requests.</t>

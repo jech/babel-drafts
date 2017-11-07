@@ -7,7 +7,7 @@
 <?rfc sortrefs="yes" ?>
 <?rfc compact="yes" ?>
 <rfc category="std" docName="draft-ietf-babel-source-specific-01"
-ipr="trust200902" updates="6126bis">
+ipr="trust200902">
 <front>
 <title>Source-Specific Routing in Babel</title>
 <author fullname="Matthieu Boutier" initials="M." surname="Boutier">
@@ -40,12 +40,11 @@ ipr="trust200902" updates="6126bis">
 <date day="21" month="August" year="2017"/>
 
 <abstract>
-<t>Source-specific routing is an extension to traditional next-hop routing
-where packets are forwarded according to both their destination and their
-source address.  This document describes the source-specific routing
-extension to the Standard Track's Babel routing protocol defined in <xref
-target="BABEL"/>.  It is incompatible with the Experimental Track's Babel
-<xref target="RFC6126"/>.</t>
+<t>Source-specific routing is an extension to traditional next-hop routing where
+packets are forwarded according to both their destination and their source
+address.  This document describes the source-specific routing extension to the
+Standard Track's Babel routing protocol.  It is incompatible with the
+Experimental Track's Babel.</t>
 
 <t>Source-specific routing is also known as Source Address Dependent
 Routing, SAD Routing, SADR, Destination/Source Routing or
@@ -59,7 +58,8 @@ Source/Destination Routing.</t>
 <section title="TODOs">
 <t><list style="symbols">
   <t>Source Prefix sub-TLV type: TBD</t>
-  <t>check references (Section) for BABEL in 6126bis</t>
+  <t>check references (Section) for BABEL in 6126bis
+  (done in November 2017)</t>
 </list></t>
 </section>
 
@@ -73,16 +73,16 @@ depends on the destination address of the packets and on the entries of
 the forwarding table.  When a packet is about to be routed, its
 destination address is compared to the prefixes of the routing table: the
 entry with the most specific prefix containing the destination address of
-the packet is choosen, and the packet is forwarded to the associated
+the packet is chosen, and the packet is forwarded to the associated
 next-hop.  Next-hop routing is a simple, well understood paradigm that
 works satisfactorily in a large number of cases.</t>
 
 <t>Source-specific routing is a modest extension of next-hop routing where
-the forwarding decision additionnaly depends on the source address of the
+the forwarding decision additionally depends on the source address of the
 packets.  The forwarding tables are extended to map pairs of prefixes
 (destination, source) to a next-hop.  When multiple entries are candidate
 to route a packet, the one with the most specific destination prefix is
-choosen, and in case of equality the one with the most specific source.
+chosen, and in case of equality the one with the most specific source.
 In source-specific routing, two packets with the same destination but
 different sources may be forwarded among different paths.</t>
 
@@ -100,10 +100,19 @@ target="SS-ROUTING"/>,<xref target="IETF-SSR"/>.</t>
 <t>This document describes the source-specific routing extension for the
 Babel routing protocol <xref target="BABEL"/>.  This involves changes to
 data structures and protocol messages.  The data structures receive an
-additionnal source prefix which is part of the index, similarly to (and
+additional source prefix which is part of the index, similarly to (and
 with) the destination prefix.  The Update, Route Request and Seqno Request
 are the three messages which carry a (destination) prefix: they are
 extended with a source prefix.</t>
+
+</section>
+
+<section title="Specification of Requirements">
+
+<t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+"SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+document are to be interpreted as described in <xref
+target="RFC2119"/>.</t>
 
 </section>
 
@@ -112,6 +121,14 @@ extended with a source prefix.</t>
 <t>Some of the data structures of a Babel node contains a destination
 prefix or are partly indexed by a destination prefix.  This extension adds
 a source prefix to these structures and indexes.</t>
+
+<t>A routing entry of the original protocol, which is not bound to any
+source prefix, is equivalent to the same routing entry with a zero length
+source prefix (both the two entries accept the same set of packets).
+Legacy entries are considered as carrying a zero length source prefix (see
+<xref target="route-acquisition"/>) and thus fit in our extended data
+structures.  This is compliant with <xref target="IETF-SSR"/>
+Section&nbsp;4.1.</t>
 
 <section title="The Source Table">
 
@@ -122,7 +139,7 @@ source table is indexed by triples of the form (prefix, source prefix,
 router-id).</t>
 
 <t><list style="symbols">
-<t>the source prefix specifying the source address of packets to which
+<t>The source prefix specifying the source address of packets to which
 this entry applies.</t>
 </list></t>
 
@@ -158,7 +175,7 @@ With this extension, the table of pending seqno requests is indexed by
 triples of the form (prefix, source prefix, router-id).</t>
 
 <t><list style="symbols">
-<t>the source prefix being requested.</t>
+<t>The source prefix being requested.</t>
 </list></t>
 
 </section>
@@ -178,9 +195,9 @@ without one necessarily being more specific than the other.  Consider for
 example the following routing table:</t>
 
 <figure><artwork><![CDATA[
-          destination                source    next-hop
-    2001:DB8:0:1::/64                  ::/0           A
-                 ::/0     2001:DB8:0:2::/64           B
+          destination                source     next-hop
+    2001:DB8:0:1::/64                  ::/0            A
+                 ::/0     2001:DB8:0:2::/64            B
 ]]></artwork></figure>
 
 <t>This specifies that all packets with destination in 2001:DB8:0:1::/64
@@ -215,6 +232,9 @@ target="SS-ROUTING"/> Section V.B for such an algorithm);</t>
 implementation MUST silently ignore (drop) any source-specific routes.</t>
 </list></t>
 
+<t>This behaviour aligns with the ongoing work in the routing area for how
+to handle source-specific routes <xref target="IETF-SSR"/>.</t>
+
 </section>
 
 <section title="Protocol Operation">
@@ -239,7 +259,7 @@ source-specific.</t>
 
 </section>
 
-<section title="Route Acquisition">
+<section title="Route Acquisition" anchor="route-acquisition">
 
 <t>When a non-source-specific Babel node receives a source-specific
 update, it silently ignores it.  When a source-specific Babel node
@@ -318,9 +338,9 @@ persistent routing loops in hybrid networks.</t>
 <t>Consider two nodes A and B, with A source-specific announcing a route
 to (D,&nbsp;S).  Suppose that B (non source-specific) merely ignores the
 source prefix information when it receives the update rather than ignoring
-the whole TLV, and reannounces the route as D.  This reannouncement reaches
-A, which treats it as (D,&nbsp;::/0).  Packets destined to D but not
-sourced in S will be forwarded by A to B, and by B to A, causing a
+the whole TLV, and re-announces the route as D.  This re-announcement
+reaches A, which treats it as (D,&nbsp;::/0).  Packets destined to D but
+not sourced in S will be forwarded by A to B, and by B to A, causing a
 persistent routing loop:</t>
 <figure><artwork><![CDATA[
     (D,S)                 (D)
@@ -351,9 +371,32 @@ backbone.</t>
 
 <section title="Protocol Encoding">
 
-<t>This extension defines a new sub-TLV used to carry a source prefix by
-the three following existing messages: Update, Route Request and Seqno
-Request.</t>
+<t>In the original Babel protocol, routing entries are characterized by a
+destination prefix.  Three TLVs use this destination prefix to communicate
+about routing entries.  The Update TLV announce that a node has (or
+retracts) a route for the given destination.  The Route Request asks a
+neighbour to send an Update for the given destination.  The Seqno Request
+asks the source of the route to increase the sequence number of the route.
+These three messages need to be augmented with a source prefix to handle
+source-specific routing entries.</t>
+
+<t>This extension defines a new sub-TLV used to carry a source prefix: the
+Source Prefix sub-TLV.  It can be used within an Update, a Route Request
+or a Seqno Request TLV to characterize source-specific routing entries, in
+conjunction with the destination prefix natively carried by these
+TLVs.</t>
+
+<t>Since a source-specific routing entry is characterized by a single
+destination prefix and a single source prefix, a source-specific message
+contains exactly one Source Prefix sub-TLV.  A node MUST NOT send more
+that one Source Prefix sub-TLV by TLV.  A node receiving more than one
+Source Prefix sub-TLV in a single TLV SHOULD ignore this TLV.  It MAY
+ignore the whole packet.</t>
+
+<t>As explained before, an entry with a zero length source prefix is not a
+source-specific entry.  Such entry MUST be sent with a legacy Update: a
+node MUST NOT send a zero length Source Prefix sub-TLV.  A node receiving
+a zero length Source Prefix SHOULD ignore the whole TLV.</t>
 
 <section title="Source Prefix sub-TLV">
 <figure><artwork><![CDATA[
@@ -380,9 +423,11 @@ field's size is (Source Plen)/8 rounded upwards.</t>
 <t>The source prefix encoding (AE) is the same as the Prefix's.  It is
 defined by the AE field of the corresponding TLV.</t>
 
+<t>There MUST NOT be more than one Source Prefix sub-TLV per TLV.</t>
+
 <t>Note that this sub-TLV is a Mandatory sub-TLV.  The whole TLV MUST be
-ignored if that sub-TLV is not recognized.  Otherwise, routing loops may
-occur (see <xref target="loop"/>).</t>
+ignored if that sub-TLV is not recognized (or malformed).  Otherwise,
+routing loops may occur (see <xref target="loop"/>).</t>
 
 </section>
 
@@ -450,22 +495,22 @@ change the security properties of the protocol.</t>
 
 <references title="Normative References">
 
+<reference anchor="RFC2119"><front>
+<title>Key words for use in RFCs to Indicate Requirement Levels</title>
+<author fullname="Scott Bradner" initials="S." surname="Bradner"/>
+<date month="March" year="1997"/>
+</front>
+<seriesInfo name="BCP" value="14"/>
+<seriesInfo name="RFC" value="2119"/>
+<seriesInfo name="DOI" value="10.17487/RFC2119"/>
+</reference>
+
 <reference anchor="BABEL"><front>
 <title>The Babel Routing Protocol</title>
 <author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
 <date month="May" year="2017"/>
 </front>
-<seriesInfo name="Internet Draft" value="draft-ietf-babel-rfc6126bis-02"/>
-</reference>
-
-<reference anchor="IETF-SSR"><front>
-<title>Destination/Source Routing</title>
-<author fullname="David Lamparter" initials="D." surname="Lamparter"/>
-<author fullname="Anton Smirnov" initials="A." surname="Smirnov"/>
-<date month="May" year="2017"/>
-</front>
-<seriesInfo name="Internet Draft"
-            value="draft-ietf-rtgwg-dst-src-routing"/>
+<seriesInfo name="Internet Draft" value="draft-ietf-babel-rfc6126bis-04"/>
 </reference>
 
 <reference anchor="RFC6126"><front>
@@ -489,6 +534,16 @@ change the security properties of the protocol.</t>
 </references>
 
 <references title="Informative References">
+
+<reference anchor="IETF-SSR"><front>
+<title>Destination/Source Routing</title>
+<author fullname="David Lamparter" initials="D." surname="Lamparter"/>
+<author fullname="Anton Smirnov" initials="A." surname="Smirnov"/>
+<date month="May" year="2017"/>
+</front>
+<seriesInfo name="Internet Draft"
+            value="draft-ietf-rtgwg-dst-src-routing"/>
+</reference>
 
 <reference anchor="SS-ROUTING">
 <front>

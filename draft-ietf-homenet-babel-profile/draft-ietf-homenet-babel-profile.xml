@@ -63,7 +63,7 @@ protocol.  It allows Babel's control data to be carried over either
 link-local IPv6 or IPv4, and in either case allows announcing both IPv4
 and IPv6 routes.  It leaves link cost estimation, metric computation and
 route selection to the implementation.  Distinct implementations of
-RFC&nbsp;6126 Babel will interoperate, in the sense that they will
+RFC&nbsp;6126bis Babel will interoperate, in the sense that they will
 maintain a set of loop-free forwarding paths.  However, if they implement
 conflicting options, they might not be able to exchange a full set of
 routes; in the worst case, an implementation that only implements the IPv6
@@ -71,10 +71,10 @@ subset of the protocol and an implementation that only implements the IPv4
 subset of the protocol will not exchange any routes.  In addition, if
 implementations use conflicting route selection policies, persistent
 oscillations might occur.</t>
-<t>The informative Appendix&nbsp;A of RFC&nbsp;6126 suggests a simple and
+<t>The informative Appendix&nbsp;A of RFC&nbsp;6126bis suggests a simple and
 easy to implement algorithm for cost and metric computation that has been
 found to work satisfactorily in a wide range of topologies.</t>
-<t>While RFC&nbsp;6126 does not provide an algorithm for route selection,
+<t>While RFC&nbsp;6126bis does not provide an algorithm for route selection,
 its Section&nbsp;3.6 suggests selecting the route with smallest metric
 with some hysteresis applied.  An algorithm that has been found to work
 well in practice is described in Section&nbsp;III.E of
@@ -109,13 +109,13 @@ some features that make implementations somewhat simpler and more reliable
 IPv6.</t></list></t>
 
 <t>REQ2: a Homenet implementation of Babel MUST implement the IPv6 subset
-of the protocol defined in the body of RFC&nbsp;6126.</t>
+of the protocol defined in the body of RFC&nbsp;6126bis.</t>
 
 <t><list style="empty"><t>Rationale: support for IPv6 routing is an
 essential component of the Homenet architecture.</t></list></t>
 
 <t>REQ3: a Homenet implementation of Babel SHOULD implement the IPv4
-subset of the protocol defined in the body of RFC&nbsp;6126.  Use of other
+subset of the protocol defined in the body of RFC&nbsp;6126bis.  Use of other
 techniques for acquiring IPv4 connectivity (such as multiple layers of
 NAT) is strongly discouraged.</t>
 
@@ -138,7 +138,7 @@ target="RFC7788"/>).</t></list></t>
 
 <t>REQ5: a Homenet implementation of Babel MUST use metrics that are of
 a similar magnitude to the values suggested in Appendix&nbsp;A of
-RFC&nbsp;6126.  In particular, it SHOULD assign costs that are no less
+RFC&nbsp;6126bis.  In particular, it SHOULD assign costs that are no less
 than 256 to wireless links, and SHOULD assign costs between 32 and 196 to
 lossless wired links.</t>
 
@@ -151,7 +151,7 @@ wired and wireless links; if it is unable to determine whether a link is
 wired or wireless, it SHOULD make the worst-case hypothesis that the link
 is wireless.  It SHOULD dynamically probe the quality of wireless links
 and derive a suitable metric from its quality estimation.  The algorithm
-described in Appendix&nbsp;A of RFC&nbsp;6126 MAY be used.</t>
+described in Appendix&nbsp;A of RFC&nbsp;6126bis MAY be used.</t>
 
 <t><list style="empty"><t>Rationale: support for wireless transit links is
 a "killer feature" of Homenet, something that is requested by our users
@@ -167,7 +167,7 @@ routing".</t></list></t>
 
 <t>NR1: a Homenet implementation of Babel MAY perform route selection by
 applying hysteresis to route metrics, as suggested in Section&nbsp;3.6 of
-RFC&nbsp;6126 and described in detail in Section&nbsp;III.E of
+RFC&nbsp;6126bis and described in detail in Section&nbsp;III.E of
 <xref target="BABEL-RTT"/>.  However, it MAY simply pick the route with
 the smallest metric.</t>
 

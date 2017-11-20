@@ -44,7 +44,7 @@ and Babel.</t>
 information and assigning prefixes to links, combined with the Babel
 routing protocol <xref target="RFC6126bis"/>.  Babel is an extensible,
 flexible and modular protocol: minimal implementations of Babel have been
-demonstrated that consist of a few hundred of lines of code, while the
+demonstrated that consist of a few hundred lines of code, while the
 "large" implementation includes support for a number of extensions and
 consists of over ten thousand lines of C code.</t>
 
@@ -295,7 +295,7 @@ for autonomous configuration of HNCP and Babel security has been defined.</t>
 
 <section title="Acknowledgments">
 
-<t>A number of people have helped with definining the requirements listed
+<t>A number of people have helped with defining the requirements listed
 in this document.  I am especially indebted to Markus Stenberg for his
 input.</t>
 

@@ -40,11 +40,11 @@ ipr="trust200902">
 <date day="21" month="August" year="2017"/>
 
 <abstract>
-<t>Source-specific routing is an extension to traditional next-hop routing where
-packets are forwarded according to both their destination and their source
-address.  This document describes the source-specific routing extension to the
-Standard Track's Babel routing protocol.  It is incompatible with the
-Experimental Track's Babel.</t>
+<t>Source-specific routing is an extension to traditional next-hop routing
+where packets are forwarded according to both their destination and their
+source address.  This document describes the source-specific routing
+extension to the Standard Track's Babel routing protocol.  It is
+incompatible with the Experimental's Babel.</t>
 
 <t>Source-specific routing is also known as Source Address Dependent
 Routing, SAD Routing, SADR, Destination/Source Routing or
@@ -321,11 +321,11 @@ routers and source-specific routers are mixed in a single routing domain,
 Babel's loop-avoidance properties are preserved, and, in particular, no
 persistent routing loops will occur.</t>
 
-<t>However, this extension is not compatible with the Experimental Track's
-Babel Routing Protocol <xref target="RFC6126"/>.  It requires the
-mandatory sub-TLV introduced in <xref target="BABEL"/>.  Consequently,
-this extension MUST NOT be used with routers implementing RFC 6126,
-otherwise persistent routing loops may occur.</t>
+<t>However, this extension is not compatible with the Experimental's Babel
+Routing Protocol <xref target="RFC6126"/>.  It requires the mandatory
+sub-TLV introduced in <xref target="BABEL"/>.  Consequently, this
+extension MUST NOT be used with routers implementing RFC 6126, otherwise
+persistent routing loops may occur.</t>
 
 <section title="Loop-avoidance" anchor="loop">
 

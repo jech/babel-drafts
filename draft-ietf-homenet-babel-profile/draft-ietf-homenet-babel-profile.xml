@@ -310,9 +310,10 @@ Stenberg, and Stephen Farrell.</t>
 <reference anchor="RFC6126bis"><front>
 <title>The Babel Routing Protocol</title>
 <author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
-<date month="May" year="2017"/>
+<author fullname="David Schinazi" initials="D." surname="Schinazi"/>
+<date month="October" year="2017"/>
 </front>
-<seriesInfo name="Internet Draft" value="draft-ietf-babel-rfc6126bis-02"/>
+<seriesInfo name="Internet Draft" value="draft-ietf-babel-rfc6126bis-04"/>
 </reference>
 
 <reference anchor="RFC7788"><front>

@@ -341,11 +341,10 @@ S  |1
 </t>
 
 <t>The only route available from A to S, the one that goes through B, is
-not feasible: A suffers from spurious starvation.  At this point, the
-whole network must be rebooted in order to solve the starvation; this is
+not feasible: A suffers from spurious starvation.  At that point, the
+whole subtree suffering from starvation must be reset, which is
 essentially what EIGRP does when it performs a global synchronisation of
-all the routers in the network with the source (the "active" phase of
-EIGRP).</t>
+all the routers in the sarving subtree (the "active" phase of EIGRP).</t>
 
 <t>Babel reacts to starvation in a less drastic manner, by using sequenced
 routes, a technique introduced by DSDV and adopted by AODV.  In addition to

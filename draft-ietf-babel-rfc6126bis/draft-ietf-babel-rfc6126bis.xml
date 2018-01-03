@@ -154,15 +154,12 @@ algorithm is executed for all sources.</t>
 
 <section title="Costs, Metrics and Neighbourship">
 
-<t>As many routing algorithms, Babel computes costs of links between any
-two neighbouring nodes, abstract values attached to the edges between two
-nodes.  We write C(A,&nbsp;B) for the cost of the edge from node A to node
-B.</t>
-
-<t>Given a route between any two nodes, the metric of the route is the sum
-of the costs of all the edges along the route.  The goal of the routing
-algorithm is to compute, for every source S, the tree of routes of lowest
-metric to S.</t>
+<t>For every pair of neighbouring nodes A and B, Babel computes an
+abstract value known as the cost of the link from A to B., written
+C(A,&nbsp;B).  Given a route between any two (not necessarily
+neighbouring) nodes, the metric of the route is the sum of the costs of
+all the edges along the route.  The goal of the routing algorithm is to
+compute, for every source S, the tree of routes of lowest metric to S.</t>
 
 <t>Costs and metrics need not be integers.  In general, they can be values
 in any algebra that satisfies two fairly general conditions

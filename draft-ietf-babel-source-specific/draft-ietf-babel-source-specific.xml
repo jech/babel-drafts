@@ -95,7 +95,7 @@ ISP, and sends packets with one of these addresses as source address.
 Source-specific routing ensures that packets are routed towards the
 provider of their source address, such that they are not filtered out.
 More details and more use cases can be found in <xref
-target="SS-ROUTING"/>,<xref target="IETF-SSR"/>.</t>
+target="SS-ROUTING"/>,<xref target="DSR"/>.</t>
 
 <t>This document describes the source-specific routing extension for the
 Babel routing protocol <xref target="BABEL"/>.  This involves changes to
@@ -127,7 +127,7 @@ source prefix, is equivalent to the same routing entry with a zero length
 source prefix (both the two entries accept the same set of packets).
 Legacy entries are considered as carrying a zero length source prefix (see
 <xref target="route-acquisition"/>) and thus fit in our extended data
-structures.  This is compliant with <xref target="IETF-SSR"/>
+structures.  This is compliant with <xref target="DSR"/>
 Section&nbsp;4.1.</t>
 
 <section title="The Source Table">
@@ -233,7 +233,7 @@ implementation MUST silently ignore (drop) any source-specific routes.</t>
 </list></t>
 
 <t>This behaviour aligns with the ongoing work in the routing area for how
-to handle source-specific routes <xref target="IETF-SSR"/>.</t>
+to handle source-specific routes <xref target="DSR"/>.</t>
 
 </section>
 
@@ -535,14 +535,14 @@ change the security properties of the protocol.</t>
 
 <references title="Informative References">
 
-<reference anchor="IETF-SSR"><front>
+<reference anchor="DSR"><front>
 <title>Destination/Source Routing</title>
 <author fullname="David Lamparter" initials="D." surname="Lamparter"/>
 <author fullname="Anton Smirnov" initials="A." surname="Smirnov"/>
-<date month="May" year="2017"/>
+<date month="May" year="2018"/>
 </front>
 <seriesInfo name="Internet Draft"
-            value="draft-ietf-rtgwg-dst-src-routing"/>
+            value="draft-ietf-rtgwg-dst-src-routing-06"/>
 </reference>
 
 <reference anchor="SS-ROUTING">

@@ -6,7 +6,7 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="no" ?>
-<rfc category="std" docName="draft-ietf-homenet-babel-profile-04"
+<rfc category="std" docName="draft-ietf-homenet-babel-profile-05"
      ipr="trust200902">
 <front>
 <title abbrev="Homenet Babel profile">Homenet profile of the Babel routing protocol</title>
@@ -24,13 +24,12 @@
 </address>
 </author>
 
-<date day="3" month="January" year="2018"/>
+<date day="16" month="January" year="2018"/>
 
 <abstract>
-<t>This document defines the subset of the Babel routing protocol
-<xref target="RFC6126bis"/> and its extensions that a Homenet router must
-implement, as well as the interactions between HNCP <xref target="RFC7788"/>
-and Babel.</t>
+<t>This document defines the subset of the Babel routing protocol and its
+extensions that a Homenet router must implement, as well as the
+interactions between HNCP and Babel.</t>
 </abstract>
 
 </front>
@@ -52,6 +51,16 @@ consists of over ten thousand lines of C code.</t>
 subset of the Babel protocol and its extensions that is required by an
 implementation of the Homenet protocol suite.  The second specifies how
 HNCP interacts with Babel.</t>
+
+
+<section title="Requirement Language">
+
+<t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+"SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+"OPTIONAL" in this document are to be interpreted as described in RFC 2119
+<xref target="RFC2119"/>.</t>
+
+</section>
 
 <section title="Background">
 
@@ -275,21 +284,29 @@ packets sent from a global address.  Hence, they are only susceptible to
 attacks from a directly connected link on which the HNCP and Babel
 implementations are listening.</t>
 
-<t>The security of a Homenet network relies on having a set of "Internal"
-and "Ad Hoc" interfaces (Section 5.1 of <xref target="RFC7788"/>) that are
-assumed to be connected to links that are secured at a lower layer.  HNCP
-and Babel packets are only accepted when they originate on these trusted
-links.  "External" and "Guest" interfaces are connected to links that are
-not trusted, and any HNCP or Babel packets that are received on such
-interfaces are ignored.  ("Leaf" interfaces are a special case, since they
-are connected to trusted links but HNCP and Babel traffic received on such
-interfaces is ignored.)</t>
+<t>The security of a Homenet network relies on having a set of "Internal",
+"Ad Hoc" and "Hybrid" interfaces (Section 5.1 of <xref target="RFC7788"/>)
+that are assumed to be connected to links that are secured at a lower
+layer.  HNCP and Babel packets are only accepted when they originate on
+these trusted links.  "External" and "Guest" interfaces are connected to
+links that are not trusted, and any HNCP or Babel packets that are
+received on such interfaces are ignored.  ("Leaf" interfaces are a special
+case, since they are connected to trusted links but HNCP and Babel traffic
+received on such interfaces is ignored.)  This implies that the security
+of a Homenet network depends on the reliability of the border discovery
+procedure described in Section 5.3 of <xref target="RFC7788"/>.</t>
 
 <t>If untrusted links are used for transit, which is NOT RECOMMENDED,
 then any HNCP and Babel traffic that is carried over such links MUST be
 secured using an upper-layer security protocol.  While both HNCP and Babel
 support cryptographic authentication, at the time of writing no protocol
 for autonomous configuration of HNCP and Babel security has been defined.</t>
+
+</section>
+
+<section title="IANA Considerations">
+
+<t>This document requires no actions from IANA.</t>
 
 </section>
 
@@ -306,6 +323,16 @@ Stenberg, and Stephen Farrell.</t>
 <back>
 
 <references title="Normative References">
+
+<reference anchor="RFC2119"><front>
+<title>Key words for use in RFCs to Indicate Requirement Levels</title>
+<author initials="S." surname="Bradner" fullname="S. Bradner"/>
+<date year="1997" month="March"/>
+</front>
+<seriesInfo name="BCP" value="14"/>
+<seriesInfo name="RFC" value="2119"/>
+<seriesInfo name="DOI" value="10.17487/RFC2119"/>
+</reference>
 
 <reference anchor="RFC6126bis"><front>
 <title>The Babel Routing Protocol</title>

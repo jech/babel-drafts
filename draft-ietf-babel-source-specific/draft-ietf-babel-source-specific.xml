@@ -6,7 +6,7 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="yes" ?>
-<rfc category="std" docName="draft-ietf-babel-source-specific-01"
+<rfc category="std" docName="draft-ietf-babel-source-specific-02"
 ipr="trust200902">
 <front>
 <title>Source-Specific Routing in Babel</title>
@@ -37,7 +37,7 @@ ipr="trust200902">
 </address>
 </author>
 
-<date day="19" month="January" year="2018"/>
+<date day="20" month="January" year="2018"/>
 
 <abstract>
 <t>Source-specific routing (also known as Source-Address Dependent
@@ -110,16 +110,16 @@ target="RFC2119"/>.</t>
 <section title="Data Structures">
 
 <t>A number of the conceptual data structures described in Section 3.2 of
-<xref target="BABEL"/> contain a destination prefix.  This extension
+<xref target="BABEL"/> contain a destination prefix.  This specification
 extends these data structures with a source prefix.  Data from the
-original protocol, which do not specify a source prefix, are encoded with
+original protocol, which do not specify a source prefix, are stored with
 a zero length source prefix, which matches exactly the same set of packets
 as the original, non-source-specific data.</t>
 
 <section title="The Source Table">
 
 <t>Every Babel node maintains a source table, as described in <xref
-target="BABEL"/>, Section&nbsp;3.2.5.  A source-specific Babel node
+target="BABEL"/> Section&nbsp;3.2.5.  A source-specific Babel node
 extends this table with the following field:</t>
 <t><list style="symbols">
 <t>The source prefix specifying the source address of packets to which
@@ -130,7 +130,7 @@ this entry applies.</t>
 prefix, router-id).</t>
 
 <t>Note that the route entry contains a source which itself contains
-a source prefix.  These are two very different concepts, and should not be
+a source prefix.  These are two very different concepts that should not be
 confused.</t>
 
 </section>
@@ -138,8 +138,8 @@ confused.</t>
 <section title="The Route Table">
 
 <t>Every Babel node maintains a route table, as described in <xref
-target="BABEL"/>, Section&nbsp;3.2.6.  Each route table entry contains,
-among other data, a source, which this extension extends with a source
+target="BABEL"/> Section&nbsp;3.2.6.  Each route table entry contains,
+among other data, a source, which this specification extends with a source
 prefix as described above.  The route table is now indexed by triples of
 the form (prefix, source prefix, neighbour), where the prefix and source
 prefix are obtained from the source.</t>
@@ -224,9 +224,9 @@ protocol, and we therefore only describe differences between the original
 protocol and the extended protocol.</t>
 
 <t>In the original protocol, three TLVs carry a destination prefix:
-Updates, Route Requests and Seqno Requests.  This extension extends these
-messages to optionally carry a source prefix sub-TLV, as described in
-<xref target="protocol-encoding"/> below.  The sub-TLV is marked as
+Updates, Route Requests and Seqno Requests.  This specification extends
+these messages to optionally carry a source prefix sub-TLV, as described
+in <xref target="protocol-encoding"/> below.  The sub-TLV is marked as
 mandatory, so that an unextended implementation will silently ignore the
 whole enclising TLV.  A node obeying this specification MUST NOT send
 a TLV with a zero-length source prefix: instead, it sends a TLV with no
@@ -258,27 +258,30 @@ Section 3.8 of <xref target="BABEL"/>, except that the request applies to
 the Route Table entry carrying the source prefix indicated by the
 sub-TLV.</t>
 
-<section title="Wildcard operations">
+</section>
+
+<section title="Wildcard Messages">
 
 <t>In the original protocol, the Address Encoding value 0 is used for
-wildcard operations: operations that apply to all the routes, of any
-address family and with any destination prefix.  Wildcard operations are
-allowed in two places in the protocol: wildcard retractions are used to
-retract all of the routes previously advertised by a node on a given
-interface, and wildcard Route Requests are used to request a full dump of
-the Route Table from a given node.  Wildcard operations are intended to
-apply to all routes, including routes decorated with additional data and
-AE values to be defined by future extensions, and hence this specification
-extends wildcard operations to apply to all routes, whatever the value of
-the source prefix.</t>
+wildcard messages: messages that apply to all routes, of any address
+family and with any destination prefix.  Wildcard messages are allowed
+in two places in the protocol: wildcard retractions are used to retract
+all of the routes previously advertised by a node on a given interface,
+and wildcard Route Requests are used to request a full dump of the Route
+Table from a given node.  Wildcard messages are intended to apply to all
+routes, including routes decorated with additional data and AE values to
+be defined by future extensions, and hence this specification extends
+wildcard operations to apply to all routes, whatever the value of the
+source prefix.</t>
 
 <t>More precisely, a node receiving an Update with the AE field set to
 0 and the Metric field set to infinity (a wildcard retraction) MUST apply
 the route acquisition procedure described in Section 3.5.4 of <xref
-target="BABEL"/> to all of the routes that is has learned, whatever the
-value of the source prefix.  A node MUST NOT send a wildcard retraction
-with an attached source prefix, and a node that receives a wildcard
-retraction with a source prefix MUST silently ignore it.</t>
+target="BABEL"/> to all of the routes that is has learned from the sending
+node, whatever the value of the source prefix.  A node MUST NOT send
+a wildcard retraction with an attached source prefix, and a node that
+receives a wildcard retraction with a source prefix MUST silently ignore
+it.</t>
 
 <t>Similarly, a node that receives a route request with the AE field set
 to 0 (a wildcard route request) SHOULD send a full routing table dump,
@@ -286,8 +289,6 @@ including routes with a non-zero-length source prefix.  A node MUST NOT
 send a wildcard request that carries a source prefix, and a node receiving
 a wildcard request with a with a source prefix MUST silently ignore
 it.</t>
-
-</section>
 
 </section>
 
@@ -370,13 +371,13 @@ ignore the whole packet.</t>
 0                   1                   2                   3
 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|Type = TBD[128]|    Length     |  Source Plen  | Source Prefix...
+|   Type = TBD  |    Length     |  Source Plen  | Source Prefix...
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
 ]]></artwork></figure>
 
 <t>Fields:
 <list style="hanging" hangIndent="10">
-<t hangText="Type">Set to TBD[128] to indicate a Source Prefix
+<t hangText="Type">Set to TBD to indicate a Source Prefix
 sub-TLV.</t>
 <t hangText="Length">The length of the body, exclusive of the Type and
 Length fields.</t>
@@ -417,15 +418,18 @@ correctly update their parser state while otherwise ignoring the whole TLV.</t>
 
 <t>A source-specific Route Request is a Route Request TLV with a Source
 Prefix sub-TLV.  It prompts the receiver to send an update for a given
-pair of destination and source prefixes.  A wildcard request (Route
-Request with AE equals to 0) MUST NOT carry a Source Prefix sub-TLV.</t>
+pair of destination and source prefixes, as described in Section 3.8.1.1
+of <xref target="BABEL"/>.  A wildcard request (Route Request with AE
+equals to 0) MUST NOT carry a Source Prefix sub-TLV.</t>
 
 </section>
 
 <section title="Source-Specific Seqno Request">
 
 <t>A source-specific Seqno Request is a Seqno Request TLV with a Source
-Prefix sub-TLV.</t>
+Prefix sub-TLV.  It requests the receiving node to perform the procedure
+described in Section 3.8.1.2 of <xref target="BABEL"/>, but applied to
+a pair of a destination and source prefix.</t>
 
 </section>
 
@@ -447,8 +451,10 @@ following entry to the "Babel mandatory sub-TLV Types" registry:</t>
 <section title="Security considerations">
 
 <t>The extension defined in this document adds a new sub-TLV to three TLVs
-already present in the original Babel protocol.  It does not by itself
-change the security properties of the protocol.</t>
+already present in the original Babel protocol, and does not in itself
+change the security properties of the protocol.  However, source-specific
+routing gives more control over routing to the sending hosts, which might
+have security implications (see Section 8 of <xref target="DSR"/>).</t>
 
 </section>
 
@@ -476,14 +482,6 @@ change the security properties of the protocol.</t>
 <seriesInfo name="Internet Draft" value="draft-ietf-babel-rfc6126bis-04"/>
 </reference>
 
-<reference anchor="RFC6126"><front>
-<title>The Babel Routing Protocol (Experimental)</title>
-<author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
-<date month="February" year="2011"/>
-</front>
-<seriesInfo name="RFC" value="6126"/>
-</reference>
-
 <reference anchor="BCP84"><front>
 <title>Ingress Filtering for Multihomed Networks</title>
 <author fullname="Fred Baker" initials="F." surname="Baker"/>
@@ -497,6 +495,14 @@ change the security properties of the protocol.</t>
 </references>
 
 <references title="Informative References">
+
+<reference anchor="RFC6126"><front>
+<title>The Babel Routing Protocol (Experimental)</title>
+<author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
+<date month="February" year="2011"/>
+</front>
+<seriesInfo name="RFC" value="6126"/>
+</reference>
 
 <reference anchor="DSR"><front>
 <title>Destination/Source Routing</title>

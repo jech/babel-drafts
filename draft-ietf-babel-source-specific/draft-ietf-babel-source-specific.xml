@@ -65,8 +65,8 @@ chosen, and the packet is forwarded to the associated next-hop.  Next-hop
 routing is a simple, well understood paradigm that works satisfactorily in
 a large number of cases.</t>
 
-<t>Source-specific routing, or Source Address Dependent Routing (SADR)
-<xref target="SS-ROUTING"/> <xref target="DSR"/> is a modest extension to
+<t>Source-specific routing <xref target="SS-ROUTING"/>, or Source Address
+Dependent Routing (SADR) <xref target="DSR"/>, is a modest extension to
 next-hop routing where the forwarding decision depends not only on the
 destination address but also on the source address of the packet being
 routed, which makes it possible for two packets with the same destination
@@ -109,51 +109,41 @@ target="RFC2119"/>.</t>
 
 <section title="Data Structures">
 
-<t>Some of the data structures of a Babel node contains a destination
-prefix or are partly indexed by a destination prefix.  This extension adds
-a source prefix to these structures and indexes.</t>
-
-<t>A routing entry of the original protocol, which is not bound to any
-source prefix, is equivalent to the same routing entry with a zero length
-source prefix (both the two entries accept the same set of packets).
-Legacy entries are considered as carrying a zero length source prefix (see
-<xref target="route-acquisition"/>) and thus fit in our extended data
-structures.  This is compliant with <xref target="DSR"/>
-Section&nbsp;4.1.</t>
+<t>A number of the conceptual data structures described in Section 3.2 of
+<xref target="BABEL"/> contain a destination prefix.  This extension
+extends these data structures with a source prefix.  Data from the
+original protocol, which do not specify a source prefix, are encoded with
+a zero length source prefix, which matches exactly the same set of packets
+as the original, non-source-specific data (see in particular <xref
+target="route-acquisition"/> below).</t>
 
 <section title="The Source Table">
 
 <t>Every Babel node maintains a source table, as described in <xref
 target="BABEL"/>, Section&nbsp;3.2.5.  A source-specific Babel node
-extends this table with the following field.  With this extension, the
-source table is indexed by triples of the form (prefix, source prefix,
-router-id).</t>
-
+extends this table with the following field:</t>
 <t><list style="symbols">
 <t>The source prefix specifying the source address of packets to which
 this entry applies.</t>
 </list></t>
 
-<t>If a source table entry has a zero length source prefix, then the entry
-is a non-source-specific entry, and is treated just like a source table
-entry defined by the original Babel protocol.</t>
+<t>The source table is now indexed by triples of the form (prefix, source
+prefix, router-id).</t>
 
-<t>With this extension, the route entry contains a source which itself
-contains a source prefix.  These are two very different concepts, and
-should not be confused.</t>
+<t>Note that the route entry contains a source which itself contains
+a source prefix.  These are two very different concepts, and should not be
+confused.</t>
 
 </section>
 
 <section title="The Route Table">
 
 <t>Every Babel node maintains a route table, as described in <xref
-target="BABEL"/>, Section&nbsp;3.2.6.  With this extension, the route
-table is indexed by triples of the form (prefix, source prefix, neighbour)
-obtained from the associated source table entry.</t>
-
-<t>If a route table entry has a zero length source prefix, then the entry
-is a non-source-specific entry, and is treated just like a route table
-entry defined by the original Babel protocol.</t>
+target="BABEL"/>, Section&nbsp;3.2.6.  Each route table entry contains,
+among other data, a source, which this extension extends with a source
+prefix as described above.  The route table is now indexed by triples of
+the form (prefix, source prefix, neighbour), where the prefix and source
+prefix are obtained from the source.</t>
 
 </section>
 
@@ -161,13 +151,14 @@ entry defined by the original Babel protocol.</t>
 
 <t>Every Babel node maintains a table of pending seqno requests, as
 described in <xref target="BABEL"/>, Section&nbsp;3.2.7.  A
-source-specific Babel node extends this table with the following entry.
-With this extension, the table of pending seqno requests is indexed by
-triples of the form (prefix, source prefix, router-id).</t>
+source-specific Babel node extends this table with the following entry:</t>
 
 <t><list style="symbols">
 <t>The source prefix being requested.</t>
 </list></t>
+
+<t>The table of pending seqno requests is now indexed by triples of the
+form (prefix, source prefix, router-id).</t>
 
 </section>
 

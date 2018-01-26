@@ -76,16 +76,17 @@ source) to next hops.  When multiple entries match a given packet, the one
 with the most specific destination prefix is chosen, and, in case of
 equality, the one with the most specific source prefix.</t>
 
-<t>The main application of source-specific routing is multihoming with
-multiple addresses, a technique for multihoming which, unlike multihoming,
-does not require the use of provider-independent addresses and does not
-cause excessive growth of the global routing table.  In a network using
-this form of multihoming, each host is given multiple addresses, one per
-upstream provider.  When a host sources a packet, it picks one of its
-addresses as the source address of the packet, and source-specific routing
-is used to route the packet to an edge router that is connected to the
-corresponding provider, which is compatible with <xref target="BCP84"/>.
-More details are given in <xref target="SS-ROUTING"/> and
+<t>The main application of source-specific routing is a form of
+multihoming known as multihoming with multiple addresses.  When using this
+technique in a network connected to multiple providers, every host is
+assigned multiple addresses, one per provider.  When a host sources
+a packet, it picks one of its addresses as the source address, and
+source-specific routing is used to route the packet to an edge router that
+is connected to the corresponding provider, which is compatible with <xref
+target="BCP84"/>.  Unlike classical multihoming, this technique is
+applicable to small networks, as it does not require the use of
+provider-independent addresses, or cause excessive growth of the global
+routing table.  More details are given in <xref target="SS-ROUTING"/> and
 <xref target="DSR"/>.</t>
 
 <t>This document describes a source-specific routing extension for the

@@ -2270,8 +2270,9 @@ packets are carried over IPv4.</t>
 <t>A number of people have contributed text and ideas to this
 specification.  The authors are particularly indebted to Matthieu Boutier,
 Gwendoline Chouasne, Margaret Cullen, Donald Eastlake and Toke
-Hoiland-Jorgensen.  The address compression technique was inspired by
-<xref target="PACKETBB"/>.</t>
+Hoiland-Jorgensen.  Earlier versions of this document greatly benefited
+from the input of Joel Halpern.  The address compression technique was
+inspired by <xref target="PACKETBB"/>.</t>
 
 </section>
 

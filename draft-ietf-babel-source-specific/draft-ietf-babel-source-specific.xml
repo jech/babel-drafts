@@ -372,13 +372,13 @@ ignore the whole packet.</t>
 0                   1                   2                   3
 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|   Type = TBD  |    Length     |  Source Plen  | Source Prefix...
+|   Type = 128  |    Length     |  Source Plen  | Source Prefix...
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
 ]]></artwork></figure>
 
 <t>Fields:
 <list style="hanging" hangIndent="10">
-<t hangText="Type">Set to TBD to indicate a Source Prefix
+<t hangText="Type">Set to 128 to indicate a Source Prefix
 sub-TLV.</t>
 <t hangText="Length">The length of the body, exclusive of the Type and
 Length fields.</t>
@@ -438,14 +438,8 @@ a pair of a destination and source prefix.</t>
 
 <section title="IANA Considerations">
 
-<t>IANA is requested to allocate TBD, a Babel sub-TLV type from the range
-reserved for mandatory sub-TLVs [value 128 suggested], and to add the
-following entry to the "Babel mandatory sub-TLV Types" registry:</t>
-
-<texttable>
-<ttcol>Type</ttcol><ttcol>Name</ttcol><ttcol>Reference</ttcol>
-<c>TBD[128]</c><c>Source Prefix</c><c>(this document)</c>
-</texttable>
+<t>IANA has allocated sub-TLV number 128 for the Source Prefix sub-TLV in
+the Babel Sub-TLV Numbers registry.</t>
 
 </section>
 

@@ -497,12 +497,14 @@ have security implications (see Section 8 of <xref target="DSR"/>).</t>
 
 <references title="Informative References">
 
-<reference anchor="RFC6126"><front>
-<title>The Babel Routing Protocol (Experimental)</title>
-<author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
-<date month="February" year="2011"/>
+<reference anchor="RFC6126" target="https://www.rfc-editor.org/info/rfc6126">
+<front>
+<title>The Babel Routing Protocol</title>
+<author initials="J." surname="Chroboczek" fullname="J. Chroboczek"/>
+<date year="2011" month="April"/>
 </front>
 <seriesInfo name="RFC" value="6126"/>
+<seriesInfo name="DOI" value="10.17487/RFC6126"/>
 </reference>
 
 <reference anchor="DSR"><front>

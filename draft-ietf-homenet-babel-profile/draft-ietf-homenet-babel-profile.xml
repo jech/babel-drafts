@@ -6,7 +6,7 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="no" ?>
-<rfc category="std" docName="draft-ietf-homenet-babel-profile-05"
+<rfc category="std" docName="draft-ietf-homenet-babel-profile-06"
      ipr="trust200902">
 <front>
 <title abbrev="Homenet Babel profile">Homenet profile of the Babel routing protocol</title>
@@ -24,12 +24,13 @@
 </address>
 </author>
 
-<date day="16" month="January" year="2018"/>
+<date day="23" month="February" year="2018"/>
 
 <abstract>
 <t>This document defines the subset of the Babel routing protocol and its
 extensions that a Homenet router must implement, as well as the
-interactions between HNCP and Babel.</t>
+interactions between the Home Networking Control Protocol (HNCP) and
+Babel.</t>
 </abstract>
 
 </front>
@@ -38,20 +39,20 @@ interactions between HNCP and Babel.</t>
 
 <section title="Introduction">
 
-<t>The core of the Homenet protocol suite consists of HNCP 
-<xref target="RFC7788"/>, a protocol used for flooding configuration
-information and assigning prefixes to links, combined with the Babel
-routing protocol <xref target="RFC6126bis"/>.  Babel is an extensible,
-flexible and modular protocol: minimal implementations of Babel have been
-demonstrated that consist of a few hundred lines of code, while the
-"large" implementation includes support for a number of extensions and
-consists of over ten thousand lines of C code.</t>
+<t>The core of the Homenet protocol suite consists of the Home Networking
+Control Protocol (HNCP) <xref target="RFC7788"/>, a protocol used for
+flooding configuration information and assigning prefixes to links,
+combined with the Babel routing protocol <xref target="RFC6126bis"/>.
+Babel is an extensible, flexible and modular protocol: minimal
+implementations of Babel have been demonstrated that consist of a few
+hundred lines of code, while the "large" implementation includes support
+for a number of extensions and consists of over ten thousand lines of
+C code.</t>
 
 <t>This document consists of two parts.  The first specifies the exact
 subset of the Babel protocol and its extensions that is required by an
 implementation of the Homenet protocol suite.  The second specifies how
 HNCP interacts with Babel.</t>
-
 
 <section title="Requirement Language">
 
@@ -68,10 +69,10 @@ HNCP interacts with Babel.</t>
 of documents:
 <list style="symbols">
 <t>RFC&nbsp;6126bis <xref target="RFC6126bis"/> defines the Babel routing
-protocol.  It allows Babel's control data to be carried over either
-link-local IPv6 or IPv4, and in either case allows announcing both IPv4
-and IPv6 routes.  It leaves link cost estimation, metric computation and
-route selection to the implementation.  Distinct implementations of
+protocol.  It allows Babel's control data to be carried either over
+link-local IPv6 or over IPv4, and in either case allows announcing both
+IPv4 and IPv6 routes.  It leaves link cost estimation, metric computation
+and route selection to the implementation.  Distinct implementations of
 RFC&nbsp;6126bis Babel will interoperate, in the sense that they will
 maintain a set of loop-free forwarding paths.  However, if they implement
 conflicting options, they might not be able to exchange a full set of
@@ -163,12 +164,17 @@ and derive a suitable metric from its quality estimation.  The algorithm
 described in Appendix&nbsp;A of RFC&nbsp;6126bis MAY be used.</t>
 
 <t><list style="empty"><t>Rationale: support for wireless transit links is
-a "killer feature" of Homenet, something that is requested by our users
-and easy to explain to our bosses.  In the absence of dynamically computed
-metrics, the routing protocol attempts to minimise the number of links
-crossed by a route, and therefore prefers long, lossy links to shorter,
-lossless ones.  In wireless networks, "hop-count routing is worst-path
-routing".</t></list></t>
+a distinguishing feature of Homenet, and one that is requested by our
+users.  In the absence of dynamically computed metrics, the routing
+protocol attempts to minimise the number of links crossed by a route, and
+therefore prefers long, lossy links to shorter, lossless ones.  In
+wireless networks, "hop-count routing is worst-path routing".</t>
+
+<t>While it would be desirable to perform link-quality probing on some
+wired link technologies, notably power-line networks, these kinds of links
+tend to be difficult or impossible to detect automatically, and we are not
+aware of any published link-quality algorithms for them.  Hence, we do not
+require link-quality estimation for wired links of any kind.</t></list></t>
 
 </section>
 
@@ -234,7 +240,7 @@ behaviour is application-specific.</t></list></t>
 wins the election for NAT gateway, then it MUST act as a NAT gateway and
 MUST announce a (non-specific) IPv4 default route over Babel.</t>
 
-<t><list style="empty"><t>Rationale: the Homenet architecture does not use
+<t><list style="empty"><t>Rationale: the Homenet stack does not use
 source-specific routing for IPv4; instead, HNCP elects a single NAT
 gateway and publishes a single default route towards that gateway
 (<xref target="RFC7788"/> Section 6.5).</t></list></t>
@@ -313,8 +319,8 @@ for autonomous configuration of HNCP and Babel security has been defined.</t>
 <section title="Acknowledgments">
 
 <t>A number of people have helped with defining the requirements listed in
-this document.  I am especially indebted to Barbara Stark, Markus
-Stenberg, and Stephen Farrell.</t>
+this document.  I am especially indebted to Barbara Stark and Markus
+Stenberg.</t>
 
 </section>
 

@@ -51,9 +51,13 @@ that are usually deployed, such as OSPF <xref target="RFC5340"/> and IS-IS
 <section title="Technical overview of the Babel protocol">
 
 <t>At its core, Babel is a traditional distance-vector protocol based on
-the distributed Bellman-Ford algorithm, similar in principle to RIPv2 or
-RIPng, but augmented with explicit neighbour discovery and link-quality
-sensing.  Algorithms of this class are simple to understand and simple to
+the distributed Bellman-Ford algorithm, similar in principle to RIP <xref
+target="RFC2453"/>, but with two obvious extensions: provisions for
+explicit neighbour reachability, bidirectional reachability and
+link-quality sensing, and support for multiple address families (e.g.,
+IPv6 and IPv4) in a single protocol instance.</t>
+
+<t>Algorithms of this class are simple to understand and simple to
 implement, but unfortunately they do not work very well &mdash; they
 suffer from "counting to infinity", a case of pathologically slow
 convergence in some topologies after a link has been brought down.  Babel
@@ -158,20 +162,21 @@ the two does not violate the protocol's assumptions.</t>
 
 <t>Notable extensions deployed to date include:
 <list style="symbols">
-<t>source-specific routing (SADR), which allows routing to take a packet's
-source address into account, thus enabling a cheap form of multihoming;</t>
-<t>RTT-based routing, which allows routing to minimise link delay, which
-is useful in overlay network (where both hop count and packet loss are
-poor metrics).</t>
+<t>source-specific routing (SADR) <xref target="BABEL-SS"/>, which
+allows routing to take a packet's source address into account, thus
+enabling a cheap form of multihoming;</t>
+<t>RTT-based routing <xref target="BABEL-RTT"/>, which allows routing to
+minimise link delay, which is useful in overlay network (where both hop
+count and packet loss are poor metrics).</t>
 </list>
 Some other extensions have been designed, but have not seen deployment
 yet (and their usefulness is yet to be demonstrated):
 <list style="symbols">
-<t>frequency-aware routing, which allows routing to minimise radio
-interference in wireless networks;</t>
-<t>ToS-aware routing, which allows routing to take a packet's ToS marking
-into account for selected routes without incurring the full cost of
-a multi-topology routing protocol.</t>
+<t>frequency-aware routing <xref target="BABEL-Z"/>, which allows routing
+to minimise radio interference in wireless networks;</t>
+<t>ToS-aware routing <xref target="BABEL-TOS"/>, which allows routing
+to take a packet's ToS marking into account for selected routes without
+incurring the full cost of a multi-topology routing protocol.</t>
 </list></t>
 
 </section>
@@ -281,7 +286,9 @@ networks.</t>
 <t>Because of its small size and simple configuration, Babel has been
 deployed in small, unmanaged networks (three to five routers), where it
 serves as a more efficient replacement for RIP <xref target="RFC2453"/>,
-with the significant advantage of having good support for wireless links.</t>
+over which it has two significant advantages: the ability to route
+multiple address families (IPv6 and IPv4) in a single protocol instance,
+and good support for using wireless links for transit.</t>
 
 </section>
 
@@ -542,6 +549,44 @@ Babel Hashed Message Authentication Code (HMAC) Cryptographic Authentication
 </front>
 <seriesInfo name="RFC" value="7298"/>
 <seriesInfo name="DOI" value="10.17487/RFC7298"/>
+</reference>
+
+<reference anchor="BABEL-SS">
+<front>
+<title>Source-Specific Routing in Babel</title>
+<author initials='M' surname='Boutier' fullname='Matthieu Boutier'></author>
+<author initials='J' surname='Chroboczek' fullname='Juliusz Chroboczek'></author>
+<date day="4" month="August" year="2018"/>
+</front>
+<seriesInfo name='Internet-Draft' value='draft-ietf-babel-source-specific-03'/>
+</reference>
+
+<reference anchor="BABEL-RTT">
+<front>
+<title>Delay-based Metric Extension for the Babel Routing Protocol</title>
+<author initials='B' surname='Jonglez' fullname='Baptiste Jonglez'></author>
+<author initials='J' surname='Chroboczek' fullname='Juliusz Chroboczek'></author>
+<date month='May' day='27' year='2015' />
+</front>
+<seriesInfo name='Internet-Draft' value='draft-jonglez-babel-rtt-extension-01' />
+</reference>
+
+<reference anchor="BABEL-TOS">
+<front>
+<title>TOS-Specific Routing in Babel</title>
+<author fullname="Gwendoline Chouasne" initials="G." surname="Chouasne"/>
+<author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
+<date day="3" month="July" year="2017"/>
+</front>
+<seriesInfo name='Internet-Draft' value='draft-chouasne-babel-tos-specific-00'/>
+</reference>
+
+<reference anchor="BABEL-Z"><front>
+<title>Diversity Routing for the Babel Routing Protocol</title>
+<author initials='J' surname='Chroboczek' fullname='Juliusz Chroboczek'></author>
+<date month='February' day='15' year='2016' />
+</front>
+<seriesInfo name='Internet-Draft' value='draft-chroboczek-babel-diversity-routing-01'/>
 </reference>
 
 </references>

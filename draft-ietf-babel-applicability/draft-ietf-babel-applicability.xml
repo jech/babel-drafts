@@ -59,29 +59,29 @@ in a single protocol instance.</t>
 <t>Algorithms of this class are simple to understand and simple to
 implement, but unfortunately they do not work very well &mdash; they
 suffer from "counting to infinity", a case of pathologically slow
-convergence in some topologies after link failure.  Babel uses a mechanism
+convergence in some topologies after a link failure.  Babel uses a mechanism
 pioneered by EIGRP <xref target="DUAL"/> <xref target="RFC7868"/>, known
 as "feasibility", which avoids routing loops and therefore makes counting
 to infinity impossible.</t>
 
-<t>Feasibility is a very conservative mechanism, one that not only rejects
-all looping routes, but also rejects some loop-free routes.  Thus, it can
-lead to a situation known as "starvation", where a router rejects all
-routes to a given destination, even those that are loop-free.  In order to
-recover from starvation, Babel uses a mechanism pioneered by DSDV <xref
+<t>Feasibility is a very conservative mechanism, that not only avoids all
+looping routes, but also rejects some loop-free routes.  Thus, it can lead
+to a situation known as "starvation", where a router rejects all routes to
+a given destination, even those that are loop-free.  In order to recover
+from starvation, Babel uses a mechanism pioneered by DSDV <xref
 target="DSDV"/> and known as "sequenced routes".  In Babel, this mechanism
 is generalised to deal with prefixes of arbitrary length and routes
 announced at multiple points in a single routing domain (DSDV was a pure
 mesh protocol, and only dealt with host routes).</t>
 
-<t>The sequenced routes algorithm is slow to react to a starvation
-episode.  In Babel, starvation recovery is accelerated by using explicit
-requests (known as "seqno requests" in the protocol) that signal
-a starvation episode and cause a new sequenced route to be propagated in
-a timely manner.  In the absence of packet loss, this mechanism is
-provably complete and clears the starvation in time proportional to the
-diameter of the network, at the cost of some additional signalling
-traffic.</t>
+<t>In DSDV, the sequenced routes algorithm is slow to react to
+a starvation episode.  In Babel, starvation recovery is accelerated by
+using explicit requests (known as "seqno requests" in the protocol) that
+signal a starvation episode and cause a new sequenced route to be
+propagated in a timely manner.  In the absence of packet loss, this
+mechanism is provably complete and clears the starvation in time
+proportional to the diameter of the network, at the cost of some
+additional signalling traffic.</t>
 
 </section>
 
@@ -165,21 +165,21 @@ the two does not violate the protocol's assumptions.</t>
 
 <t>Notable extensions deployed to date include:
 <list style="symbols">
-<t>source-specific routing (SADR) <xref target="BABEL-SS"/>, which
-allows routing to take a packet's source address into account, thus
-enabling a cheap form of multihoming <xref target="SS-ROUTING"/>;</t>
-<t>RTT-based routing <xref target="BABEL-RTT"/>, which allows routing to
-minimise link delay, which is useful in overlay network (where both hop
-count and packet loss are poor metrics).</t>
+<t>source-specific routing (SADR) <xref target="BABEL-SS"/> allows
+forwarding to take a packet's source address into account, thus enabling
+a cheap form of multihoming <xref target="SS-ROUTING"/>;</t>
+<t>RTT-based routing <xref target="BABEL-RTT"/> minimises link delay,
+which is useful in overlay network (where both hop count and packet loss
+are poor metrics).</t>
 </list>
 Some other extensions have been designed, but have not seen deployment
 yet (and their usefulness is yet to be demonstrated):
 <list style="symbols">
-<t>frequency-aware routing <xref target="BABEL-Z"/>, which allows routing
-to minimise radio interference in wireless networks;</t>
-<t>ToS-aware routing <xref target="BABEL-TOS"/>, which allows routing
-to take a packet's ToS marking into account for selected routes without
-incurring the full cost of a multi-topology routing protocol.</t>
+<t>frequency-aware routing <xref target="BABEL-Z"/> aims to minimise radio
+interference in wireless networks;</t>
+<t>ToS-aware routing <xref target="BABEL-TOS"/> allows routing to take
+a packet's ToS marking into account for selected routes without incurring
+the full cost of a multi-topology routing protocol.</t>
 </list></t>
 
 </section>
@@ -203,7 +203,7 @@ amount of control traffic will be reduced by using a protocol that relies
 on a reliable transport (such as OSPF, IS-IS or EIGRP);</t>
 <t>low-power networks: the periodic updates use up battery power even when
 there are no topology changes and no user traffic, which makes Babel
-undesirable in stable, low-power networks.</t>
+wasteful in stable low-power networks.</t>
 </list></t>
 
 </section>
@@ -211,13 +211,12 @@ undesirable in stable, low-power networks.</t>
 <section title="Full routing table">
 
 <t>While there exist techniques that allow a Babel speaker to function
-with a partial routing table (e.g., by using just a default route), the
+with a partial routing table (e.g., by learning just a default route), the
 basic design of the protocol is that every Babel speaker has a full
 routing table.  In networks where some nodes are too constrained to hold
 a full routing table, it might be preferable to use a protocol designed to
-function with a partial routing table (such as AODVv2 <xref
-target="AODVv2"/>, RPL <xref target="RFC6550"/> or LOADng <xref
-target="LOADng"/>).</t>
+work with a partial routing table (such as AODVv2 <xref target="AODVv2"/>,
+RPL <xref target="RFC6550"/> or LOADng <xref target="LOADng"/>).</t>
 
 </section>
 

@@ -6,7 +6,7 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="no" ?>
-<rfc category="info" docName="draft-ietf-babel-applicability-02"
+<rfc category="info" docName="draft-ietf-babel-applicability-03"
      ipr="trust200902">
 <front>
 <title abbrev="Babel Protocol Applicability">Applicability of the Babel
@@ -28,8 +28,8 @@ routing protocol</title>
 <date day="6" month="April" year="2018"/>
 
 <abstract>
-<t>Where we argue that although OSPF and IS-IS are fine protocols, there
-exists a space where the Babel routing protocol (RFC 6126bis) can be
+<t>Where we argue that, although OSPF and IS-IS are fine protocols, there
+exists a space where the Babel routing protocol (RFC 6126bis) is
 useful.</t>
 </abstract>
 
@@ -44,44 +44,44 @@ familiar distance-vector algorithm (sometimes known as distributed
 Bellman-Ford) augmented with mechanisms for loop avoidance (there is no
 "counting to infinity") and starvation avoidance.  In this document, we
 argue that there exist niches where Babel is useful and that are not
-adequately served by the mature, efficient and highly refined protocols
-that are usually deployed, such as OSPF <xref target="RFC5340"/> and IS-IS
-<xref target="RFC1195"/>.</t>
+adequately served by mature, efficient and highly refined protocols such
+as OSPF <xref target="RFC5340"/> and IS-IS <xref target="RFC1195"/>.</t>
 
 <section title="Technical overview of the Babel protocol">
 
 <t>At its core, Babel is a traditional distance-vector protocol based on
 the distributed Bellman-Ford algorithm, similar in principle to RIP <xref
 target="RFC2453"/>, but with two obvious extensions: provisions for
-explicit neighbour reachability, bidirectional reachability and
-link-quality sensing, and support for multiple address families (e.g.,
-IPv6 and IPv4) in a single protocol instance.</t>
+sensing of neighbour reachability, bidirectional reachability and link
+quality, and support for multiple address families (e.g., IPv6 and IPv4)
+in a single protocol instance.</t>
 
 <t>Algorithms of this class are simple to understand and simple to
 implement, but unfortunately they do not work very well &mdash; they
 suffer from "counting to infinity", a case of pathologically slow
-convergence in some topologies after a link has been brought down.  Babel
-uses a mechanism pioneered by EIGRP <xref target="DUAL"/> <xref
-target="RFC7868"/>, known as "feasibility", which avoids routing loops and
-therefore makes counting to infinity impossible.</t>
+convergence in some topologies after link failure.  Babel uses a mechanism
+pioneered by EIGRP <xref target="DUAL"/> <xref target="RFC7868"/>, known
+as "feasibility", which avoids routing loops and therefore makes counting
+to infinity impossible.</t>
 
 <t>Feasibility is a very conservative mechanism, one that not only rejects
-all looping routes, but also rejects some loop-free routes; it can easily
-lead to a situation known as starvation, where a router rejects all routes
-to a given destination, even those that are loop-free.  In order to
+all looping routes, but also rejects some loop-free routes.  Thus, it can
+lead to a situation known as "starvation", where a router rejects all
+routes to a given destination, even those that are loop-free.  In order to
 recover from starvation, Babel uses a mechanism pioneered by DSDV <xref
 target="DSDV"/> and known as "sequenced routes".  In Babel, this mechanism
 is generalised to deal with prefixes of arbitrary length and routes
 announced at multiple points in a single routing domain (DSDV was a pure
-mesh protocol, and did not need to deal with such details).</t>
+mesh protocol, and only dealt with host routes).</t>
 
 <t>The sequenced routes algorithm is slow to react to a starvation
 episode.  In Babel, starvation recovery is accelerated by using explicit
-requests (known as "seqno requests" in the protocol) to signal
-a starvation episode and to cause a new sequenced route to be propagated
-in the network.  In the absence of packet loss, this mechanism is provably
-complete and clears the starvation in time proportional to the diameter of
-the network, at the cost of some additional signalling traffic.</t>
+requests (known as "seqno requests" in the protocol) that signal
+a starvation episode and cause a new sequenced route to be propagated in
+a timely manner.  In the absence of packet loss, this mechanism is
+provably complete and clears the starvation in time proportional to the
+diameter of the network, at the cost of some additional signalling
+traffic.</t>
 
 </section>
 
@@ -91,19 +91,20 @@ the network, at the cost of some additional signalling traffic.</t>
 avoidance, starvation avoidance) rely on some rather weak properties of
 the network and the metric being used.  The most significant are:
 <list style="symbols">
-<t>causality: a control message is not received before it has been sent;</t>
+<t>causality: a control message is not received before it has been sent
+(more precisely, the "happens-before" relation is acyclic);</t>
 <t>strict monotonicity of the metric: M&nbsp;&lt;&nbsp;C&nbsp;+&nbsp;M;</t>
 <t>left-distributivity of the metric: if M&nbsp;&le;&nbsp;M',
 then C&nbsp;+&nbsp;M&nbsp;&le;&nbsp;C&nbsp;+&nbsp;M'.</t>
 </list>
 In particular, Babel does not assume a reliable transport, it does not
-require an ordered transport, it does not require transitive
-communication, and it does not require that the metric be discrete
+assume ordered delivery, it does not assume that communication is
+transitive, and it does not require that the metric be discrete
 (continuous metrics are possible, reflecting for example packet loss
 rates).  This is in contrast to traditional link-state routing protocols
 such as OSPF <xref target="RFC5340"/> or IS-IS <xref target="RFC1195"/>
-which are layered over a reliable flooding algorithm and make some rather
-strong requirements on the underlying network and metric.</t>
+which are layered over a reliable flooding algorithm and make stronger
+requirements on the underlying network and metric.</t>
 
 <section title="Simplicity and implementability">
 
@@ -115,9 +116,8 @@ Babel can be explained in 15 minutes, and a full description of the
 protocol can be done in 52 minutes (one microcentury).</t>
 
 <t>An important consequence is that Babel is easy to implement.  While
-Babel is a young protocol, there already exist four independent
-implementations, one of which was reportedly written and debugged in just
-two nights.</t>
+Babel is a young protocol, there exist four independent implementations,
+including one that was reportedly written and debugged in just two nights.</t>
 
 </section>
 
@@ -129,19 +129,20 @@ protocol:
 <list style="symbols">
 <t>robust with respect to bugs: unless you are very unlucky, an
 implementation bug does probably not violate the properties on which Babel
-relies; in practice, implementation bugs tend to slow down convergence or
-cause sub-optimal routing, but do not cause the protocol to collapse;</t>
-<t>robust with respect to broken networks: a fragile network
+relies; in our (extensive) experience, implementation bugs tend to slow
+down convergence or cause sub-optimal routing, but do not cause the
+network to collapse;</t>
+<t>robust with respect to unusual networks: an unusual network
 (non-transitive links, unstable links, etc.) does most probably not
 violate the assumptions of the protocol;</t>
-<t>robust with respect to strange metrics: no matter how strange your
+<t>robust with respect to novel metrics: no matter how strange your
 metric (continuous, constantly fluctuating, etc.), it does most probably
 not violate the assumptions of the protocol.</t>
 </list></t>
 
 <t>These robustness properties have important consequences for the
 applicability of the protocol: Babel works (more or less efficiently) in
-a wide range of networks where traditional routing protocols give up.</t>
+a wide range of circumstances where traditional routing protocols give up.</t>
 
 </section>
 
@@ -149,13 +150,13 @@ a wide range of networks where traditional routing protocols give up.</t>
 
 <t>Babel's packet format has a number of features designed to make the
 protocol extensible, and a number of extensions have been designed to make
-Babel work in situations that were not envisioned when the protocol was
-initially designed.  This extensibility is not an accident, but
+Babel work better in situations that were not envisioned when the protocol
+was initially designed.  This extensibility is not an accident, but
 a consequence of the design of the protocol: it is easy to check whether
 a given extension violates the assumptions made by the protocol.</t>
 
 <t>Remarkably enough, all of the extensions designed to date interoperate
-with the base protocol and with each other.  Again, this is a consequence
+with the base protocol and with each other.  This, again, is a consequence
 of the protocol design: in order to check the interoperability of two
 implementations of Babel, it is enough to verify that the interaction of
 the two does not violate the protocol's assumptions.</t>
@@ -164,7 +165,7 @@ the two does not violate the protocol's assumptions.</t>
 <list style="symbols">
 <t>source-specific routing (SADR) <xref target="BABEL-SS"/>, which
 allows routing to take a packet's source address into account, thus
-enabling a cheap form of multihoming;</t>
+enabling a cheap form of multihoming <xref target="SS-ROUTING"/>;</t>
 <t>RTT-based routing <xref target="BABEL-RTT"/>, which allows routing to
 minimise link delay, which is useful in overlay network (where both hop
 count and packet loss are poor metrics).</t>
@@ -193,16 +194,16 @@ unusable in some deployments.</t>
 <t>The main mechanisms used by Babel to reconverge after a topology change
 are reactive: triggered updates, triggered retractions and explicit
 requests.  However, in the presence of heavy packet loss, Babel relies on
-periodic updates to clear routing pathologies.  This reliance on periodic
-updates makes Babel unsuitable in at least two kinds of deployments:
+periodic updates to clear pathologies.  This reliance on periodic updates
+makes Babel unsuitable in at least two kinds of deployments:
 <list style="symbols">
 <t>large, stable networks: since Babel sends periodic updates even in the
-absence of topology changes, in well-managed large, stable networks,
-protocols that rely on a reliable transport (such as OSPF, IS-IS or EIGRP)
-are intrinsically more efficient;</t>
+absence of topology changes, in well-managed, large, stable networks the
+amount of control traffic will be reduced by using a protocol that relies
+on a reliable transport (such as OSPF, IS-IS or EIGRP);</t>
 <t>low-power networks: the periodic updates use up battery power even when
-there are no topology changes, which makes Babel undesirable in stable,
-low-power networks.</t>
+there are no topology changes and no user traffic, which makes Babel
+undesirable in stable, low-power networks.</t>
 </list></t>
 
 </section>
@@ -213,9 +214,10 @@ low-power networks.</t>
 with a partial routing table (e.g., by using just a default route), the
 basic design of the protocol is that every Babel speaker has a full
 routing table.  In networks where some nodes are too constrained to hold
-a full routing table, protocols such as AODVv2 <xref target="AODVv2"/>,
-RPL <xref target="RFC6550"/> and LOADng <xref target="LOADng"/> may be
-preferable to Babel.</t>
+a full routing table, it might be preferable to use a protocol designed to
+function with a partial routing table (such as AODVv2 <xref
+target="AODVv2"/>, RPL <xref target="RFC6550"/> or LOADng <xref
+target="LOADng"/>).</t>
 
 </section>
 
@@ -260,11 +262,10 @@ updates) allow it to remain stable and efficient in the presence of
 unstable metrics, even in the presence of a feedback loop.  For this
 reason, it has been successfully deployed in large scale overlay networks,
 built out of thousands of tunnels spanning continents, where it is used
-with a metric computed from links' latencies <xref
-target="DELAY-BASED"/>.</t>
+with a metric computed from links' latencies.</t>
 
 <t>This particular application depends on the extension for RTT-sensitive
-routing.</t>
+routing <xref target="DELAY-BASED"/>.</t>
 
 </section>
 
@@ -273,11 +274,11 @@ routing.</t>
 <t>While Babel is a general-purpose routing protocol, it has been
 repeatedly shown to be competitive with dedicated routing protocols for
 wireless mesh networks <xref target="REAL-WORLD"/> <xref
-target="BRIDGING-LAYERS"/>.  While this particular niche is already served
-by a number of mature protocols, notably OLSR-ETX and OLSRv2 <xref
-target="RFC7181"/> equipped with the DAT metric <xref target="RFC7779"/>,
-Babel has seen a moderate amount of successful deployment in pure mesh
-networks.</t>
+target="BRIDGING-LAYERS"/>.  Although this particular niche is already
+served by a number of mature protocols, notably OLSR-ETX and OLSRv2 <xref
+target="RFC7181"/> (equipped e.g.&nbsp;with the DAT metric <xref
+target="RFC7779"/>), Babel has seen a moderate amount of successful
+deployment in pure mesh networks.</t>
 
 </section>
 
@@ -303,11 +304,11 @@ section before publication.]</t>
 
 <section title="Security Considerations">
 
-<t>As in all distance-vector routing protocols, a Babel speaker receives
-reachability information from its neighbours, which by default is trusted.
-A number of attacks are possible if this information is not suitably
-protected, either by a lower-layer mechanism or by an extension to the
-protocol itself (e.g.&nbsp;<xref target="RFC7298"/>).</t>
+<t>As is the case in all distance-vector routing protocols, a Babel
+speaker receives reachability information from its neighbours, which by
+default is trusted.  A number of attacks are possible if this information
+is not suitably protected, either by a lower-layer mechanism or by an
+extension to the protocol itself (e.g.&nbsp;<xref target="RFC7298"/>).</t>
 
 <t>Implementors and deployers must be aware of the insecure nature of the
 base protocol, and must take suitable measures to ensure that the protocol
@@ -587,6 +588,16 @@ Babel Hashed Message Authentication Code (HMAC) Cryptographic Authentication
 <date month='February' day='15' year='2016' />
 </front>
 <seriesInfo name='Internet-Draft' value='draft-chroboczek-babel-diversity-routing-01'/>
+</reference>
+
+<reference anchor="SS-ROUTING" target="http://arxiv.org/pdf/1403.0445">
+<front>
+<title>Source-Specific Routing</title>
+<author initials="M." surname="Boutier" fullname="Matthieu Boutier"/>
+<author initials="J." surname="Chroboczek" fullname="Juliusz Chroboczek"/>
+<date year="2014" month="August"/>
+</front>
+<annotation>In Proc. IFIP Networking 2015.</annotation>
 </reference>
 
 </references>

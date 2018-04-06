@@ -37,15 +37,15 @@ useful.</t>
 
 <middle>
 
-<section title="Introduction">
+<section title="Introduction and background">
 
 <t>Babel <xref target="RFC6126bis"/> is a routing protocol based on the
 familiar distance-vector algorithm (sometimes known as distributed
 Bellman-Ford) augmented with mechanisms for loop avoidance (there is no
 "counting to infinity") and starvation avoidance.  In this document, we
 argue that there exist niches where Babel is useful and that are not
-adequately served by mature, efficient and highly refined protocols such
-as OSPF <xref target="RFC5340"/> and IS-IS <xref target="RFC1195"/>.</t>
+adequately served by more mature protocols such as OSPF
+<xref target="RFC5340"/> and IS-IS <xref target="RFC1195"/>.</t>
 
 <section title="Technical overview of the Babel protocol">
 
@@ -82,6 +82,8 @@ a timely manner.  In the absence of packet loss, this mechanism is
 provably complete and clears the starvation in time proportional to the
 diameter of the network, at the cost of some additional signalling
 traffic.</t>
+
+</section>
 
 </section>
 
@@ -182,8 +184,6 @@ incurring the full cost of a multi-topology routing protocol.</t>
 
 </section>
 
-</section>
-
 <section title="Limitations">
 
 <t>Babel has some undesirable properties that make it suboptimal or even
@@ -238,8 +238,7 @@ aggregation.</t>
 
 </section>
 
-<section title="Existing successful deployments of Babel"
-         anchor="existing">
+<section title="Successful deployments of Babel">
 
 <t>In this section, we give a few examples of environments where Babel has
 been successfully deployed.</t>

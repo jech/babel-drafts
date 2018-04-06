@@ -973,20 +973,20 @@ only satisfy the following conditions:
 </list>
 Additionally, the metric SHOULD satisfy the following condition:
 <list style="symbols">
-  <t>M is isotonic: if m &le; m', then M(c, m) &le; M(c, m').</t>
+  <t>M is left-distributive: if m &le; m', then M(c, m) &le; M(c, m').</t>
 </list>
 Note that while strict monotonicity is essential to the integrity of the
-network (persistent routing loops may arise if it is not satisfied),
-isotonicity is not: if it is not satisfied, Babel will still converge to
-a loop-free configuration, but might not reach a global optimum (in fact,
-a global optimum may not even exist).</t>
+network (persistent routing loops may arise if it is not satisfied), left
+distributivity is not: if it is not satisfied, Babel will still converge
+to a loop-free configuration, but might not reach a global optimum (in
+fact, a global optimum may not even exist).</t>
 
 <t>As with cost computation, not all strategies for computing route
 metrics will give good results.  In particular, some metrics are more
 likely than others to lead to routing instabilities (route flapping).  In
 <xref target="metric-computation-examples"/>, we give a number of examples
-of strictly monotonic, isotonic routing metrics that are known to work
-well in practice.</t>
+of strictly monotonic, left-distributive routing metrics that are known to
+work well in practice.</t>
 
 </section>
 
@@ -2545,11 +2545,11 @@ a metric.</t>
 
 <section title="Additive Metrics" anchor="additive-metric">
 
-<t>The simplest approach for obtaining a monotonic, isotonic metric is to
-define the metric of a route as the sum of the costs of the component
-links.  More formally, if a neighbour advertises a route with metric m over
-a link with cost c, then the resulting route has metric M(c, m) = c +
-m.</t>
+<t>The simplest approach for obtaining a monotonic, left-distributive
+metric is to define the metric of a route as the sum of the costs of the
+component links.  More formally, if a neighbour advertises a route with
+metric m over a link with cost c, then the resulting route has metric M(c,
+m) = c + m.</t>
 
 <t>A multiplicative metric can be converted into an additive one by taking
 the logarithm (in some suitable base) of the link costs.</t>

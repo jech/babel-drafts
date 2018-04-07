@@ -25,7 +25,7 @@ routing protocol</title>
 </address>
 </author>
 
-<date day="6" month="April" year="2018"/>
+<date day="7" month="April" year="2018"/>
 
 <abstract>
 <t>Where we argue that, although OSPF and IS-IS are fine protocols, there
@@ -64,8 +64,8 @@ pioneered by EIGRP <xref target="DUAL"/> <xref target="RFC7868"/>, known
 as "feasibility", which avoids routing loops and therefore makes counting
 to infinity impossible.</t>
 
-<t>Feasibility is a very conservative mechanism, that not only avoids all
-looping routes, but also rejects some loop-free routes.  Thus, it can lead
+<t>Feasibility is a conservative mechanism, one that not only avoids all
+looping routes but also rejects some loop-free routes.  Thus, it can lead
 to a situation known as "starvation", where a router rejects all routes to
 a given destination, even those that are loop-free.  In order to recover
 from starvation, Babel uses a mechanism pioneered by DSDV <xref
@@ -89,24 +89,8 @@ additional signalling traffic.</t>
 
 <section title="Properties of the Babel protocol">
 
-<t>The fairly strong properties of the Babel protocol (convergence, loop
-avoidance, starvation avoidance) rely on some rather weak properties of
-the network and the metric being used.  The most significant are:
-<list style="symbols">
-<t>causality: a control message is not received before it has been sent
-(more precisely, the "happens-before" relation is acyclic);</t>
-<t>strict monotonicity of the metric: M&nbsp;&lt;&nbsp;C&nbsp;+&nbsp;M;</t>
-<t>left-distributivity of the metric: if M&nbsp;&le;&nbsp;M',
-then C&nbsp;+&nbsp;M&nbsp;&le;&nbsp;C&nbsp;+&nbsp;M'.</t>
-</list>
-In particular, Babel does not assume a reliable transport, it does not
-assume ordered delivery, it does not assume that communication is
-transitive, and it does not require that the metric be discrete
-(continuous metrics are possible, reflecting for example packet loss
-rates).  This is in contrast to traditional link-state routing protocols
-such as OSPF <xref target="RFC5340"/> or IS-IS <xref target="RFC1195"/>
-which are layered over a reliable flooding algorithm and make stronger
-requirements on the underlying network and metric.</t>
+<t>In this section, we describe the properties of the Babel protocol as
+well as its known limitations.</t>
 
 <section title="Simplicity and implementability">
 
@@ -125,17 +109,33 @@ including one that was reportedly written and debugged in just two nights.</t>
 
 <section title="Robustness">
 
-<t>Babel's correctness depends on a small number of fairly weak and
-reasonably obvious properties.  This makes Babel in many ways a robust
-protocol:
+<t>The fairly strong properties of the Babel protocol (convergence, loop
+avoidance, starvation avoidance) rely on some rather weak properties of
+the network and the metric being used.  The most significant are:
 <list style="symbols">
-<t>robust with respect to bugs: unless you are very unlucky, an
-implementation bug does probably not violate the properties on which Babel
-relies; in our (extensive) experience, implementation bugs tend to slow
-down convergence or cause sub-optimal routing, but do not cause the
-network to collapse;</t>
+<t>causality: a control message is not received before it has been sent
+(more precisely, the "happens-before" relation is acyclic);</t>
+<t>strict monotonicity of the metric: M&nbsp;&lt;&nbsp;C&nbsp;+&nbsp;M;</t>
+<t>left-distributivity of the metric: if M&nbsp;&le;&nbsp;M',
+then C&nbsp;+&nbsp;M&nbsp;&le;&nbsp;C&nbsp;+&nbsp;M'.</t>
+</list>
+In particular, Babel does not assume a reliable transport, it does not
+assume ordered delivery, it does not assume that communication is
+transitive, and it does not require that the metric be discrete
+(continuous metrics are possible, reflecting for example packet loss
+rates).  This is in contrast to traditional link-state routing protocols
+such as OSPF <xref target="RFC5340"/> or IS-IS <xref target="RFC1195"/>,
+which are layered over a reliable flooding algorithm and make stronger
+requirements on the underlying network and metric.</t>
+
+<t>These weak requirements make Babel a robust protocol:
+<list style="symbols">
+<t>robust with respect to bugs: an implementation bug does most probably
+not violate the properties on which Babel relies; in our (extensive)
+experience, bugs tend to slow down convergence or cause sub-optimal
+routing, but do not cause the network to collapse;</t>
 <t>robust with respect to unusual networks: an unusual network
-(non-transitive links, unstable links, etc.) does most probably not
+(non-transitive links, unstable metrics, etc.) does most probably not
 violate the assumptions of the protocol;</t>
 <t>robust with respect to novel metrics: no matter how strange your
 metric (continuous, constantly fluctuating, etc.), it does most probably
@@ -150,12 +150,13 @@ a wide range of circumstances where traditional routing protocols give up.</t>
 
 <section title="Extensibility">
 
-<t>Babel's packet format has a number of features designed to make the
-protocol extensible, and a number of extensions have been designed to make
-Babel work better in situations that were not envisioned when the protocol
-was initially designed.  This extensibility is not an accident, but
-a consequence of the design of the protocol: it is easy to check whether
-a given extension violates the assumptions made by the protocol.</t>
+<t>Babel's packet format has a number of features that make the protocol
+extensible (see Appendix&nbsp;C of <xref target="RFC6126bis"/>), and
+a number of extensions have been designed to make Babel work better in
+situations that were not envisioned when the protocol was initially
+designed.  The ease of extensibility is not an accident, but a consequence
+of the design of the protocol: it is reasonably easy to check whether
+a given extension violates the assumptions on which Babel relies.</t>
 
 <t>Remarkably enough, all of the extensions designed to date interoperate
 with the base protocol and with each other.  This, again, is a consequence
@@ -203,7 +204,7 @@ amount of control traffic will be reduced by using a protocol that relies
 on a reliable transport (such as OSPF, IS-IS or EIGRP);</t>
 <t>low-power networks: the periodic updates use up battery power even when
 there are no topology changes and no user traffic, which makes Babel
-wasteful in stable low-power networks.</t>
+wasteful in low-power networks.</t>
 </list></t>
 
 </section>
@@ -211,10 +212,11 @@ wasteful in stable low-power networks.</t>
 <section title="Full routing table">
 
 <t>While there exist techniques that allow a Babel speaker to function
-with a partial routing table (e.g., by learning just a default route), the
-basic design of the protocol is that every Babel speaker has a full
-routing table.  In networks where some nodes are too constrained to hold
-a full routing table, it might be preferable to use a protocol designed to
+with a partial routing table (e.g., by learning just a default route or,
+more generally, performing route aggregation), Babel is designed around
+the assumption that every router has a full routing table.  In networks
+where some nodes are too constrained to hold a full routing table, it
+might be preferable to use a protocol that was designed from the outset to
 work with a partial routing table (such as AODVv2 <xref target="AODVv2"/>,
 RPL <xref target="RFC6550"/> or LOADng <xref target="LOADng"/>).</t>
 
@@ -226,10 +228,10 @@ RPL <xref target="RFC6550"/> or LOADng <xref target="LOADng"/>).</t>
 after a retraction until all neighbours have been guaranteed to have acted
 upon the retraction, even in the presence of packet loss.  Unless the
 optional algorithm described in Section 3.5.5 of <xref target="RFC6126bis"/>
-is implemented, this entails that a node is unreachable for a few
-minutes after the most specific route to it has been retracted.  This
-property may make Babel undesirable in networks that perform automatic
-aggregation.</t>
+is implemented, this entails that a node is unreachable for a few minutes
+after the most specific route to it has been retracted.  This delay may
+make Babel slow to recover from a topology change in networks that perform
+automatic route aggregation.</t>
 
 </section>
 
@@ -250,7 +252,11 @@ non-transitive link technologies.  Because of that, it has seen a number
 of succesful deployments in medium-sized hybrid networks, networks that
 combine a wired, aggregated backbone with meshy wireless bits at the edges.
 No other routing protocol known to us is similarly robust and efficient in
-this particular type of network.</t>
+this particular kind of topology.</t>
+
+<t>Efficient operation in hybrid networks requires the implementation to
+distinguish wired and wireless links, and to perform link quality
+estimation on wireless links.</t>
 
 </section>
 <section title="Large scale overlay networks">
@@ -283,11 +289,12 @@ deployment in pure mesh networks.</t>
 <section title="Small unmanaged networks">
 
 <t>Because of its small size and simple configuration, Babel has been
-deployed in small, unmanaged networks (three to five routers), where it
-serves as a more efficient replacement for RIP <xref target="RFC2453"/>,
-over which it has two significant advantages: the ability to route
-multiple address families (IPv6 and IPv4) in a single protocol instance,
-and good support for using wireless links for transit.</t>
+deployed in small, unmanaged networks (e.g., home and small office
+networks), where it serves as a more efficient replacement for RIP
+<xref target="RFC2453"/>, over which it has two significant advantages: the
+ability to route multiple address families (IPv6 and IPv4) in a single
+protocol instance, and good support for using wireless links for
+transit.</t>
 
 </section>
 

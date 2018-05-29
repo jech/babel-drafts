@@ -6,7 +6,7 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="no" ?>
-<rfc category="std" docName="draft-ietf-babel-rfc6126bis-04"
+<rfc category="std" docName="draft-ietf-babel-rfc6126bis-05"
      ipr="trust200902"
      obsoletes="6126,7557">
 <front>
@@ -38,7 +38,7 @@
 </address>
 </author>
 
-<date day="3" month="January" year="2018"/>
+<date day="29" month="May" year="2018"/>
 
 <abstract>
 <t>Babel is a loop-avoiding distance-vector routing protocol that is
@@ -2826,14 +2826,19 @@ allows sub-TLVs.</t>
 </list></t>
 </section>
 
-<section title="Changes since draft-ietf-babel-rfc6126bis-04">
-
-</section>
-
-</section>
-
 <section title="Changes since draft-ietf-babel-rfc6126bis-03">
 <t>Minor editorial changes.</t>
+</section>
+
+<section title="Changes since draft-ietf-babel-rfc6126bis-04">
+<t><list style="symbols">
+<t>Renamed isotonicity to left-distributivity.</t>
+<t>Minor clarifications to unicast hellos.</t>
+<t>Updated requirements boilerplate to RFC 8174.</t>
+<t>Minor editorial changes.</t>
+</list></t>
+</section>
+    
 </section>
 
 </back>

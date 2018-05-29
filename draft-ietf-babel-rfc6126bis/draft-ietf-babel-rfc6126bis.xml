@@ -42,8 +42,9 @@
 
 <abstract>
 <t>Babel is a loop-avoiding distance-vector routing protocol that is
-robust and efficient both in ordinary wired networks and in wireless
-mesh networks.</t>
+robust and efficient both in ordinary wired networks and in wireless mesh
+networks.  This document describes the Babel routing protocol, and
+obsoletes RFCs 6126 and 7557</t>
 </abstract>
 </front>
 

@@ -454,7 +454,7 @@ become unfeasible for A.</t>
 <t>In effect, the routing loop disappears at the latest when routing
 information has gone around the loop.  Since this process can be delayed by
 lost packets, Babel makes certain efforts to ensure that updates are sent
-reliably after a router-id change <xref target="triggered-updates"/>.</t>
+reliably after a router-id change (<xref target="triggered-updates"/>).</t>
 
 <t>Additionally, after the routers have advertised the two routes, both
 sources will be in their source tables, which will prevent them from ever
@@ -503,9 +503,9 @@ assigns host IDs.)</t>
 <section title="Message Transmission and Reception"
          anchor="transmission-reception">
 
-<t>Babel protocol packets are sent in the body of a UDP datagram.  Each
-Babel packet consists of zero or more TLVs.  Most TLVs may contain
-sub-TLVs.</t>
+<t>Babel protocol packets are sent in the body of a UDP datagram (as
+described in <xref target="protocol-encoding"/> below).  Each Babel packet
+consists of zero or more TLVs.  Most TLVs may contain sub-TLVs.</t>
 
 <t>The source address of a Babel packet is always a unicast address,
 link-local in the case of IPv6.  Babel packets may be sent to a well-known
@@ -781,14 +781,15 @@ say that a Hello is "scheduled" if it carries a non-zero interval, and
 "unscheduled" otherwise.</t>
 
 <t>There are two kinds of Hellos: Multicast Hellos, which use
-a per-interface Hello counter, and Unicast Hellos, which use
-a per-neighbour counter.  A Multicast Hello with a given seqno MUST be
-sent to all neighbours on a given interface, either by sending it to
-a multicast address or by sending it to one unicast address per neighbour
-(hence, the term "Multicast Hello" is a slight misnomer).  A Unicast Hello
-carrying a given seqno should normally be sent to just one neighbour (over
-unicast), since the sequence numbers of different neighbours are not
-in general synchronised.</t>
+a per-interface Hello counter (the Multicast Hello seqno), and Unicast
+Hellos, which use a per-neighbour counter (the Multicast Hello seqno).
+A Multicast Hello with a given seqno MUST be sent to all neighbours on
+a given interface, either by sending it to a multicast address or by
+sending it to one unicast address per neighbour (hence, the term
+"Multicast Hello" is a slight misnomer).  A Unicast Hello carrying a given
+seqno should normally be sent to just one neighbour (over unicast), since
+the sequence numbers of different neighbours are not in general
+synchronised.</t>
 
 <t>Multicast Hellos sent over multicast can be used for neighbour
 discovery; hence, a node SHOULD send periodic (scheduled) Multicast Hellos
@@ -1287,7 +1288,7 @@ unicast address of the neighbour that sent the request.</t>
 <t>When a node receives a route request for a given prefix, it checks its
 route table for a selected route to this exact prefix.  If such a route
 exists, it MUST send an update (over unicast or over multicast); if such
-a route does not, it MUST send a retraction for that prefix.</t>
+a route does not exist, it MUST send a retraction for that prefix.</t>
 
 <t>When a node receives a wildcard route request, it SHOULD send a full
 route table dump.  Full route dumps MAY be rate-limited, especially if
@@ -1328,11 +1329,12 @@ count and sends the request in a unicast packet destined to the selected
 neighbour.</t>
 
 <t>A node SHOULD maintain a list of recently forwarded seqno requests and
-forward the reply (an update with a sufficiently large seqno) in a timely
-manner.  A node SHOULD compare every incoming seqno request against its
-list of recently forwarded seqno requests and avoid forwarding it if it is
-redundant (i.e., if it has recently sent a request with the same prefix,
-router-id and a seqno that is not smaller modulo 2^16).</t>
+forward the reply (an update with a seqno sufficiently large to satisfy
+the request) in a timely manner.  A node SHOULD compare every incoming
+seqno request against its list of recently forwarded seqno requests and
+avoid forwarding it if it is redundant (i.e., if it has recently sent
+a request with the same prefix, router-id and a seqno that is not smaller
+modulo 2^16).</t>
 
 <t>Since the request-forwarding mechanism does not necessarily obey the
 feasibility condition, it may get caught in routing loops; hence, requests
@@ -1448,7 +1450,7 @@ on link layers with high per-packet overhead (e.g., IEEE&nbsp;802.11).</t>
 
 </section>
 
-<section title="Protocol Encoding">
+<section title="Protocol Encoding" anchor="protocol-encoding">
 
 <t>A Babel packet is sent as the body of a UDP datagram, with network-layer
 hop count set to 1, destined to a well-known multicast address or to
@@ -1918,8 +1920,8 @@ ignored due to an unknown mandatory sub-TLV.</t>
 <t hangText="Type">Set to 7 to indicate a Next Hop TLV.</t>
 <t hangText="Length">The length of the body, exclusive of the Type and
 Length fields.</t>
-<t hangText="AE">The encoding of the Address field.  This SHOULD be 1 or 3
-and MUST NOT be 0.</t>
+<t hangText="AE">The encoding of the Address field.  This SHOULD be
+1 (IPv4) or 3 (link-local IPv6), and MUST NOT be 0.</t>
 <t hangText="Reserved">Sent as 0 and MUST be ignored on reception.</t>
 <t hangText="Next hop">The next-hop address advertised by subsequent Update
 TLVs, for this address family.</t>
@@ -2806,6 +2808,10 @@ allows sub-TLVs.</t>
 <t>Added information about sending requests to Appendix B.</t>
 <t>A number of minor wording changes and clarifications.</t>
 </list></t>
+</section>
+
+<section title="Changes since draft-ietf-babel-rfc6126bis-04">
+
 </section>
 
 </section>

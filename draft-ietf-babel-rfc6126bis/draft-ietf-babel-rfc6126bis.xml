@@ -132,8 +132,10 @@ aggregation.</t>
 <section title="Specification of Requirements">
 
 <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
-"SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
-document are to be interpreted as described in <xref target="RFC2119"/>.</t>
+"SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+"OPTIONAL" in this document are to be interpreted as described in BCP 14
+<xref target="RFC2119"/> <xref target="RFC8174"/> when, and only when,
+they appear in all capitals, as shown here.</t>
 
 </section>
 
@@ -2287,11 +2289,13 @@ inspired by <xref target="PACKETBB"/>.</t>
 <references title="Normative References">
 
 <reference anchor="RFC2119"><front>
-    <title>Key words for use in RFCs to Indicate Requirement Levels</title>
-    <author fullname="Scott Bradner" initials="S." surname="Bradner"/>
-    <date month="March" year="1997"/>
-  </front>
-  <seriesInfo name="RFC" value="2119"/>
+<title>Key words for use in RFCs to Indicate Requirement Levels</title>
+<author initials="S." surname="Bradner" fullname="S. Bradner"/>
+<date year="1997" month="March"/>
+</front>
+<seriesInfo name="BCP" value="14"/>
+<seriesInfo name="RFC" value="2119"/>
+<seriesInfo name="DOI" value="10.17487/RFC2119"/>
 </reference>
 
 <reference anchor="RFC5226">
@@ -2304,6 +2308,17 @@ inspired by <xref target="PACKETBB"/>.</t>
 <seriesInfo name='BCP' value='26' />
 <seriesInfo name='RFC' value='5226' />
 </reference>
+
+<reference anchor="RFC8174"><front>
+<title>Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words</title>
+<author initials="B." surname="Leiba" fullname="B. Leiba"/>
+<date year="2017" month="May"/>
+</front>
+<seriesInfo name="BCP" value="14"/>
+<seriesInfo name="RFC" value="8174"/>
+<seriesInfo name="DOI" value="10.17487/RFC8174"/>
+</reference>
+
 </references>
 
 <references title="Informative References">

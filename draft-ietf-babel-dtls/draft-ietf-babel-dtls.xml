@@ -54,9 +54,9 @@ protocol.</t>
 
 </section>
 
-<section title="Operation of the protocol">
+<section title="Establishing and managing Babel over DTLS sessions">
 
-<section title="DTLS Handshake">
+<section title="Session Initiation">
 
 <t>When a peer A receives a packet incoming from a new neighbour B,
 then:

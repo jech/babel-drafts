@@ -105,9 +105,9 @@ unprotected packets must be send over the standard Babel port
 <t>When a peer A acquires a new neighbour B:
 <list style="symbols">
 <t>if the link-local address of A is inferior to the link-local
-address of B, A initializes its DTLS state as a server for the peer
+address of B, A initialises its DTLS state as a server for the peer
 B</t>
-<t>else, A initializes its DTLS state as a client for the peer B, and
+<t>else, A initialises its DTLS state as a client for the peer B, and
 starts the DTLS handshake</t>
 </list>
 If the handshake succeeds, the peers run Babel as usual over DTLS.

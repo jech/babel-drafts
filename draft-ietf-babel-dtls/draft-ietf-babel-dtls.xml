@@ -31,8 +31,9 @@
 <date year="2018" />
 
 <abstract>
-<t>The Babel routing protocol has no built-in security mechanism.  We
-describe methods to secure Babel with DTLS.</t>
+<t>The Babel routing protocol is completely insecure, thus subject to
+passive and active threats.  We propose mechanisms to protect Babel
+with the Datagram Transport Layer Security (DTLS) protocol.</t>
 </abstract>
 </front>
 
@@ -40,17 +41,60 @@ describe methods to secure Babel with DTLS.</t>
 
 <section title="Introduction">
 
-<t>The Babel routing protocol <xref target="RFC6126"></xref> has no
-built-in security mechanism.  We describe methods to secure Babel with
-DTLS <xref target="RFC6347"></xref>.  The motivations for proposing
-Babel over DTLS are that:
+<t>The Babel routing protocol <xref target="RFC6126"></xref> is
+completely insecure, thus subject to passive and active threats.  We
+propose mechanisms to protect Babel with the Datagram Transport Layer
+Security (DTLS) <xref target="RFC6347"></xref> protocol.  The
+motivations for proposing Babel over DTLS are that:
 <list style="symbols">
 <t>DTLS provides a sub-layer of security that is well-defined and has
 various implementations, and does not require changes in the Babel
 protocol.</t>
 <t>DTLS allows the use of asymmetric keys</t>
+<t>DTLS provides authentication of data</t>
+<t>DTLS provides confidentiality of data</t>
+</list>
+
+Threat models against an insecure Babel include passive eavesdropping,
+attracting data traffic by advertising routes with a low metric,
+privacy issues, spoofed IPv4 traffic.
+</t>
+
+</section>
+
+<section title="Babel profile for DTLS">
+
+<t>A Babel peer must be able to receive unprotected data as well as
+protected data.  Protected and unprotected traffic must be
+differentiated.</t>
+
+<section title="Peer-to-peer on the same port">
+
+<t>In this model, Babel and Babel over DTLS traffic is received on the
+same port.  The DTLS client port, the DTLS server port, and the Babel
+port (6696) are identical.  When a packet is received, it is treated
+as a DTLS packet and decrypted.
+
+<list style="symbols">
+<t>if the decryption is successful, the decrypted content is parsed as
+a Babel packet and the peer takes action on it.</t>
+<t>if not, the packet is parsed as a Babel packet and the peer MUST
+only take action on Hello or IHU TLVs.</t>
 </list>
 </t>
+
+</section>
+
+<section title="Peer-to-peer on another port">
+
+<t>In this model, another port is reserved (TBD) for Babel over DTLS
+traffic.  All DTLS protected packets must be send over this port, all
+unprotected packets must be send over the standard Babel port
+(6696).</t>
+
+<t>FIXME: are the client port and the server port the same?</t>
+
+</section>
 
 </section>
 
@@ -58,39 +102,47 @@ protocol.</t>
 
 <section title="Session Initiation">
 
-<t>When a peer A receives a packet incoming from a new neighbour B,
-then:
+<t>When a peer A acquires a new neighbour B:
 <list style="symbols">
-<t>if the link-local address of A is inferior of the link-local
+<t>if the link-local address of A is inferior to the link-local
 address of B, A initializes its DTLS state as a server for the peer
 B</t>
-<t>else, initializes its DTLS state as a server for the peer B, and
+<t>else, A initializes its DTLS state as a client for the peer B, and
 starts the DTLS handshake</t>
 </list>
 If the handshake succeeds, the peers run Babel as usual over DTLS.
-Else, refer to the DTLS RFC (possibly free the DTLS state for the
-neighbour).</t>
+Else, the DTLS state of each peer for this pair must be freed or
+reset.</t>
+
+<t>FIXME: &quot;link-local address&quot; is only valid in IPv6. Change
+that to &quot;address&quot;?</t>
 
 </section>
 
-<section title="DTLS State Removal">
+<section title="Neighbour flush">
 
-<t>If two peers A and B have an existing DTLS connection, and A
-receives a packet from B that A can not decrypt (B may have rebooted),
-then:
-<list style="symbols">
-<t>either the DTLS state of A for B is discarded,</t>
-<t>either we try to follow the DTLS RFC</t>
-</list>
-XXX: should we maintain two DTLS states?</t>
+<t>When a neighbour is flushed from the neighbour table, its
+associated DTLS state is discarded.</t>
+
+<t>Note: consider sending a DTLS fatal alert to the neighbour being
+flushed.</t>
+<t>Note: should we discard the DTLS state or keep it in case the
+flushed peer comes back alive later, and we'd like to reuse the
+session?</t>
+
+</section>
+
+<section title="Establishing New Associations with Existing Parameters">
+
+<t>DTLS RFC section 4.2.8 SHOULD be followed.</t>
 
 </section>
 
 <section title="Emission">
 
 <t>DTLS can not secure multicast.  All packets send via unicast must
-be protected by DTLS.  Only Hello, IHU, or TLVs containing
-non-sensitive data are allowed to be send in clear via multicast.</t>
+be protected by DTLS.  Only Hello and IHU TLVs are allowed to be send
+in clear via multicast.</t>
 
 </section>
 
@@ -99,41 +151,39 @@ non-sensitive data are allowed to be send in clear via multicast.</t>
 <t>A unprotected packet received can be parsed, but peers may choose
 not take action on the content of the packet.  A peer using Babel over
 DTLS must not take action on the content of an unencrypted packet,
-unless the TLVs are Hello, IHU, or TLVs containing non-sensitive
-information.</t>
+unless the TLVs are Hello or IHU.  A protected packet is treated
+normally after decryption.</t>
 
 </section>
 
 </section>
 
-<section title="Cooperation with Babel">
+<section title="Performance Considerations">
 
-<section title="Peer-to-peer on the same port">
+<t>To reduce the number of octets of the DTLS handshake, especially
+the size of the certificate in the ServerHello (which can be several
+kilobytes), Babel peers can use raw public keys [RFC7250] or Cached
+Information Extension [RFC7924].  Cached Information Extension avoids
+transmitting the server's certificate and certificate chain if the
+client has cached that information from a previous TLS handshake.  TLS
+False Start [RFC7918] can reduce round trips by allowing the TLS
+second flight of messages (ChangeCipherSpec) to also contain the
+(encrypted) Babel packet.</t>
 
-<t>Babel and DTLS traffic is received on the same socket.  The DTLS
-client port, the DTLS server port, and the Babel port are the same.
-When a packet is received, it is treated as a DTLS packet and
-decrypted.
-<list style="symbols">
-<t>if the decryption is successful, the packet is parsed as a Babel
-packet and the peer takes action on its content.</t>
-<t>if not, the packet is parsed as a Babel packet and the peer may
-only take action on non-sensitive data.</t>
-</list>
-</t>
+<t>It is highly advantageous to avoid server-side DTLS state and
+reduce the number of new DTLS sessions on the server that can be done
+with TLS Session Resumption without server state [RFC5077].  This also
+eliminates a round trip for subsequent Babel over DTLS packets,
+because with [RFC5077] the DTLS session does not need to be
+re-established.</t>
 
-</section>
-
-<section title="Peer-to-peer on another port">
-
-<t>A new port is used for Babel over DTLS traffic.  Question: are the
-client port and the server port the same?</t>
-
-</section>
-
-<section title="Client / Server model">
-
-</section>
+<t>Note: I think there is no need to probe the server using DTLS
+heartbeat [RFC6520] to ensure it has maintained cryptographic state,
+considering that contacts between Babel peers are frequent and already
+act as keep-alive (if that's the point of the HeartBeat extension).</t>
+<t>Note: taken from https://tools.ietf.org/html/rfc8094#section-4.
+Credits needed? Reformulation?</t>
+<t>Note: Path MTU issues?</t>
 
 </section>
 

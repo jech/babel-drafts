@@ -1,15 +1,29 @@
 <?xml version="1.0" encoding="US-ASCII"?>
-<!DOCTYPE rfc SYSTEM "rfc2629.dtd" []>
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd" [
+<!ENTITY RFC2119 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml">
+<!ENTITY RFC5077 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.5077.xml">
+<!ENTITY RFC6066 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.6066.xml">
+<!ENTITY RFC6347 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.6347.xml">
+<!ENTITY RFC7250 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.7250.xml">
+<!ENTITY RFC7525 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.7525.xml">
+<!ENTITY RFC7918 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.7918.xml">
+<!ENTITY RFC7924 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.7924.xml">
+<!ENTITY RFC8094 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.8094.xml">
+<!ENTITY RFC8174 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.8174.xml">
+]>
 <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
 <?rfc toc="yes"?>
 <?rfc tocdepth="2"?>
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="no" ?>
-<rfc category="info" docName="draft-decimo-babel-dtls-00"
-     ipr="trust200902">
+<rfc category="std"
+    updates=""
+    obsoletes=""
+    docName="draft-decimo-babel-dtls-00"
+    ipr="trust200902">
 <front>
-<title>Babel Routing Protocol over DTLS</title>
+<title abbrev="Babel over DTLS">Babel Routing Protocol over Datagram Transport Layer Security</title>
 <author fullname="Antonin Decimo" initials="A." surname="Decimo">
 <organization></organization>
 <address>
@@ -55,8 +69,8 @@
 <date year="2018" />
 
 <abstract>
-<t>This documents describes how to use DTLS to secure Babel (RFC
-6216bis) messages.</t>
+<t>This documents describes how to use Datagram Transport Layer Security
+(DTLS) to secure the Babel Routing Protocol.</t>
 </abstract>
 
 </front>
@@ -69,19 +83,20 @@
 not provide security mechanisms.  This document describes how to
 protect Babel with the Datagram Transport Layer Security (DTLS) <xref
 target="RFC6347"></xref> protocol.  The main change to the Babel
-protocol is that Babel over DTLS requires all packets to be sent over
+protocol is that Babel over DTLS requires most packets to be sent over
 unicast.  The motivations for proposing Babel over DTLS are that:
 <list style="symbols">
-<t>DTLS provides a sub-layer of security that is well-defined and has
-various implementations;</t>
+<t>DTLS provides a sub-layer of security that is well-defined, whose
+security has been proven, and who has various implementations;</t>
 <t>DTLS allows the use of asymmetric keys;</t>
-<t>DTLS provides authentication of data;</t>
+<t>DTLS provides authentication of peers;</t>
+<t>DTLS provides integrity of data;</t>
 <t>DTLS provides confidentiality of data.</t>
 </list>
 
-Threats against an insecure Babel include, attracting data traffic by
-advertising routes with a low metric, privacy issues, spoofed traffic,
-passive eavesdropping.</t>
+A malicious entity in range of a non-secured deployment of Babel can
+learn properties of the network, but also reroute legitimate traffic
+by advertising routes with a low metric.</t>
 
 <section title="Specification of Requirements">
 
@@ -95,47 +110,46 @@ they appear in all capitals, as shown here.</t>
 
 </section>
 
-<section title="Babel profile for DTLS">
+<section title="Handling protected and unprotected data">
 
-<t>A Babel peer must be able to receive unprotected data for
+<t>A Babel node needs to receive unprotected data for
 bootstrapping reasons, as well as protected data.  Protected and
-unprotected traffic must be differentiated.  [ NOTE TO READER: AUTHORS
-ARE CONSIDERING THESE TWO OPTIONS BUT ONLY (the first) ONE WILL BE
-RETAINED IN THE FINAL DOCUMENT ].</t>
+unprotected traffic needs to be differentiated.</t>
+<t>[ NOTE TO READER: AUTHORS ARE CONSIDERING THESE TWO OPTIONS
+BUT ONLY ONE WILL BE RETAINED IN THE FINAL DOCUMENT. ]</t>
 
-<section title="Peer-to-peer on the same port">
+<section title="Cleartext and DTLS on the same port">
 
 <t>In this approach, Babel and Babel over DTLS traffic is received on
 the same port.  The DTLS client port, the DTLS server port, and the
 Babel port (6696) are equal.  When a packet is received, it is
 unconditionally treated as a DTLS packet and decrypted.
-
 <list style="symbols">
 <t>If the decryption is successful, the decrypted content is parsed as
-a Babel packet and the peer acts on it.</t>
-<t>If not, the packet is parsed as a Babel packet and the peer MUST
+a Babel packet and the node acts on it.</t>
+<t>If not, the packet is parsed as a Babel packet and the node MUST
 silently ignore all TLVs except Hello and IHU.</t>
 </list>
 </t>
+<t>Since the source port is fixed as 6696, a node that loses its DTLS
+state (e.g. if it reboots), will reuse the same source and destination
+ports for the new session. In order to avoid discarding these new
+packets, nodes receiving an unexpected DTLS ClientHello MUST proceed
+with a new handshake and MUST NOT destroy the existing session until
+the new session's handshake completes to avoid denial of service attacks
+(Section 4.2.8 of <xref target="RFC6347"/>).</t>
 
 </section>
 
-<section title="Peer-to-peer on another port">
+<section title="Cleartext and DTLS on separate ports" anchor="goodports">
 
-<t>In this approach, another port is reserved (TBD) for Babel over
-DTLS traffic.  All DTLS protected packets must be send over this port,
-all unprotected packets must be send over the standard Babel port
-(6696). As above, when a packet is received, it is unconditionally
-treated as a DTLS packet and decrypted.
-
-<list style="symbols">
-<t>If the decryption is successful, the decrypted content is parsed as
-a Babel packet and the peer acts on it.</t>
-<t>If not, the packet is parsed as a Babel packet and the peer MUST
-silently ignore all TLVs except Hello and IHU.</t>
-</list></t>
-
-<t>FIXME: are the client port and the server port the same?</t>
+<t>In this approach, another port (number TBD) is allocated by IANA
+for Babel over DTLS traffic.  The Babel over DTLS server listens on
+this port and Babel over DTLS clients use an ephemeral source port
+to initiate outbound DTLS connections. Unprotected Babel messages
+are sent and received over the standard Babel port (6696). When
+parsing unprotected packets, all Babel TLVs except Hello and IHU
+MUST be silently ignored.</t>
 
 </section>
 
@@ -145,52 +159,46 @@ silently ignore all TLVs except Hello and IHU.</t>
 
 <section title="Session Initiation">
 
-<t>When a peer A acquires a new neighbour B, as described in section
-3.4 of <xref target="RFC6126bis"/>:
+<t>When a node A acquires a new neighbour B (the first time A
+receives any Babel packet from B, see Section 3.4 of
+<xref target="RFC6126bis"/>),
 <list style="symbols">
-<t>if the source address of A is smaller than the link-local address
-of B, A initializes its DTLS state as a server for the peer B;</t>
-<t>otherwise, A initializes its DTLS state as a client for the peer B,
-and starts the DTLS handshake.</t>
+<t>if the IP address A uses to send and receive Babel packets is
+smaller than the source IP address of the received Babel packet
+from B, A initializes its DTLS state as a server for peer B;</t>
+<t>otherwise, A initializes its DTLS state as a client for peer B,
+and initiates a DTLS handshake.</t>
 </list>
-If the handshake succeeds, the peers run Babel as usual over DTLS.
-Otherwise, the DTLS state of each peer for this pair must be freed or
-reset.</t>
+Once the handshake succeeds and a DTLS session is established, nodes
+send all unicast Babel messages over DTLS.</t>
 
 </section>
 
 <section title="Emission">
 
-<t>DTLS can not secure multicast.  All packets send via unicast must
-be protected by DTLS.  Only Hello and IHU TLVs are allowed to be send
-in clear via multicast.  Unicast IHU must be send over DTLS.</t>
+<t>Since, DTLS cannot secure multicast, nodes SHOULD send all TLVs
+over unicast DTLS, if possible. All TLVs that are not Hello nor IHU
+MUST be sent over unicast DTLS. Hello and IHU TLVs MAY be sent either
+over unicast DTLS or unprotected multicast. Nodes MUST NOT send any
+unprotected packets over unicast.</t>
 
 </section>
 
 <section title="Reception">
 
-<t>An unprotected packet received must be parsed, but peers MUST
-silently ignore all TLVs except Hello or IHU.  A protected packet is
-treated normally after decryption.</t>
+<t>Packets received over unicast DTLS are parsed the same way as
+any packets in the original specification of Babel.  Nodes MUST
+parse unprotected packets received over multicast, however they
+MUST silently ignore any TLV that is not Hello or IHU. Unprotected
+packets received over unicast MUST be silently ignored.</t>
 
 </section>
 
 <section title="Neighbour flush">
 
 <t>When a neighbour entry is flushed from the neighbour table, its
-associated DTLS state is discarded.</t>
-
-<t>Note: consider sending a DTLS fatal alert to the neighbour being
-flushed.</t>
-<t>Note: should we discard the DTLS state or keep it in case the
-flushed peer comes back alive later, and we'd like to reuse the
-session?</t>
-
-</section>
-
-<section title="Establishing New Associations with Existing Parameters">
-
-<t>DTLS RFC section 4.2.8 SHOULD be followed.</t>
+associated DTLS state SHOULD be discarded. The node MAY send a DTLS
+close_notify alert to the neighbour.</t>
 
 </section>
 
@@ -199,26 +207,25 @@ session?</t>
 <section title="Path MTU (PMTU) Issues">
 
 <t>Compared to normal Babel, DTLS adds at least 13 octets of header,
-plus cipher and authentication overhead to every query and every
-response.  This reduces the size of the Babel payload that can be
+plus cipher and authentication overhead to every packet.  This reduces
+the size of the Babel payload that can be
 carried.  If the Path MTU is not known, an IP MTU of 1280 bytes SHOULD
-be assumed.  The Babel peer MUST ensure that the DNS response size
+be assumed.  The Babel node MUST ensure that the DTLS datagram size
 does not exceed the Path MTU, i.e., each DTLS record MUST fit within a
-single datagram, as required by <xref target="RFC6347"/>.  The Babel
-peer must consider the amount of record expansion expected by the DTLS
-processing when calculating the size of DNS response that fits within
-the path MTU.  The Path MTU MUST be greater than or equal to the Babel
-message size + DTLS overhead of 13 octets + authentication overhead of
-the negotiated DTLS cipher suite + block padding (Section 4.1.1.1 of
-<xref target="RFC6347"/>).  If the Babel packet size was to exceed
-that calculated value, well...</t>
+single datagram, as required by <xref target="RFC6347"/>.  A Babel
+node MUST consider the amount of record expansion expected by the DTLS
+processing when calculating the maximum size of Babel packet that fits
+within the path MTU.  The overhead can be computed as DTLS overhead of
+13 octets + authentication overhead of the negotiated DTLS cipher suite
++ block padding (Section 4.1.1.1 of <xref target="RFC6347"/>).</t>
 
 </section>
 
 <section title="IANA Considerations">
 
-<t>In the case that the two ports options is retained, a new port for
-Babel over DTLS traffic shall be registered.</t>
+<t>If the final version of this specification uses separate ports for
+unprotected packets and DTLS <xref target="goodports"/>, IANA is
+requested to assign a UDP port with label "Babel_DTLS".</t>
 
 </section>
 
@@ -247,14 +254,9 @@ beyond the scope of this document.</t>
 
 <references title="Normative References">
 
-<reference anchor="RFC2119"><front>
-<title>Key words for use in RFCs to Indicate Requirement Levels</title>
-<author initials="S." surname="Bradner" fullname="S. Bradner"/>
-<date year="1997" month="March"/>
-</front>
-<seriesInfo name="BCP" value="14"/>
-<seriesInfo name="RFC" value="2119"/>
-</reference>
+&RFC2119;
+&RFC6347;
+&RFC8174;
 
 <reference anchor="RFC6126bis"><front>
 <title>The Babel Routing Protocol</title>
@@ -264,98 +266,17 @@ beyond the scope of this document.</t>
 <seriesInfo name="Internet Draft" value="draft-ietf-babel-rfc6126bis-05"/>
 </reference>
 
-<reference anchor="RFC6347" target="https://www.rfc-editor.org/info/rfc6347"><front>
-<title>Datagram Transport Layer Security Version 1.2</title>
-<author initials="E." surname="Rescorla" fullname="E. Rescorla"/>
-<author initials="N." surname="Modadugu" fullname="N. Modadugu"/>
-<date year="2012" month="January"/></front>
-<seriesInfo name="RFC" value="6347"/>
-</reference>
-
-<reference anchor="RFC8174"><front>
-<title>Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words</title>
-<author initials="B." surname="Leiba" fullname="B. Leiba"/>
-<date year="2017" month="May"/></front>
-<seriesInfo name="BCP" value="14"/>
-<seriesInfo name="RFC" value="8174"/>
-</reference>
-
-
 </references>
 
 <references title="Informative References">
 
-<reference anchor="RFC7250" target="https://www.rfc-editor.org/info/rfc7250"><front>
-<title>Using Raw Public Keys in Transport Layer Security (TLS) and
-Datagram Transport Layer Security (DTLS)</title>
-<author initials="P." surname="Wouters" fullname="P. Wouters" role="editor"/>
-<author initials="H." surname="Tschofenig" fullname="H. Tschofenig" role="editor"/>
-<author initials="J." surname="Gilmore" fullname="J. Gilmore"/>
-<author initials="S." surname="Weiler" fullname="S. Weiler"/>
-<author initials="T." surname="Kivinen" fullname="T. Kivinen"/>
-<date year="2014" month="June"/></front>
-<seriesInfo name="RFC" value="7250"/>
-</reference>
-
-<reference anchor="RFC7918" target="https://www.rfc-editor.org/info/rfc7918"><front>
-<title>Transport Layer Security (TLS) False Start</title>
-<author initials="A." surname="Langley" fullname="A. Langley"/>
-<author initials="N." surname="Modadugu" fullname="N. Modadugu"/>
-<author initials="B." surname="Moeller" fullname="B. Moeller"/>
-<date year="2016" month="August"/></front>
-<seriesInfo name="RFC" value="7918"/>
-</reference>
-
-<reference anchor="RFC7924" target="https://www.rfc-editor.org/info/rfc7924"><front>
-<title>Transport Layer Security (TLS) Cached Information
-Extension</title>
-<author initials="S." surname="Santesson" fullname="S. Santesson"/>
-<author initials="H." surname="Tschofenig" fullname="H. Tschofenig"/>
-<date year="2016" month="July"/></front>
-<seriesInfo name="RFC" value="7924"/>
-</reference>
-
-<reference anchor="RFC5077" target="https://www.rfc-editor.org/info/rfc5077"><front>
-<title>Transport Layer Security (TLS) Session Resumption without
-Server-Side State</title>
-<author initials="J." surname="Salowey" fullname="J. Salowey"/>
-<author initials="H." surname="Zhou" fullname="H. Zhou"/>
-<author initials="P." surname="Eronen" fullname="P. Eronen"/>
-<author initials="H." surname="Tschofenig" fullname="H. Tschofenig"/>
-<date year="2008" month="January"/></front>
-<seriesInfo name="RFC" value="5077"/>
-</reference>
-
-<reference anchor="RFC6520"
-target="https://www.rfc-editor.org/info/rfc6520"><front>
-<title>Transport Layer Security (TLS) and Datagram Transport Layer
-Security (DTLS) Heartbeat Extension</title>
-<author initials="R." surname="Seggelmann" fullname="R. Seggelmann"/>
-<author initials="M." surname="Tuexen" fullname="M. Tuexen"/>
-<author initials="M." surname="Williams" fullname="M. Williams"/>
-<date year="2012" month="February"/></front>
-<seriesInfo name="RFC" value="6520"/>
-</reference>
-
-<reference anchor="RFC6066" target="https://www.rfc-editor.org/info/rfc6066"><front>
-<title>Transport Layer Security (TLS) Extensions: Extension
-Definitions</title>
-<author initials="D." surname="Eastlake 3rd" fullname="D. Eastlake 3rd"/>
-<date year="2011" month="January"/></front>
-<seriesInfo name="RFC" value="6066"/>
-</reference>
-
-<reference anchor="RFC7525" target="https://www.rfc-editor.org/info/rfc7525"><front>
-<title>Recommendations for Secure Use of Transport Layer Security
-(TLS) and Datagram Transport Layer Security (DTLS)</title>
-
-<author initials="Y." surname="Sheffer" fullname="Y. Sheffer"/>
-<author initials="R." surname="Holz" fullname="R. Holz"/>
-<author initials="P." surname="Saint-Andre" fullname="P. Saint-Andre"/>
-<date year="2015" month="May"/></front>
-<seriesInfo name="BCP" value="195"/>
-<seriesInfo name="RFC" value="7525"/>
-</reference>
+&RFC7250;
+&RFC7918;
+&RFC7924;
+&RFC5077;
+&RFC6066;
+&RFC7525;
+&RFC8094;
 
 </references>
 
@@ -379,13 +300,8 @@ target="RFC5077"/>.  This also eliminates a round trip for subsequent
 Babel over DTLS packets, because with <xref target="RFC5077"/> the
 DTLS session does not need to be re-established.</t>
 
-<t>Note: I think there is no need to probe the server using DTLS
-heartbeat <xref target="RFC6520"/> to ensure it has maintained
-cryptographic state, considering that contacts between Babel peers are
-frequent and already act as keep-alive (if that's the point of the
-HeartBeat extension).</t>
-<t>Note: taken from https://tools.ietf.org/html/rfc8094#section-4.
-Credits needed? Reformulation?</t>
+<t>These performance considerations were inspired from the ones for
+DNS over DTLS <xref target="RFC8094"/>.</t>
 
 </section>
 

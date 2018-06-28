@@ -230,22 +230,13 @@ Updates, Route Requests and Seqno Requests.  This specification extends
 these messages to optionally carry a source prefix sub-TLV, as described
 in <xref target="protocol-encoding"/> below.  The sub-TLV is marked as
 mandatory, so that an unextended implementation will silently ignore the
-whole enclosing TLV.</t>
-
-<t>This extension reuses the original protocol TLVs for routes having a
-zero length source prefix.  Indeed, a route with no source prefix matches
-the same packets that this route with a zero length source prefix.  Taken
-together, the two following properties ensure interoperability (see <xref
-target="compatibility"/> below) between the original and extended
-protocols:</t>
-
-<t><list style="symbols">
-<t>a node obeying this specification MUST NOT
-send a TLV with a zero length source prefix: instead, it sends a TLV with
-no source prefix sub-TLV,</t>
-<t>conversely, an extended implementation MUST interpret an original TLV
-as carrying a zero length source prefix.</t>
-</list><t>
+whole enclosing TLV.  A node obeying this specification MUST NOT send
+a TLV with a zero-length source prefix: instead, it sends a TLV with no
+source prefix sub-TLV.  Conversely, an extended implementation MUST
+interpret an unextended TLV as carrying a source prefix of zero length.
+Taken together, these properties ensure interoperability between the
+original and extended protocols (see <xref target="compatibility"/>
+below).</t>
 
 <section title="Protocol Messages">
 

@@ -227,10 +227,12 @@ packets that are as large as any attached interface's MTU adjusted for
 lower-layer headers or 512 octets, whichever is larger. Babel packets
 MUST NOT be sent in IPv6 Jumbograms.</t>
 
-<t>The Babel node MUST ensure that the DTLS datagram size does not
-exceed the interface MTU, i.e., each DTLS record MUST fit within a
-single datagram, as required by <xref target="RFC6347"/>.  A Babel
-node MUST consider the amount of record expansion expected by the DTLS
+<t>This requirements are retained by this specification, but are
+extended to take DTLS overhead into account as follows.  The Babel
+node MUST ensure that the DTLS datagram size does not exceed the
+interface MTU, i.e., each DTLS record MUST fit within a single
+datagram, as required by <xref target="RFC6347"/>.  A Babel node MUST
+consider the amount of record expansion expected by the DTLS
 processing when calculating the maximum size of Babel packet that fits
 within the interface MTU.  The overhead can be computed as DTLS
 overhead of 13 octets + authentication overhead of the negotiated DTLS

@@ -74,7 +74,52 @@
 
 <section title="Protocol Operation">
 
-<t></t>
+<section title="Message Transmission">
+<t>
+<list style="symbols">
+<t>In order to prevent replay, a Babel implementation must include an Index
+and a per interface Packet Counter.  When sending a packet, a TLV containing
+the Index and the Packet Counter is added in the body.  The Packet Conter
+increase.  If the Packet Counter overflows, a new Index is randomly chosen.</t>
+<t> The pseudo header is determined and the HMAC calculated (eventually two
+different HMAC during key rotation).  The HMAC must be placed in the packet
+trailer. </t>
+</list>
+
+</t>
+
+</section>
+
+<section title="Message Reception">
+
+<t>When receiving a packet, the security verification proceed in three steps:
+</t>
+<t>
+<list style="symbols">
+<t>A Babel implementation must first check if at least one  HMAC received is
+correct.  We generate an HMAC from the body of the packet (remove header and
+trailer), and the pseudo header with the key corresponding to the interface.
+When we receive packet with a wrong HMAC or no HMAC (if a key is added to the
+corresponding interface), the packet must be silently ignore.  If the HMAC has
+the right value, we know for sure that the packet were sent by a trusted
+identity.  However, it still can be a replayed packet.</t>
+<t>A Babel implementation must preparse the packet after the HMAC verification,
+in order to detect replay.  We are looking for the Index and Packet Counter,
+the challenge reply (when we previously asked the neighbour) and eventually a
+challenge request.  A challenge request should be treated immediatley to prevent
+latency.  A lack of Index and Packet Counter, or an unknown Index must send a
+challenge to the corresponding neighbour and reject the packet.  A wrong Packet
+Counter (while receiving a correct Index) must reject the packet without
+sending a challenge request.  A wrong reply to the challenge must reject the
+packet.  When the reply to the challenge is correct, the Babel implementation
+must retrieve and memorize the Index and the Packet Counter and continue
+parsing.</t>
+<t>The rest of the parsing is left as described in rfc???</t>
+</list>
+
+</t>
+
+</section>
 
 </section>
 

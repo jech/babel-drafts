@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="US-ASCII"?>
 <!DOCTYPE rfc SYSTEM "rfc2629.dtd" [
 <!ENTITY RFC2119 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml">
-<!ENTITY RFC5077 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.5077.xml">
 <!ENTITY RFC6066 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.6066.xml">
 <!ENTITY RFC6347 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.6347.xml">
 <!ENTITY RFC7250 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.7250.xml">
@@ -26,7 +25,7 @@
 <title abbrev="Babel over DTLS">Babel Routing Protocol over Datagram
 Transport Layer Security</title>
 <author fullname="Antonin Decimo" initials="A." surname="Decimo">
-<organization></organization>
+<organization>IRIF, University of Paris-Diderot</organization>
 <address>
 <postal>
 <street></street>
@@ -85,19 +84,22 @@ not provide security mechanisms.  This document describes how to
 protect Babel with the Datagram Transport Layer Security (DTLS) <xref
 target="RFC6347"></xref> protocol.  The main change to the Babel
 protocol is that Babel over DTLS requires most packets to be sent over
-unicast.  The motivations for proposing Babel over DTLS are that:
+unicast.</t>
+
+<t>The motivations for proposing Babel over DTLS are that:
 <list style="symbols">
 <t>DTLS provides a sub-layer of security that is well-defined, whose
-security has been proven, and who has various implementations;</t>
-<t>DTLS allows the use of asymmetric keys;</t>
+security has been shown, and that has multiple interoperable
+implementations;</t>
 <t>DTLS provides authentication of peers;</t>
 <t>DTLS provides integrity of data;</t>
-<t>DTLS provides confidentiality of data.</t>
-</list>
+<t>DTLS provides confidentiality of data;</t>
+<t>DTLS allows the use of asymmetric keys.</t>
+</list></t>
 
-A malicious entity in range of a non-secured deployment of Babel can
-learn properties of the network, but also reroute legitimate traffic
-by advertising routes with a low metric.</t>
+<t>A malicious entity in range of a non-secured deployment of Babel
+can learn properties of the network, but also reroute legitimate
+traffic by advertising routes with a low metric.</t>
 
 <section title="Specification of Requirements">
 
@@ -119,7 +121,7 @@ needs to be differentiated.</t>
 <t>[ NOTE TO READER: AUTHORS ARE CONSIDERING THESE TWO OPTIONS BUT
 ONLY ONE WILL BE RETAINED IN THE FINAL DOCUMENT. ]</t>
 
-<section title="Cleartext and DTLS on the same port">
+<section title="Cleartext and DTLS on the same port" anchor="same_ports">
 
 <t>In this approach, Babel and Babel over DTLS traffic is received on
 the same port.  The DTLS client port, the DTLS server port, and the
@@ -128,7 +130,7 @@ unconditionally treated as a DTLS packet and decrypted.
 <list style="symbols">
 <t>If the decryption is successful, the decrypted content is parsed as
 a Babel packet and the node acts on it.</t>
-<t>If not, the packet is parsed as a Babel packet and the node MUST
+<t>Otherwise, the packet is parsed as a Babel packet and the node MUST
 silently ignore all TLVs except Hello and IHU.</t>
 </list>
 </t>
@@ -142,12 +144,12 @@ attacks (Section 4.2.8 of <xref target="RFC6347"/>).</t>
 
 </section>
 
-<section title="Cleartext and DTLS on separate ports" anchor="goodports">
+<section title="Cleartext and DTLS on separate ports" anchor="separate_ports">
 
-<t>In this approach, another port (number TBD) is allocated by IANA
-for Babel over DTLS traffic.  The Babel over DTLS server listens on
-this port and Babel over DTLS clients use an ephemeral source port to
-initiate outbound DTLS connections. Unprotected Babel messages are
+<t>In this approach, a different port (number TBD) is allocated by
+IANA for Babel over DTLS traffic.  The Babel over DTLS server listens
+on this port and Babel over DTLS clients use an ephemeral source port
+to initiate outbound DTLS connections. Unprotected Babel messages are
 sent and received over the standard Babel port (6696). When parsing
 unprotected packets, all Babel TLVs except Hello and IHU MUST be
 silently ignored.</t>
@@ -160,8 +162,8 @@ silently ignored.</t>
 
 <section title="Session Initiation">
 
-<t>When a node A acquires a new neighbour B (the first time A receives
-any Babel packet from B, see Section 3.4 of <xref
+<t>When a node A acquires a new neighbour B (e.g. when A first
+receives a Babel packet from B, see Section 3.4 of <xref
 target="RFC6126bis"/>),
 <list style="symbols">
 <t>if the IP address A uses to send and receive Babel packets is
@@ -175,7 +177,7 @@ send all unicast Babel messages over DTLS.</t>
 
 </section>
 
-<section title="Emission">
+<section title="Transmission">
 
 <t>Since, DTLS cannot secure multicast, nodes SHOULD send all TLVs
 over unicast DTLS, if possible. All TLVs that are not Hello nor IHU
@@ -197,35 +199,53 @@ received over unicast MUST be silently ignored.</t>
 
 <section title="Neighbour flush">
 
-<t>When a neighbour entry is flushed from the neighbour table, its
-associated DTLS state SHOULD be discarded. The node MAY send a DTLS
-close_notify alert to the neighbour.</t>
+<t>When a neighbour entry is flushed from the neighbour table
+(Appendix A of <xref target="RFC6126bis"/>), its associated DTLS state
+SHOULD be discarded. The node MAY send a DTLS close_notify alert to
+the neighbour.</t>
 
 </section>
 
 </section>
 
-<section title="Path MTU (PMTU) Issues">
+<section title="Interface MTU Issues">
 
 <t>Compared to normal Babel, DTLS adds at least 13 octets of header,
 plus cipher and authentication overhead to every packet.  This reduces
-the size of the Babel payload that can be carried.  If the Path MTU is
-not known, an IP MTU of 1280 bytes SHOULD be assumed.  The Babel node
-MUST ensure that the DTLS datagram size does not exceed the Path MTU,
-i.e., each DTLS record MUST fit within a single datagram, as required
-by <xref target="RFC6347"/>.  A Babel node MUST consider the amount of
-record expansion expected by the DTLS processing when calculating the
-maximum size of Babel packet that fits within the path MTU.  The
-overhead can be computed as DTLS overhead of 13 octets +
-authentication overhead of the negotiated DTLS cipher suite + block
-padding (Section 4.1.1.1 of <xref target="RFC6347"/>).</t>
+the size of the Babel payload that can be carried.</t>
+
+<t>As stated in Section 4 of <xref target="RFC6126bis"/>, in order to
+minimise the number of packets being sent while avoiding lower-layer
+fragmentation, a Babel node SHOULD attempt to maximise the size of the
+packets it sends, up to the outgoing interface's MTU adjusted for
+lower-layer headers (28 octets for UDP over IPv4, 48 octets for UDP
+over IPv6). It MUST NOT send packets larger than the attached
+interface's MTU adjusted for lower-layer headers or 512 octets,
+whichever is larger, but not exceeding 2^16 - 1 adjusted for
+lower-layer headers. Every Babel speaker MUST be able to receive
+packets that are as large as any attached interface's MTU adjusted for
+lower-layer headers or 512 octets, whichever is larger. Babel packets
+MUST NOT be sent in IPv6 Jumbograms.</t>
+
+<t>The Babel node MUST ensure that the DTLS datagram size does not
+exceed the interface MTU, i.e., each DTLS record MUST fit within a
+single datagram, as required by <xref target="RFC6347"/>.  A Babel
+node MUST consider the amount of record expansion expected by the DTLS
+processing when calculating the maximum size of Babel packet that fits
+within the interface MTU.  The overhead can be computed as DTLS
+overhead of 13 octets + authentication overhead of the negotiated DTLS
+cipher suite + block padding (Section 4.1.1.1 of <xref
+target="RFC6347"/>).</t>
 
 </section>
 
 <section title="IANA Considerations">
 
+<t>If the final version of this specification uses the standard Babel
+port for unprotected packets and DTLS <xref target="same_ports"/>, no
+actions are required from IANA.</t>
 <t>If the final version of this specification uses separate ports for
-unprotected packets and DTLS <xref target="goodports"/>, IANA is
+unprotected packets and DTLS <xref target="separate_ports"/>, IANA is
 requested to assign a UDP port with label "Babel_DTLS".</t>
 
 </section>
@@ -244,8 +264,8 @@ handshakes with a server.  As the clients are not uniquely identified
 by the protocol and can be obfuscated with IPv4 address sharing and
 with IPv6 temporary addresses, a server needs to mitigate the impact
 of such an attack.  Such mitigation might involve rate limiting
-handshakes from a certain subnet or more advanced DoS/DDoS techniques
-beyond the scope of this document.</t>
+handshakes from a given subnet or more advanced DoS/DDoS avoidance
+techniques beyond the scope of this document.</t>
 
 </section>
 
@@ -274,7 +294,6 @@ beyond the scope of this document.</t>
 &RFC7250;
 &RFC7918;
 &RFC7924;
-&RFC5077;
 &RFC6066;
 &RFC7525;
 &RFC8094;
@@ -283,23 +302,16 @@ beyond the scope of this document.</t>
 
 <section title="Performance Considerations">
 
-<t>To reduce the number of octets of the DTLS handshake, especially
-the size of the certificate in the ServerHello (which can be several
-kilobytes), Babel peers can use raw public keys <xref
-target="RFC7250"/> or Cached Information Extension <xref
-target="RFC7924"/>.  Cached Information Extension avoids transmitting
-the server's certificate and certificate chain if the client has
-cached that information from a previous TLS handshake.  TLS False
-Start <xref target="RFC7918"/> can reduce round trips by allowing the
-TLS second flight of messages (ChangeCipherSpec) to also contain the
-(encrypted) Babel packet.</t>
-
-<t>It is highly advantageous to avoid server-side DTLS state and
-reduce the number of new DTLS sessions on the server that can be done
-with TLS Session Resumption without server state <xref
-target="RFC5077"/>.  This also eliminates a round trip for subsequent
-Babel over DTLS packets, because with <xref target="RFC5077"/> the
-DTLS session does not need to be re-established.</t>
+<t>To reduce the number of octets taken by the DTLS handshake,
+especially the size of the certificate in the ServerHello (which can
+be several kilobytes), Babel peers can use raw public keys <xref
+target="RFC7250"/> or the Cached Information Extension <xref
+target="RFC7924"/>.  The Cached Information Extension avoids
+transmitting the server's certificate and certificate chain if the
+client has cached that information from a previous TLS handshake.  TLS
+False Start <xref target="RFC7918"/> can reduce round trips by
+allowing the TLS second flight of messages (ChangeCipherSpec) to also
+contain the (encrypted) Babel packet.</t>
 
 <t>These performance considerations were inspired from the ones for
 DNS over DTLS <xref target="RFC8094"/>.</t>

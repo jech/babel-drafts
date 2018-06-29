@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd" []>
+<?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
+<?rfc toc="yes"?>
+<?rfc tocdepth="2"?>
+<?rfc symrefs="yes"?>
+<?rfc sortrefs="yes" ?>
+<?rfc compact="no" ?>
+<rfc category="std" docName="draft-ietf-babel-rfc7298bis"
+     ipr="trust200902"
+     obsoletes="6126,7557">
+<front>
+<title>Babel Cryptographic Authentification</title>
+<author fullname="Clara Do" initials="C." surname="Do">
+<organization>IRIF, University of Paris-Diderot</organization>
+<address>
+<postal>
+<street></street>
+<city>75205 Paris Cedex 13</city>
+<region></region>
+<code></code>
+<country>France</country>
+</postal>
+<email>clarado_perso@yahoo.fr</email>
+</address>
+</author>
+<author fullname="Weronika Kolodziejak" initials="W." surname="Kolodziejak">
+<organization>IRIF, University of Paris-Diderot</organization>
+<address>
+<postal>
+<street></street>
+<city>75205 Paris Cedex 13</city>
+<region></region>
+<code></code>
+<country>France</country>
+</postal>
+<email>weronika.kolodziejak@gmail.com</email>
+</address>
+</author>
+<author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek">
+<organization>IRIF, University of Paris-Diderot</organization>
+<address>
+<postal>
+<street>Case 7014</street>
+<city>75205 Paris Cedex 13</city>
+<region></region>
+<code></code>
+<country>France</country>
+</postal>
+<email>jch@irif.fr</email>
+</address>
+</author>
+
+<date day="29" month="June" year="2018"/>
+
+<abstract>
+<t></t>
+</abstract>
+</front>
+
+<middle>
+
+<section title="Introduction">
+
+<t></t>
+
+</section>
+
+<section title="Data Structures">
+
+<t></t>
+
+</section>
+
+<section title="Protocol Operation">
+
+<t></t>
+
+</section>
+
+<section title="Packet Format">
+
+<t></t>
+
+<section title="TLV HMAC Format">
+
+<t></t>
+
+<figure><artwork><![CDATA[
+0                   1                   2                   3
+0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|     Type      |    Length     |     HMAC...
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+]]></artwork></figure>
+
+<t>Fields :
+<list style="hanging" hangIndent="10">
+<t hangText="Type">Set to TBD to indicate an HMAC TLV</t>
+<t hangText="Length">The length of the body, exclusive of the Type and
+Length fields.  The length of the body depends on the hash function
+used.</t>
+<t hangText="HMAC">The body contains the HMAC of the whole packet
+plus the pseudo header.</t>
+</list></t>
+
+</section>
+
+<section title="TLV Cryptographic Seqno Format">
+
+<t></t>
+
+<figure><artwork><![CDATA[
+0                   1                   2                   3
+0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|     Type      |    Length     |             PC
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                |            Index...
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+]]></artwork></figure>
+
+<t>Fields :
+<list style="hanging" hangIndent="10">
+<t hangText="Type">Set to TBD to indicate a Cryptographic Seqno TLV</t>
+<t hangText="Length">The length of the body, exclusive of the Type and
+Length fields.</t>
+<t hangText="PC">Packet Counter.  Each time we send a packet, we must
+increase the Packet Counter.  If the Packet Counter overflows it must
+be set to 0 and a new Index must be randomly chosen. </t>
+<t hangText="Index">Our chosen Index.  It must be randomly chosen every
+time we lose state, or when the Packet Counter has reset.
+</t>
+</list></t>
+
+</section>
+
+<section title="TLV Challenge Request Format">
+
+<t></t>
+
+<figure><artwork><![CDATA[
+0                   1                   2                   3
+0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|     Type      |    Length     |     Nonce...
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+]]></artwork></figure>
+
+<t>Fields :
+<list style="hanging" hangIndent="10">
+<t hangText="Type">Set to TBD to indicate a Challenge Request TLV</t>
+<t hangText="Length">The length of the body, exclusive of the Type and
+Length fields.  The length of the body is set to a chosen high number
+for maximum security (in general half of the size of the hash length).</t>
+<t hangText="Nonce">A random number of an arbitrary size.</t>
+</list></t>
+
+</section>
+
+<section title="TLV Challenge Reply Format">
+
+<t></t>
+
+<figure><artwork><![CDATA[
+0                   1                   2                   3
+0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|     Type      |    Length     |     Nonce...
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+]]></artwork></figure>
+
+<t>Fields :
+<list style="hanging" hangIndent="10">
+<t hangText="Type">Set to TBD to indicate a Challenge Reply TLV</t>
+<t hangText="Length">The length of the body, exclusive of the Type and
+Length fields.  The length of the body is set to the same size as the
+challenge request TLV length received.</t>
+<t hangText="Nonce">A copy of the nonce contained in the corresponding
+challenge request.</t>
+</list></t>
+</section>
+
+</section>
+
+<section title="Security Considerations">
+
+<t></t>
+
+</section>
+
+<section title="IANA Considerations">
+
+</section>
+
+<section title="Acknowledgments">
+
+</section>
+
+</middle>
+
+<back>
+
+</back>
+
+</rfc>

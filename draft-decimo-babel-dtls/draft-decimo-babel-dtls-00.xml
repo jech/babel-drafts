@@ -23,7 +23,8 @@
     docName="draft-decimo-babel-dtls-00"
     ipr="trust200902">
 <front>
-<title abbrev="Babel over DTLS">Babel Routing Protocol over Datagram Transport Layer Security</title>
+<title abbrev="Babel over DTLS">Babel Routing Protocol over Datagram
+Transport Layer Security</title>
 <author fullname="Antonin Decimo" initials="A." surname="Decimo">
 <organization></organization>
 <address>
@@ -69,8 +70,8 @@
 <date year="2018" />
 
 <abstract>
-<t>This documents describes how to use Datagram Transport Layer Security
-(DTLS) to secure the Babel Routing Protocol.</t>
+<t>This documents describes how to use Datagram Transport Layer
+Security (DTLS) to secure the Babel Routing Protocol.</t>
 </abstract>
 
 </front>
@@ -102,9 +103,9 @@ by advertising routes with a low metric.</t>
 
 <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
 "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in BCP 14
-<xref target="RFC2119"/> <xref target="RFC8174"/> when, and only when,
-they appear in all capitals, as shown here.</t>
+"OPTIONAL" in this document are to be interpreted as described in BCP
+14 <xref target="RFC2119"/> <xref target="RFC8174"/> when, and only
+when, they appear in all capitals, as shown here.</t>
 
 </section>
 
@@ -112,11 +113,11 @@ they appear in all capitals, as shown here.</t>
 
 <section title="Handling protected and unprotected data">
 
-<t>A Babel node needs to receive unprotected data for
-bootstrapping reasons, as well as protected data.  Protected and
-unprotected traffic needs to be differentiated.</t>
-<t>[ NOTE TO READER: AUTHORS ARE CONSIDERING THESE TWO OPTIONS
-BUT ONLY ONE WILL BE RETAINED IN THE FINAL DOCUMENT. ]</t>
+<t>A Babel node needs to receive unprotected data for bootstrapping
+reasons, as well as protected data.  Protected and unprotected traffic
+needs to be differentiated.</t>
+<t>[ NOTE TO READER: AUTHORS ARE CONSIDERING THESE TWO OPTIONS BUT
+ONLY ONE WILL BE RETAINED IN THE FINAL DOCUMENT. ]</t>
 
 <section title="Cleartext and DTLS on the same port">
 
@@ -136,8 +137,8 @@ state (e.g. if it reboots), will reuse the same source and destination
 ports for the new session. In order to avoid discarding these new
 packets, nodes receiving an unexpected DTLS ClientHello MUST proceed
 with a new handshake and MUST NOT destroy the existing session until
-the new session's handshake completes to avoid denial of service attacks
-(Section 4.2.8 of <xref target="RFC6347"/>).</t>
+the new session's handshake completes to avoid denial of service
+attacks (Section 4.2.8 of <xref target="RFC6347"/>).</t>
 
 </section>
 
@@ -145,11 +146,11 @@ the new session's handshake completes to avoid denial of service attacks
 
 <t>In this approach, another port (number TBD) is allocated by IANA
 for Babel over DTLS traffic.  The Babel over DTLS server listens on
-this port and Babel over DTLS clients use an ephemeral source port
-to initiate outbound DTLS connections. Unprotected Babel messages
-are sent and received over the standard Babel port (6696). When
-parsing unprotected packets, all Babel TLVs except Hello and IHU
-MUST be silently ignored.</t>
+this port and Babel over DTLS clients use an ephemeral source port to
+initiate outbound DTLS connections. Unprotected Babel messages are
+sent and received over the standard Babel port (6696). When parsing
+unprotected packets, all Babel TLVs except Hello and IHU MUST be
+silently ignored.</t>
 
 </section>
 
@@ -159,15 +160,15 @@ MUST be silently ignored.</t>
 
 <section title="Session Initiation">
 
-<t>When a node A acquires a new neighbour B (the first time A
-receives any Babel packet from B, see Section 3.4 of
-<xref target="RFC6126bis"/>),
+<t>When a node A acquires a new neighbour B (the first time A receives
+any Babel packet from B, see Section 3.4 of <xref
+target="RFC6126bis"/>),
 <list style="symbols">
 <t>if the IP address A uses to send and receive Babel packets is
-smaller than the source IP address of the received Babel packet
-from B, A initializes its DTLS state as a server for peer B;</t>
-<t>otherwise, A initializes its DTLS state as a client for peer B,
-and initiates a DTLS handshake.</t>
+smaller than the source IP address of the received Babel packet from
+B, A initialises its DTLS state as a server for peer B;</t>
+<t>otherwise, A initialises its DTLS state as a client for peer B, and
+initiates a DTLS handshake.</t>
 </list>
 Once the handshake succeeds and a DTLS session is established, nodes
 send all unicast Babel messages over DTLS.</t>
@@ -186,11 +187,11 @@ unprotected packets over unicast.</t>
 
 <section title="Reception">
 
-<t>Packets received over unicast DTLS are parsed the same way as
-any packets in the original specification of Babel.  Nodes MUST
-parse unprotected packets received over multicast, however they
-MUST silently ignore any TLV that is not Hello or IHU. Unprotected
-packets received over unicast MUST be silently ignored.</t>
+<t>Packets received over unicast DTLS are parsed the same way as any
+packets in the original specification of Babel.  Nodes MUST parse
+unprotected packets received over multicast, however they MUST
+silently ignore any TLV that is not Hello or IHU. Unprotected packets
+received over unicast MUST be silently ignored.</t>
 
 </section>
 
@@ -208,16 +209,16 @@ close_notify alert to the neighbour.</t>
 
 <t>Compared to normal Babel, DTLS adds at least 13 octets of header,
 plus cipher and authentication overhead to every packet.  This reduces
-the size of the Babel payload that can be
-carried.  If the Path MTU is not known, an IP MTU of 1280 bytes SHOULD
-be assumed.  The Babel node MUST ensure that the DTLS datagram size
-does not exceed the Path MTU, i.e., each DTLS record MUST fit within a
-single datagram, as required by <xref target="RFC6347"/>.  A Babel
-node MUST consider the amount of record expansion expected by the DTLS
-processing when calculating the maximum size of Babel packet that fits
-within the path MTU.  The overhead can be computed as DTLS overhead of
-13 octets + authentication overhead of the negotiated DTLS cipher suite
-+ block padding (Section 4.1.1.1 of <xref target="RFC6347"/>).</t>
+the size of the Babel payload that can be carried.  If the Path MTU is
+not known, an IP MTU of 1280 bytes SHOULD be assumed.  The Babel node
+MUST ensure that the DTLS datagram size does not exceed the Path MTU,
+i.e., each DTLS record MUST fit within a single datagram, as required
+by <xref target="RFC6347"/>.  A Babel node MUST consider the amount of
+record expansion expected by the DTLS processing when calculating the
+maximum size of Babel packet that fits within the path MTU.  The
+overhead can be computed as DTLS overhead of 13 octets +
+authentication overhead of the negotiated DTLS cipher suite + block
+padding (Section 4.1.1.1 of <xref target="RFC6347"/>).</t>
 
 </section>
 
@@ -232,7 +233,7 @@ requested to assign a UDP port with label "Babel_DTLS".</t>
 <section title="Security Considerations">
 
 <t>The interaction between two Babel peers requires Datagram Transport
-Layer Security (DTLS) with a ciphersuite offering confidentiality
+Layer Security (DTLS) with a cipher suite offering confidentiality
 protection.  The guidance given in <xref target="RFC7525"/> MUST be
 followed to avoid attacks on DTLS.  The DTLS client SHOULD use the TLS
 Certificate Status Request extension (Section 8 of <xref

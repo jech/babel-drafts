@@ -246,6 +246,82 @@ challenge request.</t>
 
 <back>
 
+<section title="Implicit indices">
+
+<t>[This appendix describes the "implicit indices" variant of the
+protocol, which is different and incompatible to the "explicit indices"
+variant described in the body of this document.  This section should
+either be integrated into the body of the document or be removed before
+publication of this document an RFC, depending on which protocol variant
+is finally chosen.]</t>
+
+<t>The protocol described in the body of this document explicitly sends
+indices as in each packet as part of the Cryptographic Seqno TLV.  Observe
+that, except when a challenge is required, the index sent on the wire is
+identical to the index stored in the Neighbour Table, and therefore
+doesn't need to be sent explicitly except during challenges &mdash; it is
+enough for it to participate in HMAC computation in order to protect
+against replay.  The "implicit indices" variant of the protocol, due to
+Markus Stenberg and described in this appendix, uses this information to
+avoid sending indices explicitly and thus shave off 8 to 10 octets from
+almost every packet.</t>
+
+<t>The changes to the protocol are as follows.  The pseudo-header includes
+the Index, and therefore has the following format:
+<figure><artwork><![CDATA[
+TBD
+]]></artwork></figure>
+</t>
+
+<t>The Cryptographic Seqno TLV no longer contains an Index, and therefore
+has the following format:
+<figure><artwork><![CDATA[
+0                   1                   2                   3
+0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|     Type      |    Length     |             PC
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+]]></artwork></figure>
+This TLV is now self-terminating, and therefore allows sub-TLVs.</t>
+
+<t>Packets containing the Challenge Reply and Challenge Request TLVs must
+contain an explicit index.  Two encodings are possible: one uses Challenge
+Replies and Requests with an extra field for the sender's index, which
+complicates the encoding somewhat but makes these two TLVs
+self-terminating, the other one uses a new TLV that is used for carrying
+an Index, which uses up a new TLV number but makes it possible to reuse
+these two TLV with other protocols that require a nonce-based challenge.</t>
+
+<t>Packet transmission is modified as follows.  If a packet contains
+a Challenge or a Challenge Reply, then the node inserts its index into the
+packet body.  In any case, it uses its current index to generate the
+pseudo-header that will be used to compute the HMAC and shipping out the
+packet.  (This implies that a packet must be parsed in its entirety before
+HMAC validation, which requires a robust parser.)</t>
+
+<t>Packet reception is modified as follows.  Before checking the HMAC of
+a packet, the receiver checks whether the packet contains an explicit
+index.  If this is the case, it uses the index contained in the packet in
+order to generate the pseudo header; if this is not the case, it uses the
+index contained in its neighbours table.  If there is no index available
+for that neighbour (either because the table doesn't contain in an entry for
+this neighbour, or the entry doesn't contain an index), HMAC validation
+fails.</t>
+
+<t>The index and cryptographic seqno contained in the neighbours table are
+only updated after HMAC validation has succeeded.</t>
+
+<t>Since it is now impossible to differenciate between a failed HMAC and
+an index change, a node must send a challenge whenever HMAC validation
+fails.  This implies that spoofed packets cause a spurious challenge, but
+that doesn't change the security properties of the protocol much, given
+that in any case replayed packets can be used to cause a spurious
+challenge.</t>
+  
+</section>
+
 </back>
 
 </rfc>

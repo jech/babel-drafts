@@ -62,7 +62,49 @@
 
 <section title="Introduction">
 
-<t></t>
+<t>By default, the Babel routing protocol trusts the information contained
+in every UDP packet it receives on the Babel port.  If an attacker is
+allowed to send such a packet, the attacker can redirect traffic to itself
+or to a different node in the network, causing a variety of potential
+issues.  In particular, and attacker could:
+<list style="symbols">
+<t>spoof a Babel packet, and redirect traffic by announcing a smaller
+metric, a larger seqno, or a longer prefix;</t>
+<t>spoof an incorrect packet, which could cause an insufficiently robust
+implementation to crash or interfere with the rest of the network;</t>
+<t>replay a previously captured Babel packet, which could cause traffic to
+be redirected or otherwise interfere with the network.</t>
+</list></t>
+
+<t>Protecting a Babel network is made challenging by the fact that the
+Babel protocol uses both unicast and multicast communication.  One
+approach, used by the Babel over DTLS protocol, is to require a secured
+version of Babel to use unicast communication for all semantically
+significant communication, and then use a standard unicast security
+protocol to protect the Babel traffic.  In this document, we define
+a cryptographic extension to the Babel protocol that is able to protect
+both unicast and multicast traffic, thus requiring little or no changes to
+the core protocol.</t>
+
+<section title="Applicability">
+
+<t>The protocol defined in this document assumes that all interfaces on
+a given link are equally trusted and share a small set of symmetric keys
+(typically just one or two).  The protocol is inapplicable in situations
+where asymmetric keying is required, where the trust relationship is
+partial, or where large numbers of trusted keys are provisioned at the
+same time on a single link.</t>
+
+<t>The protocol supports incremental deployment (where an insecure Babel
+network is made secure with no service interruption), and it supports
+graceful key rotation (where the set of keys is changed with no service
+interruption).</t>
+
+<t>The protocol does not require synchronised clocks, it does not require
+persistently monotonic clocks, and it does not require any form of
+persistent storage.</t>
+
+</section>
 
 <section title="Assumptions and security properties">
 
@@ -78,10 +120,6 @@ assumption can be met either by using a reliable random number generator
 with sufficiently large values, by using a reliable hardware clock, or by
 rekeying whenever a collision becomes likely.</t>
 
-<t>The protocol does not assume synchronised clocks, it does not assume
-persistently monotonic clocks, and it does not assume any form of
-persistent storage.</t>
-
 <t>If the assumptions above are met, the protocol described in this
 document has the following properties:
 <list style="symbols">
@@ -95,6 +133,10 @@ a node A has accepted a packet from C as valid, then a node B will only
 accept a copy of that packet as authentic if B has accepted an older
 packet from C and B has received no later packet from C.</t>
 </list></t>
+
+<t>While this protocol makes serious efforts to mitigate the effects of
+a denial of service attack, it does not fully protect against such
+attacks.</t>
 
 </section>
 

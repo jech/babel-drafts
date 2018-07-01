@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd" []>
+<?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
+<?rfc toc="yes"?>
+<?rfc tocdepth="2"?>
+<?rfc symrefs="yes"?>
+<?rfc sortrefs="yes" ?>
+<?rfc compact="no" ?>
+<rfc category="std" docName="draft-do-babel-hmac"
+     ipr="trust200902"
+     obsoletes="6126,7557">
+<front>
+<title>Babel Cryptographic Authentification</title>
+<author fullname="Clara Do" initials="C." surname="Do">
+<organization>IRIF, University of Paris-Diderot</organization>
+<address>
+<postal>
+<street></street>
+<city>75205 Paris Cedex 13</city>
+<region></region>
+<code></code>
+<country>France</country>
+</postal>
+<email>clarado_perso@yahoo.fr</email>
+</address>
+</author>
+<author fullname="Weronika Kolodziejak" initials="W." surname="Kolodziejak">
+<organization>IRIF, University of Paris-Diderot</organization>
+<address>
+<postal>
+<street></street>
+<city>75205 Paris Cedex 13</city>
+<region></region>
+<code></code>
+<country>France</country>
+</postal>
+<email>weronika.kolodziejak@gmail.com</email>
+</address>
+</author>
+<author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek">
+<organization>IRIF, University of Paris-Diderot</organization>
+<address>
+<postal>
+<street>Case 7014</street>
+<city>75205 Paris Cedex 13</city>
+<region></region>
+<code></code>
+<country>France</country>
+</postal>
+<email>jch@irif.fr</email>
+</address>
+</author>
+
+<date day="29" month="June" year="2018"/>
+
+<abstract>
+<t></t>
+</abstract>
+</front>
+
+<middle>
+
+<section title="Introduction">
+
+<t></t>
+
+</section>
+
+<section title="Data Structures">
+
+<t></t>
+
+</section>
+
+<section title="Protocol Operation">
+
+<section title="Message Transmission">
+<t>
+<list style="symbols">
+<t>In order to prevent replay, a Babel implementation must include an Index
+and a per interface Packet Counter.  When sending a packet, a TLV containing
+the Index and the Packet Counter is added in the body.  The Packet Conter
+increase.  If the Packet Counter overflows, a new Index is randomly chosen.</t>
+<t> The pseudo header is determined and the HMAC calculated (eventually two
+different HMAC during key rotation).  The HMAC must be placed in the packet
+trailer. </t>
+</list>
+
+</t>
+
+</section>
+
+<section title="Message Reception">
+
+<t>When receiving a packet, the security verification proceed in three steps:
+</t>
+<t>
+<list style="symbols">
+<t>A Babel implementation must first check if at least one  HMAC received is
+correct.  We generate an HMAC from the body of the packet (remove header and
+trailer), and the pseudo header with the key corresponding to the interface.
+When we receive packet with a wrong HMAC or no HMAC (if a key is added to the
+corresponding interface), the packet must be silently ignore.  If the HMAC has
+the right value, we know for sure that the packet were sent by a trusted
+identity.  However, it still can be a replayed packet.</t>
+<t>A Babel implementation must preparse the packet after the HMAC verification,
+in order to detect replay.  We are looking for the Index and Packet Counter,
+the challenge reply (when we previously asked the neighbour) and eventually a
+challenge request.  A challenge request should be treated immediatley to prevent
+latency.  A lack of Index and Packet Counter, or an unknown Index must send a
+challenge to the corresponding neighbour and reject the packet.  A wrong Packet
+Counter (while receiving a correct Index) must reject the packet without
+sending a challenge request.  A wrong reply to the challenge must reject the
+packet.  When the reply to the challenge is correct, the Babel implementation
+must retrieve and memorize the Index and the Packet Counter and continue
+parsing.</t>
+<t>The rest of the parsing is left as described in rfc???</t>
+</list>
+
+</t>
+
+</section>
+
+</section>
+
+<section title="Packet Format">
+
+<t></t>
+
+<section title="TLV HMAC Format">
+
+<t></t>
+
+<figure><artwork><![CDATA[
+0                   1                   2                   3
+0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|     Type      |    Length     |     HMAC...
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+]]></artwork></figure>
+
+<t>Fields :
+<list style="hanging" hangIndent="10">
+<t hangText="Type">Set to TBD to indicate an HMAC TLV</t>
+<t hangText="Length">The length of the body, exclusive of the Type and
+Length fields.  The length of the body depends on the hash function
+used.</t>
+<t hangText="HMAC">The body contains the HMAC of the whole packet
+plus the pseudo header.</t>
+</list></t>
+
+</section>
+
+<section title="TLV Cryptographic Seqno Format">
+
+<t></t>
+
+<figure><artwork><![CDATA[
+0                   1                   2                   3
+0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|     Type      |    Length     |             PC
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                |            Index...
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+]]></artwork></figure>
+
+<t>Fields :
+<list style="hanging" hangIndent="10">
+<t hangText="Type">Set to TBD to indicate a Cryptographic Seqno TLV</t>
+<t hangText="Length">The length of the body, exclusive of the Type and
+Length fields.</t>
+<t hangText="PC">Packet Counter.  Each time we send a packet, we must
+increase the Packet Counter.  If the Packet Counter overflows it must
+be set to 0 and a new Index must be randomly chosen. </t>
+<t hangText="Index">Our chosen Index.  It must be randomly chosen every
+time we lose state, or when the Packet Counter has reset.
+</t>
+</list></t>
+
+</section>
+
+<section title="TLV Challenge Request Format">
+
+<t></t>
+
+<figure><artwork><![CDATA[
+0                   1                   2                   3
+0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|     Type      |    Length     |     Nonce...
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+]]></artwork></figure>
+
+<t>Fields :
+<list style="hanging" hangIndent="10">
+<t hangText="Type">Set to TBD to indicate a Challenge Request TLV</t>
+<t hangText="Length">The length of the body, exclusive of the Type and
+Length fields.  The length of the body is set to a chosen high number
+for maximum security (in general half of the size of the hash length).</t>
+<t hangText="Nonce">A random number of an arbitrary size.</t>
+</list></t>
+
+</section>
+
+<section title="TLV Challenge Reply Format">
+
+<t></t>
+
+<figure><artwork><![CDATA[
+0                   1                   2                   3
+0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|     Type      |    Length     |     Nonce...
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+]]></artwork></figure>
+
+<t>Fields :
+<list style="hanging" hangIndent="10">
+<t hangText="Type">Set to TBD to indicate a Challenge Reply TLV</t>
+<t hangText="Length">The length of the body, exclusive of the Type and
+Length fields.  The length of the body is set to the same size as the
+challenge request TLV length received.</t>
+<t hangText="Nonce">A copy of the nonce contained in the corresponding
+challenge request.</t>
+</list></t>
+</section>
+
+</section>
+
+<section title="Security Considerations">
+
+<t></t>
+
+</section>
+
+<section title="IANA Considerations">
+
+</section>
+
+<section title="Acknowledgments">
+
+</section>
+
+</middle>
+
+<back>
+
+</back>
+
+</rfc>

@@ -102,9 +102,10 @@ a source prefix.  The source prefix is encoded using a mandatory sub-TLV
 <section title="Specification of Requirements">
 
 <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
-"SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
-document are to be interpreted as described in <xref
-target="RFC2119"/>.</t>
+"SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+"OPTIONAL" in this document are to be interpreted as described in
+BCP&nbsp;14 <xref target="RFC2119"/> <xref target="RFC8174"/> when, and
+only when, they appear in all capitals, as shown here.</t>
 
 </section>
 
@@ -130,9 +131,9 @@ this entry applies.</t>
 <t>The source table is now indexed by triples of the form (prefix, source
 prefix, router-id).</t>
 
-<t>Note that the route entry contains a source which itself contains
-a source prefix.  These are two very different concepts that should not be
-confused.</t>
+<t>Note that the route entry contains a source (see sections 2 and 3.2.5 of
+<xref target="BABEL"/>) which itself contains a source prefix.  These are two
+very different concepts that should not be confused.</t>
 
 </section>
 
@@ -229,7 +230,7 @@ Updates, Route Requests and Seqno Requests.  This specification extends
 these messages to optionally carry a source prefix sub-TLV, as described
 in <xref target="protocol-encoding"/> below.  The sub-TLV is marked as
 mandatory, so that an unextended implementation will silently ignore the
-whole enclising TLV.  A node obeying this specification MUST NOT send
+whole enclosing TLV.  A node obeying this specification MUST NOT send
 a TLV with a zero-length source prefix: instead, it sends a TLV with no
 source prefix sub-TLV.  Conversely, an extended implementation MUST
 interpret an unextended TLV as carrying a source prefix of zero length.
@@ -243,7 +244,7 @@ below).</t>
 carry a source prefix: Update TLVs, Route Request TLVs and Seqno Request
 TLVs.</t>
 
-<t>In order to advertise a route with a non-zero-length source prefix,
+<t>In order to advertise a route with a non-zero length source prefix,
 a node sends a source-specific Update, i.e., an Update with a source
 prefix sub-TLV.  When a node receives a source-specific Update (prefix,
 source prefix, router-id, seqno, metric) from a neighbour neigh, it
@@ -286,10 +287,9 @@ it.</t>
 
 <t>Similarly, a node that receives a route request with the AE field set
 to 0 (a wildcard route request) SHOULD send a full routing table dump,
-including routes with a non-zero-length source prefix.  A node MUST NOT
+including routes with a non-zero length source prefix.  A node MUST NOT
 send a wildcard request that carries a source prefix, and a node receiving
-a wildcard request with a with a source prefix MUST silently ignore
-it.</t>
+a wildcard request with a source prefix MUST silently ignore it.</t>
 
 </section>
 
@@ -304,11 +304,11 @@ routers and source-specific routers are mixed in a single routing domain,
 Babel's loop-avoidance properties are preserved, and, in particular, no
 persistent routing loops will occur.</t>
 
-<t>However, this extension is encoded using mandatory sub-TLVs, introduced
-in <xref target="BABEL"/>, and therefore is not compatible with the older
-version of the Babel Routing Protocol <xref target="RFC6126"/>.
-Consequently, this extension MUST NOT be used with routers implementing
-RFC 6126, otherwise persistent routing loops may occur.</t>
+<t>However, this extension is encoded using mandatory sub-TLVs, introduced in
+<xref target="BABEL"/>, and therefore is not compatible with the older version
+of the Babel Routing Protocol <xref target="RFC6126"/> which does not support
+such sub-TLVs.  Consequently, this extension MUST NOT be used with routers
+implementing RFC 6126, otherwise persistent routing loops may occur.</t>
 
 <section title="Loop-avoidance" anchor="loop">
 
@@ -319,7 +319,7 @@ routers will silently ignore the whole TLV, which is necessary to avoid
 persistent routing loops in hybrid networks.</t>
 
 <t>Consider two nodes A and B, with A source-specific announcing a route
-to (D,&nbsp;S).  Suppose that B (non source-specific) merely ignores the
+to (D,&nbsp;S).  Suppose that B (non-source-specific) merely ignores the
 source prefix information when it receives the update rather than ignoring
 the whole TLV, and re-announces the route as D.  This re-announcement
 reaches A, which treats it as (D,&nbsp;::/0).  Packets destined to D but
@@ -392,7 +392,7 @@ field's size is (Source Plen)/8 rounded upwards.</t>
 <t>The contents of the source prefix sub-TLV are interpreted according to
 the AE of the enclosing TLV.</t>
 
-<t>Note that this sub-TLV is a mandatory sub-TLV.  Threfore, as described
+<t>Note that this sub-TLV is a mandatory sub-TLV.  Therefore, as described
 in Section 4.4 of <xref target="BABEL"/>, the whole TLV MUST be ignored if
 that sub-TLV is not understood (or malformed).  Otherwise, routing loops
 may occur (see <xref target="loop"/>).</t>
@@ -439,7 +439,7 @@ a pair of a destination and source prefix.</t>
 <section title="IANA Considerations">
 
 <t>IANA has allocated sub-TLV number 128 for the Source Prefix sub-TLV in
-the Babel Sub-TLV Numbers registry.</t>
+the Babel sub-TLV types registry.</t>
 
 </section>
 
@@ -475,14 +475,6 @@ have security implications (see Section 8 of <xref target="DSR"/>).</t>
 <seriesInfo name="DOI" value="10.17487/RFC2119"/>
 </reference>
 
-<reference anchor="BABEL"><front>
-<title>The Babel Routing Protocol</title>
-<author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
-<date month="May" year="2017"/>
-</front>
-<seriesInfo name="Internet Draft" value="draft-ietf-babel-rfc6126bis-04"/>
-</reference>
-
 <reference anchor="BCP84"><front>
 <title>Ingress Filtering for Multihomed Networks</title>
 <author fullname="Fred Baker" initials="F." surname="Baker"/>
@@ -491,6 +483,24 @@ have security implications (see Section 8 of <xref target="DSR"/>).</t>
 </front>
 <seriesInfo name="BCP" value="84"/>
 <seriesInfo name="RFC" value="3704"/>
+</reference>
+
+<reference anchor="BABEL"><front>
+<title>The Babel Routing Protocol</title>
+<author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
+<date month="May" year="2017"/>
+</front>
+<seriesInfo name="Internet Draft" value="draft-ietf-babel-rfc6126bis-04"/>
+</reference>
+
+<reference anchor="RFC8174"><front>
+<title>Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words</title>
+<author initials="B." surname="Leiba" fullname="B. Leiba"/>
+<date year="2017" month="May"/>
+</front>
+<seriesInfo name="BCP" value="14"/>
+<seriesInfo name="RFC" value="8174"/>
+<seriesInfo name="DOI" value="10.17487/RFC8174"/>
 </reference>
 
 </references>

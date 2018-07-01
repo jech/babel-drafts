@@ -64,6 +64,40 @@
 
 <t></t>
 
+<section title="Assumptions and security properties">
+
+<t>The correctness of the protocol relies on the following assumptions:
+<list style="symbols">
+<t>that the HMAC being used is invulnerable to spoofing, i.e.&nbsp;that an
+attacker is unable to generate a packet with a correct HMAC;</t>
+<t>that a node never generates the same index or nonce twice over the
+lifetime of a key.</t>
+</list>
+The first assumption is a property of the HMAC under use.  The second
+assumption can be met either by using a reliable random number generator
+with sufficiently large values, by using a reliable hardware clock, or by
+rekeying whenever a collision becomes likely.</t>
+
+<t>The protocol does not assume synchronised clocks, it does not assume
+persistently monotonic clocks, and it does not assume any form of
+persistent storage.</t>
+
+<t>If the assumptions above are met, the protocol described in this
+document has the following properties:
+<list style="symbols">
+<t>it is invulnerable to spoofing: any packet accepted as authentic is the
+exact copy of a packet originally sent by an authentic node;</t>
+<t>within a single node, it is invulnerable to replay: if a node has
+previously accepted a given packet as authentic, then it will never again
+accept a copy of this packet as authentic;</t>
+<t>among different nodes, it is only vulnerable to immediate replay: if
+a node A has accepted a packet from C as valid, then a node B will only
+accept a copy of that packet as authentic if B has accepted an older
+packet from C and B has received no later packet from C.</t>
+</list></t>
+
+</section>
+
 </section>
 
 <section title="Data Structures">

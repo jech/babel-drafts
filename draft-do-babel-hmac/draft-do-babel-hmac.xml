@@ -151,13 +151,18 @@ attacks.</t>
 <t>TBD.  There's now a set of HMAC configured on each interface, an
 index/seqno pair in each interface, an index/seqno pair in each neighbour
 entry.  Additionally, each neighbour entry contains information about
-a challenge in progress, a nonce and a deadline.</t>
+a challenge in progress, a nonce and a timer.</t>
 
 </section>
 
 <section title="Protocol Operation">
 
 <section title="HMAC computation" anchor="hmac-computation">
+
+<t>TBD.  Construct the pseudo-header, append the pseudo-header to the
+packet excluding the trailer (from octet 0 up to octet 4 + length), hash
+the lot.  Describe the pseudo-header here, reference RFC&nbsp;6234, say
+MUST implement HMAC-SHA256 as MTI, say SHOULD implement HMAC-SHA1.</t>
 
 </section>
 

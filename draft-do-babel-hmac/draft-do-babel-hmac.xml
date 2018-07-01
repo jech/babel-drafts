@@ -144,35 +144,52 @@ attacks.</t>
 
 <section title="Data Structures">
 
-<t></t>
+<t>TBD.  There's now a set of HMAC configured on each interface, an
+index/seqno pair in each interface, an index/seqno pair in each neighbour
+entry.  Additionally, each neighbour entry contains information about
+a challenge in progress, a nonce and a deadline.</t>
 
 </section>
 
 <section title="Protocol Operation">
 
-<section title="Message Transmission">
-<t>
-<list style="symbols">
-<t>In order to prevent replay, a Babel implementation must include an Index
-and a per interface Packet Counter.  When sending a packet, a TLV containing
-the Index and the Packet Counter is added in the body.  The Packet Conter
-increase.  If the Packet Counter overflows, a new Index is randomly chosen.</t>
-<t> The pseudo header is determined and the HMAC calculated (eventually two
-different HMAC during key rotation).  The HMAC must be placed in the packet
-trailer. </t>
-</list>
+<section title="HMAC computation" anchor="hmac-computation">
 
-</t>
+</section>
+
+<section title="Message Transmission">
+
+<t>A Babel node is expected to accumulate TLVs into a buffer in order to
+send multiple TLVs in a single packet.  The buffer is flushed, and the
+packet sent out, either after a timeout or when the buffer is about to
+reach the MTU of the outgoing interface (Section 4 of rfc6126bis).</t>
+
+<t>For an interface on which HMAC protection is configured, the packet is
+terminated when it is small enough to allow appending one Crypto Seqno TLV
+and the required number of HMAC TLVs (one per configured key) without
+exceeding.  Before shipping out the packet, the following actions are
+performed:
+<list style="symbols">
+<t>a Crypto Seqno TLV containing the Packet Counter and Index associated
+with the outgoing interface is appended to the packet body; the packet
+counter is incremented by one; if the packet counter overflows, a new
+nonce is generated;</t>
+<t>for each key configured on the interface, an HMAC is computed as
+specified in <xref target="hmac-computation"/> above, and an HMAC TLV is
+appended to the packet trailer.</t>
+</list></t>
 
 </section>
 
 <section title="Message Reception">
 
-<t>When receiving a packet, the security verification proceed in three steps:
+<t>When a packet is received on an interface that is configured for HMAC
+protection, the following steps are performed before the packet is passed
+to normal processing:
 </t>
 <t>
 <list style="symbols">
-<t>A Babel implementation must first check if at least one  HMAC received is
+<t>A Babel implementation must first check if at least one HMAC received is
 correct.  We generate an HMAC from the body of the packet (remove header and
 trailer), and the pseudo header with the key corresponding to the interface.
 When we receive packet with a wrong HMAC or no HMAC (if a key is added to the
@@ -190,10 +207,9 @@ sending a challenge request.  A wrong reply to the challenge must reject the
 packet.  When the reply to the challenge is correct, the Babel implementation
 must retrieve and memorize the Index and the Packet Counter and continue
 parsing.</t>
-<t>The rest of the parsing is left as described in rfc???</t>
 </list>
-
-</t>
+The packet is then passed for normal processing, as described in
+Section&nbsp;3 of rfc6126bis.</t>
 
 </section>
 

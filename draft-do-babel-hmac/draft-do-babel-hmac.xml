@@ -189,27 +189,121 @@ to normal processing:
 </t>
 <t>
 <list style="symbols">
-<t>A Babel implementation must first check if at least one HMAC received is
-correct.  We generate an HMAC from the body of the packet (remove header and
-trailer), and the pseudo header with the key corresponding to the interface.
-When we receive packet with a wrong HMAC or no HMAC (if a key is added to the
-corresponding interface), the packet must be silently ignore.  If the HMAC has
-the right value, we know for sure that the packet were sent by a trusted
-identity.  However, it still can be a replayed packet.</t>
-<t>A Babel implementation must preparse the packet after the HMAC verification,
-in order to detect replay.  We are looking for the Index and Packet Counter,
-the challenge reply (when we previously asked the neighbour) and eventually a
-challenge request.  A challenge request should be treated immediatley to prevent
-latency.  A lack of Index and Packet Counter, or an unknown Index must send a
-challenge to the corresponding neighbour and reject the packet.  A wrong Packet
-Counter (while receiving a correct Index) must reject the packet without
-sending a challenge request.  A wrong reply to the challenge must reject the
-packet.  When the reply to the challenge is correct, the Babel implementation
-must retrieve and memorize the Index and the Packet Counter and continue
-parsing.</t>
+<t>First, the receiver checks whether the trailer of the received packet
+carries at least one HMAC TLV; if not, the packet is immediately dropped
+and processing stops.  Then, for each key configured on the receiving
+interface, the implementation computes the HMAC of the packet.  It then
+compares every generated HMAC against every HMAC included in the packet;
+if there is at least one match, the packet passes the HMAC test; if there
+is none, the packet is silently dropped and processing stops at this
+point.  In order to avoid memory exhaustion attacks, an entry in the
+Neighbour Table MUST NOT be created before the HMAC test has passed
+successfully.  The HMAC of the packet MUST NOT be computed for each HMAC
+TLV contained in the packet, but only once for each configured key.</t>
+<t>The packet body is then parsed a first time.  During this "preparse"
+phase, the packet body is traversed and all TLVs are ignored except
+Cryptographic Seqno TLVs, Challenge Requests and Challenge Replies.  When
+a Cryptographic Seqno TLV is encountered, the enclosed PC and Index are
+saved for later processing; if multiple Cryptographic Seqnos are found,
+only the first one is processed, the remaining ones are silently ignored.
+If a Challenge Request is encountered, a Challenge Reply is scheduled, as
+described in <xref target="replying-challenges"/>, and if a Challenge
+Reply is encountered, it is tested for validity as described in <xref
+target="receiving-challenges"/> and a note is made of the result of the
+test.</t>
+<t>The preparse phase above has yielded two pieces of data: the PC and
+Index from the first Cryptographic Seqno TLV, and a bit indicating whether
+the packet contained a successful Challenge Reply.  If the packet did not
+contain a Cryptographic Seqno TLV, the packet is dropped and processing
+stops at this point.  If the packet contained a successful Challenge
+Reply, then the PC and Seqno contained in the Cryptographic Seqno TLV are
+stored in the Neighbour Table entry corresponding to the sender (which may
+need to be created at this stage).</t>
+<t>If there is no entry in the Neighbour Table corresponding to the
+sender, or if such an entry exists but contains no Index, or if the Index
+it contains is different from the Index contained in the Cryptographic
+Seqno TLV, then a challenge is sent as described in <xref
+target="sending-challenges"/>, processing stops at this stage, and the
+packet is silently dropped.</t>
+<t>At this stage, the Index contained in the Cryptographic Seqno TLV is
+equal to the Index in the Neighbour Table entry corresponding to the
+sender.  The receiver compares the received PC with the PC contained in
+the Neighbours table; if the received PC smaller or equal than the PC
+contained in the neighbours table, the packet is silently dropped and
+processing stops (no challenge is sent in this case, since this case might
+be caused by some harmless packet reordering on the link).  Otherwise, the
+PC contained in the Neighbour Table entry is set to the received PC, and
+the packet is accepted.</t>
 </list>
-The packet is then passed for normal processing, as described in
-Section&nbsp;3 of rfc6126bis.</t>
+After the packet has been accepted, it is processed as normal, except that
+any Cryptographic Seqno, Challenge Request and Challenge Reply TLVs it
+contains are silently ignored.</t>
+
+<section title="Challenge Requests and Replies">
+
+<t>During the preparse stage, the receiver might encounter a mismatched
+Index, to which it will react by schedling a Challenge Request.  It might
+encounter a Challenge Request TLV, to which it will reply with a Challenge
+Reply TLV.  Finally, it might encounter a Challenge Reply TLV, which it
+will attempt to match with a previously sent Challenge Request TLV in
+order to update the Neighbour Table entry corresponding to the sender of
+the packet.</t>
+
+<section title="Sending challenges" anchor="sending-challenges">
+
+<t>When it encounters a mismatched Index during the preparse phase, a node
+picks a nonce that it has never used before, for example by picking
+a sufficiently large random strings of bytes or by consulting a strictly
+monotonic hardware clock.  It stores the nonce in the entry of the
+Neighbour Table corresponding to the neighbour (the entry might need to be
+created at this stage), initialises the neighbour's challenge expiry
+neighbour to 30 seconds, and sends a Challenge Request TLV to the unicast
+address corresponding to the neighbour.</t>
+
+<t>A node MAY aggregate a Challenge Request with other TLVs; in other
+words, if it has already buffered TLVs to be sent to the unicast address
+of the sender of the neighbour, it MAY send the buffered TLVs in the same
+packet as the Challenge Request.  However, it MUST arrange for the
+Challenge Request to be sent in a timely manner, as any packets received
+from that neighbour will be silently ignored until the challenge
+completes.</t>
+
+</section>
+
+<section title="Replying to challenges" anchor="replying-challenges">
+
+<t>When it encounters a Challenge Request during the preparse phase,
+a node constructs a Challenge Reply TLV by copying the Nonce from the
+Challenge Request into the Challenge Reply.  It sends the Challenge Reply
+to the unicast address of the sender of the Challenge Reply.</t>
+
+<t>A node MAY aggregate a Challenge Reply with other TLVs; in other words,
+if it has already buffered TLVs to be sent to the unicast address of the
+sender of the Challenge Request, it MAY send the buffered TLVs in the same
+packet as the Challenge Reply.  However, it MUST arrange for the Challenge
+Reply to be sent in a timely manner (within a few seconds), and SHOULD NOT
+send any other TLVs over the same interface before sending the Challenge
+Reply, as those would be dropped by the challenger.</t>
+
+</section>
+
+<section title="Receiving challenge replies" anchor="receiving-challenges">
+
+<t>When it encounters a Challenge Reply during the preparse phase, a nonce
+consults the Neighbour Table entry corresponding to the neighbour that
+sent the Challenge Reply.  If no challenge is in progress, i.e.&nbsp; if
+there is no Nonce stored in the Neighbour Table entry or the Challenge
+timer has expired, the Challenge Reply is silently ignored and the
+challenge has failed.</t>
+
+<t>Otherwise, the node compares the Nonce contained in the Challenge Reply
+with the Nonce contained in the Neighbour Table entry.  If the two are
+equal (they have the same length and the same contents), then the
+challenge has succeeded; otherwise, the challenge has failed.</t>
+
+</section>
+
+</section>
 
 </section>
 

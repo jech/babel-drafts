@@ -142,6 +142,10 @@ attacks.</t>
 
 </section>
 
+<section title="Conceptual overview of the protocol">
+
+</section>
+
 <section title="Data Structures">
 
 <t>TBD.  There's now a set of HMAC configured on each interface, an

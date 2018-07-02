@@ -474,6 +474,10 @@ used.</t>
 plus the pseudo header.</t>
 </list></t>
 
+<t>This TLV is allowed in the packet trailer (see
+<xref target="packet-trailer"/>), and ignored if it is found in the packet
+body.</t>
+
 </section>
 
 <section title="PC TLV">
@@ -629,6 +633,21 @@ Authentication</title>
 </reference>
 
 </references>
+
+<section title="Use of the packet trailer" anchor="packet-trailer">
+
+<t>The protocol described in this document uses the packet trailer for
+storing HMAC TLVs.  RFC&nbsp;6126bis <xref target="RFC6126bis"/> leaves
+the format of the packet trailer undefined.  If the final version of this
+specification uses the packet trailer, RFC&nbsp;6126bis will need to be
+extended with information about the format of the packet trailer.</t>
+
+<t>This document assumes that the packet trailer has the same format as
+the packet body, i.e., that it consists of a sequence of TLVs.  The
+receiver MUST silently ignore any TLV found in the packet trailer unless
+its definition states that the TLV is allowed in the packet trailer.</t>
+
+</section>
 
 <section title="Incremental deployment and key rotation">
 

@@ -80,7 +80,7 @@ Security (DTLS) to secure the Babel Routing Protocol.</t>
 <section title="Introduction">
 
 <t>Babel over DTLS is a security protocol for the Babel routing
-protocol <xref target="RFC6126bis"/>, that uses the Datagram Transport
+protocol <xref target="RFC6126bis"/>, that uses Datagram Transport
 Layer Security (DTLS) <xref target="RFC6347"/>.  This document
 describes how to protect Babel with Babel over DTLS.</t>
 

@@ -244,11 +244,47 @@ an exact order.  The Pseudo Header must contain in that order:</t>
 
 <section title="HMAC computation" anchor="hmac-computation">
 
-<t>TBD.  Construct the pseudo-header, append the pseudo-header to the
-packet excluding the trailer (from octet 0 up to octet 4 + length), hash
-the lot.  Describe the pseudo-header here, reference RFC&nbsp;6234, say
-MUST implement HMAC-SHA256 as MTI, say SHOULD implement HMAC-SHA1.</t>
+<t>A Babel node computes an HMAC as follows.</t>
 
+<t>First, the node builds a pseudo-header that will participate in
+HMAC computation but will not be sent.  The pseudo-header has the
+following format:
+ <figure><artwork><![CDATA[
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
++                                                               +
+|                                                               |
++                          Src address                          +
+|                                                               |
++                                                               +
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|           Src port            |                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                               +
+|                                                               |
++                                                               +
+|                         Dest address                          |
++                                                               +
+|                                                               |
++                               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                               |           Dest port           |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+]]></artwork></figure></t>
+<t>Fields :
+<list style="hanging" hangIndent="10">
+<t hangText="Src address">The source IP address of the packet.</t>
+<t hangText="Src port">The source UDP port number of the packet.</t>
+<t hangText="Dest address">The destination IP address of the packet.</t>
+<t hangText="Src port">The destination UDP port number of the packet.</t>
+</list></t>
+<t>The node takes the concatenation of the pseudo-header and the
+packet including the packet header but excluding the packet trailer (from
+octet 0 inclusive up to Body Length&nbsp;+&nbsp;4 exclusive) and
+computes an HMAC as defined in Section 2 of RFC2104 with one of
+implemented hash algorithms.  Every implementation MUST implement
+HMAC-SHA256 [RFC6234], and MAY implement other HMAC algorithms.</t>
 </section>
 
 <section title="Packet Transmission">

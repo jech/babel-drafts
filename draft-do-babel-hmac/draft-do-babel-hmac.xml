@@ -510,6 +510,32 @@ indebted to Florian Horn and Toke Hoyland-Jorgensen.</t>
 
 <back>
 
+<section title="Incremental deployment and key rotation">
+
+<t>This protocol supports incremental deployment (transitioning from an
+insecure network to a secured network with no service interruption) and
+key rotation (transitioning from a set of keys to a different set of
+keys).</t>
+
+<t>In order to perform incremental deployment, the nodes in the network
+are first configured in a mode where packets are sent with authentication
+but not checked on reception.  Once all the nodes in the network are
+configured to send authenticated packets, nodes are reconfigured to reject
+unauthenticated packets.</t>
+
+<t>In order to perform key rotation, the new key is added to all the
+nodes; once this is done, both the old and the new key are sent in all
+packets, and packets are accepted if they are properly signed by either of
+the keys.  At that point, the old key is removed.</t>
+
+<t>In order to support incremental deployment and key rotation,
+implementations SHOULD support an interface configuration in which they
+send authenticated packets but accept all packets, and SHOULD allow
+changing the set of keys associated with an interface without
+a restart.</t>
+
+</section>
+
 <section title="Implicit indices">
 
 <t>[This appendix describes the "implicit indices" variant of the

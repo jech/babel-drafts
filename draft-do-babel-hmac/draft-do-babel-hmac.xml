@@ -429,7 +429,7 @@ challenge has failed.</t>
 
 <t>Otherwise, the node compares the Nonce contained in the Challenge Reply
 with the Nonce contained in the Neighbour Table entry.  If the two are
-equal (they have the same length and the same contents), then the
+equal (they have the same length and content), then the
 challenge has succeeded; otherwise, the challenge has failed.</t>
 
 </section>
@@ -559,6 +559,7 @@ Numbers registry:</t>
 <texttable>
 <ttcol>Type</ttcol><ttcol>Name</ttcol><ttcol>Reference</ttcol>
 <c>TBD</c><c>HMAC</c><c>this document</c>
+<c>TBD</c><c>PC</c><c>this document</c>
 <c>TBD</c><c>Challenge Request</c><c>this document</c>
 <c>TBD</c><c>Challenge Reply</c><c>this document</c>
 </texttable>

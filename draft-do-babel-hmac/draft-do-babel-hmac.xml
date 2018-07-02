@@ -67,10 +67,9 @@ document updates RFC 6126bis and obsoletes RFC 7298.</t>
 <section title="Introduction">
 
 <t>By default, the Babel routing protocol trusts the information contained
-in every UDP packet it receives on the Babel port.  If an attacker is
-allowed to send such a packet, the attacker can redirect traffic to itself
-or to a different node in the network, causing a variety of potential
-issues.  In particular, and attacker could:
+in every UDP packet it receives on the Babel port.  An attacker can
+redirect traffic to itself or to a different node in the network, causing
+a variety of potential issues.  In particular, and attacker might:
 <list style="symbols">
 <t>spoof a Babel packet, and redirect traffic by announcing a smaller
 metric, a larger seqno, or a longer prefix;</t>
@@ -80,31 +79,31 @@ implementation to crash or interfere with the rest of the network;</t>
 be redirected or otherwise interfere with the network.</t>
 </list></t>
 
-<t>Protecting a Babel network is made challenging by the fact that the
+<t>Protecting a Babel network is challenging due to the fact that the
 Babel protocol uses both unicast and multicast communication.  One
-approach, used by the Babel over DTLS protocol, is to require a secured
-version of Babel to use unicast communication for all semantically
-significant communication, and then use a standard unicast security
-protocol to protect the Babel traffic.  In this document, we define
-a cryptographic extension to the Babel protocol that is able to protect
-both unicast and multicast traffic, thus requiring little or no changes to
-the core protocol.</t>
+possible approach, used notably by the Babel over DTLS protocol, is to
+require a secured version of Babel to use unicast communication for all
+semantically significant communication, and then use a standard unicast
+security protocol to protect the Babel traffic.  In this document, we
+define a cryptographic extension to the Babel protocol that is able to
+protect both unicast and multicast traffic, thus requiring very few
+changes to the core protocol.</t>
 
 <section title="Applicability">
 
 <t>The protocol defined in this document assumes that all interfaces on
 a given link are equally trusted and share a small set of symmetric keys
-(typically just one or two).  The protocol is inapplicable in situations
-where asymmetric keying is required, where the trust relationship is
-partial, or where large numbers of trusted keys are provisioned at the
-same time on a single link.</t>
+(usually just one, and two during key rotation).  The protocol is
+inapplicable in situations where asymmetric keying is required, where the
+trust relationship is partial, or where large numbers of trusted keys are
+provisioned on a single link at the same time.</t>
 
-<t>The protocol supports incremental deployment (where an insecure Babel
+<t>This protocol supports incremental deployment (where an insecure Babel
 network is made secure with no service interruption), and it supports
 graceful key rotation (where the set of keys is changed with no service
 interruption).</t>
 
-<t>The protocol does not require synchronised clocks, it does not require
+<t>This protocol does not require synchronised clocks, it does not require
 persistently monotonic clocks, and it does not require any form of
 persistent storage.</t>
 
@@ -120,19 +119,20 @@ attacker is unable to generate a packet with a correct HMAC;</t>
 <t>that a node never generates the same index or nonce twice over the
 lifetime of a key.</t>
 </list>
-The first assumption is a property of the HMAC under use.  The second
-assumption can be met either by using a reliable random number generator
-with sufficiently large values, by using a reliable hardware clock, or by
+The first assumption is a property of the HMAC being used, and is
+therefore out-of-scope for this document.  The second assumption can be
+met either by using a robust random number generator and sufficiently
+large indices and nonces, by using a reliable hardware clock, or by
 rekeying whenever a collision becomes likely.</t>
 
 <t>If the assumptions above are met, the protocol described in this
 document has the following properties:
 <list style="symbols">
 <t>it is invulnerable to spoofing: any packet accepted as authentic is the
-exact copy of a packet originally sent by an authentic node;</t>
-<t>within a single node, it is invulnerable to replay: if a node has
-previously accepted a given packet as authentic, then it will never again
-accept a copy of this packet as authentic;</t>
+exact copy of a packet originally sent by an authorised node;</t>
+<t>locally to a single node, it is invulnerable to replay: if a node has
+previously accepted a given packet, then it will never again accept a copy
+of this packet or a later packet from the same sender;</t>
 <t>among different nodes, it is only vulnerable to immediate replay: if
 a node A has accepted a packet from C as valid, then a node B will only
 accept a copy of that packet as authentic if B has accepted an older
@@ -162,10 +162,10 @@ a packet through the interface, it embeds the current value of the PC
 within the region of the packet that is protected by the HMACs and
 increases the PC by at least one.  When A receives the packet, it compares
 the value of the PC with the one contained in the previous packet received
-from B, and unless it is strictly larger, the packet is discarded.</t>
+from B, and unless it is strictly greater, the packet is discarded.</t>
 
 <t>By itself, the PC mechanism is not sufficient to protect against
-replay.  Consider a pair A that has no information about a pair
+replay.  Consider a peer A that has no information about a pair
 B (e.g. because it has recently rebooted).  Suppose that A receives
 a packet ostensibly from B carrying a given PC; since A has no information
 about B, it has no way to determine whether the packet is freshly
@@ -176,30 +176,29 @@ it knows the HMAC key.  It sends a "challenge request", a TLV containing
 a nonce, a value that has never been used before and will never be used
 again.  B replies to the challenge request with a "challenge reply", a TLV
 containing a copy of the nonce chosen by A, in a packet protected by HMAC
-and containing the next PC.  Since the nonce has never been used before,
-B's reply proves B's knowledge of the HMAC key and the freshness of the
-PC.</t>
+and containing the next value of B's PC.  Since the nonce has never been
+used before, B's reply proves B's knowledge of the HMAC key and the
+freshness of the PC.</t>
 
 <t>By itself, this mechanism is safe against replay only if B never resets
-its PC.  In practice, however, this is difficult to ensure &mdash;
-persistent storage is prone to failure, and hardware clocks, even when
-available, are occasionally reset.  Suppose that B resets its PC to
-a former value, and sends a packet with a previously used PC n.
-A challenges B, B successfully responds to the challenge, A accepts the PC
-equal to n&nbsp;+&nbsp;1.  At this point, an attacker C may send
-a replayed packet with PC equal to n&nbsp;+&nbsp;2, which will be accepted
-by A.</t>
+its PC.  In practice, however, this is difficult to ensure, as persistent
+storage is prone to failure, and hardware clocks, even when available, are
+occasionally reset.  Suppose that B resets its PC to a former value, and
+sends a packet with a previously used PC n.  A challenges B,
+B successfully responds to the challenge, A accepts the PC equal to
+n&nbsp;+&nbsp;1.  At this point, an attacker C may send a replayed packet
+with PC equal to n&nbsp;+&nbsp;2, which will be accepted by A.</t>
 
 <t>Another mechanism is needed to protect against this attack.  In this
 protocol, every PC is tagged with an "index", an arbitrary string of
 octets.  Whenever B resets its PC, or whenever B doesn't know whether its
 PC has been reset, it picks an index that it has never used before (either
 by drawing it randomly or by using a reliable hardware clock) and starts
-sending PCs with that index.  Whenever A detects an index change, it
-challenges B.</t>
+sending PCs with that index.  Whenever A detects that B has changed its
+index, it challenges B again.</t>
 
-<t>With the index mechanism, this protocol is provably invulnerable to
-replay attacks (see <xref target="security-properties"/> above).</t>
+<t>With this additional mechanism, this protocol is provably invulnerable
+to replay attacks (see <xref target="security-properties"/> above).</t>
 
 </section>
 
@@ -320,7 +319,7 @@ a sufficiently large random strings of bytes or by consulting a strictly
 monotonic hardware clock.  It stores the nonce in the entry of the
 Neighbour Table corresponding to the neighbour (the entry might need to be
 created at this stage), initialises the neighbour's challenge expiry
-neighbour to 30 seconds, and sends a Challenge Request TLV to the unicast
+timer to 30 seconds, and sends a Challenge Request TLV to the unicast
 address corresponding to the neighbour.</t>
 
 <t>A node MAY aggregate a Challenge Request with other TLVs; in other

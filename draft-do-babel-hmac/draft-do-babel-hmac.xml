@@ -204,14 +204,43 @@ to replay attacks (see <xref target="security-properties"/> above).</t>
 
 <section title="Data Structures">
 
-<t>TBD.  There's now a set of HMAC configured on each interface, an
-index/seqno pair in each interface, an index/seqno pair in each neighbour
-entry.  Additionally, each neighbour entry contains information about
-a challenge in progress, a nonce and a timer.</t>
+<section title="The Interface Table">
+<t>Every Babel node maintains an interface table, as described in
+rfc6126 Section 3.2.3.  This protocol extends this table with a set of
+HMAC keys, and a pair (Index, PC), where Index is an arbitrary string
+of bytes and PC is a 32-bit interger.  The Index is initialised to a
+value that has never been used before (e.g., by choosing a random
+string of sufficient length).</t>
+</section>
+
+<section title="The Neighbour table">
+<t>>Every Babel node maintains a neighbour table, as described in
+rfc6126 Section 3.2.4.  This protocol extends this table with a pair
+(Index, PC), as well as a nonce (an arbitrary string of bytes) and a
+challenge expiry timer.  The Index and PC are initially undefined, and
+are managed as described in <xref target="packet-reception"/>.  The Nonce
+and expiry timer are used as described in <xref target="sending-challenges"/>.
+</t>
+</section>
 
 </section>
 
 <section title="Protocol Operation">
+  
+<section title="Pseudo Header">
+<t>The purpose of the Pseudo Header is to protect sensitive information that
+are not inside the Babel packet.  The computation of the HMAC includes at first
+the pseudo header and then the rest of the Babel packet.  Since it is not
+explicit in the packet, the information inside the Pseudo Header must be in
+an exact order.  The Pseudo Header must contain in that order:</t>
+<t><list style="symbols">
+<t>The ip address of the receiver.</t>
+<t>The protocol port of the receiver.</t>
+<t>The ip address of the sender.</t>
+<t>Theprotocol port of the sender.</t>
+</list></t>
+
+</section>
 
 <section title="HMAC computation" anchor="hmac-computation">
 
@@ -244,7 +273,7 @@ appended to the packet trailer.</t>
 
 </section>
 
-<section title="Packet Reception">
+<section title="Packet Reception" anchor="packet-reception">
 
 <t>When a packet is received on an interface that is configured for HMAC
 protection, the following steps are performed before the packet is passed

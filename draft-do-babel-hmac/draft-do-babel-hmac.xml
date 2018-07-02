@@ -697,9 +697,30 @@ explicitly and thus shave off 8 to 10 octets from almost every packet.</t>
 <t>The changes to the protocol are as follows.  The pseudo-header includes
 the Index, and therefore has the following format:
 <figure><artwork><![CDATA[
-TBD
-]]></artwork></figure>
-</t>
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
++                                                               +
+|                                                               |
++                          Src address                          +
+|                                                               |
++                                                               +
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|           Src port            |                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                               +
+|                                                               |
++                                                               +
+|                         Dest address                          |
++                                                               +
+|                                                               |
++                               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                               |           Dest port           |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|              Index...
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+]]></artwork></figure></t>
 
 <t>The PC TLV no longer contains an Index, and therefore has the following
 format:

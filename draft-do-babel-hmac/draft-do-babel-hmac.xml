@@ -8,7 +8,8 @@
 <?rfc compact="no" ?>
 <rfc category="std" docName="draft-do-babel-hmac"
      ipr="trust200902"
-     obsoletes="6126,7557">
+     updates="6126bis"
+     obsoletes="7298">
 <front>
 <title>Babel Cryptographic Authentification</title>
 <author fullname="Clara Do" initials="C." surname="Do">
@@ -51,7 +52,7 @@
 </address>
 </author>
 
-<date day="29" month="June" year="2018"/>
+<date day="2" month="July" year="2018"/>
 
 <abstract>
 <t></t>

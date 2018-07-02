@@ -145,6 +145,16 @@ attacks.</t>
 
 </section>
 
+<section title="Specification of Requirements">
+
+<t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+"SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+"OPTIONAL" in this document are to be interpreted as described in BCP 14
+<xref target="RFC2119"/> <xref target="RFC8174"/> when, and only when,
+they appear in all capitals, as shown here.</t>
+
+</section>
+
 </section>
 
 <section title="Conceptual overview of the protocol">
@@ -205,21 +215,23 @@ to replay attacks (see <xref target="security-properties"/> above).</t>
 <section title="Data Structures">
 
 <section title="The Interface Table">
-<t>Every Babel node maintains an interface table, as described in
-rfc6126 Section 3.2.3.  This protocol extends this table with a set of
-HMAC keys, and a pair (Index, PC), where Index is an arbitrary string
-of bytes and PC is a 32-bit interger.  The Index is initialised to a
-value that has never been used before (e.g., by choosing a random
-string of sufficient length).</t>
+<t>Every Babel node maintains an
+interface table, as described in <xref target="RFC6126bis"/> Section
+3.2.3.  This protocol extends this table with a set of HMAC keys, and
+a pair (Index, PC), where Index is an arbitrary string of bytes and PC
+is a 32-bit interger.  The Index is initialised to a value that has
+never been used before (e.g., by choosing a random string of
+sufficient length).</t>
 </section>
 
 <section title="The Neighbour table">
 <t>>Every Babel node maintains a neighbour table, as described in
-rfc6126 Section 3.2.4.  This protocol extends this table with a pair
-(Index, PC), as well as a nonce (an arbitrary string of bytes) and a
-challenge expiry timer.  The Index and PC are initially undefined, and
-are managed as described in <xref target="packet-reception"/>.  The Nonce
-and expiry timer are used as described in <xref target="sending-challenges"/>.
+<xref target="RFC6126bis"/> Section 3.2.4.  This protocol extends this
+table with a pair (Index, PC), as well as a nonce (an arbitrary string
+of bytes) and a challenge expiry timer.  The Index and PC are
+initially undefined, and are managed as described in <xref
+target="packet-reception"/>.  The Nonce and expiry timer are used as
+described in <xref target="sending-challenges"/>.
 </t>
 </section>
 
@@ -290,11 +302,11 @@ HMAC-SHA256 [RFC6234], and MAY implement other HMAC algorithms.</t>
 <section title="Packet Transmission">
 
 <t>A Babel node may delay actually sending TLVs by a small amount, in
-order to aggregate multiple TLVs in a single packet up to the interface
-MTU (Section 4 of rfc6126bis).  For an interface on which HMAC protection
-is configured, the TLV aggregation logic MUST take into account the
-overhead due to PC TLVs (one in each packet) and HMAC TLVs (one per
-configured key).</t>
+order to aggregate multiple TLVs in a single packet up to the
+interface MTU (Section 4 of <xref target="RFC6126bis"/>).  For an
+interface on which HMAC protection is configured, the TLV aggregation
+logic MUST take into account the overhead due to PC TLVs (one in each
+packet) and HMAC TLVs (one per configured key).</t>
 
 <t>Before sending a packet, the following actions are performed:
 <list style="symbols">
@@ -562,17 +574,61 @@ Numbers registry:</t>
 
 <section title="Acknowledgments">
 
-<t>The protocol described in this document is based on the original HMAC
-protocol defined by Denis Ovsienko [RFC&nbsp;7298].  The use of
-a pseudo-header was suggested by David Schinazi.  The use of an index to
-avoid replay was suggested by Markus Stenberg.  The authors are also
-indebted to Florian Horn and Toke Hoyland-Jorgensen.</t>
+<t>The protocol described in this document is based on the original
+HMAC protocol defined by Denis Ovsienko <xref target="RFC7298"/>.  The
+use of a pseudo-header was suggested by David Schinazi.  The use of an
+index to avoid replay was suggested by Markus Stenberg.  The authors
+are also indebted to Florian Horn and Toke Hoyland-Jorgensen.</t>
 
 </section>
 
 </middle>
 
 <back>
+ 
+<references title="Normative References">
+
+<reference anchor="RFC2119"><front>
+<title>Key words for use in RFCs to Indicate Requirement Levels</title>
+<author initials="S." surname="Bradner" fullname="S. Bradner"/>
+<date year="1997" month="March"/>
+</front>
+<seriesInfo name="BCP" value="14"/>
+<seriesInfo name="RFC" value="2119"/>
+<seriesInfo name="DOI" value="10.17487/RFC2119"/>
+</reference>
+
+<reference anchor="RFC8174"><front>
+<title>Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words</title>
+<author initials="B." surname="Leiba" fullname="B. Leiba"/>
+<date year="2017" month="May"/>
+</front>
+<seriesInfo name="BCP" value="14"/>
+<seriesInfo name="RFC" value="8174"/>
+<seriesInfo name="DOI" value="10.17487/RFC8174"/>
+</reference>
+
+<reference anchor="RFC6126bis"><front>
+<title>The Babel Routing Protocol</title>
+<author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
+<author fullname="David Schinazi" initials="D." surname="Schinazi"/>
+<date month="October" year="2017"/>
+</front>
+<seriesInfo name="Internet Draft" value="draft-ietf-babel-rfc6126bis-04"/>
+</reference>
+
+<reference anchor="RFC7298"
+target="https://www.rfc-editor.org/info/rfc7298"><front>
+<title>Babel Hashed Message Authentication Code (HMAC) Cryptographic
+Authentication</title>
+<author initials="D." surname="Ovsienko" fullname="D. Ovsienko"></author>
+<date year="2014" month="July"/>
+</front>
+<seriesInfo name="RFC" value="7298"/>
+<seriesInfo name="DOI" value="10.17487/RFC7298"/>
+</reference>
+
+</references>
 
 <section title="Incremental deployment and key rotation">
 

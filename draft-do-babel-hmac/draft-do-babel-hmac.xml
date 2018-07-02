@@ -6,7 +6,7 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="no" ?>
-<rfc category="std" docName="draft-do-babel-hmac"
+<rfc category="std" docName="draft-do-babel-hmac-00"
      ipr="trust200902"
      updates="6126bis"
      obsoletes="7298">

@@ -608,13 +608,13 @@ are also indebted to Florian Horn and Toke Hoyland-Jorgensen.</t>
 <seriesInfo name="DOI" value="10.17487/RFC8174"/>
 </reference>
 
-<reference anchor="RFC6126bis"><front>
+<reference anchor='RFC6126bis'><front>
 <title>The Babel Routing Protocol</title>
-<author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
-<author fullname="David Schinazi" initials="D." surname="Schinazi"/>
-<date month="October" year="2017"/>
+<author initials='J' surname='Chroboczek' fullname='Juliusz Chroboczek'/>
+<author initials='D' surname='Schinazi' fullname='David Schinazi'/>
+<date month='May' day='29' year='2018' />
 </front>
-<seriesInfo name="Internet Draft" value="draft-ietf-babel-rfc6126bis-04"/>
+<seriesInfo name='Internet-Draft' value='draft-ietf-babel-rfc6126bis-05'/>
 </reference>
 
 <reference anchor="RFC7298"

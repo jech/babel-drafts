@@ -17,7 +17,7 @@
 <?rfc sortrefs="yes" ?>
 <?rfc compact="no" ?>
 <rfc category="std"
-    updates=""
+    updates="6126bis"
     obsoletes=""
     docName="draft-decimo-babel-dtls-00"
     ipr="trust200902">

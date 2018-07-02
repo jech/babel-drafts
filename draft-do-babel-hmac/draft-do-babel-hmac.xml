@@ -175,12 +175,12 @@ packet sent out, either after a timeout or when the buffer is about to
 reach the MTU of the outgoing interface (Section 4 of rfc6126bis).</t>
 
 <t>For an interface on which HMAC protection is configured, the packet is
-terminated when it is small enough to allow appending one Crypto Seqno TLV
+terminated when it is small enough to allow appending one PC TLV
 and the required number of HMAC TLVs (one per configured key) without
 exceeding.  Before shipping out the packet, the following actions are
 performed:
 <list style="symbols">
-<t>a Crypto Seqno TLV containing the Packet Counter and Index associated
+<t>a PC TLV containing the Packet Counter and Index associated
 with the outgoing interface is appended to the packet body; the packet
 counter is incremented by one; if the packet counter overflows, a new
 nonce is generated;</t>
@@ -211,43 +211,42 @@ Neighbour Table MUST NOT be created before the HMAC test has passed
 successfully.  The HMAC of the packet MUST NOT be computed for each HMAC
 TLV contained in the packet, but only once for each configured key.</t>
 <t>The packet body is then parsed a first time.  During this "preparse"
-phase, the packet body is traversed and all TLVs are ignored except
-Cryptographic Seqno TLVs, Challenge Requests and Challenge Replies.  When
-a Cryptographic Seqno TLV is encountered, the enclosed PC and Index are
-saved for later processing; if multiple Cryptographic Seqnos are found,
-only the first one is processed, the remaining ones are silently ignored.
-If a Challenge Request is encountered, a Challenge Reply is scheduled, as
-described in <xref target="replying-challenges"/>, and if a Challenge
-Reply is encountered, it is tested for validity as described in <xref
+phase, the packet body is traversed and all TLVs are ignored except PC
+TLVs, Challenge Requests and Challenge Replies.  When a PC TLV is
+encountered, the enclosed PC and Index are saved for later processing; if
+multiple PCs are found, only the first one is processed, the remaining
+ones are silently ignored.  If a Challenge Request is encountered,
+a Challenge Reply is scheduled, as described in <xref
+target="replying-challenges"/>, and if a Challenge Reply is encountered,
+it is tested for validity as described in <xref
 target="receiving-challenges"/> and a note is made of the result of the
 test.</t>
 <t>The preparse phase above has yielded two pieces of data: the PC and
-Index from the first Cryptographic Seqno TLV, and a bit indicating whether
-the packet contained a successful Challenge Reply.  If the packet did not
-contain a Cryptographic Seqno TLV, the packet is dropped and processing
-stops at this point.  If the packet contained a successful Challenge
-Reply, then the PC and Seqno contained in the Cryptographic Seqno TLV are
-stored in the Neighbour Table entry corresponding to the sender (which may
-need to be created at this stage).</t>
+Index from the first PC TLV, and a bit indicating whether the packet
+contained a successful Challenge Reply.  If the packet did not contain
+a PC TLV, the packet is dropped and processing stops at this point.  If
+the packet contained a successful Challenge Reply, then the PC and Index
+contained in the PC TLV are stored in the Neighbour Table entry
+corresponding to the sender (which may need to be created at this
+stage).</t>
 <t>If there is no entry in the Neighbour Table corresponding to the
 sender, or if such an entry exists but contains no Index, or if the Index
-it contains is different from the Index contained in the Cryptographic
-Seqno TLV, then a challenge is sent as described in <xref
-target="sending-challenges"/>, processing stops at this stage, and the
-packet is silently dropped.</t>
-<t>At this stage, the Index contained in the Cryptographic Seqno TLV is
-equal to the Index in the Neighbour Table entry corresponding to the
-sender.  The receiver compares the received PC with the PC contained in
-the Neighbours table; if the received PC smaller or equal than the PC
-contained in the neighbours table, the packet is silently dropped and
-processing stops (no challenge is sent in this case, since this case might
-be caused by some harmless packet reordering on the link).  Otherwise, the
-PC contained in the Neighbour Table entry is set to the received PC, and
-the packet is accepted.</t>
+it contains is different from the Index contained in the PC TLV, then
+a challenge is sent as described in <xref target="sending-challenges"/>,
+processing stops at this stage, and the packet is silently dropped.</t>
+<t>At this stage, the Index contained in the PC TLV is equal to the Index
+in the Neighbour Table entry corresponding to the sender.  The receiver
+compares the received PC with the PC contained in the Neighbours table; if
+the received PC smaller or equal than the PC contained in the neighbours
+table, the packet is silently dropped and processing stops (no challenge
+is sent in this case, since this case might be caused by some harmless
+packet reordering on the link).  Otherwise, the PC contained in the
+Neighbour Table entry is set to the received PC, and the packet is
+accepted.</t>
 </list>
 After the packet has been accepted, it is processed as normal, except that
-any Cryptographic Seqno, Challenge Request and Challenge Reply TLVs it
-contains are silently ignored.</t>
+any PC, Challenge Request and Challenge Reply TLVs that it contains are
+silently ignored.</t>
 
 <section title="Challenge Requests and Replies">
 
@@ -323,7 +322,7 @@ challenge has succeeded; otherwise, the challenge has failed.</t>
 
 <t></t>
 
-<section title="TLV HMAC Format">
+<section title="HMAC TLV">
 
 <t></t>
 
@@ -347,7 +346,7 @@ plus the pseudo header.</t>
 
 </section>
 
-<section title="TLV Cryptographic Seqno Format">
+<section title="PC TLV">
 
 <t></t>
 
@@ -363,7 +362,7 @@ plus the pseudo header.</t>
 
 <t>Fields :
 <list style="hanging" hangIndent="10">
-<t hangText="Type">Set to TBD to indicate a Cryptographic Seqno TLV</t>
+<t hangText="Type">Set to TBD to indicate a PC TLV</t>
 <t hangText="Length">The length of the body, exclusive of the Type and
 Length fields.</t>
 <t hangText="PC">Packet Counter.  Each time we send a packet, we must
@@ -376,7 +375,7 @@ time we lose state, or when the Packet Counter has reset.
 
 </section>
 
-<section title="TLV Challenge Request Format">
+<section title="Challenge Request TLV">
 
 <t></t>
 
@@ -399,7 +398,7 @@ for maximum security (in general half of the size of the hash length).</t>
 
 </section>
 
-<section title="TLV Challenge Reply Format">
+<section title="Challenge Reply TLV">
 
 <t></t>
 
@@ -458,15 +457,14 @@ publication of this document an RFC, depending on which protocol variant
 is finally chosen.]</t>
 
 <t>The protocol described in the body of this document explicitly sends
-indices as in each packet as part of the Cryptographic Seqno TLV.  Observe
-that, except when a challenge is required, the index sent on the wire is
-identical to the index stored in the Neighbour Table, and therefore
-doesn't need to be sent explicitly except during challenges &mdash; it is
-enough for it to participate in HMAC computation in order to protect
-against replay.  The "implicit indices" variant of the protocol, due to
-Markus Stenberg and described in this appendix, uses this information to
-avoid sending indices explicitly and thus shave off 8 to 10 octets from
-almost every packet.</t>
+indices as in each packet as part of the PC TLV.  Observe that, except
+when a challenge is required, the index sent on the wire is identical to
+the index stored in the Neighbour Table, and therefore doesn't need to be
+sent explicitly except during challenges &mdash; it is enough for it to
+participate in HMAC computation in order to protect against replay.  The
+"implicit indices" variant of the protocol, due to Markus Stenberg and
+described in this appendix, uses this information to avoid sending indices
+explicitly and thus shave off 8 to 10 octets from almost every packet.</t>
 
 <t>The changes to the protocol are as follows.  The pseudo-header includes
 the Index, and therefore has the following format:
@@ -475,8 +473,8 @@ TBD
 ]]></artwork></figure>
 </t>
 
-<t>The Cryptographic Seqno TLV no longer contains an Index, and therefore
-has the following format:
+<t>The PC TLV no longer contains an Index, and therefore has the following
+format:
 <figure><artwork><![CDATA[
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -512,8 +510,8 @@ for that neighbour (either because the table doesn't contain in an entry for
 this neighbour, or the entry doesn't contain an index), HMAC validation
 fails.</t>
 
-<t>The index and cryptographic seqno contained in the neighbours table are
-only updated after HMAC validation has succeeded.</t>
+<t>The index and PC contained in the neighbours table are only updated
+after HMAC validation has succeeded.</t>
 
 <t>Since it is now impossible to differenciate between a failed HMAC and
 an index change, a node must send a challenge whenever HMAC validation

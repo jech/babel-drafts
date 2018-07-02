@@ -218,7 +218,7 @@ to replay attacks (see <xref target="security-properties"/> above).</t>
 <t>Every Babel node maintains an interface table, as described in <xref
 target="RFC6126bis"/> Section 3.2.3.  This protocol extends the entries in
 this table with a set of HMAC keys, and a pair (Index, PC), where Index is
-an arbitrary string of bytes and PC is a 32-bit interger.  The Index is
+an arbitrary string of bytes and PC is a 32-bit integer.  The Index is
 initialised to a value that has never been used before (e.g., by choosing
 a random string of sufficient length).</t>
 </section>
@@ -367,7 +367,7 @@ silently ignored.</t>
 <section title="Challenge Requests and Replies">
 
 <t>During the preparse stage, the receiver might encounter a mismatched
-Index, to which it will react by schedling a Challenge Request.  It might
+Index, to which it will react by scheduling a Challenge Request.  It might
 encounter a Challenge Request TLV, to which it will reply with a Challenge
 Reply TLV.  Finally, it might encounter a Challenge Reply TLV, which it
 will attempt to match with a previously sent Challenge Request TLV in
@@ -780,7 +780,7 @@ fails.</t>
 <t>The index and PC contained in the neighbours table are only updated
 after HMAC validation has succeeded.</t>
 
-<t>Since it is now impossible to differenciate between a failed HMAC and
+<t>Since it is now impossible to differentiate between a failed HMAC and
 an index change, a node must send a challenge whenever HMAC validation
 fails.  This implies that spoofed packets cause a spurious challenge, but
 that doesn't change the security properties of the protocol much, given

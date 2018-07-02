@@ -239,21 +239,6 @@ described in <xref target="sending-challenges"/>.
 
 <section title="Protocol Operation">
   
-<section title="Pseudo Header">
-<t>The purpose of the Pseudo Header is to protect sensitive information that
-are not inside the Babel packet.  The computation of the HMAC includes at first
-the pseudo header and then the rest of the Babel packet.  Since it is not
-explicit in the packet, the information inside the Pseudo Header must be in
-an exact order.  The Pseudo Header must contain in that order:</t>
-<t><list style="symbols">
-<t>The ip address of the receiver.</t>
-<t>The protocol port of the receiver.</t>
-<t>The ip address of the sender.</t>
-<t>Theprotocol port of the sender.</t>
-</list></t>
-
-</section>
-
 <section title="HMAC computation" anchor="hmac-computation">
 
 <t>A Babel node computes an HMAC as follows.</t>

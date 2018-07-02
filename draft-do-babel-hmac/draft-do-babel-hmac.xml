@@ -55,8 +55,11 @@
 <date day="2" month="July" year="2018"/>
 
 <abstract>
-<t></t>
+<t>This document describes a cryptographic authentication mechanism for
+the Babel routing protocol that has provisions for replay avoidance.  This
+document updates RFC 6126bis and obsoletes RFC 7298.</t>
 </abstract>
+
 </front>
 
 <middle>

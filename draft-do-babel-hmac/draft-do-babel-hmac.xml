@@ -170,23 +170,21 @@ MUST implement HMAC-SHA256 as MTI, say SHOULD implement HMAC-SHA1.</t>
 
 </section>
 
-<section title="Message Transmission">
+<section title="Packet Transmission">
 
-<t>A Babel node is expected to accumulate TLVs into a buffer in order to
-send multiple TLVs in a single packet.  The buffer is flushed, and the
-packet sent out, either after a timeout or when the buffer is about to
-reach the MTU of the outgoing interface (Section 4 of rfc6126bis).</t>
+<t>A Babel node may delay actually sending TLVs by a small amount, in
+order to aggregate multiple TLVs in a single packet up to the interface
+MTU (Section 4 of rfc6126bis).  For an interface on which HMAC protection
+is configured, the TLV aggregation logic MUST take into account the
+overhead due to PC TLVs (one in each packet) and HMAC TLVs (one per
+configured key).</t>
 
-<t>For an interface on which HMAC protection is configured, the packet is
-terminated when it is small enough to allow appending one PC TLV
-and the required number of HMAC TLVs (one per configured key) without
-exceeding.  Before shipping out the packet, the following actions are
-performed:
+<t>Before sending a packet, the following actions are performed:
 <list style="symbols">
 <t>a PC TLV containing the Packet Counter and Index associated with the
 outgoing interface is appended to the packet body; the packet counter is
-incremented by one; if the packet counter overflows, a new index is
-generated;</t>
+incremented by a strictly positive amount (typically just 1); if the
+packet counter overflows, a new index is generated;</t>
 <t>for each key configured on the interface, an HMAC is computed as
 specified in <xref target="hmac-computation"/> above, and an HMAC TLV is
 appended to the packet trailer.</t>
@@ -194,7 +192,7 @@ appended to the packet trailer.</t>
 
 </section>
 
-<section title="Message Reception">
+<section title="Packet Reception">
 
 <t>When a packet is received on an interface that is configured for HMAC
 protection, the following steps are performed before the packet is passed

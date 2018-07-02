@@ -277,11 +277,12 @@ following format:
 <t hangText="Src port">The destination UDP port number of the packet.</t>
 </list></t>
 <t>The node takes the concatenation of the pseudo-header and the
-packet including the packet header but excluding the packet trailer (from
-octet 0 inclusive up to Body Length&nbsp;+&nbsp;4 exclusive) and
-computes an HMAC as defined in Section 2 of RFC2104 with one of
-the implemented hash algorithms.  Every implementation MUST implement
-HMAC-SHA256 [RFC6234], and MAY implement other HMAC algorithms.</t>
+packet including the packet header but excluding the packet trailer
+(from octet 0 inclusive up to Body Length&nbsp;+&nbsp;4 exclusive) and
+computes an HMAC as defined in Section 2 of <xref target="RFC2104"/>
+with one of the implemented hash algorithms.  Every implementation MUST
+implement HMAC-SHA256 <xref target="RFC6234"/>, and MAY implement
+other HMAC algorithms.</t>
 </section>
 
 <section title="Packet Transmission">
@@ -608,6 +609,34 @@ are also indebted to Florian Horn and Toke Hoyland-Jorgensen.</t>
 </front>
 <seriesInfo name='Internet-Draft' value='draft-ietf-babel-rfc6126bis-05'/>
 </reference>
+
+<reference anchor="RFC2104" target="https://www.rfc-editor.org/info/rfc2104">
+<front>
+<title>HMAC: Keyed-Hashing for Message Authentication</title>
+<author initials="H." surname="Krawczyk" fullname="H. Krawczyk"></author>
+<author initials="M." surname="Bellare" fullname="M. Bellare"></author>
+<author initials="R." surname="Canetti" fullname="R. Canetti"></author>
+<date year="1997" month="February"/>
+</front>
+<seriesInfo name="RFC" value="2104"/>
+<seriesInfo name="DOI" value="10.17487/RFC2104"/>
+</reference>
+
+<reference anchor="RFC6234" target="https://www.rfc-editor.org/info/rfc6234">
+<front>
+<title>US Secure Hash Algorithms (SHA and SHA-based HMAC and HKDF)</title>
+<author initials="D." surname="Eastlake 3rd" fullname="D. Eastlake 3rd">
+</author>
+<author initials="T." surname="Hansen" fullname="T. Hansen"></author>
+<date year="2011" month="May"/>
+</front>
+<seriesInfo name="RFC" value="6234"/>
+<seriesInfo name="DOI" value="10.17487/RFC6234"/>
+</reference>
+
+</references>
+
+<references title="Informational References">
 
 <reference anchor="RFC7298"
 target="https://www.rfc-editor.org/info/rfc7298"><front>

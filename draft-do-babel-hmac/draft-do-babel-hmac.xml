@@ -180,10 +180,10 @@ and the required number of HMAC TLVs (one per configured key) without
 exceeding.  Before shipping out the packet, the following actions are
 performed:
 <list style="symbols">
-<t>a PC TLV containing the Packet Counter and Index associated
-with the outgoing interface is appended to the packet body; the packet
-counter is incremented by one; if the packet counter overflows, a new
-nonce is generated;</t>
+<t>a PC TLV containing the Packet Counter and Index associated with the
+outgoing interface is appended to the packet body; the packet counter is
+incremented by one; if the packet counter overflows, a new index is
+generated;</t>
 <t>for each key configured on the interface, an HMAC is computed as
 specified in <xref target="hmac-computation"/> above, and an HMAC TLV is
 appended to the packet trailer.</t>

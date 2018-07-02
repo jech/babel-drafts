@@ -392,6 +392,10 @@ Challenge Request to be sent in a timely manner, as any packets received
 from that neighbour will be silently ignored until the challenge
 completes.</t>
 
+<t>Since a challenge may be prompted by a replayed packet, a node MUST
+impose a rate limitation to the challenges it sends; a limit of one
+challenge every 300ms for each neighbour is suggested.</t>
+
 </section>
 
 <section title="Replying to challenges" anchor="replying-challenges">
@@ -408,6 +412,8 @@ packet as the Challenge Reply.  However, it MUST arrange for the Challenge
 Reply to be sent in a timely manner (within a few seconds), and SHOULD NOT
 send any other TLVs over the same interface before sending the Challenge
 Reply, as those would be dropped by the challenger.</t>
+
+<t>A challenge sent to a multicast address MUST be silently ignored.</t>
 
 </section>
 

@@ -116,24 +116,24 @@ when, they appear in all capitals, as shown here.</t>
 
 <section title="Operation of the Protocol">
 
-<t>At first sight, there are incompatibilities between Babel and
-DTLS. Babel is a pure peer-to-peer protocol, while DTLS is a two
-parties client-server protocol.  A Babel implementation typically uses
-unicast and multicast, while DTLS can only protect unicast.</t>
+<t>At first sight, there are incompatibilities between Babel and DTLS.
+Babel is a pure peer-to-peer protocol, while DTLS is a two parties
+client-server protocol.  A Babel implementation typically uses unicast
+and multicast, while DTLS can only protect unicast.</t>
 
 <t>The problem of assigning a client of server role for a DTLS
 handshake to Babel nodes is solved by a simple arbitrary choice.  The
 addresses of the two nodes are compared, and the node with the lowest
 address acts as the server.</t>
 
-<t>Babel is sufficiently flexible to work almost without multicast. In
-Babel over DTLS, almost all packets are sent via unicast. Packets that
-would have been sent via unicast needs to be duplicated and sent to
-all of the original recipients via unicast.  The cost of duplication
-is balanced by the fact that on networks with low throughput, unicast
-is often far more effective than multicast.  Only neighbour discovery
-packets are sent via multicast, as they do not represent a security
-threat.</t>
+<t>Babel is sufficiently flexible to work almost without multicast.
+In Babel over DTLS, almost all packets are sent via unicast.  Packets
+that would have been sent via unicast needs to be duplicated and sent
+to all of the original recipients via unicast.  The cost of
+duplication is balanced by the fact that on networks with low
+throughput, unicast is often far more effective than multicast.  Only
+neighbour discovery packets are sent via multicast, as they do not
+represent a security threat.</t>
 
 </section>
 
@@ -160,7 +160,7 @@ silently ignore all TLVs except Hello and IHU.</t>
 </t>
 <t>Since the source port is fixed as 6696, a node that loses its DTLS
 state (e.g. if it reboots), will reuse the same source and destination
-ports for the new session. In order to avoid discarding these new
+ports for the new session.  In order to avoid discarding these new
 packets, nodes receiving an unexpected DTLS ClientHello MUST proceed
 with a new handshake and MUST NOT destroy the existing session until
 the new session's handshake completes to avoid denial of service
@@ -173,8 +173,8 @@ attacks (Section 4.2.8 of <xref target="RFC6347"/>).</t>
 <t>In this approach, a different port (number TBD) is allocated by
 IANA for Babel over DTLS traffic.  The Babel over DTLS server listens
 on this port and Babel over DTLS clients use an ephemeral source port
-to initiate outbound DTLS connections. Unprotected Babel messages are
-sent and received over the standard Babel port (6696). When parsing
+to initiate outbound DTLS connections.  Unprotected Babel messages are
+sent and received over the standard Babel port (6696).  When parsing
 unprotected packets, all Babel TLVs except Hello and IHU MUST be
 silently ignored.</t>
 
@@ -186,7 +186,7 @@ silently ignored.</t>
 
 <section title="Session Initiation">
 
-<t>When a node A acquires a new neighbour B (e.g. when A first
+<t>When a node A acquires a new neighbour B (e.g.  when A first
 receives a Babel packet from B, see Section 3.4 of <xref
 target="RFC6126bis"/>),
 <list style="symbols">
@@ -205,9 +205,9 @@ nodes send all unicast Babel messages over DTLS.</t>
 <section title="Transmission">
 
 <t>Since DTLS cannot secure multicast, nodes SHOULD send all TLVs over
-unicast DTLS, if possible. All TLVs that are not Hello nor IHU MUST be
-sent over unicast DTLS. Hello and IHU TLVs MAY be sent either over
-unicast DTLS or unprotected multicast. Nodes MUST NOT send any
+unicast DTLS, if possible.  All TLVs that are not Hello nor IHU MUST
+be sent over unicast DTLS.  Hello and IHU TLVs MAY be sent either over
+unicast DTLS or unprotected multicast.  Nodes MUST NOT send any
 unprotected packets over unicast.</t>
 
 </section>
@@ -217,7 +217,7 @@ unprotected packets over unicast.</t>
 <t>Packets received over unicast DTLS are parsed the same way as any
 packets in the original specification of Babel.  Nodes MUST parse
 unprotected packets received over multicast, however they MUST
-silently ignore any TLV that is not Hello or IHU. Unprotected packets
+silently ignore any TLV that is not Hello or IHU.  Unprotected packets
 received over unicast MUST be silently ignored.</t>
 
 </section>
@@ -226,7 +226,7 @@ received over unicast MUST be silently ignored.</t>
 
 <t>When a neighbour entry is flushed from the neighbour table
 (Appendix A of <xref target="RFC6126bis"/>), its associated DTLS state
-SHOULD be discarded. The node MAY send a DTLS close_notify alert to
+SHOULD be discarded.  The node MAY send a DTLS close_notify alert to
 the neighbour.</t>
 
 </section>
@@ -244,12 +244,12 @@ minimise the number of packets being sent while avoiding lower-layer
 fragmentation, a Babel node SHOULD attempt to maximise the size of the
 packets it sends, up to the outgoing interface's MTU adjusted for
 lower-layer headers (28 octets for UDP over IPv4, 48 octets for UDP
-over IPv6). It MUST NOT send packets larger than the attached
+over IPv6).  It MUST NOT send packets larger than the attached
 interface's MTU adjusted for lower-layer headers or 512 octets,
 whichever is larger, but not exceeding 2^16 - 1 adjusted for
-lower-layer headers. Every Babel speaker MUST be able to receive
+lower-layer headers.  Every Babel speaker MUST be able to receive
 packets that are as large as any attached interface's MTU adjusted for
-lower-layer headers or 512 octets, whichever is larger. Babel packets
+lower-layer headers or 512 octets, whichever is larger.  Babel packets
 MUST NOT be sent in IPv6 Jumbograms.</t>
 
 <t>Theses requirements are retained by this specification, but are

@@ -69,11 +69,11 @@ document updates RFC 6126bis and obsoletes RFC 7298.</t>
 <t>By default, the Babel routing protocol trusts the information contained
 in every UDP packet it receives on the Babel port.  An attacker can
 redirect traffic to itself or to a different node in the network, causing
-a variety of potential issues.  In particular, and attacker might:
+a variety of potential issues.  In particular, an attacker might:
 <list style="symbols">
 <t>spoof a Babel packet, and redirect traffic by announcing a smaller
 metric, a larger seqno, or a longer prefix;</t>
-<t>spoof an incorrect packet, which could cause an insufficiently robust
+<t>spoof a malformed packet, which could cause an insufficiently robust
 implementation to crash or interfere with the rest of the network;</t>
 <t>replay a previously captured Babel packet, which could cause traffic to
 be redirected or otherwise interfere with the network.</t>
@@ -84,18 +84,18 @@ Babel protocol uses both unicast and multicast communication.  One
 possible approach, used notably by the Babel over DTLS protocol, is to
 require a secured version of Babel to use unicast communication for all
 semantically significant communication, and then use a standard unicast
-security protocol to protect the Babel traffic.  In this document, we
-define a cryptographic extension to the Babel protocol that is able to
-protect both unicast and multicast traffic, thus requiring very few
-changes to the core protocol.</t>
+security protocol to protect the Babel traffic.  In this document, we take
+the opposite approach: we define a cryptographic extension to the Babel
+protocol that is able to protect both unicast and multicast traffic, and
+thus requires very few changes to the core protocol.</t>
 
 <section title="Applicability">
 
 <t>The protocol defined in this document assumes that all interfaces on
 a given link are equally trusted and share a small set of symmetric keys
-(usually just one, and two during key rotation).  The protocol is
-inapplicable in situations where asymmetric keying is required, where the
-trust relationship is partial, or where large numbers of trusted keys are
+(usually just one, two during key rotation).  The protocol is inapplicable
+in situations where asymmetric keying is required, where the trust
+relationship is partial, or where large numbers of trusted keys are
 provisioned on a single link at the same time.</t>
 
 <t>This protocol supports incremental deployment (where an insecure Babel
@@ -132,7 +132,7 @@ document has the following properties:
 exact copy of a packet originally sent by an authorised node;</t>
 <t>locally to a single node, it is invulnerable to replay: if a node has
 previously accepted a given packet, then it will never again accept a copy
-of this packet or a later packet from the same sender;</t>
+of this packet or an earlier packet from the same sender;</t>
 <t>among different nodes, it is only vulnerable to immediate replay: if
 a node A has accepted a packet from C as valid, then a node B will only
 accept a copy of that packet as authentic if B has accepted an older
@@ -166,36 +166,36 @@ interface that requires cryptographic protection, it independently
 computes a set of HMACs and compares them to the HMACs appended to the
 packet; if there is no match, the packet is discarded.</t>
 
-<t>In order to protect against replay, for every inteface B maintains
-a 32-bit integer known as the "packet counter" (PC). Whenever B sends
-a packet through the interface, it embeds the current value of the PC
-within the region of the packet that is protected by the HMACs and
-increases the PC by at least one.  When A receives the packet, it compares
-the value of the PC with the one contained in the previous packet received
-from B, and unless it is strictly greater, the packet is discarded.</t>
+<t>In order to protect against replay B maintains a per-interface 32-bit
+integer known as the "packet counter" (PC). Whenever B sends a packet
+through the interface, it embeds the current value of the PC within the
+region of the packet that is protected by the HMACs and increases the PC
+by at least one.  When A receives the packet, it compares the value of the
+PC with the one contained in the previous packet received from B, and
+unless it is strictly greater, the packet is discarded.</t>
 
 <t>By itself, the PC mechanism is not sufficient to protect against
 replay.  Consider a peer A that has no information about a pair
-B (e.g. because it has recently rebooted).  Suppose that A receives
+B (e.g., because it has recently rebooted).  Suppose that A receives
 a packet ostensibly from B carrying a given PC; since A has no information
 about B, it has no way to determine whether the packet is freshly
 generated or a replay of a previously sent packet.</t>
 
 <t>In this situation, A discards the packet and challenges B to prove that
 it knows the HMAC key.  It sends a "challenge request", a TLV containing
-a nonce, a value that has never been used before and will never be used
-again.  B replies to the challenge request with a "challenge reply", a TLV
-containing a copy of the nonce chosen by A, in a packet protected by HMAC
-and containing the next value of B's PC.  Since the nonce has never been
-used before, B's reply proves B's knowledge of the HMAC key and the
+a unique nonce, a value that has never been used before and will never be
+used again.  B replies to the challenge request with a "challenge reply",
+a TLV containing a copy of the nonce chosen by A, in a packet protected by
+HMAC and containing the new value of B's PC.  Since the nonce has never
+been used before, B's reply proves B's knowledge of the HMAC key and the
 freshness of the PC.</t>
 
-<t>By itself, this mechanism is safe against replay only if B never resets
-its PC.  In practice, however, this is difficult to ensure, as persistent
+<t>By itself, this mechanism is safe against replay if B never resets its
+PC.  In practice, however, this is difficult to ensure, as persistent
 storage is prone to failure, and hardware clocks, even when available, are
-occasionally reset.  Suppose that B resets its PC to a former value, and
+occasionally reset.  Suppose that B resets its PC to an earlier value, and
 sends a packet with a previously used PC n.  A challenges B,
-B successfully responds to the challenge, A accepts the PC equal to
+B successfully responds to the challenge, and A accepts the PC equal to
 n&nbsp;+&nbsp;1.  At this point, an attacker C may send a replayed packet
 with PC equal to n&nbsp;+&nbsp;2, which will be accepted by A.</t>
 
@@ -215,23 +215,23 @@ to replay attacks (see <xref target="security-properties"/> above).</t>
 <section title="Data Structures">
 
 <section title="The Interface Table">
-<t>Every Babel node maintains an
-interface table, as described in <xref target="RFC6126bis"/> Section
-3.2.3.  This protocol extends this table with a set of HMAC keys, and
-a pair (Index, PC), where Index is an arbitrary string of bytes and PC
-is a 32-bit interger.  The Index is initialised to a value that has
-never been used before (e.g., by choosing a random string of
-sufficient length).</t>
+<t>Every Babel node maintains an interface table, as described in <xref
+target="RFC6126bis"/> Section 3.2.3.  This protocol extends the entries in
+this table with a set of HMAC keys, and a pair (Index, PC), where Index is
+an arbitrary string of bytes and PC is a 32-bit interger.  The Index is
+initialised to a value that has never been used before (e.g., by choosing
+a random string of sufficient length).</t>
 </section>
 
 <section title="The Neighbour table">
-<t>>Every Babel node maintains a neighbour table, as described in
-<xref target="RFC6126bis"/> Section 3.2.4.  This protocol extends this
-table with a pair (Index, PC), as well as a nonce (an arbitrary string
-of bytes) and a challenge expiry timer.  The Index and PC are
-initially undefined, and are managed as described in <xref
-target="packet-reception"/>.  The Nonce and expiry timer are used as
-described in <xref target="sending-challenges"/>.
+<t>Every Babel node maintains a neighbour table, as described in
+<xref target="RFC6126bis"/> Section 3.2.4.  This protocol extends the
+entries in this table with a pair (Index, PC), as well as a nonce (an
+arbitrary string of bytes) and a challenge expiry timer.  The Index and PC
+are initially undefined, and are managed as described in
+<xref target="packet-reception"/>.  The Nonce and expiry timer are
+initially undefined and used as described in
+<xref target="sending-challenges"/>.
 </t>
 </section>
 
@@ -270,7 +270,7 @@ following format:
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ]]></artwork></figure></t>
 <t>Fields :
-<list style="hanging" hangIndent="10">
+<list style="hanging" hangIndent="14">
 <t hangText="Src address">The source IP address of the packet.</t>
 <t hangText="Src port">The source UDP port number of the packet.</t>
 <t hangText="Dest address">The destination IP address of the packet.</t>
@@ -280,7 +280,7 @@ following format:
 packet including the packet header but excluding the packet trailer (from
 octet 0 inclusive up to Body Length&nbsp;+&nbsp;4 exclusive) and
 computes an HMAC as defined in Section 2 of RFC2104 with one of
-implemented hash algorithms.  Every implementation MUST implement
+the implemented hash algorithms.  Every implementation MUST implement
 HMAC-SHA256 [RFC6234], and MAY implement other HMAC algorithms.</t>
 </section>
 
@@ -338,9 +338,9 @@ target="receiving-challenges"/> and a note is made of the result of the
 test.</t>
 <t>The preparse phase above has yielded two pieces of data: the PC and
 Index from the first PC TLV, and a bit indicating whether the packet
-contained a successful Challenge Reply.  If the packet did not contain
+contains a successful Challenge Reply.  If the packet does not contain
 a PC TLV, the packet is dropped and processing stops at this point.  If
-the packet contained a successful Challenge Reply, then the PC and Index
+the packet contains a successful Challenge Reply, then the PC and Index
 contained in the PC TLV are stored in the Neighbour Table entry
 corresponding to the sender (which may need to be created at this
 stage).</t>
@@ -348,13 +348,13 @@ stage).</t>
 sender, or if such an entry exists but contains no Index, or if the Index
 it contains is different from the Index contained in the PC TLV, then
 a challenge is sent as described in <xref target="sending-challenges"/>,
-processing stops at this stage, and the packet is silently dropped.</t>
+processing stops at this stage, and the packet is dropped.</t>
 <t>At this stage, the Index contained in the PC TLV is equal to the Index
 in the Neighbour Table entry corresponding to the sender.  The receiver
-compares the received PC with the PC contained in the Neighbours table; if
-the received PC smaller or equal than the PC contained in the neighbours
-table, the packet is silently dropped and processing stops (no challenge
-is sent in this case, since this case might be caused by some harmless
+compares the received PC with the PC contained in the Neighbour Table; if
+the received PC smaller or equal than the PC contained in the Neighbour
+Table, the packet is silently dropped and processing stops (no challenge
+is sent in this case, since the mismatch might be caused by harmless
 packet reordering on the link).  Otherwise, the PC contained in the
 Neighbour Table entry is set to the received PC, and the packet is
 accepted.</t>
@@ -376,13 +376,13 @@ the packet.</t>
 <section title="Sending challenges" anchor="sending-challenges">
 
 <t>When it encounters a mismatched Index during the preparse phase, a node
-picks a nonce that it has never used before, for example by picking
-a sufficiently large random strings of bytes or by consulting a strictly
+picks a nonce that it has never used before, for example by drawing
+a sufficiently large random string of bytes or by consulting a strictly
 monotonic hardware clock.  It stores the nonce in the entry of the
-Neighbour Table corresponding to the neighbour (the entry might need to be
-created at this stage), initialises the neighbour's challenge expiry
-timer to 30 seconds, and sends a Challenge Request TLV to the unicast
-address corresponding to the neighbour.</t>
+Neighbour Table of the neighbour (the entry might need to be created at
+this stage), initialises the neighbour's challenge expiry timer to 30
+seconds, and sends a Challenge Request TLV to the unicast address
+corresponding to the neighbour.</t>
 
 <t>A node MAY aggregate a Challenge Request with other TLVs; in other
 words, if it has already buffered TLVs to be sent to the unicast address
@@ -410,7 +410,7 @@ if it has already buffered TLVs to be sent to the unicast address of the
 sender of the Challenge Request, it MAY send the buffered TLVs in the same
 packet as the Challenge Reply.  However, it MUST arrange for the Challenge
 Reply to be sent in a timely manner (within a few seconds), and SHOULD NOT
-send any other TLVs over the same interface before sending the Challenge
+send any other packets over the same interface before sending the Challenge
 Reply, as those would be dropped by the challenger.</t>
 
 <t>A challenge sent to a multicast address MUST be silently ignored.</t>
@@ -419,9 +419,9 @@ Reply, as those would be dropped by the challenger.</t>
 
 <section title="Receiving challenge replies" anchor="receiving-challenges">
 
-<t>When it encounters a Challenge Reply during the preparse phase, a nonce
+<t>When it encounters a Challenge Reply during the preparse phase, a node
 consults the Neighbour Table entry corresponding to the neighbour that
-sent the Challenge Reply.  If no challenge is in progress, i.e.&nbsp; if
+sent the Challenge Reply.  If no challenge is in progress, i.e., if
 there is no Nonce stored in the Neighbour Table entry or the Challenge
 timer has expired, the Challenge Reply is silently ignored and the
 challenge has failed.</t>
@@ -466,8 +466,8 @@ plus the pseudo header.</t>
 </list></t>
 
 <t>This TLV is allowed in the packet trailer (see
-<xref target="packet-trailer"/>), and ignored if it is found in the packet
-body.</t>
+<xref target="packet-trailer"/>), and MUST BE ignored if it is found in the
+packet body.</t>
 
 </section>
 
@@ -490,12 +490,10 @@ body.</t>
 <t hangText="Type">Set to TBD to indicate a PC TLV</t>
 <t hangText="Length">The length of the body, exclusive of the Type and
 Length fields.</t>
-<t hangText="PC">Packet Counter.  Each time we send a packet, we must
-increase the Packet Counter.  If the Packet Counter overflows it must
-be set to 0 and a new Index must be randomly chosen. </t>
-<t hangText="Index">Our chosen Index.  It must be randomly chosen every
-time we lose state, or when the Packet Counter has reset.
-</t>
+<t hangText="PC">The Packet Counter (PC), which is increased with every
+packet sent over this interface.  A new index MUST be generated whenever
+the PC overflows.</t>
+<t hangText="Index">The sender's Index.</t>
 </list></t>
 
 </section>
@@ -516,9 +514,8 @@ time we lose state, or when the Packet Counter has reset.
 <list style="hanging" hangIndent="10">
 <t hangText="Type">Set to TBD to indicate a Challenge Request TLV</t>
 <t hangText="Length">The length of the body, exclusive of the Type and
-Length fields.  The length of the body is set to a chosen high number
-for maximum security (in general half of the size of the hash length).</t>
-<t hangText="Nonce">A random number of an arbitrary size.</t>
+Length fields.</t>
+<t hangText="Nonce">The nonce uniquely identifying the challenge.</t>
 </list></t>
 
 </section>
@@ -671,19 +668,19 @@ a restart.</t>
 <t>[This appendix describes the "implicit indices" variant of the
 protocol, which is different and incompatible to the "explicit indices"
 variant described in the body of this document.  This section should
-either be integrated into the body of the document or be removed before
-publication of this document an RFC, depending on which protocol variant
+either be integrated into the body of the document or removed before
+publication of this document as an RFC, depending on which protocol variant
 is finally chosen.]</t>
 
 <t>The protocol described in the body of this document explicitly sends
 indices as in each packet as part of the PC TLV.  Observe that, except
 when a challenge is required, the index sent on the wire is identical to
 the index stored in the Neighbour Table, and therefore doesn't need to be
-sent explicitly except during challenges &mdash; it is enough for it to
+sent explicitly except during challenges: it is enough for it to
 participate in HMAC computation in order to protect against replay.  The
 "implicit indices" variant of the protocol, due to Markus Stenberg and
-described in this appendix, uses this information to avoid sending indices
-explicitly and thus shave off 8 to 10 octets from almost every packet.</t>
+described in this appendix, uses this observation to avoid sending indices
+explicitly and thus shaves off 2 to 16 octets from almost every packet.</t>
 
 <t>The changes to the protocol are as follows.  The pseudo-header includes
 the Index, and therefore has the following format:
@@ -737,9 +734,9 @@ these two TLV with other protocols that require a nonce-based challenge.</t>
 <t>Packet transmission is modified as follows.  If a packet contains
 a Challenge or a Challenge Reply, then the node inserts its index into the
 packet body.  In any case, it uses its current index to generate the
-pseudo-header that will be used to compute the HMAC and shipping out the
-packet.  (This implies that a packet must be parsed in its entirety before
-HMAC validation, which requires a robust parser.)</t>
+pseudo-header that will be used to compute the HMAC.  (This implies that
+a packet must be parsed in its entirety before HMAC validation, which
+requires a robust parser.)</t>
 
 <t>Packet reception is modified as follows.  Before checking the HMAC of
 a packet, the receiver checks whether the packet contains an explicit

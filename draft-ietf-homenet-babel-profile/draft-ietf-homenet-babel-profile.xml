@@ -183,16 +183,16 @@ require link-quality estimation for wired links of any kind.</t></list></t>
 
 <t>OPT1: a Homenet implementation of Babel MAY perform route selection by
 applying hysteresis to route metrics, as suggested in Section&nbsp;3.6 of
-RFC&nbsp;6126bis and described in detail in Section&nbsp;III.E of
-<xref target="BABEL-RTT"/>.  However, it MAY simply pick the route with
-the smallest metric.</t>
+RFC&nbsp;6126bis and described in detail in Section&nbsp;III.E of <xref
+target="BABEL-RTT"/>.  However, hysteresis is not required, and the
+implementation may simply pick the route with the smallest metric.</t>
 
 <t><list style="empty"><t>Rationale: hysteresis is only useful in
 congested and highly dynamic networks.  In a typical home network, stable
 and uncongested, the feedback loop that hysteresis compensates for does
 not occur.</t></list></t>
 
-<t>OPT2: a Homenet implementation of Babel MAY include support for other
+<t>OPT2: a Homenet implementation of Babel may include support for other
 extensions to the protocol, as long as they are known to interoperate with
 both the core protocol and source-specific routing.</t>
 

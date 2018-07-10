@@ -24,7 +24,7 @@
 </address>
 </author>
 
-<date day="23" month="February" year="2018"/>
+<date day="10" month="July" year="2018"/>
 
 <abstract>
 <t>This document defines the subset of the Babel routing protocol and its
@@ -58,8 +58,9 @@ HNCP interacts with Babel.</t>
 
 <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
 "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in RFC 2119
-<xref target="RFC2119"/>.</t>
+"OPTIONAL" in this document are to be interpreted as described in BCP 14
+<xref target="RFC2119"/> <xref target="RFC8174"/> when, and only when,
+they appear in all capitals, as shown here.</t>
 
 </section>
 
@@ -338,6 +339,16 @@ Stenberg.</t>
 <seriesInfo name="BCP" value="14"/>
 <seriesInfo name="RFC" value="2119"/>
 <seriesInfo name="DOI" value="10.17487/RFC2119"/>
+</reference>
+
+<reference anchor="RFC8174"><front>
+<title>Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words</title>
+<author initials="B." surname="Leiba" fullname="B. Leiba"/>
+<date year="2017" month="May"/>
+</front>
+<seriesInfo name="BCP" value="14"/>
+<seriesInfo name="RFC" value="8174"/>
+<seriesInfo name="DOI" value="10.17487/RFC8174"/>
 </reference>
 
 <reference anchor="RFC6126bis"><front>

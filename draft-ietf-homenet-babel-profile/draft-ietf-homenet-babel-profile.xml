@@ -6,7 +6,7 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="no" ?>
-<rfc category="std" docName="draft-ietf-homenet-babel-profile-06"
+<rfc category="std" docName="draft-ietf-homenet-babel-profile-07"
      ipr="trust200902">
 <front>
 <title abbrev="Homenet Babel profile">Homenet profile of the Babel routing protocol</title>

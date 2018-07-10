@@ -147,8 +147,8 @@ for IPv4 is not required, since HNCP arranges things so that a single
 non-specific IPv4 default route is announced (Section&nbsp;6.5 of <xref
 target="RFC7788"/>).</t></list></t>
 
-<t>REQ5: a Homenet implementation of Babel MUST use metrics that are of
-a similar magnitude to the values suggested in Appendix&nbsp;A of
+<t>REQ5: a Homenet implementation of Babel must use metrics that are
+of a similar magnitude to the values suggested in Appendix&nbsp;A of
 RFC&nbsp;6126bis.  In particular, it SHOULD assign costs that are no less
 than 256 to wireless links, and SHOULD assign costs between 32 and 196 to
 lossless wired links.</t>
@@ -161,8 +161,8 @@ different vendors will cause sub-optimal routing.</t></list></t>
 wired and wireless links; if it is unable to determine whether a link is
 wired or wireless, it SHOULD make the worst-case hypothesis that the link
 is wireless.  It SHOULD dynamically probe the quality of wireless links
-and derive a suitable metric from its quality estimation.  The algorithm
-described in Appendix&nbsp;A of RFC&nbsp;6126bis MAY be used.</t>
+and derive a suitable metric from its quality estimation.  Appendix&nbsp;A
+of RFC&nbsp;6126bis gives an example of a suitable algorithm.</t>
 
 <t><list style="empty"><t>Rationale: support for wireless transit links is
 a distinguishing feature of Homenet, and one that is requested by our
@@ -210,10 +210,10 @@ Homenet.</t></list></t>
 
 <section title="Interactions between HNCP and Babel">
 
-<t>The Homenet architecture cleanly separates between configuration, which
-is done by HNCP, and routing, which is done by Babel.  While the coupling
-between the two protocols is deliberately kept to a minimum, some
-interactions are unavoidable.</t>
+<t>The Homenet architecture cleanly separates configuration, which is done
+by HNCP, from routing, which is done by Babel.  While the coupling between
+the two protocols is deliberately kept to a minimum, some interactions are
+unavoidable.</t>
 
 <t>All the interactions between HNCP and Babel consist of HNCP causing
 Babel to perform an announcement on its behalf (under no circumstances

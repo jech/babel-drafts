@@ -179,9 +179,9 @@ require link-quality estimation for wired links of any kind.</t></list></t>
 
 </section>
 
-<section title="Non-requirements">
+<section title="Optional features">
 
-<t>NR1: a Homenet implementation of Babel MAY perform route selection by
+<t>OPT1: a Homenet implementation of Babel MAY perform route selection by
 applying hysteresis to route metrics, as suggested in Section&nbsp;3.6 of
 RFC&nbsp;6126bis and described in detail in Section&nbsp;III.E of
 <xref target="BABEL-RTT"/>.  However, it MAY simply pick the route with
@@ -192,7 +192,7 @@ congested and highly dynamic networks.  In a typical home network, stable
 and uncongested, the feedback loop that hysteresis compensates for does
 not occur.</t></list></t>
 
-<t>NR2: a Homenet implementation of Babel MAY include support for other
+<t>OPT2: a Homenet implementation of Babel MAY include support for other
 extensions to the protocol, as long as they are known to interoperate with
 both the core protocol and source-specific routing.</t>
 
@@ -255,10 +255,10 @@ routable within the Homenet.</t></list></t>
 
 </section>
 
-<section title="Non-requirements">
+<section title="Optional features">
 
-<t>NR3: an HNCP node that receives a DHCPv6 prefix delegation MAY announce
-a non-specific IPv6 default route over Babel in addition to the
+<t>OPT3: an HNCP node that receives a DHCPv6 prefix delegation MAY
+announce a non-specific IPv6 default route over Babel in addition to the
 source-specific default route mandated by requirement REQ7.</t>
 
 <t><list style="empty"><t>Rationale: since the source-specific default
@@ -269,7 +269,7 @@ causes no harm and might simplify operations in some circumstances,
 e.g.&nbsp;when interoperating with a routing protocol that does not
 support source-specific routing.</t></list></t>
 
-<t>NR4: an HNCP node that receives a DHCPv4 lease with an IPv4 address and
+<t>OPT4: an HNCP node that receives a DHCPv4 lease with an IPv4 address and
 wins the election for NAT gateway SHOULD NOT announce a source-specific
 IPv4 default route.</t>
 

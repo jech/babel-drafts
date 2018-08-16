@@ -6,7 +6,7 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="no" ?>
-<rfc category="std" docName="draft-do-babel-hmac-00"
+<rfc category="std" docName="draft-ietf-babel-hmac-00"
      ipr="trust200902"
      updates="6126bis"
      obsoletes="7298">
@@ -52,7 +52,7 @@
 </address>
 </author>
 
-<date day="2" month="July" year="2018"/>
+<date day="16" month="August" year="2018"/>
 
 <abstract>
 <t>This document describes a cryptographic authentication mechanism for

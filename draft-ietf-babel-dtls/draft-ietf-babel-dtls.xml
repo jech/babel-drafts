@@ -121,14 +121,14 @@ Babel is a pure peer-to-peer protocol, while DTLS is a two parties
 client-server protocol.  A Babel implementation typically uses unicast
 and multicast, while DTLS can only protect unicast.</t>
 
-<t>The problem of assigning a client of server role for a DTLS
+<t>The problem of assigning a client or server role for a DTLS
 handshake to Babel nodes is solved by a simple arbitrary choice.  The
 addresses of the two nodes are compared, and the node with the lowest
 address acts as the server.</t>
 
 <t>Babel is sufficiently flexible to work almost without multicast.
 In Babel over DTLS, almost all packets are sent via unicast.  Packets
-that would have been sent via unicast needs to be duplicated and sent
+that would have been sent via multicast need to be duplicated and sent
 to all of the original recipients via unicast.  The cost of
 duplication is balanced by the fact that on networks with low
 throughput, unicast is often far more effective than multicast.  Only

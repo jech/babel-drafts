@@ -105,14 +105,14 @@ when, they appear in all capitals, as shown here.</t>
 <t>The current two main mechanisms for securing Babel are Babel over DTLS
 (as described in this document) and Babel Cryptographic Authentification
 <xref target="BabelHMAC"/>.  The latter has the advantages of being simpler
-and not requiring a dependency on DTLS.  When both security mechanisms are
-applicable to a given deployment, it is RECOMMENDED to use Babel Cryptographic
-Authentification.  Both mechanisms ensure integrity of messages and prevent
-message replay.</t>
+and not requiring a dependency on DTLS, therefore implementers are encouraged
+to consider it in preference to the mechanism defined in this document whenever
+both are applicable to a given deployment.  Both mechanisms ensure integrity of
+messages and prevent message replay.</t>
 
-<t>However, the following features are not provided by Babel Cryptographic
-Authentification, therefore Babel over DTLS is applicable in cases where
-those features are needed:
+<t>However, DTLS offers several features that are not provided by Babel
+Cryptographic Authentification, therefore Babel over DTLS is applicable in
+cases where those features are needed.  Examples of such features include:
 <list style="symbols">
 <t>Asymmetric keys.  DTLS allows authentication via asymetric keys, which
 allows a finer granularity of trust per-peer, and allows for revocation.</t>
@@ -134,7 +134,7 @@ unicast, while Babel TLVs can be sent over both unicast and multicast.</t>
 <section title="DTLS Connection Initiation">
 
 <t>All Babel over DTLS nodes MUST act as DTLS servers on the "babel-dtls" port
-(UDP port TBD), and listen for multicast traffic on the unencrypted "babel"
+(UDP port TBD), and MUST listen for multicast traffic on the unencrypted "babel"
 port (UDP port 6696).  When a Babel node discovers a new neighbor (generally by
 receiving an unencrypted multicast Babel packet), it compares the neighbour's
 IPv6 link-local address with its own, using network byte ordering.  If a node's
@@ -155,7 +155,7 @@ is not an IPv6 link-local address.</t>
 
 <t>Babel over DTLS sends all unicast Babel packets encrypted by DTLS.  The
 entire Babel packet, from the Magic byte at the start of the Babel header
-to the last byte of the Babel packet footer, is sent protected by DTLS.</t>
+to the last byte of the Babel packet trailer, is sent protected by DTLS.</t>
 
 </section>
 
@@ -164,12 +164,16 @@ to the last byte of the Babel packet footer, is sent protected by DTLS.</t>
 <t>When sending packets, Babel over DTLS nodes MUST NOT send any TLVs over
 the unprotected "babel" port, with the exception of Hello TLVs without the
 Unicast flag set.  Babel over DTLS nodes MUST NOT send any unprotected unicast
-packet.  Nodes MUST periodically send unprotected multicast Hellos to ensure
+packet.  Unless some out-of-band neighbor discovery mechanism is available,
+nodes SHOULD periodically send unprotected multicast Hellos to ensure
 discovery of new neighbours.  In order to maintain bidirectional reachability,
 nodes can either rely on unprotected multicast Hellos, or also send protected
-unicast Hellos.  In contrast with an unprotected implementation of Babel,
-Babel over DTLS nodes will replace any TLV sent over multicast with a separate
-TLV sent over unicast for each neighbour.</t>
+unicast Hellos.</t>
+
+<t>Since Babel over DTLS only protects unicast packets, implementors may
+implement Babel over DTLS by modifying an unprotected implementation of Babel,
+and replacing any TLV sent over multicast with a separate TLV sent over unicast
+for each neighbour.</t>
 
 </section>
 

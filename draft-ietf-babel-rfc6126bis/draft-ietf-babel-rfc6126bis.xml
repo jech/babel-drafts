@@ -6,7 +6,7 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="no" ?>
-<rfc category="std" docName="draft-ietf-babel-rfc6126bis-05"
+<rfc category="std" docName="draft-ietf-babel-rfc6126bis-06"
      ipr="trust200902"
      obsoletes="6126,7557">
 <front>
@@ -38,7 +38,7 @@
 </address>
 </author>
 
-<date day="29" month="May" year="2018"/>
+<date day="23" month="October" year="2018"/>
 
 <abstract>
 <t>Babel is a loop-avoiding distance-vector routing protocol that is
@@ -1529,8 +1529,9 @@ significant bits (up to the prefix length).</t>
 
 <section title="Packet Format">
 
-<t>A Babel packet consists of a 4-octet header, followed by a sequence
-of TLVs.</t>
+<t>A Babel packet consists of a 4-octet header, followed by a sequence of
+TLVs (the packet body), optionally followed by a second sequence of
+TLVs (the packet trailer).</t>
 
 <figure><artwork><![CDATA[
  0                   1                   2                   3
@@ -1538,8 +1539,10 @@ of TLVs.</t>
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |     Magic     |    Version    |        Body length            |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|   Packet Body ...
-+-+-+-+-+-+-+-+-+-+-+-+-+-
+|          Packet Body ...
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+|         Packet Trailer...
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
 ]]></artwork></figure>
 
 <t>Fields :
@@ -1550,11 +1553,20 @@ packets with a first octet different from 42 MUST be silently ignored.</t>
   protocol.  Packets with a second octet different from 2 MUST be silently
   ignored.</t>
 <t hangText="Body length">The length in octets of the body following the
-  packet header (excluding the Magic, Version and Body length fields).</t>
-<t hangText="Body">The packet body; a sequence of TLVs.</t>
+packet header (excluding the Magic, Version and Body length fields, and
+excluding the packet trailer).</t>
+<t hangText="Packet Body">The packet body; a sequence of TLVs.</t>
+<t hangText="Packet Trailer">The packet trailer; another sequence of TLVs.</t>
 </list></t>
 
-<t>Any data following the body MUST be silently ignored.</t>
+<t>The packet body and the packet trailer are both sequences of TLVs.
+A TLV may appear in the packet trailer only if it is explicitly allowed to
+do so: the receiver MUST silently ignore any TLV that appears in the
+packet trailer unless it is explicitly specified to be allowed in the
+packet trailer.  Among the TLVs defined in this document, only Pad1 and
+PadN are allowed in the packet trailer; since these TLVs are ignored in
+any case, an implementation MAY silently ignore the packet trailer unless
+it implements at least one extension that uses the packet trailer.</t>
 
 </section>
 
@@ -1646,6 +1658,10 @@ is updated before checking for mandatory TLVs: parsing a TLV MUST update the
 parser state even if the TLV is otherwise ignored due to an unknown
 mandatory sub-TLV.</t>
 
+<t>None of the TLVs that modify the parser state are allowed in the packet
+trailer; hence, an implementation may choose to use a dedicated stateless
+parser to parse the packet trailer.</t>
+
 </section>
 
 <section title="Details of Specific TLVs" anchor="tlv-details">
@@ -1665,7 +1681,8 @@ mandatory sub-TLV.</t>
 <t hangText="Type">Set to 0 to indicate a Pad1 TLV.</t>
 </list></t>
 
-<t>This TLV is silently ignored on reception.</t>
+<t>This TLV is silently ignored on reception.  It is allowed in the packet
+trailer.</t>
 
 </section>
 
@@ -1687,7 +1704,8 @@ Length fields.</t>
 <t hangText="MBZ">Set to 0 on transmission.</t>
 </list></t>
 
-<t>This TLV is silently ignored on reception.</t>
+<t>This TLV is silently ignored on reception.  It is allowed in the packet
+trailer.</t>
 
 </section>
 
@@ -2253,7 +2271,7 @@ in all of the registries mentioned above by references to this document.</t>
 <t>As defined in this document, Babel is a completely insecure protocol.
 Any attacker can misdirect data traffic by advertising routes with a low
 metric or a high seqno.  This issue can be solved either by a lower-layer
-security mechanism (e.g. link-layer security), or by deploying a suitable
+security mechanism (e.g., link-layer security), or by deploying a suitable
 authentication mechanism within Babel itself.  With the exception of Hello
 TLVs used for discovery, Babel control traffic can be carried over
 unicast, which makes it possible to protect Babel traffic with a protocol
@@ -2689,11 +2707,14 @@ to the Router-Id flag being set).  Therefore, defining new AEs must be
 done with care if compatibility with unextended implementations is
 required.</t>
 
-<t>The packet trailer (the space after the declared length of the packet
-but within the payload of the UDP datagram) was originally intended to
-carry a cryptographic signature.  However, no extension has used it to
-date, and therefore we refrain from making any recommendations about its
-use due to the lack of implementation experience.</t>
+<t>The packet trailer is intended to carry cryptographic signatures that
+only cover the packet body; storing the cryptographic signatures in the
+packet trailer avoids clearing the signature before computing a hash of
+the packet body, and makes it possible to check a cryptographic signature
+before running the full, stateful TLV parser.  Thus, any TLV that is
+allowed to appear in the packet trailer must not need to be protected by
+cryptographic security protocols, it should be easy to parse, and should
+not require stateful parsing.</t>
 
 </section>
 
@@ -2836,6 +2857,13 @@ allows sub-TLVs.</t>
 <t>Minor clarifications to unicast hellos.</t>
 <t>Updated requirements boilerplate to RFC 8174.</t>
 <t>Minor editorial changes.</t>
+</list></t>
+</section>
+
+<section title="Changes since draft-ietf-babel-rfc6126bis-05">
+<t><list style="symbols">
+<t>Added information about the packet trailer, now that it is used by
+draft-ietf-babel-hmac.</t>
 </list></t>
 </section>
     

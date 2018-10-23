@@ -6,7 +6,7 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="yes" ?>
-<rfc category="std" docName="draft-ietf-babel-source-specific-03"
+<rfc category="std" docName="draft-ietf-babel-source-specific-04"
 ipr="trust200902">
 <front>
 <title>Source-Specific Routing in Babel</title>
@@ -37,7 +37,7 @@ ipr="trust200902">
 </address>
 </author>
 
-<date day="31" month="January" year="2018"/>
+<date day="23" month="October" year="2018"/>
 
 <abstract>
 <t>Source-specific routing (also known as Source-Address Dependent
@@ -190,7 +190,7 @@ are to be routed through A, while all packets with source in
 although neither is more specific than the other.  A choice is necessary,
 and unless the choice being made is the same on all routers in a routing
 domain, persistent routing loops may occur.  More details are
-given in <xref target="SS-ROUTING"/> Section IV.C.</t>
+given in Section IV.C of <xref target="SS-ROUTING"/>.</t>
 
 <t>A Babel implementation MUST choose routing table entries by using the
 so-called destination-first ordering, where a routing table entry R1 is
@@ -204,15 +204,15 @@ consistent with the behaviour described in Section 3.3 of
 
 <t>In practice, this means that a source-specific Babel implementation
 must take care that any lower layer that performs packet forwarding obey
-this semantics.  In particular:</t>
+this semantics.  More precisely:</t>
 
 <t><list style="symbols">
 <t>If the lower layers implement the destination-first ordering, then the
 Babel implementation MAY use them directly;</t>
 <t>If the lower layers can hold source-specific routes, but not with the
 right semantics, then the Babel implementation MUST disambiguate the
-routing table by using a suitable disambiguation algorithm (see <xref
-target="SS-ROUTING"/> Section V.B for such an algorithm);</t>
+routing table by using a suitable disambiguation algorithm (see Section
+V.B of <xref target="SS-ROUTING"/> for such an algorithm);</t>
 <t>If the lower layers cannot hold source-specific routes, then a Babel
 implementation MUST silently ignore (drop) any source-specific routes.</t>
 </list></t>
@@ -282,14 +282,13 @@ the route acquisition procedure described in Section 3.5.4 of <xref
 target="BABEL"/> to all of the routes that is has learned from the sending
 node, whatever the value of the source prefix.  A node MUST NOT send
 a wildcard retraction with an attached source prefix, and a node that
-receives a wildcard retraction with a source prefix MUST silently ignore
-it.</t>
+receives a wildcard retraction with a source prefix MUST ignore it.</t>
 
 <t>Similarly, a node that receives a route request with the AE field set
 to 0 (a wildcard route request) SHOULD send a full routing table dump,
 including routes with a non-zero length source prefix.  A node MUST NOT
 send a wildcard request that carries a source prefix, and a node receiving
-a wildcard request with a source prefix MUST silently ignore it.</t>
+a wildcard request with a source prefix MUST ignore it.</t>
 
 </section>
 
@@ -404,14 +403,16 @@ may occur (see <xref target="loop"/>).</t>
 <t>The source-specific Update is an Update TLV with a Source Prefix
 sub-TLV.  It advertises or retracts source-specific routes in the same
 manner than routes with non-source-specific Updates (see <xref
-target="BABEL"/>).  A wildcard retraction (Update with AE equals to 0)
+target="BABEL"/>).  A wildcard retraction (Update with AE equal to 0)
 MUST NOT carry a Source Prefix sub-TLV.</t>
 
-<t>Contrary to the destination prefix, this extension does not compress
-the source prefix attached to Updates.  However, compression is allowed
-for the destination prefix of source-specific routes.  As described in
-Section 4.5 of <xref target="BABEL"/>, unextended implementations will
-correctly update their parser state while otherwise ignoring the whole TLV.</t>
+<t>Babel uses a stateful compression scheme to reduce the size taken by
+destination prefixes in update TLVs (see Section 4.5 of <xref
+target="BABEL"/>).  The source prefix defined by this extension is not
+compressed.  On the other hand, compression is allowed for the destination
+prefixes carried by source-specific updates.  As described in Section 4.5
+of <xref target="BABEL"/>, unextended implementations will correctly
+update their parser state while otherwise ignoring the whole TLV.</t>
 
 </section>
 
@@ -488,9 +489,9 @@ have security implications (see Section 8 of <xref target="DSR"/>).</t>
 <reference anchor="BABEL"><front>
 <title>The Babel Routing Protocol</title>
 <author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
-<date month="May" year="2017"/>
+<date month="October" year="2018"/>
 </front>
-<seriesInfo name="Internet Draft" value="draft-ietf-babel-rfc6126bis-04"/>
+<seriesInfo name="Internet Draft" value="draft-ietf-babel-rfc6126bis-06"/>
 </reference>
 
 <reference anchor="RFC8174"><front>

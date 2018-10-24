@@ -95,7 +95,7 @@ the core protocol.</t>
 
 <t>The protocol defined in this document assumes that all interfaces on
 a given link are equally trusted and share a small set of symmetric keys
-(usually just one, two during key rotation).  The protocol is inapplicable
+(usually just one, and two during key rotation).  The protocol is inapplicable
 in situations where asymmetric keying is required, where the trust
 relationship is partial, or where large numbers of trusted keys are
 provisioned on a single link at the same time.</t>

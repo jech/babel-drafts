@@ -501,6 +501,10 @@ the PC overflows.</t>
 <t hangText="Index">The sender's Index.</t>
 </list></t>
 
+<t>Indices are limited to a size of 32 octets: a node MUST NOT send a TLV
+with an index strictly larger than 32 octets, and a node MAY silently
+ignore a PC TLV with an index strictly larger than 32 octets.</t>
+
 </section>
 
 <section title="Challenge Request TLV">
@@ -522,6 +526,11 @@ the PC overflows.</t>
 Length fields.</t>
 <t hangText="Nonce">The nonce uniquely identifying the challenge.</t>
 </list></t>
+
+<t>Nonces are limited to a size of 192 octets: a node MUST NOT send
+a Challenge Request TLV with a nonce strictly larger than 192 octets, and
+a node MAY ignore a nonce that is strictly larger than 192
+octets.</t>
 
 </section>
 
@@ -716,6 +725,7 @@ a restart.</t>
 <t>Changed the title.</t>
 <t>Removed Appendix with implicit indices.</t>
 <t>Clarified the definitions of acronyms.</t>
+<t>Limited the size of nonces and indices.</t>
 </list></t>
 </section>
 

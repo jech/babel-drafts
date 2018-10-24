@@ -11,7 +11,8 @@
      updates="6126bis"
      obsoletes="7298">
 <front>
-<title>Babel Cryptographic Authentication</title>
+<title abbrev="HMAC authentication for Babel">HMAC authentication for the
+Babel routing protocol</title>
 <author fullname="Clara Do" initials="C." surname="Do">
 <organization>IRIF, University of Paris-Diderot</organization>
 <address>
@@ -55,9 +56,9 @@
 <date day="24" month="October" year="2018"/>
 
 <abstract>
-<t>This document describes a cryptographic authentication mechanism for
-the Babel routing protocol that has provisions for replay avoidance.  This
-document updates RFC 6126bis and obsoletes RFC 7298.</t>
+<t>This document describes a cryptographic authentication for the Babel
+routing protocol that has provisions for replay avoidance.  This document
+updates RFC 6126bis and obsoletes RFC 7298.</t>
 </abstract>
 
 </front>
@@ -712,6 +713,7 @@ a restart.</t>
 <section title="Changes since draft-ietf-babel-hmac-00">
 
 <t><list style="symbols">
+<t>Changed the title.</t>
 <t>Removed Appendix with implicit indices.</t>
 <t>Clarified the definitions of acronyms.</t>
 </list></t>

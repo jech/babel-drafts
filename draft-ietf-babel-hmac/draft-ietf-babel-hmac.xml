@@ -82,15 +82,14 @@ be redirected or otherwise interfere with the network.</t>
 
 <t>Protecting a Babel network is challenging due to the fact that the
 Babel protocol uses both unicast and multicast communication.  One
-possible approach, used notably by the Babel over Datagram Transport
-Layer Security (DTLS) protocol <xref target="I-D.ietf-babel-dtls"/>, is to require
-a secured version of Babel to use unicast communication for all
-semantically significant communication, and then use a standard
-unicast security protocol to protect the Babel traffic.  In this
-document, we take the opposite approach: we define a cryptographic
-extension to the Babel protocol that is able to protect both unicast
-and multicast traffic, and thus requires very few changes to the core
-protocol.</t>
+possible approach, used notably by the Babel over Datagram Transport Layer
+Security (DTLS) protocol <xref target="I-D.ietf-babel-dtls"/>, is to use
+unicast communication for all semantically significant communication, and
+then use a standard unicast security protocol to protect the Babel
+traffic.  In this document, we take the opposite approach: we define
+a cryptographic extension to the Babel protocol that is able to protect
+both unicast and multicast traffic, and thus requires very few changes to
+the core protocol.</t>
 
 <section title="Applicability">
 
@@ -118,8 +117,8 @@ persistent storage.</t>
 <t>The correctness of the protocol relies on the following assumptions:
 <list style="symbols">
 <t>that the Hashed Message Authentication Code (HMAC) being used is
-invulnerable to spoofing, i.e.&nbsp;that an attacker is unable to
-generate a packet with a correct HMAC;</t>
+invulnerable to spoofing, i.e., that an attacker is unable to generate
+a packet with a correct HMAC;</t>
 <t>that a node never generates the same index or nonce twice over the
 lifetime of a key.</t>
 </list>
@@ -306,7 +305,8 @@ incremented by a strictly positive amount (typically just 1); if the
 PC overflows, a new index is generated;</t>
 <t>for each key configured on the interface, an HMAC is computed as
 specified in <xref target="hmac-computation"/> above, and an HMAC TLV is
-appended to the packet trailer.</t>
+appended to the packet trailer (see Section 4.2 of
+<xref target="RFC6126bis"/>).</t>
 </list></t>
 
 </section>
@@ -462,7 +462,7 @@ challenge has succeeded; otherwise, the challenge has failed.</t>
 
 <t>Fields :
 <list style="hanging" hangIndent="10">
-<t hangText="Type">Set to TBD to indicate an HMAC TLV</t>
+<t hangText="Type">Set to TBD to indicate an HMAC TLV.</t>
 <t hangText="Length">The length of the body, exclusive of the Type and
 Length fields.  The length of the body depends on the hash function
 used.</t>
@@ -470,8 +470,9 @@ used.</t>
 plus the pseudo header.</t>
 </list></t>
 
-<t>This TLV is allowed in the packet trailer, and MUST be ignored if it is
-found in the packet body.</t>
+<t>This TLV is allowed in the packet trailer (see Section 4.2 of
+<xref target="RFC6126bis"/>), and MUST be ignored if it is found in the
+packet body.</t>
 
 </section>
 
@@ -491,7 +492,7 @@ found in the packet body.</t>
 
 <t>Fields :
 <list style="hanging" hangIndent="10">
-<t hangText="Type">Set to TBD to indicate a PC TLV</t>
+<t hangText="Type">Set to TBD to indicate a PC TLV.</t>
 <t hangText="Length">The length of the body, exclusive of the Type and
 Length fields.</t>
 <t hangText="PC">The Packet Counter (PC), which is increased with every
@@ -501,8 +502,9 @@ the PC overflows.</t>
 </list></t>
 
 <t>Indices are limited to a size of 32 octets: a node MUST NOT send a TLV
-with an index strictly larger than 32 octets, and a node MAY silently
-ignore a PC TLV with an index strictly larger than 32 octets.</t>
+with an index of size strictly larger than 32 octets, and a node MAY
+silently ignore a PC TLV with an index of size strictly larger than 32
+octets.</t>
 
 </section>
 
@@ -520,16 +522,16 @@ ignore a PC TLV with an index strictly larger than 32 octets.</t>
 
 <t>Fields :
 <list style="hanging" hangIndent="10">
-<t hangText="Type">Set to TBD to indicate a Challenge Request TLV</t>
+<t hangText="Type">Set to TBD to indicate a Challenge Request TLV.</t>
 <t hangText="Length">The length of the body, exclusive of the Type and
 Length fields.</t>
 <t hangText="Nonce">The nonce uniquely identifying the challenge.</t>
 </list></t>
 
 <t>Nonces are limited to a size of 192 octets: a node MUST NOT send
-a Challenge Request TLV with a nonce strictly larger than 192 octets, and
-a node MAY ignore a nonce that is strictly larger than 192
-octets.</t>
+a Challenge Request TLV with a nonce of size strictly larger than 192
+octets, and a node MAY ignore a nonce that is of size strictly larger than
+192 octets.</t>
 
 </section>
 
@@ -547,7 +549,7 @@ octets.</t>
 
 <t>Fields :
 <list style="hanging" hangIndent="10">
-<t hangText="Type">Set to TBD to indicate a Challenge Reply TLV</t>
+<t hangText="Type">Set to TBD to indicate a Challenge Reply TLV.</t>
 <t hangText="Length">The length of the body, exclusive of the Type and
 Length fields.  The length of the body is set to the same size as the
 challenge request TLV length received.</t>

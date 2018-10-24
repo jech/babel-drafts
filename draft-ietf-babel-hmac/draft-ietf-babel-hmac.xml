@@ -210,8 +210,8 @@ by drawing it randomly or by using a reliable hardware clock) and starts
 sending PCs with that index.  Whenever A detects that B has changed its
 index, it challenges B again.</t>
 
-<t>With this additional mechanism, this protocol is provably invulnerable
-to replay attacks (see <xref target="security-properties"/> above).</t>
+<t>With this additional mechanism, this protocol is invulnerable to replay
+attacks (see <xref target="security-properties"/> above).</t>
 
 </section>
 

@@ -24,17 +24,17 @@
 <email>jch@irif.fr</email>
 </address>
 </author>
-<author fullname="David Schinazi" initials="D." surname="Schinazi">
-<organization>Apple Inc.</organization>
+<author fullname='David Schinazi' surname='Schinazi' initials='D.'>
+<organization>Google LLC</organization>
 <address>
 <postal>
-<street>1 Infinite Loop</street>
-<city>Cupertino</city>
+<street>1600 Amphitheatre Parkway</street>
+<city>Mountain View</city>
 <region>California</region>
-<code>95014</code>
-<country>US</country>
+<code>94043</code>
+<country>USA</country>
 </postal>
-<email>dschinazi@apple.com</email>
+<email>dschinazi.ietf@gmail.com</email>
 </address>
 </author>
 

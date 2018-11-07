@@ -2274,11 +2274,11 @@ metric or a high seqno.  This issue can be solved either by a lower-layer
 security mechanism (e.g., link-layer security or IPsec), or by deploying
 a suitable authentication mechanism within Babel itself.  There are
 currently two such mechanisms: Babel over DTLS <xref target="BABEL-DTLS"/>
-and Babel Cryptographic Authentication <xref target="BABEL-HMAC"/>.  The
-former is simpler and does not require a dependency on DTLS, and therefore
-its deployment is RECOMMENDED whenever both are applicable to a given
-deployment.  Both mechanisms ensure integrity of messages and prevent
-message replay.</t>
+and HMAC-based authentication <xref target="BABEL-HMAC"/>.  Both
+mechanisms ensure integrity of messages and prevent message replay, but
+only DTLS supports asymmetric keying and message confidentiality.  HMAC is
+simpler and does not depend on DTLS, and therefore its use is RECOMMENDED
+whenever both mechanisms are applicable.</t>
 
 <t>The information that a Babel node announces to the whole routing domain
 is often sufficient to determine a mobile node's physical location with

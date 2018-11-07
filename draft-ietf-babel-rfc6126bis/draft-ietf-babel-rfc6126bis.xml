@@ -2252,7 +2252,7 @@ its contents unchanged.</t>
 
 <t>IANA is instructed to create a new registry called "Babel Hello Flags
 Values".  The allocation policy for this registry is Specification
-Required <xref target="RFC5226"/>.  The initial values in this registry
+Required <xref target="RFC8126"/>.  The initial values in this registry
 are as follows:</t>
 <texttable>
 <ttcol>Bit</ttcol><ttcol>Name</ttcol><ttcol>Reference</ttcol>
@@ -2317,15 +2317,16 @@ inspired by <xref target="PACKETBB"/>.</t>
 <seriesInfo name="DOI" value="10.17487/RFC2119"/>
 </reference>
 
-<reference anchor="RFC5226">
+<reference anchor="RFC8126">
 <front>
 <title>Guidelines for Writing an IANA Considerations Section in RFCs</title>
+<author initials='M.' surname='Cotton' fullname='M. Cotton'></author>
+<author initials='B.' surname='Leiba' fullname='B. Leiba'></author>
 <author initials='T.' surname='Narten' fullname='T. Narten'></author>
-<author initials='H.' surname='Alvestrand' fullname='H. Alvestrand'></author>
-<date year='2008' month='May' />
+<date year='2017' month='June' />
 </front>
 <seriesInfo name='BCP' value='26' />
-<seriesInfo name='RFC' value='5226' />
+<seriesInfo name='RFC' value='8126' />
 </reference>
 
 <reference anchor="RFC8174"><front>

@@ -2271,15 +2271,14 @@ in all of the registries mentioned above by references to this document.</t>
 <t>As defined in this document, Babel is a completely insecure protocol.
 Any attacker can misdirect data traffic by advertising routes with a low
 metric or a high seqno.  This issue can be solved either by a lower-layer
-security mechanism (e.g., link-layer security or IPsec), or by deploying a
-suitable authentication mechanism within Babel itself.  There are currently
-two such mechanisms: Babel over DTLS <xref target="BabelDTLS"/> and Babel
-Cryptographic Authentication <xref target="BabelHMAC"/>.  The latter has the
-advantages of being simpler and not requiring a dependency on DTLS, therefore
-it is RECOMMENDED  whenever both are applicable to a given deployment.  Both
-mechanisms ensure integrity of messages and prevent message replay.  All
-implementations of Babel MUST implement Babel Cryptographic Authentication
-<xref target="BabelHMAC"/>.</t>
+security mechanism (e.g., link-layer security or IPsec), or by deploying
+a suitable authentication mechanism within Babel itself.  There are
+currently two such mechanisms: Babel over DTLS <xref target="BABEL-HMAC"/>
+and Babel Cryptographic Authentication <xref target="BABEL-DTLS"/>.  The
+former is simpler and does not require a dependency on DTLS, and therefore
+its deployment is RECOMMENDED whenever both are applicable to a given
+deployment.  Both mechanisms ensure integrity of messages and prevent
+message replay.</t>
 
 <t>The information that a Babel node announces to the whole routing domain
 is often sufficient to determine a mobile node's physical location with
@@ -2343,7 +2342,7 @@ inspired by <xref target="PACKETBB"/>.</t>
 <seriesInfo name="DOI" value="10.17487/RFC8174"/>
 </reference>
 
-<reference anchor="BabelHMAC"><front>
+<reference anchor="BABEL-HMAC"><front>
 <title>Babel Cryptographic Authentication</title>
 <author fullname="Clara Do" initials="C." surname="Do"/>
 <author fullname="Weronika Kolodziejak" initials="W." surname="Kolodziejak"/>
@@ -2352,7 +2351,7 @@ inspired by <xref target="PACKETBB"/>.</t>
 <seriesInfo name="Internet Draft" value="draft-ietf-babel-hmac-00"/>
 </reference>
 
-<reference anchor="BabelDTLS"><front>
+<reference anchor="BABEL-DTLS"><front>
 <title>Babel Routing Protocol over Datagram Transport Layer Security</title>
 <author fullname="Antonin Decimo" initials="A." surname="Decimo"/>
 <author fullname="David Schinazi" initials="D." surname="Schinazi"/>
@@ -2892,8 +2891,7 @@ draft-ietf-babel-hmac.</t>
 
 <section title="Changes since draft-ietf-babel-rfc6126bis-06">
 <t><list style="symbols">
-<t>Added references to security documents and mandatory to implement
-notice for draft-ietf-babel-hmac.</t>
+<t>Added references to security documents.</t>
 </list></t>
 </section>
 

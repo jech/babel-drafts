@@ -6,7 +6,7 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="no" ?>
-<rfc category="std" docName="draft-ietf-babel-rfc6126bis-06"
+<rfc category="std" docName="draft-ietf-babel-rfc6126bis-07"
      ipr="trust200902"
      obsoletes="6126,7557">
 <front>
@@ -38,7 +38,7 @@
 </address>
 </author>
 
-<date day="23" month="October" year="2018"/>
+<date day="7" month="November" year="2018"/>
 
 <abstract>
 <t>Babel is a loop-avoiding distance-vector routing protocol that is

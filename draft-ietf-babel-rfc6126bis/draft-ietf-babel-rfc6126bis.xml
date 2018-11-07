@@ -2273,8 +2273,8 @@ Any attacker can misdirect data traffic by advertising routes with a low
 metric or a high seqno.  This issue can be solved either by a lower-layer
 security mechanism (e.g., link-layer security or IPsec), or by deploying
 a suitable authentication mechanism within Babel itself.  There are
-currently two such mechanisms: Babel over DTLS <xref target="BABEL-HMAC"/>
-and Babel Cryptographic Authentication <xref target="BABEL-DTLS"/>.  The
+currently two such mechanisms: Babel over DTLS <xref target="BABEL-DTLS"/>
+and Babel Cryptographic Authentication <xref target="BABEL-HMAC"/>.  The
 former is simpler and does not require a dependency on DTLS, and therefore
 its deployment is RECOMMENDED whenever both are applicable to a given
 deployment.  Both mechanisms ensure integrity of messages and prevent

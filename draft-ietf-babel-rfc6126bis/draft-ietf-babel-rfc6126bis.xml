@@ -1559,14 +1559,16 @@ excluding the packet trailer).</t>
 <t hangText="Packet Trailer">The packet trailer; another sequence of TLVs.</t>
 </list></t>
 
-<t>The packet body and the packet trailer are both sequences of TLVs.
-A TLV may appear in the packet trailer only if it is explicitly allowed to
-do so: the receiver MUST silently ignore any TLV that appears in the
-packet trailer unless it is explicitly specified to be allowed in the
-packet trailer.  Among the TLVs defined in this document, only Pad1 and
-PadN are allowed in the packet trailer; since these TLVs are ignored in
-any case, an implementation MAY silently ignore the packet trailer unless
-it implements at least one extension that uses the packet trailer.</t>
+<t>The packet body and trailer are both sequences of TLVs.  The packet
+body is the normal place to store TLVs; the packet trailer only contains
+specialised TLVs that do not need to be protected by cryptographic
+security mechanisms.  When parsing the trailer, the receiver MUST ignore
+any TLV unless its definition explicitly states that it is allowed to
+appear there.  Among the TLVs defined in this document, only Pad1 and PadN
+are allowed in the trailer; since these TLVs are ignored in any case, an
+implementation MAY silently ignore the packet trailer without even parsing
+it, unless it implements at least one extension that defines TLVs that are
+allowed to appear in the trailer.</t>
 
 </section>
 
@@ -2733,10 +2735,10 @@ required.</t>
 only cover the packet body; storing the cryptographic signatures in the
 packet trailer avoids clearing the signature before computing a hash of
 the packet body, and makes it possible to check a cryptographic signature
-before running the full, stateful TLV parser.  Thus, any TLV that is
-allowed to appear in the packet trailer must not need to be protected by
-cryptographic security protocols, it should be easy to parse, and should
-not require stateful parsing.</t>
+before running the full, stateful TLV parser.  Hence, only TLVs that don't
+need to be protected by cryptographic security protocols should be allowed
+to appear in the packet trailer.  Any such TLVs should be easy to parse,
+and in particular should not require stateful parsing.</t>
 
 </section>
 

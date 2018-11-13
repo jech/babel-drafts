@@ -18,7 +18,7 @@
 <rfc category="std"
     updates="6126bis"
     obsoletes=""
-    docName="draft-ietf-babel-dtls-01"
+    docName="draft-ietf-babel-dtls-02"
     ipr="trust200902">
 <front>
 <title abbrev="Babel over DTLS">Babel Routing Protocol over Datagram

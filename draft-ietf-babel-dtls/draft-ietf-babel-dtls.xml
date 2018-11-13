@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="US-ASCII"?>
 <!DOCTYPE rfc SYSTEM "rfc2629.dtd" [
 <!ENTITY RFC2119 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml">
-<!ENTITY RFC6066 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.6066.xml">
 <!ENTITY RFC6347 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.6347.xml">
 <!ENTITY RFC7250 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.7250.xml">
 <!ENTITY RFC7525 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.7525.xml">
@@ -104,7 +103,7 @@ when, they appear in all capitals, as shown here.</t>
 
 <t>The current two main mechanisms for securing Babel are Babel over DTLS
 (as described in this document) and Babel Cryptographic Authentication
-<xref target="BabelHMAC"/>.  The latter has the advantages of being simpler
+<xref target="BABEL-HMAC"/>.  The latter has the advantages of being simpler
 and not requiring a dependency on DTLS, therefore implementers are encouraged
 to consider it in preference to the mechanism defined in this document whenever
 both are applicable to a given deployment.  Both mechanisms ensure integrity of
@@ -126,10 +125,10 @@ attacker from observing the routing table.</t>
 
 <section title="Operation of the Protocol">
 
-<t>Babel over DTLS requires changes to how Babel is operated, for two
-reasons. Firstly, because DTLS introduces the concepts of client and server,
-while Babel is a peer-to-peer protocol. Secondly, DTLS can only protect
-unicast, while Babel TLVs can be sent over both unicast and multicast.</t>
+<t>Babel over DTLS requires changes to how Babel is operated, for two reasons.
+Firstly, because DTLS introduces the concepts of client and server, while Babel
+is a peer-to-peer protocol. Secondly, DTLS can only protect unicast, while Babel
+TLVs can be sent over both unicast and multicast.</t>
 
 <section title="DTLS Connection Initiation">
 
@@ -145,9 +144,15 @@ As an example, fe80::1:2 is considered lower than fe80::2:1.  The node acting
 as DTLS client initiates its DTLS connection from an ephemeral UDP port.
 Nodes SHOULD ensure that new client DTLS connections use different ephemeral
 ports from recently used connections to allow servers to differentiate between
-the new and old DTLS connections.   When a node receives a new DTLS connection,
+the new and old DTLS connections.  Alternatively, nodes MAY use DTLS connection
+identifiers <xref target="DTLS-CID"/> as a higher-entropy mechanism to
+distinguish between connections.  When a node receives a new DTLS connection,
 it MUST verify the source IP address, and reject the connection if the address
-is not an IPv6 link-local address.</t>
+is not an IPv6 link-local address.  Nodes MUST use mutual authentication
+(authenticating both client and server); servers MUST request client
+authentication by sending a CertificateRequest message.  If either node fails
+to verify the peer's authentication, it MUST abort the DTLS handshake.
+Nodes MUST only negotiate DTLS version 1.2 or higher.</t>
 
 </section>
 
@@ -196,8 +201,20 @@ all TLVs in that packet are silently ignored.</t>
 <t>It is RECOMMENDED for nodes to associate the state of their DTLS connection
 with their neighbour table.  When a neighbour entry is flushed from the
 neighbour table (Appendix A of <xref target="RFC6126bis"/>), its associated
-DTLS state SHOULD be discarded.  The node MAY send a DTLS close_notify alert to
-the neighbour.</t>
+DTLS state SHOULD be discarded.  The node SHOULD send a DTLS close_notify alert
+to the neighbour.</t>
+
+</section>
+
+<section title="Simultaneous operation of both Babel over DTLS and unprotected Babel">
+
+<t>Implementations MAY implement both Babel over DTLS and unprotected Babel.
+However, accepting unprotected Babel packets (other than multicast Hellos)
+loses the security properties of Babel over DTLS.  A node MAY allow
+configuration options to allow unprotected Babel on some interfaces but not
+others; this effectively gives nodes on that interface the same access as
+authenticated nodes, and SHOULD NOT be done unless that interface has a
+mechanism to authenticate nodes at a lower layer (e.g. IPsec).</t>
 
 </section>
 
@@ -220,7 +237,9 @@ large as any attached interface's MTU adjusted for UDP and IP headers or
 512 octets, whichever is larger.  Note that this requirement on reception
 does not take into account the overhead of DTLS because the peer may not have
 the ability to compute the overhead of DTLS and the packet may be fragmented
-by lower layers.  Babel packets MUST NOT be sent in IPv6 Jumbograms.</t>
+by lower layers.  Babel packets are fragmented at the Babel layer rather than
+the DTLS layer to allow any fragment to be parsed when a previous fragment was
+lost.  Babel packets MUST NOT be sent in IPv6 Jumbograms.</t>
 
 </section>
 
@@ -236,9 +255,7 @@ number, called "babel-dtls", for use by Babel over DTLS.</t>
 <t>The interaction between two Babel peers requires Datagram Transport
 Layer Security (DTLS) with a cipher suite offering confidentiality
 protection.  The guidance given in <xref target="RFC7525"/> MUST be
-followed to avoid attacks on DTLS.  The DTLS client SHOULD use the TLS
-Certificate Status Request extension (Section 8 of <xref
-target="RFC6066"/>).</t>
+followed to avoid attacks on DTLS.</t>
 
 <t>A malicious client might attempt to perform a high number of DTLS
 handshakes with a server.  As the clients are not uniquely identified
@@ -275,17 +292,26 @@ techniques beyond the scope of this document.</t>
 &RFC7250;
 &RFC7918;
 &RFC7924;
-&RFC6066;
 &RFC7525;
 &RFC8094;
 
-<reference anchor="BabelHMAC"><front>
+<reference anchor="BABEL-HMAC"><front>
 <title>Babel Cryptographic Authentication</title>
 <author fullname="Clara Do" initials="C." surname="Do"/>
 <author fullname="Weronika Kolodziejak" initials="W." surname="Kolodziejak"/>
 <author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
 <date month="August" year="2018"/></front>
 <seriesInfo name="Internet Draft" value="draft-ietf-babel-hmac-00"/>
+</reference>
+
+<reference anchor="DTLS-CID"><front>
+<title>Connection Identifiers for DTLS 1.2</title>
+<author fullname="Eric Rescorla" initials="E." surname="Rescorla"/>
+<author fullname="Hannes Tschofenig" initials="H." surname="Tschofenig"/>
+<author fullname="Thomas Fossati" initials="T." surname="Fossati"/>
+<author fullname="Tobias Gondrom" initials="T." surname="Gondrom"/>
+<date month="October" year="2018"/></front>
+<seriesInfo name="Internet Draft" value="draft-ietf-tls-dtls-connection-id-02"/>
 </reference>
 
 </references>
@@ -303,7 +329,20 @@ False Start <xref target="RFC7918"/> can reduce round trips by
 allowing the TLS second flight of messages (ChangeCipherSpec) to also
 contain the (encrypted) Babel packet.</t>
 
-<t>These performance considerations were inspired from the ones for
+<t></t>
+
+</section>
+
+<section title="Acknowledgments">
+
+<t>The authors would like to thank
+Thomas Fossati,
+Gabriel Kerneis,
+Antoni Przygienda,
+Markus Stenberg,
+Dave Taht,
+and Martin Thomson for their input and contributions.
+The performance considerations in this document were inspired from the ones for
 DNS over DTLS <xref target="RFC8094"/>.</t>
 
 </section>

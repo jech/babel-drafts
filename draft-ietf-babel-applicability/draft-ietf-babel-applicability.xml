@@ -333,9 +333,9 @@ is deployed as securely as required by the application.</t>
 <title>The Babel Routing Protocol</title>
 <author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
 <author fullname="David Schinazi" initials="D." surname="Schinazi"/>
-<date month="October" year="2017"/>
+<date month="November" year="2018"/>
 </front>
-<seriesInfo name="Internet Draft" value="draft-ietf-babel-rfc6126bis-04"/>
+<seriesInfo name="Internet Draft" value="draft-ietf-babel-rfc6126bis-07"/>
 </reference>
 </references>
 

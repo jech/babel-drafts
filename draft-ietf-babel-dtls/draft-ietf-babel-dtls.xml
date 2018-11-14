@@ -122,10 +122,11 @@ in deployments where both protocols are equally applicable.</t>
 
 <section title="Operation of the Protocol">
 
-<t>Babel over DTLS requires some changes to how Babel operates.  First,
-DTLS is a client-server protocol, while while Babel is a peer-to-peer
-protocol. Second, DTLS can only protect unicast communcation, while Babel
-packets can be sent over to both unicast and multicast destinations.</t>
+<t>Babel over DTLS requires some changes to how Babel operates.
+First, DTLS is a client-server protocol, while Babel is a peer-to-peer
+protocol.  Second, DTLS can only protect unicast communication, while
+Babel packets can be sent over to both unicast and multicast
+destinations.</t>
 
 <section title="DTLS Connection Initiation">
 
@@ -230,7 +231,7 @@ packet size requirements in Section 4 of <xref target="RFC6126bis"/>, but
 recommends that DTLS overhead be taken into account when computing maximum
 packet size.</t>
 
-<t> More precidely, nodes SHOULD compute the overhead of DTLS depending on
+<t> More precisely, nodes SHOULD compute the overhead of DTLS depending on
 the ciphers in use, and SHOULD NOT send Babel packets larger than the
 interface maximum transmission unit (MTU) minus the overhead of IP, UDP
 and DTLS.  Nodes MUST NOT send Babel packets larger than the attached

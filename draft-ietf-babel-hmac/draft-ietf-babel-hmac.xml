@@ -117,16 +117,15 @@ persistent storage.</t>
 <t>The correctness of the protocol relies on the following assumptions:
 <list style="symbols">
 <t>that the Hashed Message Authentication Code (HMAC) being used is
-invulnerable to spoofing, i.e., that an attacker is unable to generate
-a packet with a correct HMAC;</t>
+invulnerable to pre-image attacks, i.e., that an attacker is unable to
+generate a packet with a correct HMAC;</t>
 <t>that a node never generates the same index or nonce twice over the
 lifetime of a key.</t>
 </list>
-The first assumption is a property of the HMAC being used, and is
-therefore out-of-scope for this document.  The second assumption can be
-met either by using a robust random number generator and sufficiently
-large indices and nonces, by using a reliable hardware clock, or by
-rekeying whenever a collision becomes likely.</t>
+The first assumption is a property of the HMAC being used.  The second
+assumption can be met either by using a robust random number generator and
+sufficiently large indices and nonces, by using a reliable hardware clock,
+or by rekeying whenever a collision becomes likely.</t>
 
 <t>If the assumptions above are met, the protocol described in this
 document has the following properties:
@@ -562,6 +561,46 @@ challenge request.</t>
 
 <section title="Security Considerations">
 
+<t>This document defines a mechanism that provides basic security
+properties for the Babel routing protocol.  The scope of this protocol is
+strictly limited: it only provides authentication, on the assumption that
+routing information is not confidential, only symmetric keying, and only
+allows for the use of a small number of symmetric keys on each link.
+Deployments that need more features, e.g., confidentiality or asymmetric
+keying, should use a more featureful security mechanism such as the one
+described in <xref target="I-D.ietf-babel-dtls"/>.</t>
+
+<t>This mechanism relies on two assumptions, as described in <xref
+target="security-properties"/>.  First, it assumes that the hash being
+used is invulnerable to pre-image attacks (Section 1.1 of <xref
+target="RFC6039"/>); at the time of writing, SHA-256, which is mandatory
+to implement (<xref target="hmac-computation"/>), is believed to be safe
+against practical attacks.</t>
+
+<t>Second, it assumes that indices and nonces are generated uniquely over
+the lifetime of a key used for HMAC computation.  This property can be
+satisfied either by using a cryptographically secure random number
+generator to generate indices and nonces that contain enough entropy
+(64-bit values are believed to be large enough for all practical
+applications), or by using a reliably monotonic hardware clock.  If
+unicity cannot be guaranteed (e.g., because a hardware clock has been
+reset), then rekeying is necessary.</t>
+
+<t>While it is probably not possible to be immune against denial of
+service (DoS) attacks in general, this protocol includes a number of
+mechanisms designed to mitigate such attacks.  In particular, reception of
+a packet with no correct HMAC creates no local state whatsoever (<xref
+target="packet-reception"/>).  Reception of a replayed packet with correct
+hash, on the other hand, causes a challenge to be sent; this is mitigated
+somewhat by requiring that challenges be rate-limited.</t>
+
+<t>As described in this document, sending a challenge requires retaining
+enough information to validate the challenge reply.  However, the nonce
+included in a challenge request and echoed in the challenge reply can be
+fairly large (up to 192 octets), which should in principle allow avoiding
+any local per-challenge state by encoding the challenge information as
+a "cookie" in the nonce itself.</t>
+
 <t></t>
 
 </section>
@@ -647,6 +686,21 @@ are also indebted to Florian Horn and Toke Hoyland-Jorgensen.</t>
 </front>
 <seriesInfo name="RFC" value="6234"/>
 <seriesInfo name="DOI" value="10.17487/RFC6234"/>
+</reference>
+
+<reference anchor="RFC6039" target="https://www.rfc-editor.org/info/rfc6039">
+<front>
+<title>
+Issues with Existing Cryptographic Protection Methods for Routing Protocols
+</title>
+<author initials="V." surname="Manral" fullname="V. Manral"/>
+<author initials="M." surname="Bhatia" fullname="M. Bhatia"/>
+<author initials="J." surname="Jaeggli" fullname="J. Jaeggli"/>
+<author initials="R." surname="White" fullname="R. White"/>
+<date year="2010" month="October"/>
+</front>
+<seriesInfo name="RFC" value="6039"/>
+<seriesInfo name="DOI" value="10.17487/RFC6039"/>
 </reference>
 
 </references>

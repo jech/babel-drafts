@@ -245,10 +245,10 @@ initially undefined and used as described in
 
 <t>A Babel node computes an HMAC as follows.</t>
 
-<t>First, the node builds a pseudo-header that will participate in
-HMAC computation but will not be sent.  The pseudo-header has the
-following format:
- <figure><artwork><![CDATA[
+<t>First, the node builds a pseudo-header that will participate in HMAC
+computation but will not be sent.  If the packet was carried over IPv6,
+the pseudo-header has the following format:
+<figure><artwork><![CDATA[
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -268,6 +268,19 @@ following format:
 +                                                               +
 |                                                               |
 +                               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                               |           Dest port           |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+]]></artwork></figure>
+If the packet was carried over IPv4, the pseudo-header has the following
+format:
+<figure><artwork><![CDATA[
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                          Src address                          |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|           Src port            |        Dest address           |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |                               |           Dest port           |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ]]></artwork></figure></t>

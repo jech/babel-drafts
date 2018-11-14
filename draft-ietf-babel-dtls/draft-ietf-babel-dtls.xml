@@ -122,40 +122,44 @@ in deployments where both protocols are equally applicable.</t>
 
 <section title="Operation of the Protocol">
 
-<t>Babel over DTLS requires changes to how Babel is operated, for two reasons.
-Firstly, because DTLS introduces the concepts of client and server, while Babel
-is a peer-to-peer protocol. Secondly, DTLS can only protect unicast, while Babel
-TLVs can be sent over both unicast and multicast.</t>
+<t>Babel over DTLS requires some changes to how Babel operates.  First,
+DTLS is a client-server protocol, while while Babel is a peer-to-peer
+protocol. Second, DTLS can only protect unicast communcation, while Babel
+packets can be sent over to both unicast and multicast destinations.</t>
 
 <section title="DTLS Connection Initiation">
 
 <t>All Babel over DTLS nodes MUST act as DTLS servers on the "babel-dtls" port
-(UDP port TBD), and MUST listen for multicast traffic on the unencrypted "babel"
+(UDP port TBD), and MUST listen for traffic on the unencrypted "babel"
 port (UDP port 6696).  When a Babel node discovers a new neighbor (generally by
 receiving an unencrypted multicast Babel packet), it compares the neighbour's
 IPv6 link-local address with its own, using network byte ordering.  If a node's
 address is lower than the recently discovered neighbor's address, it acts
 as a client and connects to the neighbor.  In other words, the node with
 the lowest address is the DTLS client for this pairwise relationship.
-As an example, fe80::1:2 is considered lower than fe80::2:1.  The node acting
-as DTLS client initiates its DTLS connection from an ephemeral UDP port.
-Nodes SHOULD ensure that new client DTLS connections use different ephemeral
-ports from recently used connections to allow servers to differentiate between
-the new and old DTLS connections.  Alternatively, nodes MAY use DTLS connection
-identifiers <xref target="DTLS-CID"/> as a higher-entropy mechanism to
-distinguish between connections.  When a node receives a new DTLS connection,
-it MUST verify the source IP address, and reject the connection if the address
-is not an IPv6 link-local address.  Nodes MUST use mutual authentication
-(authenticating both client and server); servers MUST request client
-authentication by sending a CertificateRequest message.  If either node fails
-to verify the peer's authentication, it MUST abort the DTLS handshake.
-Nodes MUST only negotiate DTLS version 1.2 or higher.</t>
+As an example, fe80::1:2 is considered lower than fe80::2:1.</t>
+
+<t>The node acting as DTLS client initiates its DTLS connection from an
+ephemeral UDP port.  Nodes SHOULD ensure that new client DTLS connections
+use different ephemeral ports from recently used connections to allow
+servers to differentiate between the new and old DTLS connections.
+Alternatively, nodes MAY use DTLS connection identifiers
+<xref target="DTLS-CID"/> as a higher-entropy mechanism to distinguish between
+connections.</t>
+
+<t>When a node receives a new DTLS connection, it MUST verify the source
+IP address, and reject the connection if the address is not an IPv6
+link-local address.  Nodes MUST use mutual authentication (authenticating
+both client and server); servers MUST request client authentication by
+sending a CertificateRequest message.  If either node fails to verify the
+peer's authentication, it MUST abort the DTLS handshake.  Nodes MUST only
+negotiate DTLS version 1.2 or higher.</t>
 
 </section>
 
 <section title="Protocol Encoding">
 
-<t>Babel over DTLS sends all unicast Babel packets encrypted by DTLS.  The
+<t>Babel over DTLS sends all unicast Babel packets protected by DTLS.  The
 entire Babel packet, from the Magic byte at the start of the Babel header
 to the last byte of the Babel packet trailer, is sent protected by DTLS.</t>
 
@@ -166,11 +170,11 @@ to the last byte of the Babel packet trailer, is sent protected by DTLS.</t>
 <t>When sending packets, Babel over DTLS nodes MUST NOT send any TLVs over
 the unprotected "babel" port, with the exception of Hello TLVs without the
 Unicast flag set.  Babel over DTLS nodes MUST NOT send any unprotected unicast
-packet.  Unless some out-of-band neighbor discovery mechanism is available,
+packets.  Unless some out-of-band neighbor discovery mechanism is available,
 nodes SHOULD periodically send unprotected multicast Hellos to ensure
 discovery of new neighbours.  In order to maintain bidirectional reachability,
-nodes can either rely on unprotected multicast Hellos, or also send protected
-unicast Hellos.</t>
+nodes can either rely entirely on unprotected multicast Hellos, or send
+protected unicast Hellos in addition to the multicast Hellos.</t>
 
 <t>Since Babel over DTLS only protects unicast packets, implementors may
 implement Babel over DTLS by modifying an unprotected implementation of Babel,

@@ -282,8 +282,8 @@ techniques beyond the scope of this document.</t>
 <title>The Babel Routing Protocol</title>
 <author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
 <author fullname="David Schinazi" initials="D." surname="Schinazi"/>
-<date month="May" year="2018"/></front>
-<seriesInfo name="Internet Draft" value="draft-ietf-babel-rfc6126bis-06"/>
+<date month="November" year="2018"/></front>
+<seriesInfo name="Internet Draft" value="draft-ietf-babel-rfc6126bis-07"/>
 </reference>
 
 </references>
@@ -301,8 +301,8 @@ techniques beyond the scope of this document.</t>
 <author fullname="Clara Do" initials="C." surname="Do"/>
 <author fullname="Weronika Kolodziejak" initials="W." surname="Kolodziejak"/>
 <author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
-<date month="August" year="2018"/></front>
-<seriesInfo name="Internet Draft" value="draft-ietf-babel-hmac-00"/>
+<date month="November" year="2018"/></front>
+<seriesInfo name="Internet Draft" value="draft-ietf-babel-hmac-01"/>
 </reference>
 
 <reference anchor="DTLS-CID"><front>

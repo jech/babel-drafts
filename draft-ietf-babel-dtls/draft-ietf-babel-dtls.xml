@@ -101,23 +101,20 @@ when, they appear in all capitals, as shown here.</t>
 
 <section title="Applicability">
 
-<t>The current two main mechanisms for securing Babel are Babel over DTLS
-(as described in this document) and Babel Cryptographic Authentication
-<xref target="BABEL-HMAC"/>.  The latter has the advantages of being simpler
-and not requiring a dependency on DTLS, therefore implementers are encouraged
-to consider it in preference to the mechanism defined in this document whenever
-both are applicable to a given deployment.  Both mechanisms ensure integrity of
-messages and prevent message replay.</t>
+<t>The protocol described in this document protects Babel packets with
+DTLS.  As such, it inherits the features offered by DTLS, notably
+authentication, integrity, replay protection, confidentiality and
+asymmetric keying.  It is therefore expected to be applicable in a wide
+range of environments.</t>
 
-<t>However, DTLS offers several features that are not provided by Babel
-Cryptographic Authentication, therefore Babel over DTLS is applicable in
-cases where those features are needed.  Examples of such features include:
-<list style="symbols">
-<t>Asymmetric keys.  DTLS allows authentication via asymmetric keys, which
-allows a finer granularity of trust per-peer, and allows for revocation.</t>
-<t>Confidentiality of data.  DTLS encrypts payloads, preventing an on-link
-attacker from observing the routing table.</t>
-</list></t>
+<t>There exists another mechanism for securing Babel, namely Babel HMAC
+authentication <xref target="BABEL-HMAC"/>.  HMAC only offers very basic
+features, namely authentication, integrity and replay protection with
+a small number of symmetric keys.</t>
+
+<t>Since HMAC authentication is simpler, requires fewer changes to the
+Babel protocol, and avoids a dependency on DTLS, its use is RECOMMENDED
+in deployments where both protocols are equally applicable.</t>
 
 </section>
 

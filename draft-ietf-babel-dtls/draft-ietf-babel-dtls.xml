@@ -171,7 +171,9 @@ to the last byte of the Babel packet trailer, is sent protected by DTLS.</t>
 <t>When sending packets, Babel over DTLS nodes MUST NOT send any TLVs over
 the unprotected "babel" port, with the exception of Hello TLVs without the
 Unicast flag set.  Babel over DTLS nodes MUST NOT send any unprotected unicast
-packets.  Unless some out-of-band neighbor discovery mechanism is available,
+packets.  This ensures the confidentiality of the information sent in Babel
+packets (e.g. the network topology) by only sending it encrypted by DTLS.
+Unless some out-of-band neighbor discovery mechanism is available,
 nodes SHOULD periodically send unprotected multicast Hellos to ensure
 discovery of new neighbours.  In order to maintain bidirectional reachability,
 nodes can either rely entirely on unprotected multicast Hellos, or send
@@ -204,7 +206,7 @@ all TLVs in that packet are silently ignored.</t>
 with their neighbour table.  When a neighbour entry is flushed from the
 neighbour table (Appendix A of <xref target="RFC6126bis"/>), its associated
 DTLS state SHOULD be discarded.  The node SHOULD send a DTLS close_notify alert
-to the neighbour.</t>
+to the neighbour if it believes the link is still viable.</t>
 
 </section>
 

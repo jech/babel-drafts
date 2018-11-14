@@ -116,9 +116,9 @@ the network and the metric being used.  The most significant are:
 <list style="symbols">
 <t>causality: a control message is not received before it has been sent
 (more precisely, the "happens-before" relation is acyclic);</t>
-<t>strict monotonicity of the metric: for any metric M and link cost C,
-&nbsp;&lt;&nbsp;C&nbsp;+&nbsp;M;</t>
-<t>left-distributivity of the metric: for any metrics M and M' and cost C,
+<t>strict monotonicity of the metric: for any metric M and link cost&nbsp;C,
+M&nbsp;&lt;&nbsp;C&nbsp;+&nbsp;M;</t>
+<t>left-distributivity of the metric: for any metrics M and M' and cost&nbsp;C,
 if M&nbsp;&le;&nbsp;M', then
 C&nbsp;+&nbsp;M&nbsp;&le;&nbsp;C&nbsp;+&nbsp;M'.</t>
 </list>

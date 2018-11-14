@@ -225,22 +225,23 @@ mechanism to authenticate nodes at a lower layer (e.g. IPsec).</t>
 
 <t>Compared to unprotected Babel, DTLS adds header, authentication tag and
 possibly block-size padding overhead to every packet.  This reduces the size of
-the Babel payload that can be carried.  Nodes SHOULD compute the overhead of
-DTLS depending on the ciphers in use, and SHOULD NOT send Babel packets larger
-than the interface maximum transmission unit (MTU) minus the overhead of lower
-layers (IP, UDP and DTLS).  This helps reduce the likelihood of lower-layer
-fragmentation which would negatively impact performance and reliability.
-Nodes MUST NOT send Babel packets larger than the attached interface's MTU
-adjusted for known lower-layer headers (at least UDP and IP) or 512 octets,
-whichever is larger, but not exceeding 2^16 - 1 adjusted for lower-layer
-headers.  Every Babel speaker MUST be able to receive packets that are as
-large as any attached interface's MTU adjusted for UDP and IP headers or
-512 octets, whichever is larger.  Note that this requirement on reception
-does not take into account the overhead of DTLS because the peer may not have
-the ability to compute the overhead of DTLS and the packet may be fragmented
-by lower layers.  Babel packets are fragmented at the Babel layer rather than
-the DTLS layer to allow any fragment to be parsed when a previous fragment was
-lost.  Babel packets MUST NOT be sent in IPv6 Jumbograms.</t>
+the Babel payload that can be carried.  This document does not relax the
+packet size requirements in Section 4 of <xref target="RFC6126bis"/>, but
+recommends that DTLS overhead be taken into account when computing maximum
+packet size.</t>
+
+<t> More precidely, nodes SHOULD compute the overhead of DTLS depending on
+the ciphers in use, and SHOULD NOT send Babel packets larger than the
+interface maximum transmission unit (MTU) minus the overhead of IP, UDP
+and DTLS.  Nodes MUST NOT send Babel packets larger than the attached
+interface's MTU adjusted for known lower-layer headers (at least UDP and
+IP) or 512 octets, whichever is larger, but not exceeding 2^16 -
+1 adjusted for lower-layer headers.  Every Babel speaker MUST be able to
+receive packets that are as large as any attached interface's MTU adjusted
+for UDP and IP headers or 512 octets, whichever is larger.  Note that this
+requirement on reception does not take into account the overhead of DTLS
+because the peer may not have the ability to compute the overhead of DTLS
+and the packet may be fragmented by lower layers.</t>
 
 </section>
 

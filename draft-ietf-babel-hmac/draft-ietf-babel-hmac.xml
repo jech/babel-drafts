@@ -594,12 +594,11 @@ target="packet-reception"/>).  Reception of a replayed packet with correct
 hash, on the other hand, causes a challenge to be sent; this is mitigated
 somewhat by requiring that challenges be rate-limited.</t>
 
-<t>As described in this document, sending a challenge requires retaining
-enough information to validate the challenge reply.  However, the nonce
-included in a challenge request and echoed in the challenge reply can be
-fairly large (up to 192 octets), which should in principle allow avoiding
-any local per-challenge state by encoding the challenge information as
-a "cookie" in the nonce itself.</t>
+<t>At first sight, sending a challenge requires retaining enough
+information to validate the challenge reply.  However, the nonce included
+in a challenge request and echoed in the challenge reply can be fairly
+large (up to 192 octets), which should in principle permit encoding the
+per-challenge state as a secure "cookie" within the nonce itself.</t>
 
 <t></t>
 

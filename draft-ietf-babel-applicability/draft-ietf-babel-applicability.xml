@@ -6,7 +6,7 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="no" ?>
-<rfc category="info" docName="draft-ietf-babel-applicability-04"
+<rfc category="info" docName="draft-ietf-babel-applicability-05"
      ipr="trust200902">
 <front>
 <title abbrev="Babel Protocol Applicability">Applicability of the Babel
@@ -25,7 +25,7 @@ routing protocol</title>
 </address>
 </author>
 
-<date day="23" month="October" year="2018"/>
+<date day="14" month="November" year="2018"/>
 
 <abstract>
 <t>Babel is a routing protocol based on the distance-vector algorithm

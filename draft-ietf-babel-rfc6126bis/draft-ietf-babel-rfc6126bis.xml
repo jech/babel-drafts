@@ -38,7 +38,7 @@
 </address>
 </author>
 
-<date day="7" month="November" year="2018"/>
+<date day="14" month="November" year="2018"/>
 
 <abstract>
 <t>Babel is a loop-avoiding distance-vector routing protocol that is
@@ -2345,12 +2345,12 @@ inspired by <xref target="PACKETBB"/>.</t>
 </reference>
 
 <reference anchor="BABEL-HMAC"><front>
-<title>Babel Cryptographic Authentication</title>
+<title>HMAC authentication for the Babel routing protocol</title>
 <author fullname="Clara Do" initials="C." surname="Do"/>
 <author fullname="Weronika Kolodziejak" initials="W." surname="Kolodziejak"/>
 <author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
-<date month="August" year="2018"/></front>
-<seriesInfo name="Internet Draft" value="draft-ietf-babel-hmac-00"/>
+<date month="November" year="2018"/></front>
+<seriesInfo name="Internet Draft" value="draft-ietf-babel-hmac-01"/>
 </reference>
 
 <reference anchor="BABEL-DTLS"><front>
@@ -2737,8 +2737,8 @@ packet trailer avoids clearing the signature before computing a hash of
 the packet body, and makes it possible to check a cryptographic signature
 before running the full, stateful TLV parser.  Hence, only TLVs that don't
 need to be protected by cryptographic security protocols should be allowed
-to appear in the packet trailer.  Any such TLVs should be easy to parse,
-and in particular should not require stateful parsing.</t>
+in the packet trailer.  Any such TLVs should be easy to parse, and in
+particular should not require stateful parsing.</t>
 
 </section>
 

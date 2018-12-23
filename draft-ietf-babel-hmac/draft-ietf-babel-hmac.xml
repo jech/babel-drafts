@@ -637,7 +637,7 @@ Numbers registry:</t>
 HMAC protocol defined by Denis Ovsienko <xref target="RFC7298"/>.  The
 use of a pseudo-header was suggested by David Schinazi.  The use of an
 index to avoid replay was suggested by Markus Stenberg.  The authors
-are also indebted to Florian Horn and Toke Hoyland-Jorgensen.</t>
+are also indebted to Toke Hoiland-Jorgensen, Florian Horn, and Dave Taht.</t>
 
 </section>
 

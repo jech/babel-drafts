@@ -177,7 +177,7 @@ PC with the one contained in the previous packet received from B, and
 unless it is strictly greater, the packet is discarded.</t>
 
 <t>By itself, the PC mechanism is not sufficient to protect against
-replay.  Consider a peer A that has no information about a pair
+replay.  Consider a peer A that has no information about a peer
 B (e.g., because it has recently rebooted).  Suppose that A receives
 a packet ostensibly from B carrying a given PC; since A has no information
 about B, it has no way to determine whether the packet is freshly
@@ -454,10 +454,10 @@ challenge has succeeded; otherwise, the challenge has failed.</t>
 
 </section>
 
-<section title="Expiring per-peer state" anchor="expire">
+<section title="Expiring per-neighbour state" anchor="expire">
 
-<t>The per-peer (Index, PC) pair is maintained in the neighbour table, and
-is normally discarded when the neighbour table entry expires.
+<t>The per-neighbour (Index, PC) pair is maintained in the neighbour
+table, and is normally discarded when the neighbour table entry expires.
 Implementations MUST ensure that an (Index, PC) pair is discarded within
 a finite time since the last time a packet has been accepted.  In
 particular, unsuccessful challenges MUST NOT prevent an (Index, PC) pair

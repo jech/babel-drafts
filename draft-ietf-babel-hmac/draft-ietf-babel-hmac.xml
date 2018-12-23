@@ -811,6 +811,15 @@ rfc6126bis.</t>
 </list></t>
 </section>
 
+<section title="Changes since draft-ietf-babel-hmac-00">
+
+<t><list style="symbols">
+<t>Made BLAKE2s a recommended HMAC algorithm.</t>
+<t>Added requirement to expire per-neighbour crypto state.</t>
+</list></t>
+
+</section>
+
 </section>
 
 </back>

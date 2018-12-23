@@ -454,7 +454,7 @@ challenge has succeeded; otherwise, the challenge has failed.</t>
 
 </section>
 
-<section title="Expiring per-peer state">
+<section title="Expiring per-peer state" anchor="expire">
 
 <t>The per-peer (Index, PC) pair is maintained in the neighbour table, and
 is normally discarded when the neighbour table entry expires.
@@ -607,6 +607,16 @@ generator to generate indices and nonces that contain enough entropy
 applications), or by using a reliably monotonic hardware clock.  If
 unicity cannot be guaranteed (e.g., because a hardware clock has been
 reset), then rekeying is necessary.</t>
+
+<t>The expiry mechanism mandated in <xref target="expire"/> is required to
+prevent an attacker from delaying an authentic packet by an unbounded
+amount of time.  If an attacker is able to delay the delivery of a packet
+(e.g., because it is located at a layer 2 switch), then the packet will be
+accepted as long as the corresponding (Index, PC) pair is present at the
+receiver.  If the attacker is able to cause the (Index, PC) pair to
+persist for arbitrary amounts of time (e.g., by causing failed
+challenges), then it is able to delay the packet by arbitrary amounts of
+time, even after the sender has left the network.</t>
 
 <t>While it is probably not possible to be immune against denial of
 service (DoS) attacks in general, this protocol includes a number of

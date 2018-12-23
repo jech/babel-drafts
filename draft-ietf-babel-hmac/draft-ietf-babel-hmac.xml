@@ -583,12 +583,12 @@ challenge request.</t>
 
 <t>This document defines a mechanism that provides basic security
 properties for the Babel routing protocol.  The scope of this protocol is
-strictly limited: it only provides authentication, on the assumption that
-routing information is not confidential, only symmetric keying, and only
-allows for the use of a small number of symmetric keys on each link.
-Deployments that need more features, e.g., confidentiality or asymmetric
-keying, should use a more featureful security mechanism such as the one
-described in <xref target="I-D.ietf-babel-dtls"/>.</t>
+strictly limited: it only provides authentication (we assume that routing
+information is not confidential), it only supports symmetric keying, and
+it only allows for the use of a small number of symmetric keys on every
+link.  Deployments that need more features, e.g., confidentiality or
+asymmetric keying, should use a more featureful security mechanism such as
+the one described in <xref target="I-D.ietf-babel-dtls"/>.</t>
 
 <t>This mechanism relies on two assumptions, as described in <xref
 target="security-properties"/>.  First, it assumes that the hash being

@@ -475,11 +475,7 @@ the timer expires (an timeout of 5&nbsp;min is suggested).</t>
 
 <section title="Packet Format">
 
-<t></t>
-
 <section title="HMAC TLV">
-
-<t></t>
 
 <figure><artwork><![CDATA[
  0                   1                   2                   3
@@ -506,8 +502,6 @@ packet body.</t>
 </section>
 
 <section title="PC TLV">
-
-<t></t>
 
 <figure><artwork><![CDATA[
  0                   1                   2                   3
@@ -539,8 +533,6 @@ octets.</t>
 
 <section title="Challenge Request TLV">
 
-<t></t>
-
 <figure><artwork><![CDATA[
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -565,8 +557,6 @@ octets, and a node MAY ignore a nonce that is of size strictly larger than
 </section>
 
 <section title="Challenge Reply TLV">
-
-<t></t>
 
 <figure><artwork><![CDATA[
  0                   1                   2                   3
@@ -631,8 +621,6 @@ information to validate the challenge reply.  However, the nonce included
 in a challenge request and echoed in the challenge reply can be fairly
 large (up to 192 octets), which should in principle permit encoding the
 per-challenge state as a secure "cookie" within the nonce itself.</t>
-
-<t></t>
 
 </section>
 

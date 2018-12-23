@@ -700,21 +700,6 @@ are also indebted to Toke Hoiland-Jorgensen, Florian Horn, and Dave Taht.</t>
 <seriesInfo name="DOI" value="10.17487/RFC6234"/>
 </reference>
 
-<reference anchor="RFC6039" target="https://www.rfc-editor.org/info/rfc6039">
-<front>
-<title>
-Issues with Existing Cryptographic Protection Methods for Routing Protocols
-</title>
-<author initials="V." surname="Manral" fullname="V. Manral"/>
-<author initials="M." surname="Bhatia" fullname="M. Bhatia"/>
-<author initials="J." surname="Jaeggli" fullname="J. Jaeggli"/>
-<author initials="R." surname="White" fullname="R. White"/>
-<date year="2010" month="October"/>
-</front>
-<seriesInfo name="RFC" value="6039"/>
-<seriesInfo name="DOI" value="10.17487/RFC6039"/>
-</reference>
-
 </references>
 
 <references title="Informational References">
@@ -739,6 +724,21 @@ Authentication</title>
 </front>
 <seriesInfo name="Internet-Draft" value="draft-ietf-babel-dtls-01"/>
 <format type="TXT" target="http://www.ietf.org/internet-drafts/draft-ietf-babel-dtls-01.txt"/>
+</reference>
+
+<reference anchor="RFC6039" target="https://www.rfc-editor.org/info/rfc6039">
+<front>
+<title>
+Issues with Existing Cryptographic Protection Methods for Routing Protocols
+</title>
+<author initials="V." surname="Manral" fullname="V. Manral"/>
+<author initials="M." surname="Bhatia" fullname="M. Bhatia"/>
+<author initials="J." surname="Jaeggli" fullname="J. Jaeggli"/>
+<author initials="R." surname="White" fullname="R. White"/>
+<date year="2010" month="October"/>
+</front>
+<seriesInfo name="RFC" value="6039"/>
+<seriesInfo name="DOI" value="10.17487/RFC6039"/>
 </reference>
 
 </references>

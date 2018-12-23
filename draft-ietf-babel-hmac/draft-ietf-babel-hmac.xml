@@ -106,8 +106,8 @@ graceful key rotation (where the set of keys is changed with no service
 interruption).</t>
 
 <t>This protocol does not require synchronised clocks, it does not require
-persistently monotonic clocks, and it does not require any form of
-persistent storage.</t>
+persistently monotonic clocks, and it does not require persistent storage
+except for what might be required for storing cryptographic keys.</t>
 
 </section>
 

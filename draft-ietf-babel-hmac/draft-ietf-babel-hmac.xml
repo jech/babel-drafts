@@ -591,7 +591,9 @@ to implement (<xref target="hmac-computation"/>), is believed to be safe
 against practical attacks.</t>
 
 <t>Second, it assumes that indices and nonces are generated uniquely over
-the lifetime of a key used for HMAC computation.  This property can be
+the lifetime of a key used for HMAC computation (more precisely, indices
+must be unique for a given (key, source) pair, and nonces must be unique
+for a given (key, source, destination) triple).  This property can be
 satisfied either by using a cryptographically secure random number
 generator to generate indices and nonces that contain enough entropy
 (64-bit values are believed to be large enough for all practical

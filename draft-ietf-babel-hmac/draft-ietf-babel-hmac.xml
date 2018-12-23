@@ -291,13 +291,13 @@ format:
 <t hangText="Dest address">The destination IP address of the packet.</t>
 <t hangText="Src port">The destination UDP port number of the packet.</t>
 </list></t>
-<t>The node takes the concatenation of the pseudo-header and the
-packet including the packet header but excluding the packet trailer
-(from octet 0 inclusive up to Body Length&nbsp;+&nbsp;4 exclusive) and
-computes an HMAC as defined in Section 2 of <xref target="RFC2104"/>
-with one of the implemented hash algorithms.  Every implementation MUST
-implement HMAC-SHA256 <xref target="RFC6234"/>, and MAY implement
-other HMAC algorithms.</t>
+<t>The node takes the concatenation of the pseudo-header and the packet
+including the packet header but excluding the packet trailer (from octet
+0 inclusive up to Body Length&nbsp;+&nbsp;4 exclusive) and computes an
+HMAC with one of the implemented hash algorithms.  Every implementation
+MUST implement HMAC-SHA256 as defined in <xref target="RFC6234"/> and
+Section 2 of <xref target="RFC2104"/>, SHOULD implement keyed BLAKE2s
+<xref target="RFC7693"/>, and MAY implement other HMAC algorithms.</t>
 </section>
 
 <section title="Packet Transmission">
@@ -700,6 +700,17 @@ are also indebted to Toke Hoiland-Jorgensen, Florian Horn, and Dave Taht.</t>
 </front>
 <seriesInfo name="RFC" value="6234"/>
 <seriesInfo name="DOI" value="10.17487/RFC6234"/>
+</reference>
+
+<reference anchor="RFC7693" target="https://www.rfc-editor.org/info/rfc7693">
+<front>
+<title>The BLAKE2 Cryptographic Hash and Message Authentication Code (MAC)</title>
+<author initials="M-J." surname="Saarinen" fullname="M-J. Saarinen" role="editor"/>
+<author initials="J-P." surname="Aumasson" fullname="J-P. Aumasson"/>
+<date year="2015" month="November"/>
+</front>
+<seriesInfo name="RFC" value="7693"/>
+<seriesInfo name="DOI" value="10.17487/RFC7693"/>
 </reference>
 
 </references>

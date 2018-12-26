@@ -6,7 +6,7 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="no" ?>
-<rfc category="std" docName="draft-ietf-babel-hmac-02"
+<rfc category="std" docName="draft-ietf-babel-hmac-03"
      ipr="trust200902"
      updates="6126bis"
      obsoletes="7298">
@@ -53,7 +53,7 @@ Babel routing protocol</title>
 </address>
 </author>
 
-<date day="23" month="December" year="2018"/>
+<date day="26" month="December" year="2018"/>
 
 <abstract>
 <t>This document describes a cryptographic authentication mechanism for
@@ -123,9 +123,10 @@ generate a packet with a correct HMAC;</t>
 lifetime of a key.</t>
 </list>
 The first assumption is a property of the HMAC being used.  The second
-assumption can be met either by using a robust random number generator and
-sufficiently large indices and nonces, by using a reliable hardware clock,
-or by rekeying whenever a collision becomes likely.</t>
+assumption can be met either by using a robust random number generator
+<xref target="RFC4086"/> and sufficiently large indices and nonces, by
+using a reliable hardware clock, or by rekeying whenever a collision
+becomes likely.</t>
 
 <t>If the assumptions above are met, the protocol described in this
 document has the following properties:
@@ -314,7 +315,7 @@ packet) and HMAC TLVs (one per configured key).</t>
 <t>a PC TLV containing the PC and Index associated with the
 outgoing interface is appended to the packet body; the PC is
 incremented by a strictly positive amount (typically just 1); if the
-PC overflows, a new index is generated;</t>
+PC overflows, a fresh index is generated;</t>
 <t>for each key configured on the interface, an HMAC is computed as
 specified in <xref target="hmac-computation"/> above, and an HMAC TLV is
 appended to the packet trailer (see Section 4.2 of
@@ -518,10 +519,11 @@ packet body.</t>
 <t hangText="Type">Set to TBD to indicate a PC TLV.</t>
 <t hangText="Length">The length of the body, exclusive of the Type and
 Length fields.</t>
-<t hangText="PC">The Packet Counter (PC), which is increased with every
-packet sent over this interface.  A new index MUST be generated whenever
-the PC overflows.</t>
-<t hangText="Index">The sender's Index.</t>
+<t hangText="PC">The Packet Counter (PC), a 32-bit (4 octet) unsigned
+integer which is increased with every packet sent over this interface.
+A fresh index MUST be generated whenever the PC overflows.</t>
+<t hangText="Index">The sender's Index, an opaque string of 0 to 32
+octets.</t>
 </list></t>
 
 <t>Indices are limited to a size of 32 octets: a node MUST NOT send a TLV
@@ -546,7 +548,8 @@ octets.</t>
 <t hangText="Type">Set to TBD to indicate a Challenge Request TLV.</t>
 <t hangText="Length">The length of the body, exclusive of the Type and
 Length fields.</t>
-<t hangText="Nonce">The nonce uniquely identifying the challenge.</t>
+<t hangText="Nonce">The nonce uniquely identifying the challenge, an
+opaque string of 0 to 192 octets.</t>
 </list></t>
 
 <t>Nonces are limited to a size of 192 octets: a node MUST NOT send
@@ -605,7 +608,7 @@ satisfied either by using a cryptographically secure random number
 generator to generate indices and nonces that contain enough entropy
 (64-bit values are believed to be large enough for all practical
 applications), or by using a reliably monotonic hardware clock.  If
-unicity cannot be guaranteed (e.g., because a hardware clock has been
+uniqueness cannot be guaranteed (e.g., because a hardware clock has been
 reset), then rekeying is necessary.</t>
 
 <t>The expiry mechanism mandated in <xref target="expire"/> is required to
@@ -636,7 +639,7 @@ per-challenge state as a secure "cookie" within the nonce itself.</t>
 
 <section title="IANA Considerations">
 
-<t>IANA is instructed to allocate the following values in the Babel TLV
+<t>IANA is requested to allocate the following values in the Babel TLV
 Numbers registry:</t>
 <texttable>
 <ttcol>Type</ttcol><ttcol>Name</ttcol><ttcol>Reference</ttcol>
@@ -769,6 +772,19 @@ Issues with Existing Cryptographic Protection Methods for Routing Protocols
 <seriesInfo name="DOI" value="10.17487/RFC6039"/>
 </reference>
 
+<reference  anchor='RFC4086' target='http://www.rfc-editor.org/info/rfc4086'>
+<front>
+<title>Randomness Requirements for Security</title>
+<author initials='D.' surname='Eastlake 3rd' fullname='D. Eastlake 3rd'/>
+<author initials='J.' surname='Schiller' fullname='J. Schiller'/>
+<author initials='S.' surname='Crocker' fullname='S. Crocker'/>
+<date year='2005' month='June'/>
+</front>
+<seriesInfo name='BCP' value='106'/>
+<seriesInfo name='RFC' value='4086'/>
+<seriesInfo name='DOI' value='10.17487/RFC4086'/>
+</reference>
+
 </references>
 
 <section title="Incremental deployment and key rotation">
@@ -811,11 +827,21 @@ rfc6126bis.</t>
 </list></t>
 </section>
 
-<section title="Changes since draft-ietf-babel-hmac-00">
+<section title="Changes since draft-ietf-babel-hmac-01">
 
 <t><list style="symbols">
 <t>Made BLAKE2s a recommended HMAC algorithm.</t>
 <t>Added requirement to expire per-neighbour crypto state.</t>
+</list></t>
+
+</section>
+
+<section title="Changes since draft-ietf-babel-hmac-02">
+
+<t><list style="symbols">
+<t>Clarified that PCs are 32-bit unsigned integers.</t>
+<t>Clarified that indices and nonces are of arbitrary size.</t>
+<t>Added reference to RFC 4086.</t>
 </list></t>
 
 </section>

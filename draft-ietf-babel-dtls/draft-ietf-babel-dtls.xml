@@ -18,7 +18,7 @@
 <rfc category="std"
     updates="6126bis"
     obsoletes=""
-    docName="draft-ietf-babel-dtls-02"
+    docName="draft-ietf-babel-dtls-03"
     ipr="trust200902">
 <front>
 <title abbrev="Babel over DTLS">Babel Routing Protocol over Datagram
@@ -65,7 +65,7 @@ Transport Layer Security</title>
 </address>
 </author>
 
-<date year="2018" />
+<date/>
 
 <abstract>
 <t>The Babel Routing Protocol does not contain any means to authenticate

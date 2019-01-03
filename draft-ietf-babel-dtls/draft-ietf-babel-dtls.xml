@@ -154,7 +154,10 @@ link-local address.  Nodes MUST use mutual authentication (authenticating
 both client and server); servers MUST request client authentication by
 sending a CertificateRequest message.  If either node fails to verify the
 peer's authentication, it MUST abort the DTLS handshake.  Nodes MUST only
-negotiate DTLS version 1.2 or higher.</t>
+negotiate DTLS version 1.2 or higher.  Nodes MUST use DTLS replay protection
+to prevent attackers from replaying stale information.  Nodes SHOULD drop
+packets that have been reordered by more than several IHU intervals, to
+avoid letting attackers make stale information last longer.</t>
 
 </section>
 
@@ -207,6 +210,17 @@ with their neighbour table.  When a neighbour entry is flushed from the
 neighbour table (Appendix A of <xref target="RFC6126bis"/>), its associated
 DTLS state SHOULD be discarded.  The node SHOULD send a DTLS close_notify alert
 to the neighbour if it believes the link is still viable.</t>
+
+<t>While DTLS provides protection against an attacker that replays valid
+packets, DTLS is not able to detect when an active on-path attacker intercepts
+valid packets and resends them at a later time.  This attack could be used to
+make a node believe it has bidirectional reachability to a neighbour even
+though that neighbour has disconnected from the network.  To prevent this
+attack, nodes MUST discard the DTLS state associated with a neighbour after a
+finite time of not receiving valid DTLS packets.  This can be implemented by,
+for example, discarding a neighbour's DTLS state when its associated IHU timer
+fires. Note that relying solely on the receipt of Hellos is not sufficient as
+multicast Hellos are sent unprotected.</t>
 
 </section>
 

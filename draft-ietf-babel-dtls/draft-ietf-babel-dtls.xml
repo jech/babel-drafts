@@ -69,7 +69,7 @@ Transport Layer Security</title>
 
 <abstract>
 <t>The Babel Routing Protocol does not contain any means to authenticate
-neighbours or protect messages sent between them.  This documents describes
+neighbours or protect messages sent between them.  This documents specifies
 a mechanism to ensure these properties, using Datagram Transport Layer
 Security (DTLS). This document updates RFC 6126bis.</t>
 </abstract>
@@ -85,7 +85,7 @@ any means to authenticate neighbours or protect messages sent between them.
 Because of this, an attacker is able to send maliciously crafted Babel
 messages which could lead a network to route traffic to an attacker or
 to an under-resourced target causing denial of service.
-This documents describes a mechanism to prevent such attacks, using
+This documents specifies a mechanism to prevent such attacks, using
 Datagram Transport Layer Security (DTLS) <xref target="RFC6347"/>.</t>
 
 <section title="Specification of Requirements">
@@ -108,7 +108,7 @@ asymmetric keying.  It is therefore expected to be applicable in a wide
 range of environments.</t>
 
 <t>There exists another mechanism for securing Babel, namely Babel HMAC
-authentication <xref target="BABEL-HMAC"/>.  HMAC only offers very basic
+authentication <xref target="BABEL-HMAC"/>.  HMAC only offers basic
 features, namely authentication, integrity and replay protection with
 a small number of symmetric keys.</t>
 
@@ -154,9 +154,9 @@ Alternatively, nodes MAY use DTLS connection identifiers
 <xref target="DTLS-CID"/> as a higher-entropy mechanism to distinguish between
 connections.</t>
 
-<t>When a node receives a new DTLS connection, it MUST verify the source
-IP address, and reject the connection if the address is not an IPv6
-link-local address.  Nodes MUST use mutual authentication (authenticating
+<t>When a node receives a new DTLS connection, it MUST verify that the source
+IP address is an IPv6 link-local address; if it is not, it MUST reject the
+connection.  Nodes MUST use mutual authentication (authenticating
 both client and server); servers MUST request client authentication by
 sending a CertificateRequest message.  If either node fails to verify the
 peer's authentication, it MUST abort the DTLS handshake.  Nodes MUST only
@@ -189,9 +189,13 @@ nodes can either rely entirely on unprotected multicast Hellos, or send
 protected unicast Hellos in addition to the multicast Hellos.</t>
 
 <t>Since Babel over DTLS only protects unicast packets, implementors may
-implement Babel over DTLS by modifying an unprotected implementation of Babel,
-and replacing any TLV sent over multicast with a separate TLV sent over unicast
-for each neighbour.</t>
+implement Babel over DTLS by modifying an implementation of Babel without DTLS
+support, and replacing any TLV previously sent over multicast with a separate
+TLV sent over unicast for each neighbour.  TLVs previously sent over multicast
+can be replaced with the same contents over unicast, with the exception of
+Hellos as described above.  Some implementations could also change the contents
+of IHU TLVs when converting to unicast in order to remove redundant
+information.</t>
 
 </section>
 
@@ -277,18 +281,17 @@ number, called "babel-dtls", for use by Babel over DTLS.</t>
 
 <section title="Security Considerations">
 
-<t>The interaction between two Babel peers requires Datagram Transport
+<t>Confidential interaction between two Babel peers requires Datagram Transport
 Layer Security (DTLS) with a cipher suite offering confidentiality
 protection.  The guidance given in <xref target="RFC7525"/> MUST be
 followed to avoid attacks on DTLS.</t>
 
 <t>A malicious client might attempt to perform a high number of DTLS
 handshakes with a server.  As the clients are not uniquely identified
-by the protocol and can be obfuscated with IPv4 address sharing and
-with IPv6 temporary addresses, a server needs to mitigate the impact
-of such an attack.  Such mitigation might involve rate limiting
-handshakes from a given subnet or more advanced denial of service avoidance
-techniques beyond the scope of this document.</t>
+by the protocol and can be obfuscated with IPv6 temporary addresses,
+a server needs to mitigate the impact of such an attack.  Such mitigation might
+involve rate limiting handshakes from a given subnet or more advanced denial of
+service avoidance techniques beyond the scope of this document.</t>
 
 </section>
 
@@ -361,6 +364,7 @@ contain the (encrypted) Babel packet.</t>
 <section title="Acknowledgments">
 
 <t>The authors would like to thank
+Donald Eastlake,
 Thomas Fossati,
 Gabriel Kerneis,
 Antoni Przygienda,

@@ -131,11 +131,12 @@ destinations.</t>
 <section title="DTLS Connection Initiation">
 
 <t>Babel over DTLS operates on a different port than unencrypted Babel.
-All Babel over DTLS nodes MUST act as DTLS servers on a configured port, and
-MUST listen for unencrypted Babel traffic on a distinct configured port.
-The default port for Babel over DTLS is registered with IANA as the
-"babel-dtls" port (UDP port TBD), and the unencrypted port is registered as
-the "babel" port (UDP port 6696).  Nodes SHOULD use these default ports.</t>
+All Babel over DTLS nodes MUST act as DTLS servers on a DTLS port, and MUST
+listen for unencrypted Babel traffic on an unencrypted port, which MUST be
+distinct from the DTLS port.  The default port for Babel over DTLS is
+registered with IANA as the "babel-dtls" port (UDP port TBD), and the
+unencrypted port is registered as the "babel" port (UDP port 6696).
+Nodes SHOULD use these default ports.</t>
 
 <t>When a Babel node discovers a new neighbor (generally by
 receiving an unencrypted multicast Babel packet), it compares the neighbour's

@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd" [
+<!ENTITY RFC2119 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml">
+<!ENTITY RFC6347 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.6347.xml">
+<!ENTITY RFC7250 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.7250.xml">
+<!ENTITY RFC7525 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.7525.xml">
+<!ENTITY RFC7918 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.7918.xml">
+<!ENTITY RFC7924 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.7924.xml">
+<!ENTITY RFC8094 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.8094.xml">
+<!ENTITY RFC8174 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.8174.xml">
+]>
+<?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
+<?rfc toc="yes"?>
+<?rfc tocdepth="2"?>
+<?rfc symrefs="yes"?>
+<?rfc sortrefs="yes" ?>
+<?rfc compact="no" ?>
+<rfc category="std"
+    updates="6126bis"
+    obsoletes=""
+    docName="draft-ietf-babel-dtls-03"
+    ipr="trust200902">
+<front>
+<title abbrev="Babel over DTLS">Babel Routing Protocol over Datagram
+Transport Layer Security</title>
+<author fullname="Antonin Decimo" initials="A." surname="Decimo">
+<organization>IRIF, University of Paris-Diderot</organization>
+<address>
+<postal>
+<street></street>
+<city>Paris</city>
+<region></region>
+<code></code>
+<country>France</country>
+</postal>
+<email>antonin.decimo@gmail.com</email>
+</address>
+</author>
+
+<author fullname='David Schinazi' surname='Schinazi' initials='D.'>
+<organization>Google LLC</organization>
+<address>
+<postal>
+<street>1600 Amphitheatre Parkway</street>
+<city>Mountain View</city>
+<region>California</region>
+<code>94043</code>
+<country>USA</country>
+</postal>
+<email>dschinazi.ietf@gmail.com</email>
+</address>
+</author>
+
+<author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek">
+<organization>IRIF, University of Paris-Diderot</organization>
+<address>
+<postal>
+<street>Case 7014</street>
+<city>75205 Paris Cedex 13</city>
+<region></region>
+<code></code>
+<country>France</country>
+</postal>
+<email>jch@irif.fr</email>
+</address>
+</author>
+
+<date/>
+
+<abstract>
+<t>The Babel Routing Protocol does not contain any means to authenticate
+neighbours or protect messages sent between them.  This documents specifies
+a mechanism to ensure these properties, using Datagram Transport Layer
+Security (DTLS). This document updates RFC 6126bis.</t>
+</abstract>
+
+</front>
+
+<middle>
+
+<section title="Introduction">
+
+<t>The Babel Routing Protocol <xref target="RFC6126bis"/> does not contain
+any means to authenticate neighbours or protect messages sent between them.
+Because of this, an attacker is able to send maliciously crafted Babel
+messages which could lead a network to route traffic to an attacker or
+to an under-resourced target causing denial of service.
+This documents specifies a mechanism to prevent such attacks, using
+Datagram Transport Layer Security (DTLS) <xref target="RFC6347"/>.</t>
+
+<section title="Specification of Requirements">
+
+<t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+"SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+"OPTIONAL" in this document are to be interpreted as described in BCP
+14 <xref target="RFC2119"/> <xref target="RFC8174"/> when, and only
+when, they appear in all capitals, as shown here.</t>
+
+</section>
+
+
+<section title="Applicability">
+
+<t>The protocol described in this document protects Babel packets with
+DTLS.  As such, it inherits the features offered by DTLS, notably
+authentication, integrity, replay protection, confidentiality and
+asymmetric keying.  It is therefore expected to be applicable in a wide
+range of environments.</t>
+
+<t>There exists another mechanism for securing Babel, namely Babel HMAC
+authentication <xref target="BABEL-HMAC"/>.  HMAC only offers basic
+features, namely authentication, integrity and replay protection with
+a small number of symmetric keys.</t>
+
+<t>Since HMAC authentication is simpler, requires fewer changes to the
+Babel protocol, and avoids a dependency on DTLS, its use is RECOMMENDED
+in deployments where both protocols are equally applicable.</t>
+
+</section>
+
+</section>
+
+<section title="Operation of the Protocol">
+
+<t>Babel over DTLS requires some changes to how Babel operates.
+First, DTLS is a client-server protocol, while Babel is a peer-to-peer
+protocol.  Second, DTLS can only protect unicast communication, while
+Babel packets can be sent over to both unicast and multicast
+destinations.</t>
+
+<section title="DTLS Connection Initiation">
+
+<t>Babel over DTLS operates on a different port than unencrypted Babel.
+All Babel over DTLS nodes MUST act as DTLS servers on a DTLS port, and MUST
+listen for unencrypted Babel traffic on an unencrypted port, which MUST be
+distinct from the DTLS port.  The default port for Babel over DTLS is
+registered with IANA as the "babel-dtls" port (UDP port TBD), and the
+unencrypted port is registered as the "babel" port (UDP port 6696).
+Nodes SHOULD use these default ports.</t>
+
+<t>When a Babel node discovers a new neighbor (generally by
+receiving an unencrypted multicast Babel packet), it compares the neighbour's
+IPv6 link-local address with its own, using network byte ordering.  If a node's
+address is lower than the recently discovered neighbor's address, it acts
+as a client and connects to the neighbor.  In other words, the node with
+the lowest address is the DTLS client for this pairwise relationship.
+As an example, fe80::1:2 is considered lower than fe80::2:1.</t>
+
+<t>The node acting as DTLS client initiates its DTLS connection from an
+ephemeral UDP port.  Nodes SHOULD ensure that new client DTLS connections
+use different ephemeral ports from recently used connections to allow
+servers to differentiate between the new and old DTLS connections.
+Alternatively, nodes MAY use DTLS connection identifiers
+<xref target="DTLS-CID"/> as a higher-entropy mechanism to distinguish between
+connections.</t>
+
+<t>When a node receives a new DTLS connection, it MUST verify that the source
+IP address is an IPv6 link-local address; if it is not, it MUST reject the
+connection.  Nodes MUST use mutual authentication (authenticating
+both client and server); servers MUST request client authentication by
+sending a CertificateRequest message.  If either node fails to verify the
+peer's authentication, it MUST abort the DTLS handshake.  Nodes MUST only
+negotiate DTLS version 1.2 or higher.  Nodes MUST use DTLS replay protection
+to prevent attackers from replaying stale information.  Nodes SHOULD drop
+packets that have been reordered by more than several IHU intervals, to
+avoid letting attackers make stale information last longer.</t>
+
+</section>
+
+<section title="Protocol Encoding">
+
+<t>Babel over DTLS sends all unicast Babel packets protected by DTLS.  The
+entire Babel packet, from the Magic byte at the start of the Babel header
+to the last byte of the Babel packet trailer, is sent protected by DTLS.</t>
+
+</section>
+
+<section title="Transmission">
+
+<t>When sending packets, Babel over DTLS nodes MUST NOT send any TLVs over
+the unprotected "babel" port, with the exception of Hello TLVs without the
+Unicast flag set.  Babel over DTLS nodes MUST NOT send any unprotected unicast
+packets.  This ensures the confidentiality of the information sent in Babel
+packets (e.g. the network topology) by only sending it encrypted by DTLS.
+Unless some out-of-band neighbor discovery mechanism is available,
+nodes SHOULD periodically send unprotected multicast Hellos to ensure
+discovery of new neighbours.  In order to maintain bidirectional reachability,
+nodes can either rely entirely on unprotected multicast Hellos, or send
+protected unicast Hellos in addition to the multicast Hellos.</t>
+
+<t>Since Babel over DTLS only protects unicast packets, implementors may
+implement Babel over DTLS by modifying an implementation of Babel without DTLS
+support, and replacing any TLV previously sent over multicast with a separate
+TLV sent over unicast for each neighbour.  TLVs previously sent over multicast
+can be replaced with the same contents over unicast, with the exception of
+Hellos as described above.  Some implementations could also change the contents
+of IHU TLVs when converting to unicast in order to remove redundant
+information.</t>
+
+</section>
+
+<section title="Reception">
+
+<t>Babel over DTLS nodes can receive Babel packets either protected over a
+DTLS connection, or unprotected directly over the "babel" port.  To ensure the
+security properties of this mechanism, unprotected packets are treated
+differently.  Nodes MUST silently ignore any unprotected packet sent over
+unicast.  When parsing an unprotected packet, a node MUST silently
+ignore all TLVs that are not of type Hello.  Nodes MUST also silently ignore
+any unprotected Hello with the Unicast flag set.  Note that receiving an
+unprotected packet can still be used to discover new neighbors, even when
+all TLVs in that packet are silently ignored.</t>
+
+</section>
+
+<section title="Neighbour table entry">
+
+<t>It is RECOMMENDED for nodes to associate the state of their DTLS connection
+with their neighbour table.  When a neighbour entry is flushed from the
+neighbour table (Appendix A of <xref target="RFC6126bis"/>), its associated
+DTLS state SHOULD be discarded.  The node SHOULD send a DTLS close_notify alert
+to the neighbour if it believes the link is still viable.</t>
+
+<t>While DTLS provides protection against an attacker that replays valid
+packets, DTLS is not able to detect when an active on-path attacker intercepts
+valid packets and resends them at a later time.  This attack could be used to
+make a node believe it has bidirectional reachability to a neighbour even
+though that neighbour has disconnected from the network.  To prevent this
+attack, nodes MUST discard the DTLS state associated with a neighbour after a
+finite time of not receiving valid DTLS packets.  This can be implemented by,
+for example, discarding a neighbour's DTLS state when its associated IHU timer
+fires. Note that relying solely on the receipt of Hellos is not sufficient as
+multicast Hellos are sent unprotected.</t>
+
+</section>
+
+<section title="Simultaneous operation of both Babel over DTLS and unprotected Babel">
+
+<t>Implementations MAY implement both Babel over DTLS and unprotected Babel.
+However, accepting unprotected Babel packets (other than multicast Hellos)
+loses the security properties of Babel over DTLS.  A node MAY allow
+configuration options to allow unprotected Babel on some interfaces but not
+others; this effectively gives nodes on that interface the same access as
+authenticated nodes, and SHOULD NOT be done unless that interface has a
+mechanism to authenticate nodes at a lower layer (e.g. IPsec).</t>
+
+</section>
+
+</section>
+
+<section title="Interface Maximum Transmission Unit Issues">
+
+<t>Compared to unprotected Babel, DTLS adds header, authentication tag and
+possibly block-size padding overhead to every packet.  This reduces the size of
+the Babel payload that can be carried.  This document does not relax the
+packet size requirements in Section 4 of <xref target="RFC6126bis"/>, but
+recommends that DTLS overhead be taken into account when computing maximum
+packet size.</t>
+
+<t> More precisely, nodes SHOULD compute the overhead of DTLS depending on
+the ciphers in use, and SHOULD NOT send Babel packets larger than the
+interface maximum transmission unit (MTU) minus the overhead of IP, UDP
+and DTLS.  Nodes MUST NOT send Babel packets larger than the attached
+interface's MTU adjusted for known lower-layer headers (at least UDP and
+IP) or 512 octets, whichever is larger, but not exceeding 2^16 -
+1 adjusted for lower-layer headers.  Every Babel speaker MUST be able to
+receive packets that are as large as any attached interface's MTU adjusted
+for UDP and IP headers or 512 octets, whichever is larger.  Note that this
+requirement on reception does not take into account the overhead of DTLS
+because the peer may not have the ability to compute the overhead of DTLS
+and the packet may be fragmented by lower layers.</t>
+
+</section>
+
+<section title="IANA Considerations">
+
+<t>If this document is approved, IANA is requested to register a UDP port
+number, called "babel-dtls", for use by Babel over DTLS.</t>
+
+</section>
+
+<section title="Security Considerations">
+
+<t>Confidential interaction between two Babel peers requires Datagram Transport
+Layer Security (DTLS) with a cipher suite offering confidentiality
+protection.  The guidance given in <xref target="RFC7525"/> MUST be
+followed to avoid attacks on DTLS.</t>
+
+<t>A malicious client might attempt to perform a high number of DTLS
+handshakes with a server.  As the clients are not uniquely identified
+by the protocol and can be obfuscated with IPv6 temporary addresses,
+a server needs to mitigate the impact of such an attack.  Such mitigation might
+involve rate limiting handshakes from a given subnet or more advanced denial of
+service avoidance techniques beyond the scope of this document.</t>
+
+</section>
+
+</middle>
+
+<back>
+
+<references title="Normative References">
+
+&RFC2119;
+&RFC6347;
+&RFC8174;
+
+<reference anchor="RFC6126bis"><front>
+<title>The Babel Routing Protocol</title>
+<author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
+<author fullname="David Schinazi" initials="D." surname="Schinazi"/>
+<date month="November" year="2018"/></front>
+<seriesInfo name="Internet Draft" value="draft-ietf-babel-rfc6126bis-07"/>
+</reference>
+
+</references>
+
+<references title="Informative References">
+
+&RFC7250;
+&RFC7918;
+&RFC7924;
+&RFC7525;
+&RFC8094;
+
+<reference anchor="BABEL-HMAC"><front>
+<title>Babel Cryptographic Authentication</title>
+<author fullname="Clara Do" initials="C." surname="Do"/>
+<author fullname="Weronika Kolodziejak" initials="W." surname="Kolodziejak"/>
+<author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
+<date month="November" year="2018"/></front>
+<seriesInfo name="Internet Draft" value="draft-ietf-babel-hmac-03"/>
+</reference>
+
+<reference anchor="DTLS-CID"><front>
+<title>Connection Identifiers for DTLS 1.2</title>
+<author fullname="Eric Rescorla" initials="E." surname="Rescorla"/>
+<author fullname="Hannes Tschofenig" initials="H." surname="Tschofenig"/>
+<author fullname="Thomas Fossati" initials="T." surname="Fossati"/>
+<author fullname="Tobias Gondrom" initials="T." surname="Gondrom"/>
+<date month="October" year="2018"/></front>
+<seriesInfo name="Internet Draft" value="draft-ietf-tls-dtls-connection-id-02"/>
+</reference>
+
+</references>
+
+<section title="Performance Considerations">
+
+<t>To reduce the number of octets taken by the DTLS handshake,
+especially the size of the certificate in the ServerHello (which can
+be several kilobytes), Babel peers can use raw public keys <xref
+target="RFC7250"/> or the Cached Information Extension <xref
+target="RFC7924"/>.  The Cached Information Extension avoids
+transmitting the server's certificate and certificate chain if the
+client has cached that information from a previous TLS handshake.  TLS
+False Start <xref target="RFC7918"/> can reduce round trips by
+allowing the TLS second flight of messages (ChangeCipherSpec) to also
+contain the (encrypted) Babel packet.</t>
+
+<t></t>
+
+</section>
+
+<section title="Acknowledgments">
+
+<t>The authors would like to thank
+Donald Eastlake,
+Thomas Fossati,
+Gabriel Kerneis,
+Antoni Przygienda,
+Barbara Stark,
+Markus Stenberg,
+Dave Taht,
+and Martin Thomson for their input and contributions.
+The performance considerations in this document were inspired from the ones for
+DNS over DTLS <xref target="RFC8094"/>.</t>
+
+</section>
+
+</back>
+
+</rfc>

@@ -156,14 +156,16 @@ connections.</t>
 
 <t>When a node receives a new DTLS connection, it MUST verify that the source
 IP address is an IPv6 link-local address; if it is not, it MUST reject the
-connection.  Nodes MUST use mutual authentication (authenticating
-both client and server); servers MUST request client authentication by
-sending a CertificateRequest message.  If either node fails to verify the
-peer's authentication, it MUST abort the DTLS handshake.  Nodes MUST only
-negotiate DTLS version 1.2 or higher.  Nodes MUST use DTLS replay protection
-to prevent attackers from replaying stale information.  Nodes SHOULD drop
-packets that have been reordered by more than several IHU intervals, to
-avoid letting attackers make stale information last longer.</t>
+connection.  Nodes use mutual authentication (authenticating
+both client and server); servers MUST send a CertificateRequest message and
+subsequently authenticate the client.  Implementations MUST support
+authenticating peers against a local store of credentials.  If either node
+fails to authenticate its peer against its local policy, it MUST abort the DTLS
+handshake.  Nodes MUST only negotiate DTLS version 1.2 or higher.  Nodes MUST
+use DTLS replay protection to prevent attackers from replaying stale
+information.  Nodes SHOULD drop packets that have been reordered by more than
+several IHU intervals, to avoid letting attackers make stale information last
+longer.</t>
 
 </section>
 

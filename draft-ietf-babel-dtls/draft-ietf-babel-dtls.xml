@@ -134,7 +134,8 @@ destinations.</t>
 All Babel over DTLS nodes MUST act as DTLS servers on a DTLS port, and MUST
 listen for unencrypted Babel traffic on an unencrypted port, which MUST be
 distinct from the DTLS port.  The default port for Babel over DTLS is
-registered with IANA as the "babel-dtls" port (UDP port TBD), and the
+registered with IANA as the "babel-dtls" port (UDP port TBD, see
+<xref target="iana_considerations"/>), and the
 unencrypted port is registered as the "babel" port (UDP port 6696).
 Nodes SHOULD use these default ports.</t>
 
@@ -274,10 +275,11 @@ and the packet may be fragmented by lower layers.</t>
 
 </section>
 
-<section title="IANA Considerations">
+<section title="IANA Considerations" anchor="iana_considerations">
 
 <t>If this document is approved, IANA is requested to register a UDP port
-number, called "babel-dtls", for use by Babel over DTLS.</t>
+number, called "babel-dtls", for use by Babel over DTLS.  The IANA registry
+will include a reference to this document.</t>
 
 </section>
 
@@ -359,8 +361,6 @@ False Start <xref target="RFC7918"/> can reduce round trips by
 allowing the TLS second flight of messages (ChangeCipherSpec) to also
 contain the (encrypted) Babel packet.</t>
 
-<t></t>
-
 </section>
 
 <section title="Acknowledgments">
@@ -373,7 +373,8 @@ Antoni Przygienda,
 Barbara Stark,
 Markus Stenberg,
 Dave Taht,
-and Martin Thomson for their input and contributions.
+Martin Thomson,
+and Sean Turner for their input and contributions.
 The performance considerations in this document were inspired from the ones for
 DNS over DTLS <xref target="RFC8094"/>.</t>
 

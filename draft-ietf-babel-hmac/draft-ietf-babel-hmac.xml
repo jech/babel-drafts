@@ -165,9 +165,9 @@ they appear in all capitals, as shown here.</t>
 <t>When a node B sends out a Babel packet through an interface that is
 configured for HMAC cryptographic protection, it computes one or more
 HMACs which it appends to the packet.  When a node A receives a packet
-over an interface that requires cryptographic protection, it independently
-computes a set of HMACs and compares them to the HMACs appended to the
-packet; if there is no match, the packet is discarded.</t>
+over an interface that requires HMAC cryptographic protection, it
+independently computes a set of HMACs and compares them to the HMACs
+appended to the packet; if there is no match, the packet is discarded.</t>
 
 <t>In order to protect against replay B maintains a per-interface 32-bit
 integer known as the "packet counter" (PC). Whenever B sends a packet

@@ -163,9 +163,9 @@ they appear in all capitals, as shown here.</t>
 <section title="Conceptual overview of the protocol">
 
 <t>When a node B sends out a Babel packet through an interface that is
-configured for cryptographic protection, it computes one or more HMACs
-which it appends to the packet.  When a node A receives a packet over an
-interface that requires cryptographic protection, it independently
+configured for HMAC cryptographic protection, it computes one or more
+HMACs which it appends to the packet.  When a node A receives a packet
+over an interface that requires cryptographic protection, it independently
 computes a set of HMACs and compares them to the HMACs appended to the
 packet; if there is no match, the packet is discarded.</t>
 
@@ -834,6 +834,8 @@ a restart.</t>
 </section>
 
 <section title="Changes from previous versions">
+
+<t>[RFC Editor: please remove this section before publication.]</t>
 
 <section title="Changes since draft-ietf-babel-hmac-00">
 

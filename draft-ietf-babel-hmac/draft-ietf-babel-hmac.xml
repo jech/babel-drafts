@@ -237,7 +237,7 @@ an interface on which HMAC authentication has been configured with two new
 pieces of data:
 <list style="symbols">
 <t> a set of one or more HMAC keys, each associated with a given HMAC
-algorithm ; the length of each key is exactly the block size of the
+algorithm ; the length of each key is exactly the hash size of the
 associated HMAC algorithm (i.e., the key is not subject to the
 preprocessing described in Section 2 of <xref target="RFC2104"/>);</t>
 <t> a pair (Index, PC), where Index is an arbtrary string of 0 to 32

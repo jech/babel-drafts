@@ -222,23 +222,31 @@ described in <xref target="RFC6126bis"/> Section 3.2.  This protocol
 extends these data structures as follows.</t>
     
 <section title="The Interface Table">
+
 <t>Every Babel node maintains an interface table, as described in <xref
-target="RFC6126bis"/> Section 3.2.3.  This protocol extends each entry in
-this table that is associated with an interface on which HMAC
-authentication has been configured with two new pieces of data:
+target="RFC6126bis"/> Section 3.2.3.  Implementations of this protocol
+MUST allow each interface to be provisioned with a set of one or more HMAC
+keys and the associated HMAC algorithms (see <xref target="hmac-computation"/>).
+In order to allow incremental deployment of this protocol (see
+<xref target="incremental-deployment"/>), implementations SHOULD allow an
+interface to be configured in a mode in which it participates in the HMAC
+authentication protocol but accepts packets that are not authentified.</t>
+
+<t>This protocol extends each entry in this table that is associated with
+an interface on which HMAC authentication has been configured with two new
+pieces of data:
 <list style="symbols">
 <t> a set of one or more HMAC keys, each associated with a given HMAC
-algorithm (see <xref target="hmac-computation"/>); the length of each key
-is exactly the block size of the associated HMAC algorithm (i.e., they are
-not subject to the preprocessing described in Section 2 of <xref
-target="RFC2104"/>);</t>
+algorithm ; the length of each key is exactly the block size of the
+associated HMAC algorithm (i.e., the key is not subject to the
+preprocessing described in Section 2 of <xref target="RFC2104"/>);</t>
 <t> a pair (Index, PC), where Index is an arbtrary string of 0 to 32
 octets, and PC is a 32-bit (4-octet) integer.</t>
 </list>
 The Index and PC are initialised to arbitrary values chosen so as to
-ensure that a given (Index, PC) pair is never used twice.  Typically, the
+ensure that a given (Index, PC) pair is never reused.  Typically, the
 initial Index will be chosen as a random string of sufficient length, and
-the initial PC will be chosen as 0.</t>
+the initial PC will be set to 0.</t>
 </section>
 
 <section title="The Neighbour table">
@@ -675,11 +683,12 @@ registry:</t>
 
 <section title="Acknowledgments">
 
-<t>The protocol described in this document is based on the original
-HMAC protocol defined by Denis Ovsienko <xref target="RFC7298"/>.  The
-use of a pseudo-header was suggested by David Schinazi.  The use of an
-index to avoid replay was suggested by Markus Stenberg.  The authors
-are also indebted to Toke Hoiland-Jorgensen, Florian Horn, and Dave Taht.</t>
+<t>The protocol described in this document is based on the original HMAC
+protocol defined by Denis Ovsienko <xref target="RFC7298"/>.  The use of
+a pseudo-header was suggested by David Schinazi.  The use of an index to
+avoid replay was suggested by Markus Stenberg.  The authors are also
+indebted to Donald Eastlake, Toke Hoiland-Jorgensen, Florian Horn, and
+Dave Taht.</t>
 
 </section>
 
@@ -809,7 +818,8 @@ Issues with Existing Cryptographic Protection Methods for Routing Protocols
 
 </references>
 
-<section title="Incremental deployment and key rotation">
+<section title="Incremental deployment and key rotation"
+         anchor="incremental-deployment">
 
 <t>This protocol supports incremental deployment (transitioning from an
 insecure network to a secured network with no service interruption) and

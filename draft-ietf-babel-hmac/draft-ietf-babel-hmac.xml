@@ -449,7 +449,7 @@ default to one challenge request every 300ms, and MAY be configurable.</t>
 <t>When it encounters a Challenge Request during the preparse phase,
 a node constructs a Challenge Reply TLV by copying the Nonce from the
 Challenge Request into the Challenge Reply.  It sends the Challenge Reply
-to the unicast address of the sender of the Challenge Reply.</t>
+to the unicast address from which the Challenge Request was sent.</t>
 
 <t>A node MAY aggregate a Challenge Reply with other TLVs; in other words,
 if it has already buffered TLVs to be sent to the unicast address of the

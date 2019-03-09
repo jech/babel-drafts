@@ -380,22 +380,22 @@ contains a successful Challenge Reply.  If the packet does not contain
 a PC TLV, the packet is dropped and processing stops at this point.  If
 the packet contains a successful Challenge Reply, then the PC and Index
 contained in the PC TLV are stored in the Neighbour Table entry
-corresponding to the sender (which may need to be created at this
-stage).</t>
-<t>If there is no entry in the Neighbour Table corresponding to the
-sender, or if such an entry exists but contains no Index, or if the Index
-it contains is different from the Index contained in the PC TLV, then
-a challenge is sent as described in <xref target="sending-challenges"/>,
+corresponding to the sender (which may need to be created at this stage),
+and the packet is accepted.</t>
+<t>Otherwise, if there is no entry in the Neighbour Table corresponding to
+the sender, or if such an entry exists but contains no Index, or if the
+Index it contains is different from the Index contained in the PC TLV,
+then a challenge is sent as described in <xref target="sending-challenges"/>,
 processing stops at this stage, and the packet is dropped.</t>
-<t>At this stage, the Index contained in the PC TLV is equal to the Index
-in the Neighbour Table entry corresponding to the sender.  The receiver
-compares the received PC with the PC contained in the Neighbour Table; if
-the received PC smaller or equal than the PC contained in the Neighbour
-Table, the packet is silently dropped and processing stops (no challenge
-is sent in this case, since the mismatch might be caused by harmless
-packet reordering on the link).  Otherwise, the PC contained in the
-Neighbour Table entry is set to the received PC, and the packet is
-accepted.</t>
+<t>At this stage, the packet contained no successful challenge reply and
+the Index contained in the PC TLV is equal to the Index in the Neighbour
+Table entry corresponding to the sender.  The receiver compares the
+received PC with the PC contained in the Neighbour Table; if the received
+PC is smaller or equal than the PC contained in the Neighbour Table, the
+packet is silently dropped and processing stops (no challenge is sent in
+this case, since the mismatch might be caused by harmless packet
+reordering on the link).  Otherwise, the PC contained in the Neighbour
+Table entry is set to the received PC, and the packet is accepted.</t>
 </list>
 After the packet has been accepted, it is processed as normal, except that
 any PC, Challenge Request and Challenge Reply TLVs that it contains are

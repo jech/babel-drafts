@@ -217,25 +217,45 @@ attacks (see <xref target="security-properties"/> above).</t>
 
 <section title="Data Structures">
 
+<t>Every Babel node maintains a set of conceptual data structures
+described in <xref target="RFC6126bis"/> Section 3.2.  This protocol
+extends these data structures as follows.</t>
+    
 <section title="The Interface Table">
 <t>Every Babel node maintains an interface table, as described in <xref
-target="RFC6126bis"/> Section 3.2.3.  This protocol extends the entries in
-this table with a set of HMAC keys, and a pair (Index, PC), where Index is
-an arbitrary string of bytes and PC is a 32-bit integer.  The Index is
-initialised to a value that has never been used before (e.g., by choosing
-a random string of sufficient length).</t>
+target="RFC6126bis"/> Section 3.2.3.  This protocol extends each entry in
+this table that is associated with an interface on which HMAC
+authentication has been configured with two new pieces of data:
+<list style="symbols">
+<t> a set of one or more HMAC keys, each associated with a given HMAC
+algorithm (see <xref target="hmac-computation"/>); the length of each key
+is exactly the block size of the associated HMAC algorithm (i.e., they are
+not subject to the preprocessing described in Section 2 of <xref
+target="RFC2104"/>);</t>
+<t> a pair (Index, PC), where Index is an arbtrary string of 0 to 32
+octets, and PC is a 32-bit (4-octet) integer.</t>
+</list>
+The Index and PC are initialised to arbitrary values chosen so as to
+ensure that a given (Index, PC) pair is never used twice.  Typically, the
+initial Index will be chosen as a random string of sufficient length, and
+the initial PC will be chosen as 0.</t>
 </section>
 
 <section title="The Neighbour table">
 <t>Every Babel node maintains a neighbour table, as described in
-<xref target="RFC6126bis"/> Section 3.2.4.  This protocol extends the
-entries in this table with a pair (Index, PC), as well as a nonce (an
-arbitrary string of bytes) and a challenge expiry timer.  The Index and PC
-are initially undefined, and are managed as described in
+<xref target="RFC6126bis"/> Section 3.2.4.  This protocol extends each
+entry in this table with two new pieces of data:
+<list style="symbols">
+<t> a pair (Index, PC), where Index is a string of 0 to 32 octets, and PC
+is a 32-bit (4-octet) integer;</t>
+<t> a Nonce, an arbitrary string of 0 to 192 octets, and an associated
+challenge expiry timer.</t>
+</list>
+The Index and PC are initially undefined, and are managed as described in
 <xref target="packet-reception"/>.  The Nonce and expiry timer are
-initially undefined and used as described in
-<xref target="sending-challenges"/>.
-</t>
+initially undefined, and used as described in
+<xref target="sending-challenges"/>.</t>
+
 </section>
 
 </section>

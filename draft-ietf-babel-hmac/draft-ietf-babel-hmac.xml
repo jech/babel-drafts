@@ -431,8 +431,8 @@ from that neighbour will be silently ignored until the challenge
 completes.</t>
 
 <t>Since a challenge may be prompted by a replayed packet, a node MUST
-impose a rate limitation to the challenges it sends; a limit of one
-challenge every 300ms for each neighbour is suggested.</t>
+impose a rate limitation to the challenges it sends; the limit SHOULD
+default to one challenge request every 300ms, and MAY be configurable.</t>
 
 </section>
 
@@ -484,11 +484,13 @@ a finite time since the last time a packet has been accepted.  In
 particular, unsuccessful challenges MUST NOT prevent an (Index, PC) pair
 from being discarded for unbounded periods of time.</t>
 
-<t>Implementations that use a Hello history (Appendix A of <xref
-target="RFC6126bis"/>) may discard the (Index, PC) pair whenever the Hello
-history becomes empty.  Other impementations may use a timer that is reset
-whenever a packet is accepted, and discard the (Index, PC) pair whenever
-the timer expires (a timeout of 5&nbsp;min is suggested).</t>
+<t>A possible implementation strategy for implementations that use a Hello
+history (Appendix A of <xref target="RFC6126bis"/>) is to discard the
+(Index, PC) pair whenever the Hello history becomes empty.  Another
+implementation strategy is to use a timer that is reset whenever a packet
+is accepted, and to discard the (Index, PC) pair whenever the timer
+expires.  If the latter strategy is being used, the timer SHOULD default
+to a value of 5&nbsp;min, and MAY be configurable.</t>
 
 </section>
 

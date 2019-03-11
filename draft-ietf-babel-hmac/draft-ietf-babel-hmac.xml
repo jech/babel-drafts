@@ -6,7 +6,7 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="no" ?>
-<rfc category="std" docName="draft-ietf-babel-hmac-03"
+<rfc category="std" docName="draft-ietf-babel-hmac-04"
      ipr="trust200902"
      updates="6126bis"
      obsoletes="7298">
@@ -53,7 +53,7 @@ Babel routing protocol</title>
 </address>
 </author>
 
-<date day="26" month="December" year="2018"/>
+<date day="9" month="March" year="2019"/>
 
 <abstract>
 <t>This document describes a cryptographic authentication mechanism for
@@ -880,6 +880,17 @@ rfc6126bis.</t>
 
 </section>
 
+<section title="Changes since draft-ietf-babel-hmac-03">
+
+<t><list style="symbols">
+<t>Use the TLV values allocated by IANA.</t>
+<t>Fixed an issue with packets that contain a successful challenge
+reply: they should be accepted before checking the PC value.</t>
+<t>Clarified that keys are the exact value of the HMAC hash size, and not
+subject to preprocessing; this makes management more deterministic.</t>
+</list></t>
+
+</section>
 </section>
 
 </back>

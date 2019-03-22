@@ -2349,8 +2349,8 @@ inspired by <xref target="PACKETBB"/>.</t>
 <author fullname="Clara Do" initials="C." surname="Do"/>
 <author fullname="Weronika Kolodziejak" initials="W." surname="Kolodziejak"/>
 <author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
-<date month="November" year="2018"/></front>
-<seriesInfo name="Internet Draft" value="draft-ietf-babel-hmac-01"/>
+<date month="March" year="2019"/></front>
+<seriesInfo name="Internet Draft" value="draft-ietf-babel-hmac-04"/>
 </reference>
 
 <reference anchor="BABEL-DTLS"><front>
@@ -2358,8 +2358,8 @@ inspired by <xref target="PACKETBB"/>.</t>
 <author fullname="Antonin Decimo" initials="A." surname="Decimo"/>
 <author fullname="David Schinazi" initials="D." surname="Schinazi"/>
 <author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
-<date month="October" year="2018"/></front>
-<seriesInfo name="Internet Draft" value="draft-ietf-babel-dtls-01"/>
+<date month="February" year="2019"/></front>
+<seriesInfo name="Internet Draft" value="draft-ietf-babel-dtls-04"/>
 </reference>
 
 </references>

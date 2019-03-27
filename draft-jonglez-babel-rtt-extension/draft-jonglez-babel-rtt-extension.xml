@@ -6,7 +6,7 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="no" ?>
-<rfc category="exp" docName="draft-jonglez-babel-rtt-extension-01"
+<rfc category="exp" docName="draft-jonglez-babel-rtt-extension-02"
      ipr="trust200902" updates="6126">
 <front>
 <title abbrev="Babel RTT Extension">Delay-based Metric Extension for the Babel Routing Protocol</title>
@@ -24,7 +24,7 @@
 </address>
 </author>
 <author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek">
-<organization>PPS, University of Paris-Diderot</organization>
+<organization>IRIF, University of Paris-Diderot</organization>
 <address>
 <postal>
 <street>Case 7014</street>
@@ -33,11 +33,11 @@
 <code></code>
 <country>France</country>
 </postal>
-<email>jch@pps.univ-paris-diderot.fr</email>
+<email>jch@irif.fr</email>
 </address>
 </author>
 
-<date day="27" month="May" year="2015"/>
+<date day="11" month="March" year="2019"/>
 
 <abstract>
 <t>This document defines an extension to the Babel routing protocol that

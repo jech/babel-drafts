@@ -2147,7 +2147,7 @@ Length fields.</t>
 <t hangText="Hop Count">The maximum number of times that this TLV may be
 forwarded, plus 1.  This MUST NOT be 0.</t>
 <t hangText="Reserved">Sent as 0 and MUST be ignored on reception.</t>
-<t hangText="Router Id">The Router-Id that is being requested.  This MUST
+<t hangText="Router-Id">The Router-Id that is being requested.  This MUST
 NOT consist of all zeroes or all ones.</t>
 <t hangText="Prefix">The prefix being requested.  This field's size is
 Plen/8 rounded upwards.</t>

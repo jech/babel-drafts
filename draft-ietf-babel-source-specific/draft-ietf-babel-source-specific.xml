@@ -73,8 +73,9 @@ routed, which makes it possible for two packets with the same destination
 but different source addresses to be routed following different paths.
 The forwarding tables are extended to map pairs of prefixes (destination,
 source) to next hops.  When multiple entries match a given packet, the one
-with the most specific destination prefix is chosen, and, in case of
-equality, the one with the most specific source prefix.</t>
+with the most specific destination prefix is chosen, and, in the case of
+equally specific destination prefixes, the one with the most specific
+source prefix.</t>
 
 <t>The main application of source-specific routing is a form of
 multihoming known as multihoming with multiple addresses.  When using this
@@ -258,7 +259,7 @@ a source-specific Request, i.e., a Request with a source prefix sub-TLV.
 When a node receives a source-specific Request, it behaves as described in
 Section 3.8 of <xref target="BABEL"/>, except that the request applies to
 the Route Table entry carrying the source prefix indicated by the
-sub-TLV.</t>
+Source-Specific sub-TLV.</t>
 
 </section>
 
@@ -279,7 +280,7 @@ source prefix.</t>
 <t>More precisely, a node receiving an Update with the AE field set to
 0 and the Metric field set to infinity (a wildcard retraction) MUST apply
 the route acquisition procedure described in Section 3.5.4 of <xref
-target="BABEL"/> to all of the routes that is has learned from the sending
+target="BABEL"/> to all of the routes that it has learned from the sending
 node, whatever the value of the source prefix.  A node MUST NOT send
 a wildcard retraction with an attached source prefix, and a node that
 receives a wildcard retraction with a source prefix MUST ignore it.</t>
@@ -298,10 +299,10 @@ a wildcard request with a source prefix MUST ignore it.</t>
 
 <t>The protocol extension defined in this document is, to a great extent,
 interoperable with the base protocol defined in <xref target="BABEL"/>
-(and all of its extensions).  More precisely, if non-source-specific
-routers and source-specific routers are mixed in a single routing domain,
-Babel's loop-avoidance properties are preserved, and, in particular, no
-persistent routing loops will occur.</t>
+(and all previously standardised extensions).  More precisely, if
+non-source-specific routers and source-specific routers are mixed in
+a single routing domain, Babel's loop-avoidance properties are preserved,
+and, in particular, no persistent routing loops will occur.</t>
 
 <t>However, this extension is encoded using mandatory sub-TLVs, introduced in
 <xref target="BABEL"/>, and therefore is not compatible with the older version
@@ -336,11 +337,11 @@ persistent routing loop:</t>
 
 <section title="Starvation and Blackholes">
 
-<t>In general, discarding source-specific routes by non-source-specific
-routers will cause route starvation.  Intuitively, unless there are enough
-non-source-specific routes in the network, non-source-specific routers
-will suffer starvation, and discard packets for destinations that are only
-announced by source-specific routers.</t>
+<t>In general, the discarding of source-specific routes by
+non-source-specific routers will cause route starvation.  Intuitively,
+unless there are enough non-source-specific routes in the network,
+non-source-specific routers will suffer starvation, and discard packets
+for destinations that are only announced by source-specific routers.</t>
 
 <t>A simple yet sufficient condition for avoiding starvation is to build a
 connected source-specific backbone that includes all of the edge routers,
@@ -389,7 +390,10 @@ field's size is (Source Plen)/8 rounded upwards.</t>
 </t>
 
 <t>The contents of the source prefix sub-TLV are interpreted according to
-the AE of the enclosing TLV.</t>
+the AE of the enclosing TLV.  If a TLV with AE equal to 0 contains
+a source prefix sub-TLV, then the whole TLV MUST be ignored.  Similarly,
+if a TLV contains multiple source prefix sub-TLVs, then the whole TLV MUST
+be ignored.</t>
 
 <t>Note that this sub-TLV is a mandatory sub-TLV.  Therefore, as described
 in Section 4.4 of <xref target="BABEL"/>, the whole TLV MUST be ignored if
@@ -402,9 +406,9 @@ may occur (see <xref target="loop"/>).</t>
 
 <t>The source-specific Update is an Update TLV with a Source Prefix
 sub-TLV.  It advertises or retracts source-specific routes in the same
-manner than routes with non-source-specific Updates (see <xref
-target="BABEL"/>).  A wildcard retraction (Update with AE equal to 0)
-MUST NOT carry a Source Prefix sub-TLV.</t>
+manner as routes with non-source-specific Updates (see <xref
+target="BABEL"/>).  A wildcard retraction (Update with AE equal to 0) MUST
+NOT carry a Source Prefix sub-TLV.</t>
 
 <t>Babel uses a stateful compression scheme to reduce the size taken by
 destination prefixes in update TLVs (see Section 4.5 of <xref
@@ -422,7 +426,9 @@ update their parser state while otherwise ignoring the whole TLV.</t>
 Prefix sub-TLV.  It prompts the receiver to send an update for a given
 pair of destination and source prefixes, as described in Section 3.8.1.1
 of <xref target="BABEL"/>.  A wildcard request (Route Request with AE
-equals to 0) MUST NOT carry a Source Prefix sub-TLV.</t>
+equals to 0) MUST NOT carry a Source Prefix sub-TLV; if a wildcard request
+with a Source Prefix sub-TLV is received, then the request MUST be
+ignored.</t>
 
 </section>
 
@@ -456,7 +462,8 @@ have security implications (see Section 8 of <xref target="DSR"/>).</t>
 
 <section title="Acknowledgments">
 
-<t>The authors are grateful to Joel Halpern for his help with this document.</t>
+<t>The authors are grateful to Donald Eastlake and Joel Halpern for their
+help with this document.</t>
     
 </section>
 

@@ -228,12 +228,12 @@ protocol and the extended protocol.</t>
 
 <t>In the original protocol, three TLVs carry a destination prefix:
 Updates, Route Requests and Seqno Requests.  This specification extends
-these messages to optionally carry a source prefix sub-TLV, as described
+these messages to optionally carry a Source Prefix sub-TLV, as described
 in <xref target="protocol-encoding"/> below.  The sub-TLV is marked as
 mandatory, so that an unextended implementation will silently ignore the
 whole enclosing TLV.  A node obeying this specification MUST NOT send
 a TLV with a zero-length source prefix: instead, it sends a TLV with no
-source prefix sub-TLV.  Conversely, an extended implementation MUST
+Source Prefix sub-TLV.  Conversely, an extended implementation MUST
 interpret an unextended TLV as carrying a source prefix of zero length.
 Taken together, these properties ensure interoperability between the
 original and extended protocols (see <xref target="compatibility"/>
@@ -246,8 +246,8 @@ carry a source prefix: Update TLVs, Route Request TLVs and Seqno Request
 TLVs.</t>
 
 <t>In order to advertise a route with a non-zero length source prefix,
-a node sends a source-specific Update, i.e., an Update with a source
-prefix sub-TLV.  When a node receives a source-specific Update (prefix,
+a node sends a source-specific Update, i.e., an Update with a Source
+Prefix sub-TLV.  When a node receives a source-specific Update (prefix,
 source prefix, router-id, seqno, metric) from a neighbour neigh, it
 behaves as described in <xref target="BABEL"/> Section&nbsp;3.5.4, except
 that the entry under consideration is indexed by (prefix, source prefix,
@@ -255,11 +255,11 @@ neigh) rather than just (prefix, neigh).</t>
 
 <t>Similarly, when a node needs to send a Request of either kind that
 applies to a route with a non-zero length source prefix, it sends
-a source-specific Request, i.e., a Request with a source prefix sub-TLV.
+a source-specific Request, i.e., a Request with a Source Prefix sub-TLV.
 When a node receives a source-specific Request, it behaves as described in
 Section 3.8 of <xref target="BABEL"/>, except that the request applies to
 the Route Table entry carrying the source prefix indicated by the
-Source-Specific sub-TLV.</t>
+Source Prefix sub-TLV.</t>
 
 </section>
 
@@ -389,10 +389,10 @@ field's size is (Source Plen)/8 rounded upwards.</t>
 </list>
 </t>
 
-<t>The contents of the source prefix sub-TLV are interpreted according to
+<t>The contents of the Source Prefix sub-TLV are interpreted according to
 the AE of the enclosing TLV.  If a TLV with AE equal to 0 contains
-a source prefix sub-TLV, then the whole TLV MUST be ignored.  Similarly,
-if a TLV contains multiple source prefix sub-TLVs, then the whole TLV MUST
+a Source Prefix sub-TLV, then the whole TLV MUST be ignored.  Similarly,
+if a TLV contains multiple Source Prefix sub-TLVs, then the whole TLV MUST
 be ignored.</t>
 
 <t>Note that this sub-TLV is a mandatory sub-TLV.  Therefore, as described

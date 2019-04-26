@@ -6,7 +6,7 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="no" ?>
-<rfc category="info" docName="draft-ietf-babel-applicability-05"
+<rfc category="info" docName="draft-ietf-babel-applicability-06"
      ipr="trust200902">
 <front>
 <title abbrev="Babel Protocol Applicability">Applicability of the Babel
@@ -25,7 +25,7 @@ routing protocol</title>
 </address>
 </author>
 
-<date day="14" month="November" year="2018"/>
+<date day="26" month="April" year="2019"/>
 
 <abstract>
 <t>Babel is a routing protocol based on the distance-vector algorithm
@@ -314,13 +314,29 @@ section before publication.]</t>
 
 <t>As is the case in all distance-vector routing protocols, a Babel
 speaker receives reachability information from its neighbours, which by
-default is trusted.  A number of attacks are possible if this information
-is not suitably protected, either by a lower-layer mechanism or by an
-extension to the protocol itself (e.g.&nbsp;<xref target="RFC7298"/>).</t>
+default is trusted by all nodes in the routing domain.</t>
 
-<t>Implementors and deployers must be aware of the insecure nature of the
-base protocol, and must take suitable measures to ensure that the protocol
-is deployed as securely as required by the application.</t>
+<t>In most deployments, the Babel protocol is run over a network that is
+secured either at the physical layer (e.g., physically protecting Ethernet
+sockets) or at the link layer (using a protocol such as WiFi Protected
+Access (WPA2)).  If Babel is being run over an unprotected network, then
+the routing traffic needs to be protected using a sufficiently strong
+cryptographic mechanism.</t>
+
+<t>At the time of writing, two such mechanisms have been defined.
+Babel-HMAC <xref target="HMAC"/> is a simple and easy to implement
+mechanism that only guarantees authenticity and integrity of the routing
+traffic, and only supports symmetric keying with a small number of keys
+(typically just one or two), but is invulnerable to replay even in the
+absence of persistent state.  Babel-DTLS <xref target="DTLS"/> is a more
+complex mechanism, that requires some minor changes to be made to
+a typical Babel implementation and depends on a DTLS stack being
+available, but inherits all of the features of DTLS, notably
+confidentiality and the ability to use asymmetric keys.</t>
+
+<t>Due to its simplicity, Babel-HMAC should be the preferred security
+mechanism in most deployments, with Babel-DTLS available for networks
+that require its additional features.</t>
 
 </section>
 
@@ -548,20 +564,6 @@ Networks</title>
 <seriesInfo name="Proc. ATNAC" value="2010"/>
 </reference>
 
-<reference anchor="RFC7298" target="http://www.rfc-editor.org/info/rfc7298">
-<front>
-<title>
-Babel Hashed Message Authentication Code (HMAC) Cryptographic Authentication
-</title>
-<author initials="D." surname="Ovsienko" fullname="D. Ovsienko">
-<organization/>
-</author>
-<date year="2014" month="July"/>
-</front>
-<seriesInfo name="RFC" value="7298"/>
-<seriesInfo name="DOI" value="10.17487/RFC7298"/>
-</reference>
-
 <reference anchor="BABEL-SS">
 <front>
 <title>Source-Specific Routing in Babel</title>
@@ -600,14 +602,33 @@ Babel Hashed Message Authentication Code (HMAC) Cryptographic Authentication
 <seriesInfo name='Internet-Draft' value='draft-chroboczek-babel-diversity-routing-01'/>
 </reference>
 
-<reference anchor="SS-ROUTING" target="http://arxiv.org/pdf/1403.0445">
-<front>
+<reference anchor="SS-ROUTING" target="http://arxiv.org/pdf/1403.0445"><front>
 <title>Source-Specific Routing</title>
 <author initials="M." surname="Boutier" fullname="Matthieu Boutier"/>
 <author initials="J." surname="Chroboczek" fullname="Juliusz Chroboczek"/>
 <date year="2014" month="August"/>
 </front>
 <annotation>In Proc. IFIP Networking 2015.</annotation>
+</reference>
+
+<reference anchor="HMAC"><front>
+<title>HMAC authentication for the Babel routing protocol</title>
+<author initials="C" surname="Do" fullname="Clara Do"/>
+<author initials="W" surname="Kolodziejak" fullname="Weronika Kolodziejak"/>
+<author initials="J" surname="Chroboczek" fullname="Juliusz Chroboczek"/>
+<date month="March" day="9" year="2019"/>
+</front>
+<seriesInfo name="Internet-Draft" value="draft-ietf-babel-hmac-04"/>
+</reference>
+
+<reference anchor="DTLS"><front>
+<title>Babel Routing Protocol over Datagram Transport Layer Security</title>
+<author initials="A" surname="Decimo" fullname="Antonin Decimo"/>
+<author initials="D" surname="Schinazi" fullname="David Schinazi"/>
+<author initials="J" surname="Chroboczek" fullname="Juliusz Chroboczek"/>
+<date month="February" day="6" year="2019"/>
+</front>
+<seriesInfo name="Internet-Draft" value="draft-ietf-babel-dtls-04"/>
 </reference>
 
 </references>

@@ -385,9 +385,11 @@ S  |1
 at which point the route through B becomes feasible again.</t>
 
 <t>Note that while sequence numbers are used for determining feasibility,
-they are not necessarily used in route selection: a node will normally
-ignore the sequence number when selecting the best route to a given
-destination (<xref target="route-selection"/>).</t>
+they are not used in route selection: a node ignores the sequence number
+when selecting the best route to a given destination
+(<xref target="route-selection"/>).  Doing otherwise would cause
+route oscillation while a seqno propagates through the network, and might
+even cause persistent blackholes with some exotic metrics.</t>
 
 </section>
 
@@ -1130,7 +1132,14 @@ criteria; in roughly decreasing order of importance, these are:
   <t>stable routes should be preferred to unstable ones;</t>
   <t>switching next hops should be avoided.</t>
 </list>
-A simple but useful strategy is to choose the feasible route with the
+Route selection MUST NOT take seqnos into account: a route MUST NOT be
+preferred just because it carries a higher (more recent) seqno.  Doing
+otherwise would cause route oscillation while a new seqno propagates
+through the network, possibly following multiple paths of different
+latency, and might even create persistent blackholes if the metric being
+used is not left-distributive <xref target="metric-computation"/>.</t>
+
+<t>A simple but useful strategy is to choose the feasible route with the
 smallest metric, with a small amount of hysteresis applied to avoid
 switching router-ids too often.</t>
 
@@ -2299,10 +2308,10 @@ packets are carried over IPv4.</t>
 
 <t>A number of people have contributed text and ideas to this
 specification.  The authors are particularly indebted to Matthieu Boutier,
-Gwendoline Chouasne, Margaret Cullen, Donald Eastlake and Toke
-Hoiland-Jorgensen.  Earlier versions of this document greatly benefited
-from the input of Joel Halpern.  The address compression technique was
-inspired by <xref target="PACKETBB"/>.</t>
+Gwendoline Chouasne, Margaret Cullen, Donald Eastlake, Toke
+Hoiland-Jorgensen and Joao Sobrinho.  Earlier versions of this document
+greatly benefited from the input of Joel Halpern.  The address compression
+technique was inspired by <xref target="PACKETBB"/>.</t>
 
 </section>
 

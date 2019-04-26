@@ -2897,6 +2897,12 @@ draft-ietf-babel-hmac.</t>
 </list></t>
 </section>
 
+<section title="Changes since draft-ietf-babel-rfc6126bis-07">
+<t><list style="symbols">
+<t>Added list of obsoleted drafts to the abstract.</t>
+<t>Updated references.</t>
+</list></t>
+</section>
 </section>
 
 </back>

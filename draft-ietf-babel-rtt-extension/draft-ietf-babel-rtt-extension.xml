@@ -1,0 +1,430 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd" []>
+<?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
+<?rfc toc="yes"?>
+<?rfc tocdepth="2"?>
+<?rfc symrefs="yes"?>
+<?rfc sortrefs="yes" ?>
+<?rfc compact="no" ?>
+<rfc category="exp" docName="draft-ietf-babel-rtt-extension-00"
+     ipr="trust200902" updates="6126">
+<front>
+<title abbrev="Babel RTT Extension">Delay-based Metric Extension for the Babel Routing Protocol</title>
+<author fullname="Baptiste Jonglez" initials="B." surname="Jonglez">
+<organization>ENS Lyon</organization>
+<address>
+<postal>
+<street></street>
+<city></city>
+<region></region>
+<code></code>
+<country>France</country>
+</postal>
+<email>baptiste.jonglez@ens-lyon.org</email>
+</address>
+</author>
+<author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek">
+<organization>IRIF, University of Paris-Diderot</organization>
+<address>
+<postal>
+<street>Case 7014</street>
+<city>75205 Paris Cedex 13</city>
+<region></region>
+<code></code>
+<country>France</country>
+</postal>
+<email>jch@irif.fr</email>
+</address>
+</author>
+
+<date day="26" month="April" year="2019"/>
+
+<abstract>
+<t>This document defines an extension to the Babel routing protocol that
+uses symmetric delay in metric computation and therefore makes it possible
+to prefer lower latency links to higher latency ones.</t>
+</abstract>
+
+</front>
+
+<middle>
+
+<section title="Introduction">
+
+<t>The Babel routing protocol <xref target="BABEL"/> does not mandate
+a specific algorithm for computing metrics; existing implementations use
+a packet-loss based metric on wireless links and a simple hop-count metric
+on all other types of links.  While this strategy works reasonably well in
+many networks, it fails to select reasonable routes in some topologies
+involving tunnels or VPNs.</t>
+
+<figure><preamble>Consider for example the following topology, with three
+routers A, B and D located in Paris and a fourth router located in Tokyo,
+connected through tunnels in a diamond topology.</preamble>
+<artwork><![CDATA[
+                   +------------+
+                   | A (Paris)  +---------------+
+                   +------------+                \
+                  /                               \
+                 /                                 \
+                /                                   \
+  +------------+                                     +------------+
+  | B  (Paris) |                                     | C  (Tokyo) |
+  +------------+                                     +------------+
+                \                                   /
+                 \                                 /
+                  \                               /
+                   +------------+                /
+                   | D (Paris)  +---------------+
+                   +------------+
+]]></artwork></figure>
+
+<t>When routing traffic from A to D, it is obviously preferable to use the
+local route through B, as this is likely to provide better service quality
+and lower monetary cost than the distant route through C.  However, the
+existing implementations of Babel consider both routes as having the same
+metric, and will therefore route the traffic through C in roughly half the
+cases.</t>
+
+<t>In this document, we specify an extension to the Babel routing protocol
+that enables precise measurement of the round-trip time (RTT) of a link,
+and allows its usage in metric computation.  Since this causes a negative
+feedback loop, special care is needed to ensure that the resulting network
+is reasonably stable (<xref target="stability-issues"/>).</t>
+
+<t>We believe that this protocol may be useful in other situations than
+the one described above, such as when running Babel in a congested
+wireless mesh network or over a complex link layer that performs its own
+routing; the high granularity of the timestamps used (1ms) should make it
+easier to experiment with RTT-based metrics on this kind of link
+layers.</t>
+
+</section>
+
+<section title="Protocol operation">
+
+<t>The protocol estimates the RTT to each neighbour
+(<xref target="delay-estimation"/>) which it then uses for metric
+computation (<xref target="metric-computation"/>).</t>
+
+<section title="Delay estimation" anchor="delay-estimation">
+
+<t>The RTT to a neighbour is estimated using an algorithm due to Mills
+<xref target="MILLS"/>, originally developed for the HELLO routing
+protocol and later used in NTP <xref target="NTP"/>.</t>
+
+<t>A Babel speaker periodically sends a multicast Hello message over all
+of its interfaces (Section 3.4.1 of <xref target="BABEL"/>).  This Hello
+is usually accompanied with a set of IHU messages, one per neighbour
+(Section 3.4.2 of <xref target="BABEL"/>).</t>
+
+<t>In order to enable the computation of RTTs, a node A SHOULD include in
+every Hello that it sends a timestamp t1 (according to A's clock).  When
+a node B receives A's Hello, it records in its neighbour table the
+timestamp t1 as well as the time t1' according to its own (B's) clock at
+which it received the packet.</t>
+
+<t>When B later sends an IHU to A, it SHOULD attach to the IHU the
+timestamps t1 and t1' which it has stored in its neighbour table.
+Additionally, it SHOULD ensure that the packet within which the IHU is
+sent contains a Hello TLV with an associated timestamp t2' (according to
+B's clock).  Symmetrically, A will record in its neighbour table the
+timestamp t2' as well as the time t2 (according to A's clock) at which it
+has received the Hello.  This is illustrated in the following sequence
+diagram:</t>
+
+<figure><artwork><![CDATA[
+ A          B
+   |      |
+t1 +      |
+   |\     |
+   | \    |
+   |  \   |  Hello(t1)
+   |   \  |
+   |    \ |
+   |     \|
+   |      + t1'
+   |      |
+   |      |
+   |      |
+   |      + t2'
+   |     /|
+   |    / |
+   |   /  |
+   |  /   |  Hello(t2')
+   | /    |  IHU(t1, t1')
+   |/     |
+t2 +      |
+   |      |
+   v      v
+]]></artwork></figure>
+
+<t>A then estimates the RTT between A and B as
+(t2&nbsp;-&nbsp;t1)&nbsp;-&nbsp;(t2'&nbsp;-&nbsp;t1').</t>
+
+<t>This algorithm has a number of desirable properties.  First, since
+there is no requirement that t1' and t2' be equal, the protocol remains
+asynchronous &mdash; the only change to Babel's message scheduling is the
+requirement that a packet containing an IHU also contains a Hello.
+Second, since only differences of timestamps according to a single clock
+are computed, it does not require synchronised clocks.  Third, it requires
+very little additional state &mdash; a node only needs to store the two
+timestamps associated with the last hello received from each neighbour.
+Finally, since it only requires piggybacking one or two timestamps on each
+Hello and IHU packet, it makes efficient use of network resources.</t>
+
+<t>In principle, this algorithm is inaccurate in the presence of clock
+drift (i.e. when A's and B's clocks are running at different frequencies).
+However, t2'&nbsp;-&nbsp;t1' is usually on the order of seconds, and
+significant clock drift is unlikely to happen at that time scale.</t>
+
+</section>
+
+<section title="Metric computation" anchor="metric-computation">
+
+<t>The algorithm described in the previous section allows computing an RTT
+to every neighbour.  How to map this value to a link cost is a local
+implementation matter.</t>
+
+<t>Obviously, the mapping should be monotonic (larger RTTs imply larger
+costs).  In addition, in order to enhance stability (<xref
+target="stability-issues"/>), the mapping should be bounded &mdash; above
+a certain RTT, all links are equally bad.</t>
+
+<section title="Example metric computation">
+
+<t>The current implementation of Babel uses the following function for
+mapping RTTs to link costs, parameterised by three parameters rtt-min,
+rtt-max and max-rtt-penalty:</t>
+
+<figure><artwork><![CDATA[
+  cost
+    ^
+    |
+    |
+    |                           C + max-rtt-penalty
+    |                       +---------------------------
+    |                      /.
+    |                     / .
+    |                    /  .
+    |                   /   .
+    |                  /    .
+    |                 /     .
+    |                /      .
+    |               /       .
+    |              /        .
+    |             /         .
+  C +------------+          .
+    |            .          .
+    |            .          .
+    |            .          .
+    |            .          .
+  0 +---------------------------------------------------->
+    0         rtt-min    rtt-max                          RTT
+]]></artwork></figure>
+
+<t>For RTTs below rtt-min, the link cost is just the nominal cost of
+a single hop, C.  Between rtt-min and rtt-max, the cost increases linearly;
+abover rtt-max, the constant value max-rtt-penalty is added to the nominal
+cost.</t>
+
+</section>
+
+</section>
+
+<section title="Stability issues" anchor="stability-issues">
+
+<t>Using delay as an input to the routing metric in congested networks
+gives rise to a negative feedback loop: low RTT encourages traffic, which
+in turn causes the RTT to increase.  In a congested network, such
+a feedback loop can cause persistent oscillations.</t>
+
+<t>The current implementation of Babel uses three techniques that
+collaborate to limit the frequency of oscillations:
+<list style="symbols">
+<t>the measured RTT is smoothed, which limits Babel's response to
+short-term RTT variations;</t>
+<t>the mapping function is bounded, which avoids switching between
+congested routes;</t>
+<t>a hysteresis algorithm is applied to the metric before route selection,
+which limits the worst-case frequency of route oscillations.</t>
+</list></t>
+
+<t>These techniques are discussed in more detail in
+<xref target="DELAY-BASED"/>.</t>
+
+</section>
+
+<section title="Backwards and forwards compatibility">
+
+<t>This protocol extension stores the data that it requires within
+sub-TLVs of Babel's Hello and IHU TLVs.  As discussed in Section&nbsp;4 of
+<xref target="BABEL-EXT"/>, implementations that do not understand this
+extension will silently ignore the sub-TLVs while parsing the rest of the
+TLVs that they contain.  In effect, this extension supports building
+hybrid networks consisting of extended and unextended routers, and while
+such networks might suffer from sub-optimal routing, they will not suffer
+from blackholes or routing loops.</t>
+
+<t>If a sub-TLV defined in this extension is longer than expected, the
+additional data is silently ignored.  This provision is made in order to
+allow a future version of this document to extend the packet format with
+additional data.</t>
+
+</section>
+
+</section>
+
+<section title="Packet format">
+
+<t>This extension defines the Timestamp sub-TLV <xref target="BABEL-EXT"/>,
+whose Type field has value 3.  This sub-TLV can be contained within
+a Hello sub-TLV, in which case it carries a single timestamp, or
+within an IHU sub-TLV, in which case it carries two timestamps.</t>
+
+<t>Timestamps are encoded as 32-bit unsigned integers, expressed in
+units of one microsecond, counting from an arbitrary origin.  Timestamps
+wrap around every 4295 seconds, or slightly more than one hour.</t>
+
+<section title="Timestamp sub-TLV in Hello TLVs">
+
+<figure><preamble>When contained within a Hello TLV, the Timestamp sub-TLV
+has the following format:</preamble>
+<artwork><![CDATA[
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|   Type = 3    |    Length     |      Transmit timestamp       |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+]]></artwork></figure>
+
+<t>Fields :
+<list style="hanging" hangIndent="10">
+<t hangText="Type">Set to 3 to indicate a Timestamp sub-TLV.</t>
+<t hangText="Length">The length of the body, exclusive of the Type and
+Length fields.</t>
+<t hangText="Transmit timestamp">The time at which the packet containing
+this sub-TLV was sent, according to the sender's clock.</t> </list></t>
+
+<t>If the Length field is larger than the expected 4 octets, the sub-TLV
+MUST be processed normally and any extra data contained in this sub-TLV
+MUST be silently ignored.</t>
+
+</section>
+
+<section title="Timestamp sub-TLV in IHU TLVs">
+
+<figure><preamble>When contained in an IHU TLV destined for node A, the
+Timestamp sub-TLV has the following format:</preamble>
+<artwork><![CDATA[
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|   Type = 3    |    Length     |        Origin timestamp       |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                               |        Receive timestamp      |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+]]></artwork></figure>
+
+<t>Fields :
+<list style="hanging" hangIndent="10">
+<t hangText="Type">Set to 3 to indicate a Timestamp sub-TLV.</t>
+<t hangText="Length">The length of the body, exclusive of the Type and
+Length fields.</t>
+<t hangText="Origin timestamp">A copy of the transmit timestamp of the last
+Timestamp sub-TLV contained in a Hello TLV received from node A.</t>
+<t hangText="Receive timestamp">The time at which the last Hello with
+a Timestamp sub-TLV was received from node A according to the sender's
+clock.</t>
+</list></t>
+
+<t>If the Length field is larger than the expected 8 octets, the sub-TLV
+MUST be processed normally and any extra data contained in this sub-TLV
+MUST be silently ignored.</t>
+
+</section>
+
+</section>
+
+<section title="IANA Considerations">
+
+<t>IANA is instructed to add the following entry to the "Babel Sub-TLV
+Types" registry:</t>
+
+<texttable>
+<ttcol>Type</ttcol><ttcol>Name</ttcol><ttcol>Reference</ttcol>
+<c>3</c><c>Timestamp</c><c>(this document)</c>
+</texttable>
+
+</section>
+
+<section title="Security Considerations">
+
+<t>This extension merely adds additional timestamping data to two of the
+TLVs sent by a Babel router, and does not significantly change the
+security properties of the Babel protocol.</t>
+
+</section>
+
+</middle>
+
+<back>
+
+<references title="Normative References">
+
+<reference anchor="BABEL"><front>
+<title>The Babel Routing Protocol</title>
+<author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
+<date month="February" year="2011"/>
+</front>
+<seriesInfo name="RFC" value="6126"/>
+</reference>
+
+<reference anchor="BABEL-EXT"><front>
+<title>Extension Mechanism for the Babel Routing Protocol</title>
+<author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
+<date day="28" month="May" year="2015"/>
+</front>
+<seriesInfo name="RFC" value="7557"/>
+</reference>
+
+</references>
+
+<references title="Informative References">
+
+<reference anchor="DELAY-BASED"><front>
+<title>A delay-based routing metric</title>
+<author fullname="Baptiste Jonglez" initials="B." surname="Jonglez"/>
+<author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
+<date month="March" year="2014"/>
+</front>
+<annotation>Available online from http://arxiv.org/abs/1403.3488</annotation>
+</reference>
+
+<reference anchor="MILLS"><front>
+<title>DCN Local-Network Protocols</title>
+<author fullname="David L. Mills" initials="D. L." surname="Mills"/>
+<date month="December" year="1983"/>
+</front>
+<seriesInfo name="RFC" value="891"/>
+</reference>
+
+<reference anchor="NTP"><front>
+<title>Network Time Protocol Version 4: Protocol and Algorithms Specification</title>
+<author initials='D.' surname='Mills' fullname='D. Mills'/>
+<author initials='J.' surname='Martin' fullname='J. Martin'/>
+<author initials='J.' surname='Burbank' fullname='J. Burbank'/>
+<author initials='W.' surname='Kasch' fullname='W. Kasch'/>
+<date year='2010' month='June' />
+</front>
+<seriesInfo name='RFC' value='5905' />
+</reference>
+
+</references>
+
+</back>
+</rfc>

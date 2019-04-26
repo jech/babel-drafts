@@ -6,7 +6,7 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="no" ?>
-<rfc category="exp" docName="draft-jonglez-babel-rtt-extension-02"
+<rfc category="exp" docName="draft-ietf-babel-rtt-extension-00"
      ipr="trust200902" updates="6126">
 <front>
 <title abbrev="Babel RTT Extension">Delay-based Metric Extension for the Babel Routing Protocol</title>
@@ -37,7 +37,7 @@
 </address>
 </author>
 
-<date day="11" month="March" year="2019"/>
+<date day="26" month="April" year="2019"/>
 
 <abstract>
 <t>This document defines an extension to the Babel routing protocol that

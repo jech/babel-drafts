@@ -221,7 +221,7 @@ attacks (see <xref target="security-properties"/> above).</t>
 described in <xref target="RFC6126bis"/> Section 3.2.  This protocol
 extends these data structures as follows.</t>
     
-<section title="The Interface Table">
+<section title="The Interface Table" anchor="interface-table">
 
 <t>Every Babel node maintains an interface table, as described in <xref
 target="RFC6126bis"/> Section 3.2.3.  Implementations of this protocol
@@ -240,13 +240,14 @@ pieces of data:
 algorithm ; the length of each key is exactly the hash size of the
 associated HMAC algorithm (i.e., the key is not subject to the
 preprocessing described in Section 2 of <xref target="RFC2104"/>);</t>
-<t> a pair (Index, PC), where Index is an arbtrary string of 0 to 32
+<t> a pair (Index, PC), where Index is an arbitrary string of 0 to 32
 octets, and PC is a 32-bit (4-octet) integer.</t>
 </list>
-The Index and PC are initialised to arbitrary values chosen so as to
-ensure that a given (Index, PC) pair is never reused.  Typically, the
-initial Index will be chosen as a random string of sufficient length, and
-the initial PC will be set to 0.</t>
+We say that an index is fresh when it has never been used before with any
+of the keys currently configured on the interface.  The Index field is
+initialised to a fresh index, for example by drawing a random string of
+sufficient length, and and the PC is initialised to an arbitrary value
+(typically 0).</t>
 </section>
 
 <section title="The Neighbour table">
@@ -340,10 +341,11 @@ packet) and HMAC TLVs (one per configured key).</t>
 
 <t>Before sending a packet, the following actions are performed:
 <list style="symbols">
-<t>a PC TLV containing the PC and Index associated with the
-outgoing interface is appended to the packet body; the PC is
-incremented by a strictly positive amount (typically just 1); if the
-PC overflows, a fresh index is generated;</t>
+<t>a PC TLV containing the PC and Index associated with the outgoing
+interface is appended to the packet body; the PC is incremented by
+a strictly positive amount (typically just 1); if the PC overflows,
+a fresh index is generated (as defined in
+<xref target="interface-table"/>);</t>
 <t>for each key configured on the interface, an HMAC is computed as
 specified in <xref target="hmac-computation"/> above, and an HMAC TLV is
 appended to the packet trailer (see Section 4.2 of
@@ -422,7 +424,8 @@ the packet.</t>
 <section title="Sending challenges" anchor="sending-challenges">
 
 <t>When it encounters a mismatched Index during the preparse phase, a node
-picks a nonce that it has never used before, for example by drawing
+picks a nonce that it has never used with any of the keys currently
+configured on the relevant interface, for example by drawing
 a sufficiently large random string of bytes or by consulting a strictly
 monotonic hardware clock.  It stores the nonce in the entry of the
 Neighbour Table of the neighbour (the entry might need to be created at
@@ -551,7 +554,8 @@ packet body.</t>
 Length fields.</t>
 <t hangText="PC">The Packet Counter (PC), a 32-bit (4 octet) unsigned
 integer which is increased with every packet sent over this interface.
-A fresh index MUST be generated whenever the PC overflows.</t>
+A fresh index (as defined in <xref target="interface-table"/>) MUST be
+generated whenever the PC overflows.</t>
 <t hangText="Index">The sender's Index, an opaque string of 0 to 32
 octets.</t>
 </list></t>

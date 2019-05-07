@@ -2912,6 +2912,14 @@ draft-ietf-babel-hmac.</t>
 <t>Updated references.</t>
 </list></t>
 </section>
+
+<section title="Changes since draft-ietf-babel-rfc6126bis-08">
+<t><list style="symbols">
+<t>Added recommendation that route selection should not take seqnos into
+account.</t>
+</list></t>
+</section>
+
 </section>
 
 </back>

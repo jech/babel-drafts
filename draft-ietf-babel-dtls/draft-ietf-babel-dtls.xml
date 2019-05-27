@@ -17,7 +17,7 @@
 <?rfc compact="no" ?>
 <rfc category="std"
     obsoletes=""
-    docName="draft-ietf-babel-dtls-04"
+    docName="draft-ietf-babel-dtls-05"
     ipr="trust200902">
 <front>
 <title abbrev="Babel over DTLS">Babel Routing Protocol over Datagram
@@ -309,7 +309,7 @@ service avoidance techniques beyond the scope of this document.</t>
 <author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
 <author fullname="David Schinazi" initials="D." surname="Schinazi"/>
 <date month="November" year="2018"/></front>
-<seriesInfo name="Internet Draft" value="draft-ietf-babel-rfc6126bis-07"/>
+<seriesInfo name="Internet Draft" value="draft-ietf-babel-rfc6126bis-09"/>
 </reference>
 
 </references>
@@ -328,7 +328,7 @@ service avoidance techniques beyond the scope of this document.</t>
 <author fullname="Weronika Kolodziejak" initials="W." surname="Kolodziejak"/>
 <author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
 <date month="November" year="2018"/></front>
-<seriesInfo name="Internet Draft" value="draft-ietf-babel-hmac-03"/>
+<seriesInfo name="Internet Draft" value="draft-ietf-babel-hmac-04"/>
 </reference>
 
 <reference anchor="DTLS-CID"><front>
@@ -338,7 +338,7 @@ service avoidance techniques beyond the scope of this document.</t>
 <author fullname="Thomas Fossati" initials="T." surname="Fossati"/>
 <author fullname="Tobias Gondrom" initials="T." surname="Gondrom"/>
 <date month="October" year="2018"/></front>
-<seriesInfo name="Internet Draft" value="draft-ietf-tls-dtls-connection-id-02"/>
+<seriesInfo name="Internet Draft" value="draft-ietf-tls-dtls-connection-id-05"/>
 </reference>
 
 </references>

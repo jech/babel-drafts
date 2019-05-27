@@ -16,7 +16,6 @@
 <?rfc sortrefs="yes" ?>
 <?rfc compact="no" ?>
 <rfc category="std"
-    updates="6126bis"
     obsoletes=""
     docName="draft-ietf-babel-dtls-04"
     ipr="trust200902">
@@ -69,9 +68,9 @@ Transport Layer Security</title>
 
 <abstract>
 <t>The Babel Routing Protocol does not contain any means to authenticate
-neighbours or protect messages sent between them.  This documents specifies
+neighbours or protect messages sent between them.  This document specifies
 a mechanism to ensure these properties, using Datagram Transport Layer
-Security (DTLS). This document updates RFC 6126bis.</t>
+Security (DTLS).</t>
 </abstract>
 
 </front>
@@ -85,7 +84,7 @@ any means to authenticate neighbours or protect messages sent between them.
 Because of this, an attacker is able to send maliciously crafted Babel
 messages which could lead a network to route traffic to an attacker or
 to an under-resourced target causing denial of service.
-This documents specifies a mechanism to prevent such attacks, using
+This document specifies a mechanism to prevent such attacks, using
 Datagram Transport Layer Security (DTLS) <xref target="RFC6347"/>.</t>
 
 <section title="Specification of Requirements">
@@ -110,11 +109,8 @@ range of environments.</t>
 <t>There exists another mechanism for securing Babel, namely Babel HMAC
 authentication <xref target="BABEL-HMAC"/>.  HMAC only offers basic
 features, namely authentication, integrity and replay protection with
-a small number of symmetric keys.</t>
-
-<t>Since HMAC authentication is simpler, requires fewer changes to the
-Babel protocol, and avoids a dependency on DTLS, its use is RECOMMENDED
-in deployments where both protocols are equally applicable.</t>
+a small number of symmetric keys.  A comparison of Babel security mechanisms
+and their applicability can be found in <xref target="RFC6126bis"/>.</t>
 
 </section>
 
@@ -131,19 +127,18 @@ destinations.</t>
 <section title="DTLS Connection Initiation">
 
 <t>Babel over DTLS operates on a different port than unencrypted Babel.
-All Babel over DTLS nodes MUST act as DTLS servers on a DTLS port, and MUST
-listen for unencrypted Babel traffic on an unencrypted port, which MUST be
-distinct from the DTLS port.  The default port for Babel over DTLS is
+All Babel over DTLS nodes MUST act as DTLS servers on a given UDP port,
+and MUST listen for unencrypted Babel traffic on another UDP port, which
+MUST be distinct from the first one.  The default port for Babel over DTLS is
 registered with IANA as the "babel-dtls" port (UDP port TBD, see
-<xref target="iana_considerations"/>), and the
-unencrypted port is registered as the "babel" port (UDP port 6696).
-Nodes SHOULD use these default ports.</t>
+<xref target="iana_considerations"/>), and the port exchanging unencrypted
+Babel traffic is registered as the "babel" port (UDP port 6696).</t>
 
-<t>When a Babel node discovers a new neighbor (generally by
+<t>When a Babel node discovers a new neighbour (generally by
 receiving an unencrypted multicast Babel packet), it compares the neighbour's
 IPv6 link-local address with its own, using network byte ordering.  If a node's
-address is lower than the recently discovered neighbor's address, it acts
-as a client and connects to the neighbor.  In other words, the node with
+address is lower than the recently discovered neighbour's address, it acts
+as a client and connects to the neighbour.  In other words, the node with
 the lowest address is the DTLS client for this pairwise relationship.
 As an example, fe80::1:2 is considered lower than fe80::2:1.</t>
 
@@ -165,7 +160,7 @@ fails to authenticate its peer against its local policy, it MUST abort the DTLS
 handshake.  Nodes MUST only negotiate DTLS version 1.2 or higher.  Nodes MUST
 use DTLS replay protection to prevent attackers from replaying stale
 information.  Nodes SHOULD drop packets that have been reordered by more than
-several IHU intervals, to avoid letting attackers make stale information last
+two IHU intervals, to avoid letting attackers make stale information last
 longer.</t>
 
 </section>
@@ -184,8 +179,8 @@ to the last byte of the Babel packet trailer, is sent protected by DTLS.</t>
 the unprotected "babel" port, with the exception of Hello TLVs without the
 Unicast flag set.  Babel over DTLS nodes MUST NOT send any unprotected unicast
 packets.  This ensures the confidentiality of the information sent in Babel
-packets (e.g. the network topology) by only sending it encrypted by DTLS.
-Unless some out-of-band neighbor discovery mechanism is available,
+packets (e.g., the network topology) by only sending it encrypted by DTLS.
+Unless some out-of-band neighbour discovery mechanism is available,
 nodes SHOULD periodically send unprotected multicast Hellos to ensure
 discovery of new neighbours.  In order to maintain bidirectional reachability,
 nodes can either rely entirely on unprotected multicast Hellos, or send
@@ -211,7 +206,7 @@ differently.  Nodes MUST silently ignore any unprotected packet sent over
 unicast.  When parsing an unprotected packet, a node MUST silently
 ignore all TLVs that are not of type Hello.  Nodes MUST also silently ignore
 any unprotected Hello with the Unicast flag set.  Note that receiving an
-unprotected packet can still be used to discover new neighbors, even when
+unprotected packet can still be used to discover new neighbours, even when
 all TLVs in that packet are silently ignored.</t>
 
 </section>
@@ -245,7 +240,7 @@ loses the security properties of Babel over DTLS.  A node MAY allow
 configuration options to allow unprotected Babel on some interfaces but not
 others; this effectively gives nodes on that interface the same access as
 authenticated nodes, and SHOULD NOT be done unless that interface has a
-mechanism to authenticate nodes at a lower layer (e.g. IPsec).</t>
+mechanism to authenticate nodes at a lower layer (e.g., IPsec).</t>
 
 </section>
 

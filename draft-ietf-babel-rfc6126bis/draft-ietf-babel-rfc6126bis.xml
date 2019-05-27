@@ -158,10 +158,10 @@ algorithm is executed for all sources.</t>
 <section title="Costs, Metrics and Neighbourship">
 
 <t>For every pair of neighbouring nodes A and B, Babel computes an
-abstract value known as the cost of the link from A to B., written
+abstract value known as the cost of the link from A to B, written
 C(A,&nbsp;B).  Given a route between any two (not necessarily
 neighbouring) nodes, the metric of the route is the sum of the costs of
-all the edges along the route.  The goal of the routing algorithm is to
+all the links along the route.  The goal of the routing algorithm is to
 compute, for every source S, the tree of routes of lowest metric to S.</t>
 
 <t>Costs and metrics need not be integers.  In general, they can be values
@@ -344,7 +344,7 @@ S  |1
 not feasible: A suffers from spurious starvation.  At that point, the
 whole subtree suffering from starvation must be reset, which is
 essentially what EIGRP does when it performs a global synchronisation of
-all the routers in the sarving subtree (the "active" phase of EIGRP).</t>
+all the routers in the starving subtree (the "active" phase of EIGRP).</t>
 
 <t>Babel reacts to starvation in a less drastic manner, by using sequenced
 routes, a technique introduced by DSDV and adopted by AODV.  In addition to
@@ -388,8 +388,8 @@ at which point the route through B becomes feasible again.</t>
 they are not used in route selection: a node ignores the sequence number
 when selecting the best route to a given destination
 (<xref target="route-selection"/>).  Doing otherwise would cause
-route oscillation while a seqno propagates through the network, and might
-even cause persistent blackholes with some exotic metrics.</t>
+route oscillation while a sequence number propagates through the network,
+and might even cause persistent blackholes with some exotic metrics.</t>
 
 </section>
 
@@ -424,7 +424,7 @@ they forward.</t>
 
 <section title="Multiple Routers">
 
-<t>The above discussion assumes that every prefix is originated by a single
+<t>The above discussion assumes that each prefix is originated by a single
 router.  In real networks, however, it is often necessary to have a single
 prefix originated by multiple routers: for example, the default route will
 be originated by all of the edge routers of a routing domain.</t>
@@ -500,7 +500,7 @@ has been retracted by all of B's neighbours (<xref target="hold-time"/>).</t>
 
 <t>Every Babel speaker is assigned a router-id, which is an arbitrary
 string of 8 octets that is assumed unique across the routing domain.  For
-example, routers-ids could be assigned randomly, or they could derived
+example, router-ids could be assigned randomly, or they could derived
 from a link-layer address.  (The protocol encoding is slightly more
 compact when router-ids are assigned in the same manner as the IPv6 layer
 assigns host IDs.)</t>
@@ -518,7 +518,7 @@ link-local in the case of IPv6.  Babel packets may be sent to a well-known
 normal operation, a Babel speaker sends both multicast and unicast packets
 to its neighbours.</t>
 
-<t>With the exception of Hello TLVs and acknowledgments, all Babel TLVs
+<t>With the exception of acknowledgments, all Babel TLVs
 can be sent to either unicast or multicast addresses, and their semantics
 does not depend on whether the destination is a unicast or a multicast
 address.  Hence, a Babel speaker does not need to determine the destination
@@ -548,7 +548,7 @@ speaker may use different data structures as long as the resulting
 protocol is the same as the one described in this document.  For example,
 rather than maintaining a single table containing both selected and
 unselected (fallback) routes, as described in <xref target="route-table"/>
-belong, an actual implementation would probably use two tables, one with
+below, an actual implementation would probably use two tables, one with
 selected routes and one with fallback routes.</t>
 
 <section title="Sequence number arithmetic" anchor="sequence-number">
@@ -627,16 +627,15 @@ neighbour have been received by the local node;</t>
 <t>the "transmission cost" value from the last IHU packet received from
 this neighbour, or FFFF hexadecimal (infinity) if the IHU hold timer for
 this neighbour has expired;</t>
-<t>the neighbour's expected incoming Multicast Hello sequence number,
+<t>the expected incoming Multicast Hello sequence number for this neighbour,
 an integer modulo 2^16.</t>
-<t>the neighbour's expected incoming Unicast Hello sequence number,
+<t>the expected incoming Unicast Hello sequence number for this neighbour,
 an integer modulo 2^16.</t>
-<t>the neighbour's outgoing Unicast Hello sequence number, an integer modulo
-2^16 that is sent with each Unicast Hello TLV to this neighbour and
-is incremented (modulo 2^16) whenever a Unicast Hello is
-sent.  (Note that a neighbour's outgoing
-Unicast Hello seqno is distinct from the interface's outgoing
-Multicast Hello seqno.)</t>
+<t>the outgoing Unicast Hello sequence number for this neighbour, an integer
+modulo 2^16 that is sent with each Unicast Hello TLV to this neighbour and
+is incremented (modulo 2^16) whenever a Unicast Hello is sent.  (Note that
+the outgoing Unicast Hello seqno for a neighbour is distinct from the
+interface's outgoing Multicast Hello seqno.)</t>
 </list>
 </t>
 
@@ -710,7 +709,7 @@ locally, or because they were forwarded) and to which no reply has been
 received yet.  This table is indexed by triples of the form (prefix, plen,
 router-id), and every entry in this table contains the following data:
 <list style="symbols">
-<t>the prefix, router-id, and seqno being requested;</t>
+<t>the prefix, plen, router-id, and seqno being requested;</t>
 <t>the neighbour, if any, on behalf of which we are forwarding this
 request;</t>
 <t>a small integer indicating the number of times that this request will be
@@ -787,7 +786,7 @@ say that a Hello is "scheduled" if it carries a non-zero interval, and
 
 <t>There are two kinds of Hellos: Multicast Hellos, which use
 a per-interface Hello counter (the Multicast Hello seqno), and Unicast
-Hellos, which use a per-neighbour counter (the Multicast Hello seqno).
+Hellos, which use a per-neighbour counter (the Unicast Hello seqno).
 A Multicast Hello with a given seqno MUST be sent to all neighbours on
 a given interface, either by sending it to a multicast address or by
 sending it to one unicast address per neighbour (hence, the term
@@ -2147,7 +2146,7 @@ it cannot be satisfied locally.</t>
 
 <t>Fields :
 <list style="hanging" hangIndent="10">
-<t hangText="Type">Set to 10 to indicate a Seqno Request message.</t>
+<t hangText="Type">Set to 10 to indicate a Seqno Request TLV.</t>
 <t hangText="Length">The length of the body, exclusive of the Type and
 Length fields.</t>
 <t hangText="AE">The encoding of the Prefix field.  This MUST NOT be 0.</t>
@@ -2309,7 +2308,8 @@ packets are carried over IPv4.</t>
 <t>A number of people have contributed text and ideas to this
 specification.  The authors are particularly indebted to Matthieu Boutier,
 Gwendoline Chouasne, Margaret Cullen, Donald Eastlake, Toke
-Hoiland-Jorgensen and Joao Sobrinho.  Earlier versions of this document
+Hoiland-Jorgensen, Joao Sobrinho and Martin Vigoureux.
+Earlier versions of this document
 greatly benefited from the input of Joel Halpern.  The address compression
 technique was inspired by <xref target="PACKETBB"/>.</t>
 
@@ -2331,18 +2331,6 @@ technique was inspired by <xref target="PACKETBB"/>.</t>
 <seriesInfo name="DOI" value="10.17487/RFC2119"/>
 </reference>
 
-<reference anchor="RFC8126">
-<front>
-<title>Guidelines for Writing an IANA Considerations Section in RFCs</title>
-<author initials='M.' surname='Cotton' fullname='M. Cotton'></author>
-<author initials='B.' surname='Leiba' fullname='B. Leiba'></author>
-<author initials='T.' surname='Narten' fullname='T. Narten'></author>
-<date year='2017' month='June' />
-</front>
-<seriesInfo name='BCP' value='26' />
-<seriesInfo name='RFC' value='8126' />
-</reference>
-
 <reference anchor="RFC8174"><front>
 <title>Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words</title>
 <author initials="B." surname="Leiba" fullname="B. Leiba"/>
@@ -2352,6 +2340,10 @@ technique was inspired by <xref target="PACKETBB"/>.</t>
 <seriesInfo name="RFC" value="8174"/>
 <seriesInfo name="DOI" value="10.17487/RFC8174"/>
 </reference>
+
+</references>
+
+<references title="Informative References">
 
 <reference anchor="BABEL-HMAC"><front>
 <title>HMAC authentication for the Babel routing protocol</title>
@@ -2370,10 +2362,6 @@ technique was inspired by <xref target="PACKETBB"/>.</t>
 <date month="February" year="2019"/></front>
 <seriesInfo name="Internet Draft" value="draft-ietf-babel-dtls-04"/>
 </reference>
-
-</references>
-
-<references title="Informative References">
 
 <reference anchor="JITTER"><front>
     <title>The synchronization of periodic routing messages</title>
@@ -2464,6 +2452,18 @@ technique was inspired by <xref target="PACKETBB"/>.</t>
     <date month="February" year="2009"/>
   </front>
   <seriesInfo name="RFC" value="5444"/>
+</reference>
+
+<reference anchor="RFC8126">
+<front>
+<title>Guidelines for Writing an IANA Considerations Section in RFCs</title>
+<author initials='M.' surname='Cotton' fullname='M. Cotton'></author>
+<author initials='B.' surname='Leiba' fullname='B. Leiba'></author>
+<author initials='T.' surname='Narten' fullname='T. Narten'></author>
+<date year='2017' month='June' />
+</front>
+<seriesInfo name='BCP' value='26' />
+<seriesInfo name='RFC' value='8126' />
 </reference>
 
 </references>

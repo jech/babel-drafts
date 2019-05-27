@@ -369,7 +369,9 @@ Barbara Stark,
 Markus Stenberg,
 Dave Taht,
 Martin Thomson,
-and Sean Turner for their input and contributions.
+Sean Turner
+and Martin Vigoureux
+for their input and contributions.
 The performance considerations in this document were inspired from the ones for
 DNS over DTLS <xref target="RFC8094"/>.</t>
 

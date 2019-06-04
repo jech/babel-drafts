@@ -273,8 +273,20 @@ and the packet may be fragmented by lower layers.</t>
 <section title="IANA Considerations" anchor="iana_considerations">
 
 <t>If this document is approved, IANA is requested to register a UDP port
-number, called "babel-dtls", for use by Babel over DTLS.  The IANA registry
-will include a reference to this document.</t>
+number, called "babel-dtls", for use by Babel over DTLS.  Details of the
+request to IANA are as follows:
+<list style="symbols">
+<t>Assignee: David Schinazi, dschinazi.ietf@gmail.com</t>
+<t>Contact Person: David Schinazi, dschinazi.ietf@gmail.com</t>
+<t>Transport Protocols: UDP only</t>
+<t>Service Code: None</t>
+<t>Service Name: babel-dtls</t>
+<t>Desired Port Number: 6699</t>
+<t>Description: Babel Routing Protocol over DTLS</t>
+<t>Reference: This document</t>
+<t>Defined TXT Keys: None</t>
+</list>
+</t>
 
 </section>
 

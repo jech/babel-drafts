@@ -6,7 +6,7 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="no" ?>
-<rfc category="std" docName="draft-ietf-babel-rfc6126bis-09"
+<rfc category="std" docName="draft-ietf-babel-rfc6126bis-10"
      ipr="trust200902"
      obsoletes="6126,7557">
 <front>
@@ -38,7 +38,7 @@
 </address>
 </author>
 
-<date day="7" month="May" year="2019"/>
+<date day="7" month="June" year="2019"/>
 
 <abstract>
 <t>Babel is a loop-avoiding distance-vector routing protocol that is
@@ -2917,6 +2917,12 @@ draft-ietf-babel-hmac.</t>
 <t><list style="symbols">
 <t>Added recommendation that route selection should not take seqnos into
 account.</t>
+</list></t>
+</section>
+
+<section title="Changes since draft-ietf-babel-rfc6126bis-09">
+<t><list style="symbols">
+<t>Editorial changes only.</t>
 </list></t>
 </section>
 

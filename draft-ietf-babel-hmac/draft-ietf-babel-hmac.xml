@@ -68,7 +68,7 @@ document updates RFC 6126bis and obsoletes RFC 7298.</t>
 <section title="Introduction">
 
 <t>By default, the Babel routing protocol trusts the information contained
-in every UDP packet it receives on the Babel port.  An attacker can
+in every UDP datagram that it receives on the Babel port.  An attacker can
 redirect traffic to itself or to a different node in the network, causing
 a variety of potential issues.  In particular, an attacker might:
 <list style="symbols">
@@ -169,7 +169,7 @@ over an interface that requires HMAC cryptographic protection, it
 independently computes a set of HMACs and compares them to the HMACs
 appended to the packet; if there is no match, the packet is discarded.</t>
 
-<t>In order to protect against replay B maintains a per-interface 32-bit
+<t>In order to protect against replay, B maintains a per-interface 32-bit
 integer known as the "packet counter" (PC). Whenever B sends a packet
 through the interface, it embeds the current value of the PC within the
 region of the packet that is protected by the HMACs and increases the PC
@@ -218,19 +218,20 @@ attacks (see <xref target="security-properties"/> above).</t>
 <section title="Data Structures">
 
 <t>Every Babel node maintains a set of conceptual data structures
-described in <xref target="RFC6126bis"/> Section 3.2.  This protocol
+described in Section 3.2 of <xref target="RFC6126bis"/>.  This protocol
 extends these data structures as follows.</t>
     
 <section title="The Interface Table" anchor="interface-table">
 
-<t>Every Babel node maintains an interface table, as described in <xref
-target="RFC6126bis"/> Section 3.2.3.  Implementations of this protocol
-MUST allow each interface to be provisioned with a set of one or more HMAC
-keys and the associated HMAC algorithms (see <xref target="hmac-computation"/>).
-In order to allow incremental deployment of this protocol (see
-<xref target="incremental-deployment"/>), implementations SHOULD allow an
-interface to be configured in a mode in which it participates in the HMAC
-authentication protocol but accepts packets that are not authentified.</t>
+<t>Every Babel node maintains an interface table, as described in Section
+3.2.3 <xref target="RFC6126bis"/>.  Implementations of this protocol MUST
+allow each interface to be provisioned with a set of one or more HMAC keys
+and the associated HMAC algorithms (see <xref
+target="hmac-computation"/>).  In order to allow incremental deployment of
+this protocol (see <xref target="incremental-deployment"/>),
+implementations SHOULD allow an interface to be configured in a mode in
+which it participates in the HMAC authentication protocol but accepts
+packets that are not authentified.</t>
 
 <t>This protocol extends each entry in this table that is associated with
 an interface on which HMAC authentication has been configured with two new
@@ -246,19 +247,19 @@ octets, and PC is a 32-bit (4-octet) integer.</t>
 We say that an index is fresh when it has never been used before with any
 of the keys currently configured on the interface.  The Index field is
 initialised to a fresh index, for example by drawing a random string of
-sufficient length, and and the PC is initialised to an arbitrary value
+sufficient length, and the PC is initialised to an arbitrary value
 (typically 0).</t>
 </section>
 
 <section title="The Neighbour table">
 <t>Every Babel node maintains a neighbour table, as described in
-<xref target="RFC6126bis"/> Section 3.2.4.  This protocol extends each
+Section 3.2.4 of <xref target="RFC6126bis"/>.  This protocol extends each
 entry in this table with two new pieces of data:
 <list style="symbols">
 <t> a pair (Index, PC), where Index is a string of 0 to 32 octets, and PC
 is a 32-bit (4-octet) integer;</t>
-<t> a Nonce, which is an arbitrary string of 0 to 192 octets called, and
-an associated challenge expiry timer.</t>
+<t> a Nonce, which is an arbitrary string of 0 to 192 octets, and an
+associated challenge expiry timer.</t>
 </list>
 The Index and PC are initially undefined, and are managed as described in
 <xref target="packet-reception"/>.  The Nonce and expiry timer are
@@ -273,7 +274,7 @@ initially undefined, and used as described in
   
 <section title="HMAC computation" anchor="hmac-computation">
 
-<t>A Babel node computes an HMAC as follows.</t>
+<t>A Babel node computes the HMAC of a Babel packet as follows.</t>
 
 <t>First, the node builds a pseudo-header that will participate in HMAC
 computation but will not be sent.  If the packet was carried over IPv6,
@@ -323,7 +324,7 @@ format:
 </list></t>
 <t>The node takes the concatenation of the pseudo-header and the packet
 including the packet header but excluding the packet trailer (from octet
-0 inclusive up to Body Length&nbsp;+&nbsp;4 exclusive) and computes an
+0 inclusive up to (Body Length&nbsp;+&nbsp;4) exclusive) and computes an
 HMAC with one of the implemented hash algorithms.  Every implementation
 MUST implement HMAC-SHA256 as defined in <xref target="RFC6234"/> and
 Section 2 of <xref target="RFC2104"/>, SHOULD implement keyed BLAKE2s
@@ -332,7 +333,7 @@ Section 2 of <xref target="RFC2104"/>, SHOULD implement keyed BLAKE2s
 
 <section title="Packet Transmission">
 
-<t>A Babel node may delay actually sending TLVs by a small amount, in
+<t>A Babel node might delay actually sending TLVs by a small amount, in
 order to aggregate multiple TLVs in a single packet up to the
 interface MTU (Section 4 of <xref target="RFC6126bis"/>).  For an
 interface on which HMAC protection is configured, the TLV aggregation
@@ -341,14 +342,14 @@ packet) and HMAC TLVs (one per configured key).</t>
 
 <t>Before sending a packet, the following actions are performed:
 <list style="symbols">
-<t>a PC TLV containing the PC and Index associated with the outgoing
-interface is appended to the packet body; the PC is incremented by
-a strictly positive amount (typically just 1); if the PC overflows,
-a fresh index is generated (as defined in
+<t>a PC TLV containing the PC and Index associated with the
+outgoing interface MUST be appended to the packet body; the PC MUST be
+incremented by a strictly positive amount (typically just 1); if the
+PC overflows, a fresh index MUST be generated (as defined in
 <xref target="interface-table"/>);</t>
 <t>for each key configured on the interface, an HMAC is computed as
-specified in <xref target="hmac-computation"/> above, and an HMAC TLV is
-appended to the packet trailer (see Section 4.2 of
+specified in <xref target="hmac-computation"/> above, and stored in an
+HMAC TLV that MUST be appended to the packet trailer (see Section 4.2 of
 <xref target="RFC6126bis"/>).</t>
 </list></t>
 
@@ -363,12 +364,12 @@ to normal processing:
 <t>
 <list style="symbols">
 <t>First, the receiver checks whether the trailer of the received packet
-carries at least one HMAC TLV; if not, the packet is immediately dropped
+carries at least one HMAC TLV; if not, the packet MUST be immediately dropped
 and processing stops.  Then, for each key configured on the receiving
-interface, the implementation computes the HMAC of the packet.  It then
+interface, the receiver computes the HMAC of the packet.  It then
 compares every generated HMAC against every HMAC included in the packet;
 if there is at least one match, the packet passes the HMAC test; if there
-is none, the packet is silently dropped and processing stops at this
+is none, the packet MUST be silently dropped and processing stops at this
 point.  In order to avoid memory exhaustion attacks, an entry in the
 Neighbour Table MUST NOT be created before the HMAC test has passed
 successfully.  The HMAC of the packet MUST NOT be computed for each HMAC
@@ -378,34 +379,34 @@ phase, the packet body is traversed and all TLVs are ignored except PC
 TLVs, Challenge Requests and Challenge Replies.  When a PC TLV is
 encountered, the enclosed PC and Index are saved for later processing; if
 multiple PCs are found, only the first one is processed, the remaining
-ones are silently ignored.  If a Challenge Request is encountered,
-a Challenge Reply is scheduled, as described in <xref
-target="replying-challenges"/>, and if a Challenge Reply is encountered,
-it is tested for validity as described in <xref
-target="receiving-challenges"/> and a note is made of the result of the
-test.</t>
+ones MUST be silently ignored.  If a Challenge Request is encountered,
+a Challenge Reply MUST be scheduled, as described in <xref
+target="replying-challenges"/>.  If a Challenge Reply is encountered, it
+is tested for validity as described in <xref target="receiving-challenges"/>
+and a note is made of the result of the test.</t>
 <t>The preparse phase above has yielded two pieces of data: the PC and
 Index from the first PC TLV, and a bit indicating whether the packet
 contains a successful Challenge Reply.  If the packet does not contain
-a PC TLV, the packet is dropped and processing stops at this point.  If
-the packet contains a successful Challenge Reply, then the PC and Index
-contained in the PC TLV are stored in the Neighbour Table entry
+a PC TLV, the packet MUST be dropped and processing stops at this point.
+If the packet contains a successful Challenge Reply, then the PC and Index
+contained in the PC TLV MUST be stored in the Neighbour Table entry
 corresponding to the sender (which may need to be created at this stage),
 and the packet is accepted.</t>
 <t>Otherwise, if there is no entry in the Neighbour Table corresponding to
 the sender, or if such an entry exists but contains no Index, or if the
 Index it contains is different from the Index contained in the PC TLV,
-then a challenge is sent as described in <xref target="sending-challenges"/>,
-processing stops at this stage, and the packet is dropped.</t>
-<t>At this stage, the packet contained no successful challenge reply and
+then a challenge MUST be sent as described in
+<xref target="sending-challenges"/>, the packet MUST be dropped, and
+processing stops at this stage.</t>
+<t>At this stage, the packet contains no successful challenge reply and
 the Index contained in the PC TLV is equal to the Index in the Neighbour
 Table entry corresponding to the sender.  The receiver compares the
 received PC with the PC contained in the Neighbour Table; if the received
 PC is smaller or equal than the PC contained in the Neighbour Table, the
-packet is silently dropped and processing stops (no challenge is sent in
-this case, since the mismatch might be caused by harmless packet
-reordering on the link).  Otherwise, the PC contained in the Neighbour
-Table entry is set to the received PC, and the packet is accepted.</t>
+packet MUST be dropped and processing stops (no challenge is sent in this
+case, since the mismatch might be caused by harmless packet reordering on
+the link).  Otherwise, the PC contained in the Neighbour Table entry is
+set to the received PC, and the packet is accepted.</t>
 </list>
 After the packet has been accepted, it is processed as normal, except that
 any PC, Challenge Request and Challenge Reply TLVs that it contains are
@@ -427,23 +428,23 @@ the packet.</t>
 picks a nonce that it has never used with any of the keys currently
 configured on the relevant interface, for example by drawing
 a sufficiently large random string of bytes or by consulting a strictly
-monotonic hardware clock.  It stores the nonce in the entry of the
-Neighbour Table of the neighbour (the entry might need to be created at
-this stage), initialises the neighbour's challenge expiry timer to 30
-seconds, and sends a Challenge Request TLV to the unicast address
-corresponding to the neighbour.</t>
+monotonic hardware clock.  It MUST then store the nonce in the entry of
+the Neighbour Table associated to the neighbour (the entry might need to
+be created at this stage), initialise the neighbour's challenge expiry
+timer to 30 seconds, and send a Challenge Request TLV to the unicast
+address corresponding to the neighbour.</t>
 
 <t>A node MAY aggregate a Challenge Request with other TLVs; in other
 words, if it has already buffered TLVs to be sent to the unicast address
-of the sender of the neighbour, it MAY send the buffered TLVs in the same
-packet as the Challenge Request.  However, it MUST arrange for the
-Challenge Request to be sent in a timely manner, as any packets received
-from that neighbour will be silently ignored until the challenge
-completes.</t>
+of the neighbour, it MAY send the buffered TLVs in the same packet as the
+Challenge Request.  However, it MUST arrange for the Challenge Request to
+be sent in a timely manner, as any packets received from that neighbour
+will be silently ignored until the challenge completes.</t>
 
-<t>Since a challenge may be prompted by a replayed packet, a node MUST
-impose a rate limitation to the challenges it sends; the limit SHOULD
-default to one challenge request every 300ms, and MAY be configurable.</t>
+<t>Since a challenge may be prompted by a packet replayed by an attacker,
+a node MUST impose a rate limitation to the challenges it sends; the limit
+SHOULD default to one challenge request every 300ms, and MAY be
+configurable.</t>
 
 </section>
 
@@ -451,8 +452,9 @@ default to one challenge request every 300ms, and MAY be configurable.</t>
 
 <t>When it encounters a Challenge Request during the preparse phase,
 a node constructs a Challenge Reply TLV by copying the Nonce from the
-Challenge Request into the Challenge Reply.  It sends the Challenge Reply
-to the unicast address from which the Challenge Request was sent.</t>
+Challenge Request into the Challenge Reply.  It MUST then send the
+Challenge Reply to the unicast address from which the Challenge Request
+was sent.</t>
 
 <t>A node MAY aggregate a Challenge Reply with other TLVs; in other words,
 if it has already buffered TLVs to be sent to the unicast address of the
@@ -472,7 +474,7 @@ Reply, as those would be dropped by the challenger.</t>
 consults the Neighbour Table entry corresponding to the neighbour that
 sent the Challenge Reply.  If no challenge is in progress, i.e., if
 there is no Nonce stored in the Neighbour Table entry or the Challenge
-timer has expired, the Challenge Reply is silently ignored and the
+timer has expired, the Challenge Reply MUST be silently ignored and the
 challenge has failed.</t>
 
 <t>Otherwise, the node compares the Nonce contained in the Challenge Reply
@@ -522,9 +524,9 @@ to a value of 5&nbsp;min, and MAY be configurable.</t>
 <t>Fields :
 <list style="hanging" hangIndent="10">
 <t hangText="Type">Set to 16 to indicate an HMAC TLV.</t>
-<t hangText="Length">The length of the body, exclusive of the Type and
-Length fields.  The length of the body depends on the hash function
-used.</t>
+<t hangText="Length">The length of the body, in octets, exclusive of the
+Type and Length fields.  The length of the body depends on the HMAC
+algorithm being used.</t>
 <t hangText="HMAC">The body contains the HMAC of the packet, computed as
 described in <xref target="hmac-computation"/>.</t>
 </list></t>
@@ -541,17 +543,17 @@ packet body.</t>
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|   Type = 17   |    Length     |             PC
+|   Type = 17   |    Length     |             PC                |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                                |            Index...
+|                               |            Index...
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
 ]]></artwork></figure>
 
 <t>Fields :
 <list style="hanging" hangIndent="10">
 <t hangText="Type">Set to 17 to indicate a PC TLV.</t>
-<t hangText="Length">The length of the body, exclusive of the Type and
-Length fields.</t>
+<t hangText="Length">The length of the body, in octets, exclusive of the
+Type and Length fields.</t>
 <t hangText="PC">The Packet Counter (PC), a 32-bit (4 octet) unsigned
 integer which is increased with every packet sent over this interface.
 A fresh index (as defined in <xref target="interface-table"/>) MUST be
@@ -562,8 +564,7 @@ octets.</t>
 
 <t>Indices are limited to a size of 32 octets: a node MUST NOT send a TLV
 with an index of size strictly larger than 32 octets, and a node MAY
-silently ignore a PC TLV with an index of size strictly larger than 32
-octets.</t>
+ignore a PC TLV with an index of size strictly larger than 32 octets.</t>
 
 </section>
 
@@ -580,8 +581,8 @@ octets.</t>
 <t>Fields :
 <list style="hanging" hangIndent="10">
 <t hangText="Type">Set to 18 to indicate a Challenge Request TLV.</t>
-<t hangText="Length">The length of the body, exclusive of the Type and
-Length fields.</t>
+<t hangText="Length">The length of the body, in octets, exclusive of the
+Type and Length fields.</t>
 <t hangText="Nonce">The nonce uniquely identifying the challenge, an
 opaque string of 0 to 192 octets.</t>
 </list></t>
@@ -606,9 +607,8 @@ octets, and a node MAY ignore a nonce that is of size strictly larger than
 <t>Fields :
 <list style="hanging" hangIndent="10">
 <t hangText="Type">Set to 19 to indicate a Challenge Reply TLV.</t>
-<t hangText="Length">The length of the body, exclusive of the Type and
-Length fields.  The length of the body is set to the same size as the
-challenge request TLV length received.</t>
+<t hangText="Length">The length of the body, in octets, exclusive of the
+Type and Length fields.</t>
 <t hangText="Nonce">A copy of the nonce contained in the corresponding
 challenge request.</t>
 </list></t>
@@ -651,7 +651,7 @@ amount of time.  If an attacker is able to delay the delivery of a packet
 (e.g., because it is located at a layer 2 switch), then the packet will be
 accepted as long as the corresponding (Index, PC) pair is present at the
 receiver.  If the attacker is able to cause the (Index, PC) pair to
-persist for arbitrary amounts of time (e.g., by causing failed
+persist for arbitrary amounts of time (e.g., by repeatedly causing failed
 challenges), then it is able to delay the packet by arbitrary amounts of
 time, even after the sender has left the network.</t>
 

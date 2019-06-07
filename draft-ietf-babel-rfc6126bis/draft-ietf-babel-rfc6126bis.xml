@@ -500,7 +500,7 @@ has been retracted by all of B's neighbours (<xref target="hold-time"/>).</t>
 
 <t>Every Babel speaker is assigned a router-id, which is an arbitrary
 string of 8 octets that is assumed unique across the routing domain.  For
-example, router-ids could be assigned randomly, or they could derived
+example, router-ids could be assigned randomly, or they could be derived
 from a link-layer address.  (The protocol encoding is slightly more
 compact when router-ids are assigned in the same manner as the IPv6 layer
 assigns host IDs.)</t>

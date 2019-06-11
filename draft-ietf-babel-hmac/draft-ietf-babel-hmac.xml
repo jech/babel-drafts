@@ -8,7 +8,6 @@
 <?rfc compact="no" ?>
 <rfc category="std" docName="draft-ietf-babel-hmac-05"
      ipr="trust200902"
-     updates="6126bis"
      obsoletes="7298">
 <front>
 <title abbrev="HMAC authentication for Babel">HMAC authentication for the

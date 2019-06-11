@@ -563,7 +563,10 @@ octets.</t>
 
 <t>Indices are limited to a size of 32 octets: a node MUST NOT send a TLV
 with an index of size strictly larger than 32 octets, and a node MAY
-ignore a PC TLV with an index of size strictly larger than 32 octets.</t>
+ignore a PC TLV with an index of length strictly larger than 32 octets.
+Indices of length 0 are valid: if a node has reliable stable storage and
+the packet counter never overflows, then only one index is necessary, and
+the value of length 0 is the canonical choice.</t>
 
 </section>
 
@@ -589,7 +592,10 @@ opaque string of 0 to 192 octets.</t>
 <t>Nonces are limited to a size of 192 octets: a node MUST NOT send
 a Challenge Request TLV with a nonce of size strictly larger than 192
 octets, and a node MAY ignore a nonce that is of size strictly larger than
-192 octets.</t>
+192 octets.  Nonces of length 0 are valid: if a node has reliable stable
+storage, then it may use a sequential counter for generating nonces which
+get encoded in the minumum number of octets required; the value 0 is then
+encoded as the string of length 0.</t>
 
 </section>
 

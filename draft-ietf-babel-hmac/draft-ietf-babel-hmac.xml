@@ -6,7 +6,7 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="no" ?>
-<rfc category="std" docName="draft-ietf-babel-hmac-04"
+<rfc category="std" docName="draft-ietf-babel-hmac-05"
      ipr="trust200902"
      updates="6126bis"
      obsoletes="7298">
@@ -53,7 +53,7 @@ Babel routing protocol</title>
 </address>
 </author>
 
-<date day="9" month="March" year="2019"/>
+<date day="7" month="June" year="2019"/>
 
 <abstract>
 <t>This document describes a cryptographic authentication mechanism for
@@ -895,6 +895,13 @@ subject to preprocessing; this makes management more deterministic.</t>
 </list></t>
 
 </section>
+
+<section title="Changes since draft-ietf-babel-hmac-04">
+
+<t>Use normative language in more places.</t>
+
+</section>
+
 </section>
 
 </back>

@@ -1,0 +1,909 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd" []>
+<?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
+<?rfc toc="yes"?>
+<?rfc tocdepth="2"?>
+<?rfc symrefs="yes"?>
+<?rfc sortrefs="yes" ?>
+<?rfc compact="no" ?>
+<rfc category="std" docName="draft-ietf-babel-hmac-05"
+     ipr="trust200902"
+     updates="6126bis"
+     obsoletes="7298">
+<front>
+<title abbrev="HMAC authentication for Babel">HMAC authentication for the
+Babel routing protocol</title>
+<author fullname="Clara Do" initials="C." surname="Do">
+<organization>IRIF, University of Paris-Diderot</organization>
+<address>
+<postal>
+<street></street>
+<city>75205 Paris Cedex 13</city>
+<region></region>
+<code></code>
+<country>France</country>
+</postal>
+<email>clarado_perso@yahoo.fr</email>
+</address>
+</author>
+<author fullname="Weronika Kolodziejak" initials="W." surname="Kolodziejak">
+<organization>IRIF, University of Paris-Diderot</organization>
+<address>
+<postal>
+<street></street>
+<city>75205 Paris Cedex 13</city>
+<region></region>
+<code></code>
+<country>France</country>
+</postal>
+<email>weronika.kolodziejak@gmail.com</email>
+</address>
+</author>
+<author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek">
+<organization>IRIF, University of Paris-Diderot</organization>
+<address>
+<postal>
+<street>Case 7014</street>
+<city>75205 Paris Cedex 13</city>
+<region></region>
+<code></code>
+<country>France</country>
+</postal>
+<email>jch@irif.fr</email>
+</address>
+</author>
+
+<date day="7" month="June" year="2019"/>
+
+<abstract>
+<t>This document describes a cryptographic authentication mechanism for
+the Babel routing protocol that has provisions for replay avoidance.  This
+document updates RFC 6126bis and obsoletes RFC 7298.</t>
+</abstract>
+
+</front>
+
+<middle>
+
+<section title="Introduction">
+
+<t>By default, the Babel routing protocol trusts the information contained
+in every UDP datagram that it receives on the Babel port.  An attacker can
+redirect traffic to itself or to a different node in the network, causing
+a variety of potential issues.  In particular, an attacker might:
+<list style="symbols">
+<t>spoof a Babel packet, and redirect traffic by announcing a smaller
+metric, a larger seqno, or a longer prefix;</t>
+<t>spoof a malformed packet, which could cause an insufficiently robust
+implementation to crash or interfere with the rest of the network;</t>
+<t>replay a previously captured Babel packet, which could cause traffic to
+be redirected or otherwise interfere with the network.</t>
+</list></t>
+
+<t>Protecting a Babel network is challenging due to the fact that the
+Babel protocol uses both unicast and multicast communication.  One
+possible approach, used notably by the Babel over Datagram Transport Layer
+Security (DTLS) protocol <xref target="I-D.ietf-babel-dtls"/>, is to use
+unicast communication for all semantically significant communication, and
+then use a standard unicast security protocol to protect the Babel
+traffic.  In this document, we take the opposite approach: we define
+a cryptographic extension to the Babel protocol that is able to protect
+both unicast and multicast traffic, and thus requires very few changes to
+the core protocol.</t>
+
+<section title="Applicability">
+
+<t>The protocol defined in this document assumes that all interfaces on
+a given link are equally trusted and share a small set of symmetric keys
+(usually just one, and two during key rotation).  The protocol is inapplicable
+in situations where asymmetric keying is required, where the trust
+relationship is partial, or where large numbers of trusted keys are
+provisioned on a single link at the same time.</t>
+
+<t>This protocol supports incremental deployment (where an insecure Babel
+network is made secure with no service interruption), and it supports
+graceful key rotation (where the set of keys is changed with no service
+interruption).</t>
+
+<t>This protocol does not require synchronised clocks, it does not require
+persistently monotonic clocks, and it does not require persistent storage
+except for what might be required for storing cryptographic keys.</t>
+
+</section>
+
+<section title="Assumptions and security properties"
+         anchor="security-properties">
+
+<t>The correctness of the protocol relies on the following assumptions:
+<list style="symbols">
+<t>that the Hashed Message Authentication Code (HMAC) being used is
+invulnerable to pre-image attacks, i.e., that an attacker is unable to
+generate a packet with a correct HMAC;</t>
+<t>that a node never generates the same index or nonce twice over the
+lifetime of a key.</t>
+</list>
+The first assumption is a property of the HMAC being used.  The second
+assumption can be met either by using a robust random number generator
+<xref target="RFC4086"/> and sufficiently large indices and nonces, by
+using a reliable hardware clock, or by rekeying whenever a collision
+becomes likely.</t>
+
+<t>If the assumptions above are met, the protocol described in this
+document has the following properties:
+<list style="symbols">
+<t>it is invulnerable to spoofing: any packet accepted as authentic is the
+exact copy of a packet originally sent by an authorised node;</t>
+<t>locally to a single node, it is invulnerable to replay: if a node has
+previously accepted a given packet, then it will never again accept a copy
+of this packet or an earlier packet from the same sender;</t>
+<t>among different nodes, it is only vulnerable to immediate replay: if
+a node A has accepted a packet from C as valid, then a node B will only
+accept a copy of that packet as authentic if B has accepted an older
+packet from C and B has received no later packet from C.</t>
+</list></t>
+
+<t>While this protocol makes serious efforts to mitigate the effects of
+a denial of service attack, it does not fully protect against such
+attacks.</t>
+
+</section>
+
+<section title="Specification of Requirements">
+
+<t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+"SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+"OPTIONAL" in this document are to be interpreted as described in BCP 14
+<xref target="RFC2119"/> <xref target="RFC8174"/> when, and only when,
+they appear in all capitals, as shown here.</t>
+
+</section>
+
+</section>
+
+<section title="Conceptual overview of the protocol">
+
+<t>When a node B sends out a Babel packet through an interface that is
+configured for HMAC cryptographic protection, it computes one or more
+HMACs which it appends to the packet.  When a node A receives a packet
+over an interface that requires HMAC cryptographic protection, it
+independently computes a set of HMACs and compares them to the HMACs
+appended to the packet; if there is no match, the packet is discarded.</t>
+
+<t>In order to protect against replay, B maintains a per-interface 32-bit
+integer known as the "packet counter" (PC). Whenever B sends a packet
+through the interface, it embeds the current value of the PC within the
+region of the packet that is protected by the HMACs and increases the PC
+by at least one.  When A receives the packet, it compares the value of the
+PC with the one contained in the previous packet received from B, and
+unless it is strictly greater, the packet is discarded.</t>
+
+<t>By itself, the PC mechanism is not sufficient to protect against
+replay.  Consider a peer A that has no information about a peer
+B (e.g., because it has recently rebooted).  Suppose that A receives
+a packet ostensibly from B carrying a given PC; since A has no information
+about B, it has no way to determine whether the packet is freshly
+generated or a replay of a previously sent packet.</t>
+
+<t>In this situation, A discards the packet and challenges B to prove that
+it knows the HMAC key.  It sends a "challenge request", a TLV containing
+a unique nonce, a value that has never been used before and will never be
+used again.  B replies to the challenge request with a "challenge reply",
+a TLV containing a copy of the nonce chosen by A, in a packet protected by
+HMAC and containing the new value of B's PC.  Since the nonce has never
+been used before, B's reply proves B's knowledge of the HMAC key and the
+freshness of the PC.</t>
+
+<t>By itself, this mechanism is safe against replay if B never resets its
+PC.  In practice, however, this is difficult to ensure, as persistent
+storage is prone to failure, and hardware clocks, even when available, are
+occasionally reset.  Suppose that B resets its PC to an earlier value, and
+sends a packet with a previously used PC n.  A challenges B,
+B successfully responds to the challenge, and A accepts the PC equal to
+n&nbsp;+&nbsp;1.  At this point, an attacker C may send a replayed packet
+with PC equal to n&nbsp;+&nbsp;2, which will be accepted by A.</t>
+
+<t>Another mechanism is needed to protect against this attack.  In this
+protocol, every PC is tagged with an "index", an arbitrary string of
+octets.  Whenever B resets its PC, or whenever B doesn't know whether its
+PC has been reset, it picks an index that it has never used before (either
+by drawing it randomly or by using a reliable hardware clock) and starts
+sending PCs with that index.  Whenever A detects that B has changed its
+index, it challenges B again.</t>
+
+<t>With this additional mechanism, this protocol is invulnerable to replay
+attacks (see <xref target="security-properties"/> above).</t>
+
+</section>
+
+<section title="Data Structures">
+
+<t>Every Babel node maintains a set of conceptual data structures
+described in Section 3.2 of <xref target="RFC6126bis"/>.  This protocol
+extends these data structures as follows.</t>
+    
+<section title="The Interface Table" anchor="interface-table">
+
+<t>Every Babel node maintains an interface table, as described in Section
+3.2.3 <xref target="RFC6126bis"/>.  Implementations of this protocol MUST
+allow each interface to be provisioned with a set of one or more HMAC keys
+and the associated HMAC algorithms (see <xref
+target="hmac-computation"/>).  In order to allow incremental deployment of
+this protocol (see <xref target="incremental-deployment"/>),
+implementations SHOULD allow an interface to be configured in a mode in
+which it participates in the HMAC authentication protocol but accepts
+packets that are not authentified.</t>
+
+<t>This protocol extends each entry in this table that is associated with
+an interface on which HMAC authentication has been configured with two new
+pieces of data:
+<list style="symbols">
+<t> a set of one or more HMAC keys, each associated with a given HMAC
+algorithm ; the length of each key is exactly the hash size of the
+associated HMAC algorithm (i.e., the key is not subject to the
+preprocessing described in Section 2 of <xref target="RFC2104"/>);</t>
+<t> a pair (Index, PC), where Index is an arbitrary string of 0 to 32
+octets, and PC is a 32-bit (4-octet) integer.</t>
+</list>
+We say that an index is fresh when it has never been used before with any
+of the keys currently configured on the interface.  The Index field is
+initialised to a fresh index, for example by drawing a random string of
+sufficient length, and the PC is initialised to an arbitrary value
+(typically 0).</t>
+</section>
+
+<section title="The Neighbour table">
+<t>Every Babel node maintains a neighbour table, as described in
+Section 3.2.4 of <xref target="RFC6126bis"/>.  This protocol extends each
+entry in this table with two new pieces of data:
+<list style="symbols">
+<t> a pair (Index, PC), where Index is a string of 0 to 32 octets, and PC
+is a 32-bit (4-octet) integer;</t>
+<t> a Nonce, which is an arbitrary string of 0 to 192 octets, and an
+associated challenge expiry timer.</t>
+</list>
+The Index and PC are initially undefined, and are managed as described in
+<xref target="packet-reception"/>.  The Nonce and expiry timer are
+initially undefined, and used as described in
+<xref target="sending-challenges"/>.</t>
+
+</section>
+
+</section>
+
+<section title="Protocol Operation">
+  
+<section title="HMAC computation" anchor="hmac-computation">
+
+<t>A Babel node computes the HMAC of a Babel packet as follows.</t>
+
+<t>First, the node builds a pseudo-header that will participate in HMAC
+computation but will not be sent.  If the packet was carried over IPv6,
+the pseudo-header has the following format:
+<figure><artwork><![CDATA[
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
++                                                               +
+|                                                               |
++                          Src address                          +
+|                                                               |
++                                                               +
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|           Src port            |                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                               +
+|                                                               |
++                                                               +
+|                         Dest address                          |
++                                                               +
+|                                                               |
++                               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                               |           Dest port           |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+]]></artwork></figure>
+If the packet was carried over IPv4, the pseudo-header has the following
+format:
+<figure><artwork><![CDATA[
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                          Src address                          |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|           Src port            |        Dest address           |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                               |           Dest port           |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+]]></artwork></figure></t>
+<t>Fields :
+<list style="hanging" hangIndent="14">
+<t hangText="Src address">The source IP address of the packet.</t>
+<t hangText="Src port">The source UDP port number of the packet.</t>
+<t hangText="Dest address">The destination IP address of the packet.</t>
+<t hangText="Src port">The destination UDP port number of the packet.</t>
+</list></t>
+<t>The node takes the concatenation of the pseudo-header and the packet
+including the packet header but excluding the packet trailer (from octet
+0 inclusive up to (Body Length&nbsp;+&nbsp;4) exclusive) and computes an
+HMAC with one of the implemented hash algorithms.  Every implementation
+MUST implement HMAC-SHA256 as defined in <xref target="RFC6234"/> and
+Section 2 of <xref target="RFC2104"/>, SHOULD implement keyed BLAKE2s
+<xref target="RFC7693"/>, and MAY implement other HMAC algorithms.</t>
+</section>
+
+<section title="Packet Transmission">
+
+<t>A Babel node might delay actually sending TLVs by a small amount, in
+order to aggregate multiple TLVs in a single packet up to the
+interface MTU (Section 4 of <xref target="RFC6126bis"/>).  For an
+interface on which HMAC protection is configured, the TLV aggregation
+logic MUST take into account the overhead due to PC TLVs (one in each
+packet) and HMAC TLVs (one per configured key).</t>
+
+<t>Before sending a packet, the following actions are performed:
+<list style="symbols">
+<t>a PC TLV containing the PC and Index associated with the
+outgoing interface MUST be appended to the packet body; the PC MUST be
+incremented by a strictly positive amount (typically just 1); if the
+PC overflows, a fresh index MUST be generated (as defined in
+<xref target="interface-table"/>);</t>
+<t>for each key configured on the interface, an HMAC is computed as
+specified in <xref target="hmac-computation"/> above, and stored in an
+HMAC TLV that MUST be appended to the packet trailer (see Section 4.2 of
+<xref target="RFC6126bis"/>).</t>
+</list></t>
+
+</section>
+
+<section title="Packet Reception" anchor="packet-reception">
+
+<t>When a packet is received on an interface that is configured for HMAC
+protection, the following steps are performed before the packet is passed
+to normal processing:
+</t>
+<t>
+<list style="symbols">
+<t>First, the receiver checks whether the trailer of the received packet
+carries at least one HMAC TLV; if not, the packet MUST be immediately dropped
+and processing stops.  Then, for each key configured on the receiving
+interface, the receiver computes the HMAC of the packet.  It then
+compares every generated HMAC against every HMAC included in the packet;
+if there is at least one match, the packet passes the HMAC test; if there
+is none, the packet MUST be silently dropped and processing stops at this
+point.  In order to avoid memory exhaustion attacks, an entry in the
+Neighbour Table MUST NOT be created before the HMAC test has passed
+successfully.  The HMAC of the packet MUST NOT be computed for each HMAC
+TLV contained in the packet, but only once for each configured key.</t>
+<t>The packet body is then parsed a first time.  During this "preparse"
+phase, the packet body is traversed and all TLVs are ignored except PC
+TLVs, Challenge Requests and Challenge Replies.  When a PC TLV is
+encountered, the enclosed PC and Index are saved for later processing; if
+multiple PCs are found, only the first one is processed, the remaining
+ones MUST be silently ignored.  If a Challenge Request is encountered,
+a Challenge Reply MUST be scheduled, as described in <xref
+target="replying-challenges"/>.  If a Challenge Reply is encountered, it
+is tested for validity as described in <xref target="receiving-challenges"/>
+and a note is made of the result of the test.</t>
+<t>The preparse phase above has yielded two pieces of data: the PC and
+Index from the first PC TLV, and a bit indicating whether the packet
+contains a successful Challenge Reply.  If the packet does not contain
+a PC TLV, the packet MUST be dropped and processing stops at this point.
+If the packet contains a successful Challenge Reply, then the PC and Index
+contained in the PC TLV MUST be stored in the Neighbour Table entry
+corresponding to the sender (which may need to be created at this stage),
+and the packet is accepted.</t>
+<t>Otherwise, if there is no entry in the Neighbour Table corresponding to
+the sender, or if such an entry exists but contains no Index, or if the
+Index it contains is different from the Index contained in the PC TLV,
+then a challenge MUST be sent as described in
+<xref target="sending-challenges"/>, the packet MUST be dropped, and
+processing stops at this stage.</t>
+<t>At this stage, the packet contains no successful challenge reply and
+the Index contained in the PC TLV is equal to the Index in the Neighbour
+Table entry corresponding to the sender.  The receiver compares the
+received PC with the PC contained in the Neighbour Table; if the received
+PC is smaller or equal than the PC contained in the Neighbour Table, the
+packet MUST be dropped and processing stops (no challenge is sent in this
+case, since the mismatch might be caused by harmless packet reordering on
+the link).  Otherwise, the PC contained in the Neighbour Table entry is
+set to the received PC, and the packet is accepted.</t>
+</list>
+After the packet has been accepted, it is processed as normal, except that
+any PC, Challenge Request and Challenge Reply TLVs that it contains are
+silently ignored.</t>
+
+<section title="Challenge Requests and Replies">
+
+<t>During the preparse stage, the receiver might encounter a mismatched
+Index, to which it will react by scheduling a Challenge Request.  It might
+encounter a Challenge Request TLV, to which it will reply with a Challenge
+Reply TLV.  Finally, it might encounter a Challenge Reply TLV, which it
+will attempt to match with a previously sent Challenge Request TLV in
+order to update the Neighbour Table entry corresponding to the sender of
+the packet.</t>
+
+<section title="Sending challenges" anchor="sending-challenges">
+
+<t>When it encounters a mismatched Index during the preparse phase, a node
+picks a nonce that it has never used with any of the keys currently
+configured on the relevant interface, for example by drawing
+a sufficiently large random string of bytes or by consulting a strictly
+monotonic hardware clock.  It MUST then store the nonce in the entry of
+the Neighbour Table associated to the neighbour (the entry might need to
+be created at this stage), initialise the neighbour's challenge expiry
+timer to 30 seconds, and send a Challenge Request TLV to the unicast
+address corresponding to the neighbour.</t>
+
+<t>A node MAY aggregate a Challenge Request with other TLVs; in other
+words, if it has already buffered TLVs to be sent to the unicast address
+of the neighbour, it MAY send the buffered TLVs in the same packet as the
+Challenge Request.  However, it MUST arrange for the Challenge Request to
+be sent in a timely manner, as any packets received from that neighbour
+will be silently ignored until the challenge completes.</t>
+
+<t>Since a challenge may be prompted by a packet replayed by an attacker,
+a node MUST impose a rate limitation to the challenges it sends; the limit
+SHOULD default to one challenge request every 300ms, and MAY be
+configurable.</t>
+
+</section>
+
+<section title="Replying to challenges" anchor="replying-challenges">
+
+<t>When it encounters a Challenge Request during the preparse phase,
+a node constructs a Challenge Reply TLV by copying the Nonce from the
+Challenge Request into the Challenge Reply.  It MUST then send the
+Challenge Reply to the unicast address from which the Challenge Request
+was sent.</t>
+
+<t>A node MAY aggregate a Challenge Reply with other TLVs; in other words,
+if it has already buffered TLVs to be sent to the unicast address of the
+sender of the Challenge Request, it MAY send the buffered TLVs in the same
+packet as the Challenge Reply.  However, it MUST arrange for the Challenge
+Reply to be sent in a timely manner (within a few seconds), and SHOULD NOT
+send any other packets over the same interface before sending the Challenge
+Reply, as those would be dropped by the challenger.</t>
+
+<t>A challenge sent to a multicast address MUST be silently ignored.</t>
+
+</section>
+
+<section title="Receiving challenge replies" anchor="receiving-challenges">
+
+<t>When it encounters a Challenge Reply during the preparse phase, a node
+consults the Neighbour Table entry corresponding to the neighbour that
+sent the Challenge Reply.  If no challenge is in progress, i.e., if
+there is no Nonce stored in the Neighbour Table entry or the Challenge
+timer has expired, the Challenge Reply MUST be silently ignored and the
+challenge has failed.</t>
+
+<t>Otherwise, the node compares the Nonce contained in the Challenge Reply
+with the Nonce contained in the Neighbour Table entry.  If the two are
+equal (they have the same length and content), then the
+challenge has succeeded; otherwise, the challenge has failed.</t>
+
+</section>
+
+</section>
+
+</section>
+
+<section title="Expiring per-neighbour state" anchor="expire">
+
+<t>The per-neighbour (Index, PC) pair is maintained in the neighbour
+table, and is normally discarded when the neighbour table entry expires.
+Implementations MUST ensure that an (Index, PC) pair is discarded within
+a finite time since the last time a packet has been accepted.  In
+particular, unsuccessful challenges MUST NOT prevent an (Index, PC) pair
+from being discarded for unbounded periods of time.</t>
+
+<t>A possible implementation strategy for implementations that use a Hello
+history (Appendix A of <xref target="RFC6126bis"/>) is to discard the
+(Index, PC) pair whenever the Hello history becomes empty.  Another
+implementation strategy is to use a timer that is reset whenever a packet
+is accepted, and to discard the (Index, PC) pair whenever the timer
+expires.  If the latter strategy is being used, the timer SHOULD default
+to a value of 5&nbsp;min, and MAY be configurable.</t>
+
+</section>
+
+</section>
+
+<section title="Packet Format">
+
+<section title="HMAC TLV">
+
+<figure><artwork><![CDATA[
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|   Type = 16   |    Length     |     HMAC...
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+]]></artwork></figure>
+
+<t>Fields :
+<list style="hanging" hangIndent="10">
+<t hangText="Type">Set to 16 to indicate an HMAC TLV.</t>
+<t hangText="Length">The length of the body, in octets, exclusive of the
+Type and Length fields.  The length of the body depends on the HMAC
+algorithm being used.</t>
+<t hangText="HMAC">The body contains the HMAC of the packet, computed as
+described in <xref target="hmac-computation"/>.</t>
+</list></t>
+
+<t>This TLV is allowed in the packet trailer (see Section 4.2 of
+<xref target="RFC6126bis"/>), and MUST be ignored if it is found in the
+packet body.</t>
+
+</section>
+
+<section title="PC TLV">
+
+<figure><artwork><![CDATA[
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|   Type = 17   |    Length     |             PC                |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                               |            Index...
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+]]></artwork></figure>
+
+<t>Fields :
+<list style="hanging" hangIndent="10">
+<t hangText="Type">Set to 17 to indicate a PC TLV.</t>
+<t hangText="Length">The length of the body, in octets, exclusive of the
+Type and Length fields.</t>
+<t hangText="PC">The Packet Counter (PC), a 32-bit (4 octet) unsigned
+integer which is increased with every packet sent over this interface.
+A fresh index (as defined in <xref target="interface-table"/>) MUST be
+generated whenever the PC overflows.</t>
+<t hangText="Index">The sender's Index, an opaque string of 0 to 32
+octets.</t>
+</list></t>
+
+<t>Indices are limited to a size of 32 octets: a node MUST NOT send a TLV
+with an index of size strictly larger than 32 octets, and a node MAY
+ignore a PC TLV with an index of size strictly larger than 32 octets.</t>
+
+</section>
+
+<section title="Challenge Request TLV">
+
+<figure><artwork><![CDATA[
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|   Type = 18   |    Length     |     Nonce...
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+]]></artwork></figure>
+
+<t>Fields :
+<list style="hanging" hangIndent="10">
+<t hangText="Type">Set to 18 to indicate a Challenge Request TLV.</t>
+<t hangText="Length">The length of the body, in octets, exclusive of the
+Type and Length fields.</t>
+<t hangText="Nonce">The nonce uniquely identifying the challenge, an
+opaque string of 0 to 192 octets.</t>
+</list></t>
+
+<t>Nonces are limited to a size of 192 octets: a node MUST NOT send
+a Challenge Request TLV with a nonce of size strictly larger than 192
+octets, and a node MAY ignore a nonce that is of size strictly larger than
+192 octets.</t>
+
+</section>
+
+<section title="Challenge Reply TLV">
+
+<figure><artwork><![CDATA[
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|   Type = 19   |    Length     |     Nonce...
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+]]></artwork></figure>
+
+<t>Fields :
+<list style="hanging" hangIndent="10">
+<t hangText="Type">Set to 19 to indicate a Challenge Reply TLV.</t>
+<t hangText="Length">The length of the body, in octets, exclusive of the
+Type and Length fields.</t>
+<t hangText="Nonce">A copy of the nonce contained in the corresponding
+challenge request.</t>
+</list></t>
+</section>
+
+</section>
+
+<section title="Security Considerations">
+
+<t>This document defines a mechanism that provides basic security
+properties for the Babel routing protocol.  The scope of this protocol is
+strictly limited: it only provides authentication (we assume that routing
+information is not confidential), it only supports symmetric keying, and
+it only allows for the use of a small number of symmetric keys on every
+link.  Deployments that need more features, e.g., confidentiality or
+asymmetric keying, should use a more featureful security mechanism such as
+the one described in <xref target="I-D.ietf-babel-dtls"/>.</t>
+
+<t>This mechanism relies on two assumptions, as described in <xref
+target="security-properties"/>.  First, it assumes that the hash being
+used is invulnerable to pre-image attacks (Section 1.1 of <xref
+target="RFC6039"/>); at the time of writing, SHA-256, which is mandatory
+to implement (<xref target="hmac-computation"/>), is believed to be safe
+against practical attacks.</t>
+
+<t>Second, it assumes that indices and nonces are generated uniquely over
+the lifetime of a key used for HMAC computation (more precisely, indices
+must be unique for a given (key, source) pair, and nonces must be unique
+for a given (key, source, destination) triple).  This property can be
+satisfied either by using a cryptographically secure random number
+generator to generate indices and nonces that contain enough entropy
+(64-bit values are believed to be large enough for all practical
+applications), or by using a reliably monotonic hardware clock.  If
+uniqueness cannot be guaranteed (e.g., because a hardware clock has been
+reset), then rekeying is necessary.</t>
+
+<t>The expiry mechanism mandated in <xref target="expire"/> is required to
+prevent an attacker from delaying an authentic packet by an unbounded
+amount of time.  If an attacker is able to delay the delivery of a packet
+(e.g., because it is located at a layer 2 switch), then the packet will be
+accepted as long as the corresponding (Index, PC) pair is present at the
+receiver.  If the attacker is able to cause the (Index, PC) pair to
+persist for arbitrary amounts of time (e.g., by repeatedly causing failed
+challenges), then it is able to delay the packet by arbitrary amounts of
+time, even after the sender has left the network.</t>
+
+<t>While it is probably not possible to be immune against denial of
+service (DoS) attacks in general, this protocol includes a number of
+mechanisms designed to mitigate such attacks.  In particular, reception of
+a packet with no correct HMAC creates no local state whatsoever (<xref
+target="packet-reception"/>).  Reception of a replayed packet with correct
+hash, on the other hand, causes a challenge to be sent; this is mitigated
+somewhat by requiring that challenges be rate-limited.</t>
+
+<t>At first sight, sending a challenge requires retaining enough
+information to validate the challenge reply.  However, the nonce included
+in a challenge request and echoed in the challenge reply can be fairly
+large (up to 192 octets), which should in principle permit encoding the
+per-challenge state as a secure "cookie" within the nonce itself.</t>
+
+</section>
+
+<section title="IANA Considerations">
+
+<t>IANA has allocated the following values in the Babel TLV Types
+registry:</t>
+<texttable>
+<ttcol>Type</ttcol><ttcol>Name</ttcol><ttcol>Reference</ttcol>
+<c>16</c><c>HMAC</c><c>this document</c>
+<c>17</c><c>PC</c><c>this document</c>
+<c>18</c><c>Challenge Request</c><c>this document</c>
+<c>19</c><c>Challenge Reply</c><c>this document</c>
+</texttable>
+
+</section>
+
+<section title="Acknowledgments">
+
+<t>The protocol described in this document is based on the original HMAC
+protocol defined by Denis Ovsienko <xref target="RFC7298"/>.  The use of
+a pseudo-header was suggested by David Schinazi.  The use of an index to
+avoid replay was suggested by Markus Stenberg.  The authors are also
+indebted to Donald Eastlake, Toke Hoiland-Jorgensen, Florian Horn, and
+Dave Taht.</t>
+
+</section>
+
+</middle>
+
+<back>
+ 
+<references title="Normative References">
+
+<reference anchor="RFC2119"><front>
+<title>Key words for use in RFCs to Indicate Requirement Levels</title>
+<author initials="S." surname="Bradner" fullname="S. Bradner"/>
+<date year="1997" month="March"/>
+</front>
+<seriesInfo name="BCP" value="14"/>
+<seriesInfo name="RFC" value="2119"/>
+<seriesInfo name="DOI" value="10.17487/RFC2119"/>
+</reference>
+
+<reference anchor="RFC8174"><front>
+<title>Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words</title>
+<author initials="B." surname="Leiba" fullname="B. Leiba"/>
+<date year="2017" month="May"/>
+</front>
+<seriesInfo name="BCP" value="14"/>
+<seriesInfo name="RFC" value="8174"/>
+<seriesInfo name="DOI" value="10.17487/RFC8174"/>
+</reference>
+
+<reference anchor='RFC6126bis'><front>
+<title>The Babel Routing Protocol</title>
+<author initials='J' surname='Chroboczek' fullname='Juliusz Chroboczek'/>
+<author initials='D' surname='Schinazi' fullname='David Schinazi'/>
+<date month='October' day='23' year='2018' />
+</front>
+<seriesInfo name='Internet-Draft' value='draft-ietf-babel-rfc6126bis-06'/>
+</reference>
+
+<reference anchor="RFC2104" target="https://www.rfc-editor.org/info/rfc2104">
+<front>
+<title>HMAC: Keyed-Hashing for Message Authentication</title>
+<author initials="H." surname="Krawczyk" fullname="H. Krawczyk"></author>
+<author initials="M." surname="Bellare" fullname="M. Bellare"></author>
+<author initials="R." surname="Canetti" fullname="R. Canetti"></author>
+<date year="1997" month="February"/>
+</front>
+<seriesInfo name="RFC" value="2104"/>
+<seriesInfo name="DOI" value="10.17487/RFC2104"/>
+</reference>
+
+<reference anchor="RFC6234" target="https://www.rfc-editor.org/info/rfc6234">
+<front>
+<title>US Secure Hash Algorithms (SHA and SHA-based HMAC and HKDF)</title>
+<author initials="D." surname="Eastlake 3rd" fullname="D. Eastlake 3rd">
+</author>
+<author initials="T." surname="Hansen" fullname="T. Hansen"></author>
+<date year="2011" month="May"/>
+</front>
+<seriesInfo name="RFC" value="6234"/>
+<seriesInfo name="DOI" value="10.17487/RFC6234"/>
+</reference>
+
+<reference anchor="RFC7693" target="https://www.rfc-editor.org/info/rfc7693">
+<front>
+<title>The BLAKE2 Cryptographic Hash and Message Authentication Code (MAC)</title>
+<author initials="M-J." surname="Saarinen" fullname="M-J. Saarinen" role="editor"/>
+<author initials="J-P." surname="Aumasson" fullname="J-P. Aumasson"/>
+<date year="2015" month="November"/>
+</front>
+<seriesInfo name="RFC" value="7693"/>
+<seriesInfo name="DOI" value="10.17487/RFC7693"/>
+</reference>
+
+</references>
+
+<references title="Informational References">
+
+<reference anchor="RFC7298"
+target="https://www.rfc-editor.org/info/rfc7298"><front>
+<title>Babel Hashed Message Authentication Code (HMAC) Cryptographic
+Authentication</title>
+<author initials="D." surname="Ovsienko" fullname="D. Ovsienko"></author>
+<date year="2014" month="July"/>
+</front>
+<seriesInfo name="RFC" value="7298"/>
+<seriesInfo name="DOI" value="10.17487/RFC7298"/>
+</reference>
+
+<reference anchor="I-D.ietf-babel-dtls"><front>
+<title>Babel Routing Protocol over Datagram Transport Layer Security</title>
+<author initials="A" surname="Decimo" fullname="Antonin Decimo"/>
+<author initials="D" surname="Schinazi" fullname="David Schinazi"/>
+<author initials="J" surname="Chroboczek" fullname="Juliusz Chroboczek"/>
+<date month="October" day="8" year="2018"/>
+</front>
+<seriesInfo name="Internet-Draft" value="draft-ietf-babel-dtls-01"/>
+<format type="TXT" target="http://www.ietf.org/internet-drafts/draft-ietf-babel-dtls-01.txt"/>
+</reference>
+
+<reference anchor="RFC6039" target="https://www.rfc-editor.org/info/rfc6039">
+<front>
+<title>
+Issues with Existing Cryptographic Protection Methods for Routing Protocols
+</title>
+<author initials="V." surname="Manral" fullname="V. Manral"/>
+<author initials="M." surname="Bhatia" fullname="M. Bhatia"/>
+<author initials="J." surname="Jaeggli" fullname="J. Jaeggli"/>
+<author initials="R." surname="White" fullname="R. White"/>
+<date year="2010" month="October"/>
+</front>
+<seriesInfo name="RFC" value="6039"/>
+<seriesInfo name="DOI" value="10.17487/RFC6039"/>
+</reference>
+
+<reference  anchor='RFC4086' target='http://www.rfc-editor.org/info/rfc4086'>
+<front>
+<title>Randomness Requirements for Security</title>
+<author initials='D.' surname='Eastlake 3rd' fullname='D. Eastlake 3rd'/>
+<author initials='J.' surname='Schiller' fullname='J. Schiller'/>
+<author initials='S.' surname='Crocker' fullname='S. Crocker'/>
+<date year='2005' month='June'/>
+</front>
+<seriesInfo name='BCP' value='106'/>
+<seriesInfo name='RFC' value='4086'/>
+<seriesInfo name='DOI' value='10.17487/RFC4086'/>
+</reference>
+
+</references>
+
+<section title="Incremental deployment and key rotation"
+         anchor="incremental-deployment">
+
+<t>This protocol supports incremental deployment (transitioning from an
+insecure network to a secured network with no service interruption) and
+key rotation (transitioning from a set of keys to a different set of
+keys).</t>
+
+<t>In order to perform incremental deployment, the nodes in the network
+are first configured in a mode where packets are sent with authentication
+but not checked on reception.  Once all the nodes in the network are
+configured to send authenticated packets, nodes are reconfigured to reject
+unauthenticated packets.</t>
+
+<t>In order to perform key rotation, the new key is added to all the
+nodes; once this is done, both the old and the new key are sent in all
+packets, and packets are accepted if they are properly signed by either of
+the keys.  At that point, the old key is removed.</t>
+
+<t>In order to support incremental deployment and key rotation,
+implementations SHOULD support an interface configuration in which they
+send authenticated packets but accept all packets, and SHOULD allow
+changing the set of keys associated with an interface without
+a restart.</t>
+
+</section>
+
+<section title="Changes from previous versions">
+
+<t>[RFC Editor: please remove this section before publication.]</t>
+
+<section title="Changes since draft-ietf-babel-hmac-00">
+
+<t><list style="symbols">
+<t>Changed the title.</t>
+<t>Removed the appendix about the packet trailer, this is now in
+rfc6126bis.</t>
+<t>Removed the appendix with implicit indices.</t>
+<t>Clarified the definitions of acronyms.</t>
+<t>Limited the size of nonces and indices.</t>
+</list></t>
+</section>
+
+<section title="Changes since draft-ietf-babel-hmac-01">
+
+<t><list style="symbols">
+<t>Made BLAKE2s a recommended HMAC algorithm.</t>
+<t>Added requirement to expire per-neighbour crypto state.</t>
+</list></t>
+
+</section>
+
+<section title="Changes since draft-ietf-babel-hmac-02">
+
+<t><list style="symbols">
+<t>Clarified that PCs are 32-bit unsigned integers.</t>
+<t>Clarified that indices and nonces are of arbitrary size.</t>
+<t>Added reference to RFC 4086.</t>
+</list></t>
+
+</section>
+
+<section title="Changes since draft-ietf-babel-hmac-03">
+
+<t><list style="symbols">
+<t>Use the TLV values allocated by IANA.</t>
+<t>Fixed an issue with packets that contain a successful challenge
+reply: they should be accepted before checking the PC value.</t>
+<t>Clarified that keys are the exact value of the HMAC hash size, and not
+subject to preprocessing; this makes management more deterministic.</t>
+</list></t>
+
+</section>
+
+<section title="Changes since draft-ietf-babel-hmac-04">
+
+<t>Use normative language in more places.</t>
+
+</section>
+
+</section>
+
+</back>
+
+</rfc>

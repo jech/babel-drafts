@@ -6,7 +6,7 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="no" ?>
-<rfc category="std" docName="draft-ietf-babel-hmac-05"
+<rfc category="std" docName="draft-ietf-babel-hmac-06"
      ipr="trust200902"
      obsoletes="7298">
 <front>
@@ -52,7 +52,7 @@ Babel routing protocol</title>
 </address>
 </author>
 
-<date day="7" month="June" year="2019"/>
+<date day="20" month="June" year="2019"/>
 
 <abstract>
 <t>This document describes a cryptographic authentication mechanism for
@@ -927,10 +927,22 @@ subject to preprocessing; this makes management more deterministic.</t>
 
 <section title="Changes since draft-ietf-babel-hmac-04">
 
+<t><list style="symbols">
 <t>Use normative language in more places.</t>
+</list></t>
 
 </section>
 
+<section title="Changes since draft-ietf-babel-hmac-05">
+
+<t><list style="symbols">
+<t>Do not update RFC 6126bis.</t>
+<t>Clarify that indices and nonces of length 0 are valid.</t>
+<t>Clarify that multiple PC TLVs in a single packet are not allowed.</t>
+<t>Allow discarding challenge requests when they carry an old PC.</t>
+</list></t>
+
+</section>
 </section>
 
 </back>

@@ -6,7 +6,7 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="no" ?>
-<rfc category="std" docName="draft-ietf-babel-hmac-06"
+<rfc category="std" docName="draft-ietf-babel-hmac-07"
      ipr="trust200902"
      obsoletes="7298">
 <front>
@@ -943,6 +943,15 @@ subject to preprocessing; this makes management more deterministic.</t>
 </list></t>
 
 </section>
+
+<section title="Changes since draft-ietf-babel-hmac-06">
+
+<t><list style="symbols">
+<t>Do not update RFC 6126bis, for real this time.</t>
+</list></t>
+
+</section>
+
 </section>
 
 </back>

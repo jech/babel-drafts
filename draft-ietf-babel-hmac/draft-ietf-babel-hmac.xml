@@ -409,10 +409,31 @@ packet MUST be dropped and processing stops (no challenge is sent in this
 case, since the mismatch might be caused by harmless packet reordering on
 the link).  Otherwise, the PC contained in the Neighbour Table entry is
 set to the received PC, and the packet is accepted.</t>
-</list>
-After the packet has been accepted, it is processed as normal, except that
-any PC, Challenge Request and Challenge Reply TLVs that it contains are
-silently ignored.</t>
+</list></t>
+
+<t>In the algorithm described above, challenge requests are processed and
+challenges are sent before the PC/Index pair is verified against the
+neighbour table.  This simplifies the implementation somewhat (the node
+may simply schedule outgoing requests as it walks the packet during the
+preparse phase), but relies on the rate-limiting described in
+<xref target="sending-challenges"/> to avoid sending too many challenges
+in response to replayed packets.  As an optimisation, a node MAY ignore
+all challenge requests contained in a packet except the last one, and it
+MAY ignore a challenge request in the case where it it contained in
+a packet with an Index that matches the one in the Neighbour Table and
+a PC that is smaller or equal to the one contained in the Neighbour Table.
+Since it is still possible to replay a packet with an obsolete Index, the
+rate-limiting described in <xref target="sending-challenges"/> is
+required even if this optimisation is implemented.</t>
+
+<t>The same is true of challenge replies.  However, since validating
+a challenge reply is extremely cheap (it's just a bitwise comparison of
+two strings of octets), a similar optimisation for challenge replies is
+not worthwile.</t>
+
+<t>After the packet has been accepted, it is processed as normal, except
+that any PC, Challenge Request and Challenge Reply TLVs that it contains
+are silently ignored.</t>
 
 <section title="Challenge Requests and Replies">
 

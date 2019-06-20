@@ -57,7 +57,7 @@ Babel routing protocol</title>
 <abstract>
 <t>This document describes a cryptographic authentication mechanism for
 the Babel routing protocol that has provisions for replay avoidance.  This
-document updates RFC 6126bis and obsoletes RFC 7298.</t>
+document obsoletes RFC 7298.</t>
 </abstract>
 
 </front>

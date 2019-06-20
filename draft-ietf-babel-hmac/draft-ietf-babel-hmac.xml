@@ -330,7 +330,7 @@ Section 2 of <xref target="RFC2104"/>, SHOULD implement keyed BLAKE2s
 <xref target="RFC7693"/>, and MAY implement other HMAC algorithms.</t>
 </section>
 
-<section title="Packet Transmission">
+<section title="Packet Transmission" anchor="packet-transmission">
 
 <t>A Babel node might delay actually sending TLVs by a small amount, in
 order to aggregate multiple TLVs in a single packet up to the
@@ -345,7 +345,8 @@ packet) and HMAC TLVs (one per configured key).</t>
 outgoing interface MUST be appended to the packet body; the PC MUST be
 incremented by a strictly positive amount (typically just 1); if the
 PC overflows, a fresh index MUST be generated (as defined in
-<xref target="interface-table"/>);</t>
+<xref target="interface-table"/>); a node MUST NOT include multiple PC
+TLVs in a single packet;</t>
 <t>for each key configured on the interface, an HMAC is computed as
 specified in <xref target="hmac-computation"/> above, and stored in an
 HMAC TLV that MUST be appended to the packet trailer (see Section 4.2 of
@@ -377,12 +378,14 @@ TLV contained in the packet, but only once for each configured key.</t>
 phase, the packet body is traversed and all TLVs are ignored except PC
 TLVs, Challenge Requests and Challenge Replies.  When a PC TLV is
 encountered, the enclosed PC and Index are saved for later processing; if
-multiple PCs are found, only the first one is processed, the remaining
-ones MUST be silently ignored.  If a Challenge Request is encountered,
-a Challenge Reply MUST be scheduled, as described in <xref
-target="replying-challenges"/>.  If a Challenge Reply is encountered, it
-is tested for validity as described in <xref target="receiving-challenges"/>
-and a note is made of the result of the test.</t>
+multiple PCs are found (which should not happen, see
+<xref target="packet-transmission"/> above), only the first one is
+processed, the remaining ones MUST be silently ignored.  If a Challenge
+Request is encountered, a Challenge Reply MUST be scheduled, as described
+in <xref target="replying-challenges"/>.  If a Challenge Reply is
+encountered, it is tested for validity as described in
+<xref target="receiving-challenges"/> and a note is made of the result of
+the test.</t>
 <t>The preparse phase above has yielded two pieces of data: the PC and
 Index from the first PC TLV, and a bit indicating whether the packet
 contains a successful Challenge Reply.  If the packet does not contain

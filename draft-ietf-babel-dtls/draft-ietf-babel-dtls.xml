@@ -17,7 +17,7 @@
 <?rfc compact="no" ?>
 <rfc category="std"
     obsoletes=""
-    docName="draft-ietf-babel-dtls-05"
+    docName="draft-ietf-babel-dtls-06"
     ipr="trust200902">
 <front>
 <title abbrev="Babel over DTLS">Babel Routing Protocol over Datagram
@@ -132,7 +132,8 @@ and MUST listen for unencrypted Babel traffic on another UDP port, which
 MUST be distinct from the first one.  The default port for Babel over DTLS is
 registered with IANA as the "babel-dtls" port (UDP port TBD, see
 <xref target="iana_considerations"/>), and the port exchanging unencrypted
-Babel traffic is registered as the "babel" port (UDP port 6696).</t>
+Babel traffic is registered as the "babel" port (UDP port 6696,
+see Section 5 of <xref target="RFC6126bis"/>).</t>
 
 <t>When a Babel node discovers a new neighbour (generally by
 receiving an unencrypted multicast Babel packet), it compares the neighbour's
@@ -320,8 +321,8 @@ service avoidance techniques beyond the scope of this document.</t>
 <title>The Babel Routing Protocol</title>
 <author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
 <author fullname="David Schinazi" initials="D." surname="Schinazi"/>
-<date month="November" year="2018"/></front>
-<seriesInfo name="Internet Draft" value="draft-ietf-babel-rfc6126bis-09"/>
+<date month="June" year="2019"/></front>
+<seriesInfo name="Internet Draft" value="draft-ietf-babel-rfc6126bis-10"/>
 </reference>
 
 </references>
@@ -339,8 +340,8 @@ service avoidance techniques beyond the scope of this document.</t>
 <author fullname="Clara Do" initials="C." surname="Do"/>
 <author fullname="Weronika Kolodziejak" initials="W." surname="Kolodziejak"/>
 <author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
-<date month="November" year="2018"/></front>
-<seriesInfo name="Internet Draft" value="draft-ietf-babel-hmac-04"/>
+<date month="June" year="2019"/></front>
+<seriesInfo name="Internet Draft" value="draft-ietf-babel-hmac-07"/>
 </reference>
 
 <reference anchor="DTLS-CID"><front>
@@ -377,6 +378,7 @@ Donald Eastlake,
 Thomas Fossati,
 Gabriel Kerneis,
 Antoni Przygienda,
+Dan Romascanu,
 Barbara Stark,
 Markus Stenberg,
 Dave Taht,

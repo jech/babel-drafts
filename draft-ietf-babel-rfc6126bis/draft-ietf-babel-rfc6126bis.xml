@@ -1463,15 +1463,15 @@ on link layers with high per-packet overhead (e.g., IEEE&nbsp;802.11).</t>
 
 <section title="Protocol Encoding" anchor="protocol-encoding">
 
-<t>A Babel packet is sent as the body of a UDP datagram, with network-layer
-hop count set to 1, destined to a well-known multicast address or to
-a unicast address, over IPv4 or IPv6; in the case of IPv6, these addresses
-are link-local.  Both the source and destination UDP port are set to
-a well-known port number.  A Babel packet MUST be silently ignored unless
-its source address is either a link-local IPv6 address or an IPv4 address
-belonging to the local network, and its source port is the well-known Babel
-port.  It MAY be silently ignored if its destination address is a global
-IPv6 address.</t>
+<t>A Babel packet MUST be sent as the body of a UDP datagram, with
+network-layer hop count set to 1, destined to a well-known multicast
+address or to a unicast address, over IPv4 or IPv6; in the case of IPv6,
+these addresses are link-local.  Both the source and destination UDP port
+are set to a well-known port number.  A Babel packet MUST be silently
+ignored unless its source address is either a link-local IPv6 address or
+an IPv4 address belonging to the local network, and its source port is the
+well-known Babel port.  It MAY be silently ignored if its destination
+address is a global IPv6 address.</t>
 
 <t>In order to minimise the number of packets being sent while avoiding
 lower-layer fragmentation, a Babel node SHOULD attempt to maximise the
@@ -1502,7 +1502,8 @@ applications of Babel.</t>
 
 <section title="Router-Id">
 <t>A router-id is an arbitrary 8-octet value.  A router-id MUST NOT
-consist of either all zeroes or all ones.</t>
+consist of either all binary zeroes (0000000000000000 hexadecimal) or all
+binary ones ones (ffffffffffffffff hexadecimal).</t>
 </section>
 
 <section title="Address">

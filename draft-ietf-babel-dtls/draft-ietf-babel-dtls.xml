@@ -277,8 +277,8 @@ and the packet may be fragmented by lower layers.</t>
 number, called "babel-dtls", for use by Babel over DTLS.  Details of the
 request to IANA are as follows:
 <list style="symbols">
-<t>Assignee: David Schinazi, dschinazi.ietf@gmail.com</t>
-<t>Contact Person: David Schinazi, dschinazi.ietf@gmail.com</t>
+<t>Assignee: IESG, iesg@ietf.org</t>
+<t>Contact Person: IETF Chair, chair@ietf.org</t>
 <t>Transport Protocols: UDP only</t>
 <t>Service Code: None</t>
 <t>Service Name: babel-dtls</t>

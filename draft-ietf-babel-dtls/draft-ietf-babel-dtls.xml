@@ -162,7 +162,10 @@ handshake.  Nodes MUST only negotiate DTLS version 1.2 or higher.  Nodes MUST
 use DTLS replay protection to prevent attackers from replaying stale
 information.  Nodes SHOULD drop packets that have been reordered by more than
 two IHU intervals, to avoid letting attackers make stale information last
-longer.</t>
+longer.  If a node receives a new DTLS connection from a neighbour to whom
+it already has a connection, the node MUST NOT discard the older connection
+until it has completed the handshake of the new one and validated the
+identity of the peer.</t>
 
 </section>
 
@@ -268,6 +271,11 @@ for UDP and IP headers or 512 octets, whichever is larger.  Note that this
 requirement on reception does not take into account the overhead of DTLS
 because the peer may not have the ability to compute the overhead of DTLS
 and the packet may be fragmented by lower layers.</t>
+
+<t>Note that distinct DTLS connections can use different ciphers, which can
+have different amounts of overhead per packet.  Therefore, the MTU to one
+neighbour can be different from the MTU to another neighbour on the same
+link.</t>
 
 </section>
 
@@ -378,6 +386,7 @@ Donald Eastlake,
 Thomas Fossati,
 Gabriel Kerneis,
 Antoni Przygienda,
+Henning Rogge,
 Dan Romascanu,
 Barbara Stark,
 Markus Stenberg,

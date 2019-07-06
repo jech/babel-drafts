@@ -616,9 +616,9 @@ Networks</title>
 <author initials="C" surname="Do" fullname="Clara Do"/>
 <author initials="W" surname="Kolodziejak" fullname="Weronika Kolodziejak"/>
 <author initials="J" surname="Chroboczek" fullname="Juliusz Chroboczek"/>
-<date month="March" day="9" year="2019"/>
+<date month="June" day="20" year="2019"/>
 </front>
-<seriesInfo name="Internet-Draft" value="draft-ietf-babel-hmac-04"/>
+<seriesInfo name="Internet-Draft" value="draft-ietf-babel-hmac-07"/>
 </reference>
 
 <reference anchor="DTLS"><front>
@@ -626,9 +626,9 @@ Networks</title>
 <author initials="A" surname="Decimo" fullname="Antonin Decimo"/>
 <author initials="D" surname="Schinazi" fullname="David Schinazi"/>
 <author initials="J" surname="Chroboczek" fullname="Juliusz Chroboczek"/>
-<date month="February" day="6" year="2019"/>
+<date month="July" day="5" year="2019"/>
 </front>
-<seriesInfo name="Internet-Draft" value="draft-ietf-babel-dtls-04"/>
+<seriesInfo name="Internet-Draft" value="draft-ietf-babel-dtls-07"/>
 </reference>
 
 </references>

@@ -815,10 +815,10 @@ Authentication</title>
 <author initials="A" surname="Decimo" fullname="Antonin Decimo"/>
 <author initials="D" surname="Schinazi" fullname="David Schinazi"/>
 <author initials="J" surname="Chroboczek" fullname="Juliusz Chroboczek"/>
-<date month="October" day="8" year="2018"/>
+<date month="July" day="5" year="2019"/>
 </front>
-<seriesInfo name="Internet-Draft" value="draft-ietf-babel-dtls-01"/>
-<format type="TXT" target="http://www.ietf.org/internet-drafts/draft-ietf-babel-dtls-01.txt"/>
+<seriesInfo name="Internet-Draft" value="draft-ietf-babel-dtls-07"/>
+<format type="TXT" target="http://www.ietf.org/internet-drafts/draft-ietf-babel-dtls-07.txt"/>
 </reference>
 
 <reference anchor="RFC6039" target="https://www.rfc-editor.org/info/rfc6039">

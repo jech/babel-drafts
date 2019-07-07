@@ -6,7 +6,7 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="no" ?>
-<rfc category="std" docName="draft-ietf-babel-hmac-07"
+<rfc category="std" docName="draft-ietf-babel-hmac-08"
      ipr="trust200902"
      obsoletes="7298">
 <front>
@@ -52,7 +52,7 @@ Babel routing protocol</title>
 </address>
 </author>
 
-<date day="20" month="June" year="2019"/>
+<date day="7" month="July" year="2019"/>
 
 <abstract>
 <t>This document describes a cryptographic authentication mechanism for

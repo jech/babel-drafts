@@ -374,6 +374,9 @@ point.  In order to avoid memory exhaustion attacks, an entry in the
 Neighbour Table MUST NOT be created before the HMAC test has passed
 successfully.  The HMAC of the packet MUST NOT be computed for each HMAC
 TLV contained in the packet, but only once for each configured key.</t>
+<t>If an entry for the sender does not exist in the Neighbour Table, it
+MAY be created at this point (or, alternatively, its creation can be
+delayed until a challenge needs to be sent, see below);</t>
 <t>The packet body is then parsed a first time.  During this "preparse"
 phase, the packet body is traversed and all TLVs are ignored except PC
 TLVs, Challenge Requests and Challenge Replies.  When a PC TLV is
@@ -392,8 +395,8 @@ contains a successful Challenge Reply.  If the packet does not contain
 a PC TLV, the packet MUST be dropped and processing stops at this point.
 If the packet contains a successful Challenge Reply, then the PC and Index
 contained in the PC TLV MUST be stored in the Neighbour Table entry
-corresponding to the sender (which may need to be created at this stage),
-and the packet is accepted.</t>
+corresponding to the sender (which already exists in this case), and the
+packet is accepted.</t>
 <t>Otherwise, if there is no entry in the Neighbour Table corresponding to
 the sender, or if such an entry exists but contains no Index, or if the
 Index it contains is different from the Index contained in the PC TLV,
@@ -690,12 +693,28 @@ mechanisms designed to mitigate such attacks.  In particular, reception of
 a packet with no correct HMAC creates no local state whatsoever (<xref
 target="packet-reception"/>).  Reception of a replayed packet with correct
 hash, on the other hand, causes a challenge to be sent; this is mitigated
-somewhat by requiring that challenges be rate-limited.</t>
+somewhat by requiring that challenges be rate-limited
+(<xref target="sending-challenges"/>).</t>
 
-<t>At first sight, sending a challenge requires retaining enough
-information to validate the challenge reply.  However, the nonce included
-in a challenge request and echoed in the challenge reply can be fairly
-large (up to 192 octets), which should in principle permit encoding the
+<t>Receiving a replayed packet with an obsolete index causes an entry to
+be created in the Neighbour Table, which, at first sight, makes the
+protocol susceptible to resource exhaustion attacks (similarly to the
+familiar "TCP SYN Flooding" attack <xref target="RFC4987"/>).  However,
+the HMAC computation includes the sender address (<xref
+target="hmac-computation"/>), and thus the amount of storage that an
+attacker can force a node to consume is limited by the number of distinct
+source addresses used with a single HMAC key (see also Section 4 of <xref
+target="RFC6126bis"/>, which mandates that the source address is
+a link-local IPv6 address or a local IPv4 address).</t>
+
+<t>In order to make this kind of resource exhaustion attacks less
+effective, implementations may use a separate table of uncompleted
+challenges that is separate from the Neighbour Table used by the core
+protocol (the data structures described in Section 3.2 of <xref
+target="RFC6126bis"/> are conceptual, any data structure that yields the
+same result may be used).  Implementers might also consider using the fact
+that the nonces included in challenge requests and responses can be fairly
+large (up to 192 octets), which should in principle allow encoding the
 per-challenge state as a secure "cookie" within the nonce itself.</t>
 
 </section>
@@ -849,6 +868,15 @@ Issues with Existing Cryptographic Protection Methods for Routing Protocols
 <seriesInfo name='DOI' value='10.17487/RFC4086'/>
 </reference>
 
+<reference anchor="RFC4987" target="https://www.rfc-editor.org/info/rfc4987">
+<front>
+<title>TCP SYN Flooding Attacks and Common Mitigations</title>
+<author initials="W." surname="Eddy" fullname="W. Eddy"/>
+<date year="2007" month="August"/>
+</front>
+<seriesInfo name="RFC" value="4987"/>
+<seriesInfo name="DOI" value="10.17487/RFC4987"/>
+</reference>
 </references>
 
 <section title="Incremental deployment and key rotation"
@@ -952,6 +980,18 @@ subject to preprocessing; this makes management more deterministic.</t>
 
 </section>
 
+<section title="Changes since draft-ietf-babel-hmac-07">
+
+<t><list style="symbols">
+<t>Clarify that a Neighbour Table entry may be created just after the HMAC
+has been computed.</t>
+<t>Clarify that a Neighbour Table entry already exists when a successful
+Challenge Reply has been received.</t>
+<t>Expand the Security Considerations section with information about
+resource exhaustion attacks.</t>
+</list></t>
+
+</section>
 </section>
 
 </back>

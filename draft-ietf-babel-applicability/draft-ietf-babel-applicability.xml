@@ -30,8 +30,9 @@ routing protocol</title>
 <abstract>
 <t>Babel is a routing protocol based on the distance-vector algorithm
 augmented with mechanisms for loop avoidance and starvation avoidance.  In
-this document, we argue that there exist niches where Babel is useful and
-that are not adequately served by more mature protocols.</t>
+this document, we describe a number of niches where Babel has been found
+to be useful and that are arguably not adequately served by more mature
+protocols.</t>
 </abstract>
 
 </front>
@@ -44,8 +45,8 @@ that are not adequately served by more mature protocols.</t>
 familiar distance-vector algorithm (sometimes known as distributed
 Bellman-Ford) augmented with mechanisms for loop avoidance (there is no
 "counting to infinity") and starvation avoidance.  In this document, we
-argue that there exist niches where Babel is useful and that are not
-adequately served by more mature protocols such as OSPF
+describe a number of niches where Babel is useful and that are arguably
+not adequately served by more mature protocols such as OSPF
 <xref target="RFC5340"/> and IS-IS <xref target="RFC1195"/>.</t>
 
 <section title="Technical overview of the Babel protocol">
@@ -103,26 +104,32 @@ Babel can be explained in 15 minutes, and a full description of the
 protocol can be done in 52 minutes (one microcentury).</t>
 
 <t>An important consequence is that Babel is easy to implement.  At the
-time of writing, there exist four independent implementations, including
-one that was reportedly written and debugged in just two nights.</t>
+time of writing, there exist four independent, interoperable implementations,
+including one that was reportedly written and debugged in just two nights.</t>
 
 </section>
 
 <section title="Robustness">
 
 <t>The fairly strong properties of the Babel protocol (convergence, loop
-avoidance, starvation avoidance) rely on some rather weak properties of
-the network and the metric being used.  The most significant are:
+avoidance, starvation avoidance) rely on some reasonably weak properties
+of the network and the metric being used.  The most significant are:
 <list style="symbols">
-<t>causality: a control message is not received before it has been sent
-(more precisely, the "happens-before" relation is acyclic);</t>
+<t>causality: the "happens-before" relation is acyclic (intuitively,
+a control message is not received before it has been sent);</t>
 <t>strict monotonicity of the metric: for any metric M and link cost&nbsp;C,
-M&nbsp;&lt;&nbsp;C&nbsp;+&nbsp;M;</t>
-<t>left-distributivity of the metric: for any metrics M and M' and cost&nbsp;C,
-if M&nbsp;&le;&nbsp;M', then
-C&nbsp;+&nbsp;M&nbsp;&le;&nbsp;C&nbsp;+&nbsp;M'.</t>
+M&nbsp;&lt;&nbsp;C&nbsp;+&nbsp;M (intuitively, this implies that cycles
+have a strictly positive metric);</t>
+<t>left-distributivity of the metric: for any metrics M and M'
+and cost&nbsp;C, if M&nbsp;&le;&nbsp;M', then
+C&nbsp;+&nbsp;M&nbsp;&le;&nbsp;C&nbsp;+&nbsp;M' (intuitively, this implies
+that a good choice made by a neighbour B of a node A is also a good choice
+for A).</t>
 </list>
-In particular, Babel does not assume a reliable transport, it does not
+See <xref target="METAROUTING"/> for more information about these
+properties and their consequences.</t>
+
+<t>In particular, Babel does not assume a reliable transport, it does not
 assume ordered delivery, it does not assume that communication is
 transitive, and it does not require that the metric be discrete
 (continuous metrics are possible, reflecting for example packet loss
@@ -163,9 +170,9 @@ a given extension violates the assumptions on which Babel relies.</t>
 
 <t>All of the extensions designed to date interoperate with the base
 protocol and with each other.  This, again, is a consequence of the
-protocol design: in order to check the interoperability of two
-implementations of Babel, it is enough to verify that the interaction of
-the two does not violate the protocol's assumptions.</t>
+protocol design: in order to check that two extensions to the Babel
+protocol are interoperable, it is enough to verify that the interaction of
+the two does not violate the base protocol's assumptions.</t>
 
 <t>Notable extensions deployed to date include:
 <list style="symbols">
@@ -629,6 +636,17 @@ Networks</title>
 <date month="July" day="5" year="2019"/>
 </front>
 <seriesInfo name="Internet-Draft" value="draft-ietf-babel-dtls-07"/>
+</reference>
+
+<reference anchor="METAROUTING"><front>
+<title>Metarouting</title>
+<author initials="T. G." surname="Griffin" fullname="Timothy G. Griffin"/>
+<author initials="J. L." surname="Sobrinho" fullname="Joao Luis Sobrinho"/>
+<date year="2005"/>
+</front>
+<annotation>In Proceedings of the 2005 conference on Applications,
+technologies, architectures, and protocols for computer communications
+(SIGCOMM'05).</annotation>
 </reference>
 
 </references>

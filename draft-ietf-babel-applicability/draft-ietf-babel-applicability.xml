@@ -29,8 +29,8 @@ routing protocol</title>
 
 <abstract>
 <t>Babel is a routing protocol based on the distance-vector algorithm
-augmented with mechanisms for loop avoidance and starvation avoidance.  In
-this document, we describe a number of niches where Babel has been found
+augmented with mechanisms for loop avoidance and starvation avoidance.
+This document describes a number of niches where Babel has been found
 to be useful and that are arguably not adequately served by more mature
 protocols.</t>
 </abstract>
@@ -44,10 +44,10 @@ protocols.</t>
 <t>Babel <xref target="RFC6126bis"/> is a routing protocol based on the
 familiar distance-vector algorithm (sometimes known as distributed
 Bellman-Ford) augmented with mechanisms for loop avoidance (there is no
-"counting to infinity") and starvation avoidance.  In this document, we
-describe a number of niches where Babel is useful and that are arguably
-not adequately served by more mature protocols such as OSPF
-<xref target="RFC5340"/> and IS-IS <xref target="RFC1195"/>.</t>
+"counting to infinity") and starvation avoidance.  This document describes
+a number of niches where Babel is useful and that are arguably not
+adequately served by more mature protocols such as OSPF <xref
+target="RFC5340"/> and IS-IS <xref target="RFC1195"/>.</t>
 
 <section title="Technical overview of the Babel protocol">
 
@@ -91,8 +91,8 @@ additional signalling traffic.</t>
 
 <section title="Properties of the Babel protocol">
 
-<t>In this section, we describe the properties of the Babel protocol as
-well as its known limitations.</t>
+<t>This section describes the properties of the Babel protocol as well as
+its known limitations.</t>
 
 <section title="Simplicity and implementability">
 
@@ -252,8 +252,8 @@ automatic route aggregation.</t>
 
 <section title="Successful deployments of Babel">
 
-<t>In this section, we give a few examples of environments where Babel has
-been successfully deployed.</t>
+<t>This section gives a few examples of environments where Babel has been
+successfully deployed.</t>
 
 <section title="Heterogeneous networks">
 

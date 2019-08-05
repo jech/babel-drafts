@@ -140,17 +140,18 @@ on the underlying network and metric.</t>
 
 <t>These weak requirements make Babel a robust protocol:
 <list style="symbols">
-<t>robust with respect to bugs: an implementation bug does most likely
-not violate the properties on which Babel relies; in our (extensive)
-experience, bugs tend to slow down convergence or cause sub-optimal
-routing, but do not cause the network to collapse;</t>
 <t>robust with respect to unusual networks: an unusual network
 (non-transitive links, unstable metrics, etc.) does most likely not
 violate the assumptions of the protocol;</t>
 <t>robust with respect to novel metrics: no matter how strange your
 metric (continuous, constantly fluctuating, etc.), it does most likely
 not violate the assumptions of the protocol.</t>
-</list></t>
+</list>
+In addition to the above, our implementation experience indicates that
+Babel tends to be robust with respect to bugs: more often than not, an
+implementation bug does not violate the properties on which Babel relies,
+and therefore slows down convergence or causes sub-optimal routing rather
+than causing the network to collapse.</t>
 
 <t>These robustness properties have important consequences for the
 applicability of the protocol: Babel works (more or less efficiently) in
@@ -254,18 +255,27 @@ automatic route aggregation.</t>
 <t>In this section, we give a few examples of environments where Babel has
 been successfully deployed.</t>
 
-<section title="Hybrid networks">
+<section title="Heterogeneous networks">
 
 <t>Babel is able to deal with both classical, prefix-based
 ("Internet-style") routing and flat ("mesh-style") routing over
-non-transitive link technologies.  Because of that, it has seen a number
-of successful deployments in medium-sized hybrid networks, networks that
-combine a wired, aggregated backbone with meshy wireless bits at the edges.
-No other routing protocol known to us is similarly robust and efficient in
+non-transitive link technologies.  Just like traditional distance-vector
+protocols, Babel is able to carry prefixes of arbitrary length, to supress
+redundant announcements by applying the split-horizon optimisation where
+applicable, and can be configured to filter out redundant announcements
+(manual aggregation).  Just like specialised mesh protocols, Babel doesn't
+by default assume that links are transitive or symmetric, can dynamically
+compute metrics based on an estimation of link quality, and carries large
+numbers of host routes efficiently by omitting common prefixes.</t>
+
+<t>Because of these properties, Babel has seen a number of successful
+deployments in medium-sized heterogeneous networks, networks that combine
+a wired, aggregated backbone with meshy wireless bits at the edges.  No
+other routing protocol known to us is similarly robust and efficient in
 this particular kind of topology.</t>
 
-<t>Efficient operation in hybrid networks requires the implementation to
-distinguish wired and wireless links, and to perform link quality
+<t>Efficient operation in heterogeneous networks requires the implementation
+to distinguish between wired and wireless links, and to perform link quality
 estimation on wireless links.</t>
 
 </section>
@@ -332,14 +342,14 @@ cryptographic mechanism.</t>
 
 <t>At the time of writing, two such mechanisms have been defined.
 Babel-HMAC <xref target="HMAC"/> is a simple and easy to implement
-mechanism that only guarantees authenticity and integrity of the routing
-traffic, and only supports symmetric keying with a small number of keys
-(typically just one or two), but is invulnerable to replay even in the
-absence of persistent state.  Babel-DTLS <xref target="DTLS"/> is a more
-complex mechanism, that requires some minor changes to be made to
-a typical Babel implementation and depends on a DTLS stack being
-available, but inherits all of the features of DTLS, notably
-confidentiality and the ability to use asymmetric keys.</t>
+mechanism that only guarantees authenticity, integrity and replay
+protection of the routing traffic, and only supports symmetric keying with
+a small number of keys (typically just one or two).  Babel-DTLS
+<xref target="DTLS"/> is a more complex mechanism, that requires some minor
+changes to be made to a typical Babel implementation and depends on a DTLS
+stack being available, but inherits all of the features of DTLS, notably
+confidentiality, optional replay protection, and the ability to use
+asymmetric keys.</t>
 
 <t>Due to its simplicity, Babel-HMAC should be the preferred security
 mechanism in most deployments, with Babel-DTLS available for networks

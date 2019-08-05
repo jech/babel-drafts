@@ -513,6 +513,15 @@ assigns host IDs, see the definition of the "R" flag in
 described in <xref target="protocol-encoding"/> below).  Each Babel packet
 consists of zero or more TLVs.  Most TLVs may contain sub-TLVs.</t>
 
+<t>The protocol's control traffic can be carried indifferently over IPv6
+or over IPv4, and prefixes of either address family can be announced over
+either protocol.  Thus, there are at least two natural deployment models:
+using IPv6 exclusively for all control traffic, or running two distinct
+protocol instances, one for each address family.  The exclusive use of
+IPv6 for all control traffic is RECOMMENDED, since using both protocols at
+the same time doubles the amount of traffic devoted to neighbour discovery
+and link quality estimation.</t>
+
 <t>The source address of a Babel packet is always a unicast address,
 link-local in the case of IPv6.  Babel packets may be sent to a well-known
 (link-local) multicast address or to a (link-local) unicast address.  In

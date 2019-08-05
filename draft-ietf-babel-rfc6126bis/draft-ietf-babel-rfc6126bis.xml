@@ -79,7 +79,7 @@ a technique pioneered by Destination-Sequenced Distance-Vector routing
   suffers from routing loops;</t>
 <t>when a single prefix is originated by multiple routers, Babel may
   occasionally create a transient routing loop for this particular prefix;
-  this loop disappears in a time proportional to its diameter, and never
+  this loop disappears in time proportional to the loop's diameter, and never
   again (up to an arbitrary garbage-collection (GC) time) will the routers
   involved participate in a routing loop for the same prefix;</t>
 <t>assuming bounded packet loss rates, any routing black-holes that
@@ -503,7 +503,8 @@ string of 8 octets that is assumed unique across the routing domain.  For
 example, router-ids could be assigned randomly, or they could be derived
 from a link-layer address.  (The protocol encoding is slightly more
 compact when router-ids are assigned in the same manner as the IPv6 layer
-assigns host IDs.)</t>
+assigns host IDs, see the definition of the "R" flag in
+<xref target="update"/>.)</t>
 
 <section title="Message Transmission and Reception"
          anchor="transmission-reception">
@@ -1503,7 +1504,7 @@ applications of Babel.</t>
 <section title="Router-Id">
 <t>A router-id is an arbitrary 8-octet value.  A router-id MUST NOT
 consist of either all binary zeroes (0000000000000000 hexadecimal) or all
-binary ones ones (ffffffffffffffff hexadecimal).</t>
+binary ones ones (FFFFFFFFFFFFFFFF hexadecimal).</t>
 </section>
 
 <section title="Address">
@@ -1635,13 +1636,14 @@ on both the type of the sub-TLV and the type of the TLV within which it is
 embedded.</t>
 </list></t>
 
-<t>The most-significant bit of the sub-TLV, called the mandatory bit,
-indicates how to handle unknown sub-TLVs.  If the mandatory bit is not
-set, then an unknown sub-TLV MUST be silently ignored, and the rest of the
-TLV processed normally.  If the mandatory bit is set, then the whole
-enclosing TLV MUST be silently ignored (except for updating the parser
-state by a Router-Id, Next-Hop or Update TLV, see <xref target="router-id"/>,
-<xref target="next-hop"/>, and <xref target="update"/>).</t>
+<t>The most-significant bit of the sub-TLV type (the bit with value 80
+hexadecimal), called the mandatory bit, indicates how to handle unknown
+sub-TLVs.  If the mandatory bit is not set, then an unknown sub-TLV MUST
+be silently ignored, and the rest of the TLV is processed normally.  If the
+mandatory bit is set, then the whole enclosing TLV MUST be silently
+ignored (except for updating the parser state by a Router-Id, Next-Hop or
+Update TLV, see <xref target="router-id"/>, <xref target="next-hop"/>, and
+<xref target="update"/>).</t>
 
 </section>
 
@@ -1663,9 +1665,8 @@ TLV.  The parser state consists of the following pieces of data:
   and by each Update TLV with Router-Id flag set.</t>
 </list></t>
 
-<t>Since the parser state is separate from the bulk of Babel's state, and
-since for correct parsing it must be identical across implementations, it
-is updated before checking for mandatory TLVs: parsing a TLV MUST update the
+<t>Since the parser state must be identical across implementations, it is
+updated before checking for mandatory TLVs: parsing a TLV MUST update the
 parser state even if the TLV is otherwise ignored due to an unknown
 mandatory sub-TLV.</t>
 
@@ -1712,7 +1713,7 @@ trailer.</t>
 <t hangText="Type">Set to 1 to indicate a PadN TLV.</t>
 <t hangText="Length">The length of the body, exclusive of the Type and
 Length fields.</t>
-<t hangText="MBZ">Set to 0 on transmission.</t>
+<t hangText="MBZ">Must be zero, set to 0 on transmission.</t>
 </list></t>
 
 <t>This TLV is silently ignored on reception.  It is allowed in the packet
@@ -2216,7 +2217,7 @@ any TLV that allows sub-TLVs.</t>
 <t hangText="Type">Set to 1 to indicate a PadN sub-TLV.</t>
 <t hangText="Length">The length of the body, in octets, exclusive of the
 Type and Length fields.</t>
-<t hangText="MBZ">Set to 0 on transmission.</t>
+<t hangText="MBZ">Must be zero, set to 0 on transmission.</t>
 </list></t>
 
 <t>This sub-TLV is silently ignored on reception.  It is allowed within

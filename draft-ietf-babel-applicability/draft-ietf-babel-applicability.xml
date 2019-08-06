@@ -141,13 +141,16 @@ on the underlying network and metric.</t>
 <t>These weak requirements make Babel a robust protocol:
 <list style="symbols">
 <t>robust with respect to unusual networks: an unusual network
-(non-transitive links, unstable metrics, etc.) does most likely not
-violate the assumptions of the protocol;</t>
-<t>robust with respect to novel metrics: no matter how strange your
-metric (continuous, constantly fluctuating, etc.), it does most likely
-not violate the assumptions of the protocol.</t>
+(non-transitive links, unstable link costs, etc.) is likely not
+to violate the assumptions of the protocol;</t>
+<t>robust with respect to novel metrics: an unusual metric (continuous,
+constantly fluctuating, etc.) is likely not to violate the assumptions of
+the protocol.</t>
 </list>
-In addition to the above, our implementation experience indicates that
+<xref target="successful"/> below gives examples of successful deployments
+of Babel that illustrate these properties.</t>
+
+<t>In addition to the above, our implementation experience indicates that
 Babel tends to be robust with respect to bugs: in many cases, an
 implementation bug does not violate the properties on which Babel relies,
 and therefore slows down convergence or causes sub-optimal routing rather
@@ -251,7 +254,7 @@ automatic route aggregation.</t>
 
 </section>
 
-<section title="Successful deployments of Babel">
+<section title="Successful deployments of Babel" anchor="successful">
 
 <t>This section gives a few examples of environments where Babel has been
 successfully deployed.</t>

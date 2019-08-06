@@ -148,7 +148,7 @@ metric (continuous, constantly fluctuating, etc.), it does most likely
 not violate the assumptions of the protocol.</t>
 </list>
 In addition to the above, our implementation experience indicates that
-Babel tends to be robust with respect to bugs: more often than not, an
+Babel tends to be robust with respect to bugs: in many cases, an
 implementation bug does not violate the properties on which Babel relies,
 and therefore slows down convergence or causes sub-optimal routing rather
 than causing the network to collapse.</t>
@@ -270,9 +270,7 @@ numbers of host routes efficiently by omitting common prefixes.</t>
 
 <t>Because of these properties, Babel has seen a number of successful
 deployments in medium-sized heterogeneous networks, networks that combine
-a wired, aggregated backbone with meshy wireless bits at the edges.  No
-other routing protocol known to us is similarly robust and efficient in
-this particular kind of topology.</t>
+a wired, aggregated backbone with meshy wireless bits at the edges.</t>
 
 <t>Efficient operation in heterogeneous networks requires the implementation
 to distinguish between wired and wireless links, and to perform link quality

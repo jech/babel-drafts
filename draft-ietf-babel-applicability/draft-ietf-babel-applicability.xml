@@ -155,7 +155,8 @@ than causing the network to collapse.</t>
 
 <t>These robustness properties have important consequences for the
 applicability of the protocol: Babel works (more or less efficiently) in
-a wide range of circumstances where traditional routing protocols give up.</t>
+a range of circumstances where traditional routing protocols don't work
+well (or at all).</t>
 
 </section>
 

@@ -137,7 +137,7 @@ see Section 5 of <xref target="RFC6126bis"/>).</t>
 
 <t>When a Babel node discovers a new neighbour (generally by
 receiving an unencrypted multicast Babel packet), it compares the neighbour's
-IPv6 link-local address with its own, using network byte ordering.  If a node's
+IP address with its own, using network byte ordering.  If a node's
 address is lower than the recently discovered neighbour's address, it acts
 as a client and connects to the neighbour.  In other words, the node with
 the lowest address is the DTLS client for this pairwise relationship.
@@ -152,7 +152,8 @@ Alternatively, nodes MAY use DTLS connection identifiers
 connections.</t>
 
 <t>When a node receives a new DTLS connection, it MUST verify that the source
-IP address is an IPv6 link-local address; if it is not, it MUST reject the
+IP address is either an IPv6 link-local address or an IPv4 address belonging
+to the local network; if it is neither, it MUST reject the
 connection.  Nodes use mutual authentication (authenticating
 both client and server); servers MUST send a CertificateRequest message and
 subsequently authenticate the client.  Implementations MUST support
@@ -385,6 +386,7 @@ contain the (encrypted) Babel packet.</t>
 Donald Eastlake,
 Thomas Fossati,
 Gabriel Kerneis,
+Mirja Kuhlewind,
 Antoni Przygienda,
 Henning Rogge,
 Dan Romascanu,

@@ -6,7 +6,7 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="no" ?>
-<rfc category="std" docName="draft-ietf-babel-rfc6126bis-11"
+<rfc category="std" docName="draft-ietf-babel-rfc6126bis-12"
      ipr="trust200902"
      obsoletes="6126,7557">
 <front>
@@ -38,7 +38,7 @@
 </address>
 </author>
 
-<date day="29" month="June" year="2019"/>
+<date day="7" month="August" year="2019"/>
 
 <abstract>
 <t>Babel is a loop-avoiding distance-vector routing protocol that is
@@ -2940,6 +2940,13 @@ account.</t>
 <section title="Changes since draft-ietf-babel-rfc6126bis-10">
 <t><list style="symbols">
 <t>Editorial changes only.</t>
+</list></t>
+</section>
+
+<section title="Changes since draft-ietf-babel-rfc6126bis-11">
+<t><list style="symbols">
+<t>Added recommendation that control traffic should be carried over IPv6
+only.</t>
 </list></t>
 </section>
 

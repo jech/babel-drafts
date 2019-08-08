@@ -694,10 +694,10 @@ time, even after the sender has left the network.</t>
 <t>While it is probably not possible to be immune against denial of
 service (DoS) attacks in general, this protocol includes a number of
 mechanisms designed to mitigate such attacks.  In particular, reception of
-a packet with no correct HMAC creates no local state whatsoever (<xref
-target="packet-reception"/>).  Reception of a replayed packet with correct
-hash, on the other hand, causes a challenge to be sent; this is mitigated
-somewhat by requiring that challenges be rate-limited
+a packet with no correct HMAC creates no local Babel state
+(<xref target="packet-reception"/>).  Reception of a replayed packet with
+correct hash, on the other hand, causes a challenge to be sent; this is
+mitigated somewhat by requiring that challenges be rate-limited
 (<xref target="sending-challenges"/>).</t>
 
 <t>Receiving a replayed packet with an obsolete index causes an entry to

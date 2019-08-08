@@ -1632,7 +1632,7 @@ Update TLV, as described in the next section).</t>
 
 </section>
 
-<section title="Parser state and encoding of updates">
+<section title="Parser state and encoding of updates" anchor="parser-state">
 
 <t>In a large network, the bulk of Babel traffic consists of route
 updates; hence, some care has been given to encoding them efficiently.
@@ -1921,8 +1921,9 @@ ignored.</t>
 ]]></artwork></figure>
 
 <t>A Router-Id TLV establishes a router-id that is implied by subsequent
-Update TLVs.  This TLV sets the router-id even if it is otherwise ignored
-due to an unknown mandatory sub-TLV.</t>
+Update TLVs, as described in <xref target="parser-state"/>.  This TLV sets
+the router-id even if it is otherwise ignored due to an unknown mandatory
+sub-TLV.</t>
 
 <t>Fields :
 <list style="hanging" hangIndent="10">
@@ -1951,9 +1952,10 @@ Update TLVs.  This MUST NOT consist of all zeroes or all ones.</t>
 ]]></artwork></figure>
 
 <t>A Next Hop TLV establishes a next-hop address for a given address
-family (IPv4 or IPv6) that is implied in subsequent Update TLVs.  This TLV
-sets up the next-hop for subsequent Update TLVs even if it is otherwise
-ignored due to an unknown mandatory sub-TLV.</t>
+family (IPv4 or IPv6) that is implied in subsequent Update TLVs, as
+described in <xref target="parser-state"/>.  This TLV sets up the next-hop
+for subsequent Update TLVs even if it is otherwise ignored due to an
+unknown mandatory sub-TLV.</t>
 
 <t>Fields :
 <list style="hanging" hangIndent="10">
@@ -1997,7 +1999,8 @@ ignored.</t>
 
 <t>An Update TLV advertises or retracts a route.  As an optimisation, it
 can optionally have the side effect of establishing a new implied
-router-id and a new default prefix.</t>
+router-id and a new default prefix, as described in
+<xref target="parser-state"/>.</t>
 
 <t>Fields :
 <list style="hanging" hangIndent="10">

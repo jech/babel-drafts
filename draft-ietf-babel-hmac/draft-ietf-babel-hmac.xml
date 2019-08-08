@@ -223,7 +223,7 @@ extends these data structures as follows.</t>
 <section title="The Interface Table" anchor="interface-table">
 
 <t>Every Babel node maintains an interface table, as described in Section
-3.2.3 <xref target="RFC6126bis"/>.  Implementations of this protocol MUST
+3.2.3 of <xref target="RFC6126bis"/>.  Implementations of this protocol MUST
 allow each interface to be provisioned with a set of one or more HMAC keys
 and the associated HMAC algorithms (see <xref
 target="hmac-computation"/>).  In order to allow incremental deployment of

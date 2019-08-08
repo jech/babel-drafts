@@ -2807,13 +2807,6 @@ text on 32-bit CISC architecture.</t>
 
 </section>
 
-<section title="Software Availability">
-
-<t>The sample implementation of Babel is available from
-<eref target="https://www.irif.fr/~jch/software/babel/"/>.</t>
-
-</section>
-
 <section title="Changes from previous versions">
 
 <section title="Changes since RFC 6126">

@@ -995,6 +995,14 @@ Challenge Reply has been received.</t>
 resource exhaustion attacks.</t>
 </list></t>
 
+<section title="Changes since draft-ietf-babel-hmac-08">
+
+<t><list style="symbols">
+<t>Fix the size of the key to be equal to the block size, not the hash size.</t>
+<t>Editorial changes.</t>
+</list></t>
+
+</section>
 </section>
 </section>
 

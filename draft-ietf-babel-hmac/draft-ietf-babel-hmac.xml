@@ -88,7 +88,7 @@ then use a standard unicast security protocol to protect the Babel
 traffic.  In this document, we take the opposite approach: we define
 a cryptographic extension to the Babel protocol that is able to protect
 both unicast and multicast traffic, and thus requires very few changes to
-the core protocol.</t>
+the core protocol.  This document obsoletes RFC 7298.</t>
 
 <section title="Applicability">
 
@@ -117,7 +117,7 @@ except for what might be required for storing cryptographic keys.</t>
 <list style="symbols">
 <t>that the Hashed Message Authentication Code (HMAC) being used is
 invulnerable to pre-image attacks, i.e., that an attacker is unable to
-generate a packet with a correct HMAC;</t>
+generate a packet with a correct HMAC without access to the secret key;</t>
 <t>that a node never generates the same index or nonce twice over the
 lifetime of a key.</t>
 </list>
@@ -238,7 +238,7 @@ an interface on which HMAC authentication has been configured with two new
 pieces of data:
 <list style="symbols">
 <t> a set of one or more HMAC keys, each associated with a given HMAC
-algorithm ; the length of each key is exactly the hash size of the
+algorithm ; the length of each key is exactly the block size of the
 associated HMAC algorithm (i.e., the key is not subject to the
 preprocessing described in Section 2 of <xref target="RFC2104"/>);</t>
 <t> a pair (Index, PC), where Index is an arbitrary string of 0 to 32
@@ -277,7 +277,7 @@ initially undefined, and used as described in
 <t>A Babel node computes the HMAC of a Babel packet as follows.</t>
 
 <t>First, the node builds a pseudo-header that will participate in HMAC
-computation but will not be sent.  If the packet was carried over IPv6,
+computation but will not be sent.  If the packet is carried over IPv6,
 the pseudo-header has the following format:
 <figure><artwork><![CDATA[
  0                   1                   2                   3
@@ -302,7 +302,7 @@ the pseudo-header has the following format:
 |                               |           Dest port           |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ]]></artwork></figure>
-If the packet was carried over IPv4, the pseudo-header has the following
+If the packet is carried over IPv4, the pseudo-header has the following
 format:
 <figure><artwork><![CDATA[
  0                   1                   2                   3
@@ -424,7 +424,7 @@ preparse phase), but relies on the rate-limiting described in
 <xref target="sending-challenges"/> to avoid sending too many challenges
 in response to replayed packets.  As an optimisation, a node MAY ignore
 all challenge requests contained in a packet except the last one, and it
-MAY ignore a challenge request in the case where it it contained in
+MAY ignore a challenge request in the case where it is contained in
 a packet with an Index that matches the one in the Neighbour Table and
 a PC that is smaller or equal to the one contained in the Neighbour Table.
 Since it is still possible to replay a packet with an obsolete Index, the
@@ -713,7 +713,7 @@ a link-local IPv6 address or a local IPv4 address).</t>
 effective, implementations may use a separate table of uncompleted
 challenges that is separate from the Neighbour Table used by the core
 protocol (the data structures described in Section 3.2 of <xref
-target="RFC6126bis"/> are conceptual, any data structure that yields the
+target="RFC6126bis"/> are conceptual, and any data structure that yields the
 same result may be used).  Implementers might also consider using the fact
 that the nonces included in challenge requests and responses can be fairly
 large (up to 192 octets), which should in principle allow encoding the

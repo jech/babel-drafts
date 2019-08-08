@@ -469,10 +469,13 @@ Challenge Request.  However, it MUST arrange for the Challenge Request to
 be sent in a timely manner, as any packets received from that neighbour
 will be silently ignored until the challenge completes.</t>
 
-<t>Since a challenge may be prompted by a packet replayed by an attacker,
-a node MUST impose a rate limitation to the challenges it sends; the limit
-SHOULD default to one challenge request every 300ms, and MAY be
-configurable.</t>
+<t>A node MUST impose a rate limitation to the challenges it sends; the
+limit SHOULD default to one challenge request every 300ms, and MAY be
+configurable.  This rate limiting serves two purposes.  First, since
+a challenge may be sent in response to a packet replayed by an attacker,
+it limits the number of challenges that an attacker can cause a node to
+send.  Second, it limits the number of challenges sent when there are
+multiple packets in flight from a single neighbour.</t>
 
 </section>
 

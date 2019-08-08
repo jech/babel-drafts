@@ -71,8 +71,8 @@ in every UDP datagram that it receives on the Babel port.  An attacker can
 redirect traffic to itself or to a different node in the network, causing
 a variety of potential issues.  In particular, an attacker might:
 <list style="symbols">
-<t>spoof a Babel packet, and redirect traffic by announcing a smaller
-metric, a larger seqno, or a longer prefix;</t>
+<t>spoof a Babel packet, and redirect traffic by announcing a route with
+a smaller metric, a larger sequence number, or a longer prefix;</t>
 <t>spoof a malformed packet, which could cause an insufficiently robust
 implementation to crash or interfere with the rest of the network;</t>
 <t>replay a previously captured Babel packet, which could cause traffic to
@@ -130,8 +130,8 @@ becomes likely.</t>
 <t>If the assumptions above are met, the protocol described in this
 document has the following properties:
 <list style="symbols">
-<t>it is invulnerable to spoofing: any packet accepted as authentic is the
-exact copy of a packet originally sent by an authorised node;</t>
+<t>it is invulnerable to spoofing: any Babel packet accepted as authentic
+is the exact copy of a packet originally sent by an authorised node;</t>
 <t>locally to a single node, it is invulnerable to replay: if a node has
 previously accepted a given packet, then it will never again accept a copy
 of this packet or an earlier packet from the same sender;</t>
@@ -141,9 +141,8 @@ accept a copy of that packet as authentic if B has accepted an older
 packet from C and B has received no later packet from C.</t>
 </list></t>
 
-<t>While this protocol makes serious efforts to mitigate the effects of
-a denial of service attack, it does not fully protect against such
-attacks.</t>
+<t>While this protocol makes efforts to mitigate the effects of a denial
+of service attack, it does not fully protect against such attacks.</t>
 
 </section>
 
@@ -163,10 +162,11 @@ they appear in all capitals, as shown here.</t>
 
 <t>When a node B sends out a Babel packet through an interface that is
 configured for HMAC cryptographic protection, it computes one or more
-HMACs which it appends to the packet.  When a node A receives a packet
-over an interface that requires HMAC cryptographic protection, it
-independently computes a set of HMACs and compares them to the HMACs
-appended to the packet; if there is no match, the packet is discarded.</t>
+HMACs (one per key) which it appends to the packet.  When a node
+A receives a packet over an interface that requires HMAC cryptographic
+protection, it independently computes a set of HMACs and compares them to
+the HMACs appended to the packet; if there is no match, the packet is
+discarded.</t>
 
 <t>In order to protect against replay, B maintains a per-interface 32-bit
 integer known as the "packet counter" (PC). Whenever B sends a packet
@@ -195,11 +195,12 @@ freshness of the PC.</t>
 <t>By itself, this mechanism is safe against replay if B never resets its
 PC.  In practice, however, this is difficult to ensure, as persistent
 storage is prone to failure, and hardware clocks, even when available, are
-occasionally reset.  Suppose that B resets its PC to an earlier value, and
-sends a packet with a previously used PC n.  A challenges B,
-B successfully responds to the challenge, and A accepts the PC equal to
-n&nbsp;+&nbsp;1.  At this point, an attacker C may send a replayed packet
-with PC equal to n&nbsp;+&nbsp;2, which will be accepted by A.</t>
+occasionally reset.  Suppose that B loses its state and resets its PC to
+an earlier value, and sends a packet with a previously used PC n.
+A challenges B, B successfully responds to the challenge, and A accepts
+the PC equal to n&nbsp;+&nbsp;1.  At this point, an attacker C may send
+a replayed packet with PC equal to n&nbsp;+&nbsp;2, which will be accepted
+by A.</t>
 
 <t>Another mechanism is needed to protect against this attack.  In this
 protocol, every PC is tagged with an "index", an arbitrary string of
@@ -230,7 +231,7 @@ target="hmac-computation"/>).  In order to allow incremental deployment of
 this protocol (see <xref target="incremental-deployment"/>),
 implementations SHOULD allow an interface to be configured in a mode in
 which it participates in the HMAC authentication protocol but accepts
-packets that are not authentified.</t>
+packets that are not authenticated.</t>
 
 <t>This protocol extends each entry in this table that is associated with
 an interface on which HMAC authentication has been configured with two new
@@ -321,13 +322,14 @@ format:
 <t hangText="Dest address">The destination IP address of the packet.</t>
 <t hangText="Src port">The destination UDP port number of the packet.</t>
 </list></t>
-<t>The node takes the concatenation of the pseudo-header and the packet
-including the packet header but excluding the packet trailer (from octet
-0 inclusive up to (Body Length&nbsp;+&nbsp;4) exclusive) and computes an
-HMAC with one of the implemented hash algorithms.  Every implementation
-MUST implement HMAC-SHA256 as defined in <xref target="RFC6234"/> and
-Section 2 of <xref target="RFC2104"/>, SHOULD implement keyed BLAKE2s
-<xref target="RFC7693"/>, and MAY implement other HMAC algorithms.</t>
+<t>The node takes the concatenation of the pseudo-header and the Babel
+packet including the packet header but excluding the packet trailer (from
+octet 0 inclusive up to (Body Length&nbsp;+&nbsp;4) exclusive) and
+computes an HMAC with one of the implemented hash algorithms.  Every
+implementation MUST implement HMAC-SHA256 as defined in <xref
+target="RFC6234"/> and Section 2 of <xref target="RFC2104"/>, SHOULD
+implement keyed BLAKE2s <xref target="RFC7693"/>, and MAY implement other
+HMAC algorithms.</t>
 </section>
 
 <section title="Packet Transmission" anchor="packet-transmission">
@@ -621,7 +623,7 @@ a Challenge Request TLV with a nonce of size strictly larger than 192
 octets, and a node MAY ignore a nonce that is of size strictly larger than
 192 octets.  Nonces of length 0 are valid: if a node has reliable stable
 storage, then it may use a sequential counter for generating nonces which
-get encoded in the minumum number of octets required; the value 0 is then
+get encoded in the minimum number of octets required; the value 0 is then
 encoded as the string of length 0.</t>
 
 </section>

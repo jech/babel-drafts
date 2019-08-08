@@ -2089,8 +2089,9 @@ prefix being announced; otherwise, this Update MUST be ignored.</t>
 a retraction.  In that case, the router-id, next-hop and seqno are not
 used.  AE MAY then be 0, in which case this Update retracts all of the
 routes previously advertised by the sending interface.  If the metric is
-finite, AE MUST NOT be 0.  If the metric is infinite and AE is 0, Plen and
-Omitted MUST both be 0.</t>
+finite, AE MUST NOT be 0; Update TLVs with finite metric and AE equal to
+0 MUST be ignored.  If the metric is infinite and AE is 0, Plen and
+Omitted MUST both be 0.  </t>
 
 <t>Update TLVs with an unknown value in the AE field MUST be silently
 ignored.</t>

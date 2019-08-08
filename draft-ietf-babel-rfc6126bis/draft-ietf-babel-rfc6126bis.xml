@@ -900,7 +900,7 @@ computing a link's cost that are known to work well in practice.</t>
 
 </section>
 
-<section title="Routing Table Maintenance">
+<section title="Routing Table Maintenance" anchor="route-maintenance">
 
 <t>Conceptually, a Babel update is a quintuple (prefix, plen, router-id,
 seqno, metric), where (prefix, plen) is the prefix for which a route is
@@ -1003,29 +1003,6 @@ likely than others to lead to routing instabilities (route flapping).  In
 of strictly monotonic, left-distributive routing metrics that are known to
 work well in practice.</t>
 
-</section>
-
-<section title="Encoding of Updates">
-
-<t>In a large network, the bulk of Babel traffic consists of route updates;
-hence, some care has been given to encoding them efficiently.  An Update
-TLV itself only contains the prefix, seqno, and metric, while the next hop
-is derived either from the network-layer source address of the packet or
-from an explicit Next Hop TLV in the same packet.  The router-id is derived
-from a separate Router-Id TLV in the same packet, which optimises the case
-when multiple updates are sent with the same router-id.</t>
-
-<t>Additionally, a prefix of the advertised prefix can be omitted in an
-Update TLV, in which case it is copied from a previous Update TLV in
-the same packet &mdash; this is known as address compression (<xref
-target="update"/>).</t>
-
-<t>Finally, as a special optimisation for the case when a router-id
-coincides with the interface-id part of an IPv6 address, the router-id can
-optionally be derived from the low-order bits of the advertised prefix.</t>
-
-<t>The encoding of updates is described in detail in
-<xref target="tlv-details"/>.</t>
 </section>
 
 <section title="Route Acquisition" anchor="route-acquisition">
@@ -1651,15 +1628,36 @@ sub-TLVs.  If the mandatory bit is not set, then an unknown sub-TLV MUST
 be silently ignored, and the rest of the TLV is processed normally.  If the
 mandatory bit is set, then the whole enclosing TLV MUST be silently
 ignored (except for updating the parser state by a Router-Id, Next-Hop or
-Update TLV, see <xref target="router-id"/>, <xref target="next-hop"/>, and
-<xref target="update"/>).</t>
+Update TLV, as described in the next section).</t>
 
 </section>
 
-<section title="Parser state">
+<section title="Parser state and encoding of updates">
 
-<t>Babel uses a stateful parser: a TLV may refer to data from a previous
-TLV.  The parser state consists of the following pieces of data:
+<t>In a large network, the bulk of Babel traffic consists of route
+updates; hence, some care has been given to encoding them efficiently.
+The data conceptually contained in an update (<xref target="route-maintenance"/>)
+is split into three pieces:
+<list style="symbols">
+<t>the prefix, seqno and metric are contained in the Update TLV itself
+(<xref target="update"/>);</t>
+<t>the router-id is taken from Router-Id TLV that precedes the Update TLV,
+and may be shared among multiple Update TLVs (<xref target="router-id"/>);</t>
+<t>the next hop is taken either from the source-address of the
+network-layer packet that contains the Babel packet, or from an explicit
+Next-Hop TLV (<xref target="next-hop"/>).</t>
+</list>
+In addition to the above, an Update TLV can omit a prefix of the prefix
+being announced, which is then extracted from the preceding Update TLV
+in the same address family (IPv4 or IPv6).  Finally, as a special
+optimisation for the case when a router-id coincides with the interface-id
+part of an IPv6 address, Router-ID TLV itself may be omitted and the
+router-id derived derived from the low-order bits of the advertised prefix
+(<xref target="update"/>).</t>
+
+<t>In order to implement these compression techniques, Babel uses
+a stateful parser: a TLV may refer to data from a previous TLV.  The
+parser state consists of the following pieces of data:
 <list style="symbols">
   <t>for each address encoding that allows compression, the current
   default prefix; this is undefined at the start of the packet, and is
@@ -2060,7 +2058,8 @@ the advertised prefix as follows:
 <list style="symbols">
 <t>the first Omitted octets of the prefix are taken from the previous
 Update TLV with the Prefix flag set and the same address encoding,
-even if it was ignored due to an unknown mandatory sub-TLV;</t>
+even if it was ignored due to an unknown mandatory sub-TLV; if Omitted is
+not zero and there is no such TLV, then this Update MUST be ignored;</t>
 <t>the next (Plen/8 - Omitted) rounded upwards octets are taken from the
 Prefix field;</t>
 <t>the remaining octets are set to 0.  If AE is 3 (link-local IPv6),
@@ -2070,17 +2069,18 @@ Omitted MUST be 0)</t>
 
 <t>If the Metric field is finite, the router-id of the originating node
 for this announcement is taken from the prefix advertised by this Update
-if the Router-Id flag is set, computed
-as described above.  Otherwise, it is taken either from the preceding
-Router-Id packet, or the preceding Update packet with the Router-Id flag
-set, whichever comes last, even if that TLV is otherwise ignored due to an
-unknown mandatory sub-TLV.</t>
+if the Router-Id flag is set, computed as described above.  Otherwise, it
+is taken either from the preceding Router-Id packet, or the preceding
+Update packet with the Router-Id flag set, whichever comes last, even if
+that TLV is otherwise ignored due to an unknown mandatory sub-TLV; if
+there is no suitable TLV, then this update is ignored.</t>
 
 <t>The next-hop address for this update is taken from the last preceding
 Next Hop TLV with a matching address family (IPv4 or IPv6) in the same
 packet even if it was otherwise ignored due to an unknown mandatory
 sub-TLV; if no such TLV exists, it is taken from the network-layer source
-address of this packet.</t>
+address of this packet if it belongs to the same address family as the
+prefix being announced; otherwise, this Update MUST be ignored.</t>
 
 <t>If the metric field is FFFF hexadecimal, this TLV specifies
 a retraction.  In that case, the router-id, next-hop and seqno are not

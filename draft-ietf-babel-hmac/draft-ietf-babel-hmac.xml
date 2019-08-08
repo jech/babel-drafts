@@ -195,12 +195,11 @@ freshness of the PC.</t>
 <t>By itself, this mechanism is safe against replay if B never resets its
 PC.  In practice, however, this is difficult to ensure, as persistent
 storage is prone to failure, and hardware clocks, even when available, are
-occasionally reset.  Suppose that B loses its state and resets its PC to
-an earlier value, and sends a packet with a previously used PC n.
-A challenges B, B successfully responds to the challenge, and A accepts
-the PC equal to n&nbsp;+&nbsp;1.  At this point, an attacker C may send
-a replayed packet with PC equal to n&nbsp;+&nbsp;2, which will be accepted
-by A.</t>
+occasionally reset.  Suppose that B resets its PC to an earlier value, and
+sends a packet with a previously used PC n.  A challenges B,
+B successfully responds to the challenge, and A accepts the PC equal to
+n&nbsp;+&nbsp;1.  At this point, an attacker C may send a replayed packet
+with PC equal to n&nbsp;+&nbsp;2, which will be accepted by A.</t>
 
 <t>Another mechanism is needed to protect against this attack.  In this
 protocol, every PC is tagged with an "index", an arbitrary string of

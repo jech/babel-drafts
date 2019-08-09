@@ -264,7 +264,7 @@ Distance-Vector (DSDV) routing protocol <xref target="DSDV"/> and in the
 Ad hoc On-Demand Distance Vector (AODV) protocol <xref target="RFC3561"/>,
 stems from the following observation: a routing loop can only arise after
 a router has switched to a route with a larger metric than the route that
-it had previously selected.  Hence, one could decide that a route is
+it had previously selected.  Hence, one may declare a route to be
 feasible only when its metric at the local node would be no larger than
 the metric of the currently selected route, i.e., an announcement carrying
 a metric D(B) is accepted by A when C(A, B) + D(B) &lt;= D(A).  If all

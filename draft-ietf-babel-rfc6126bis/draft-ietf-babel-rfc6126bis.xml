@@ -2698,34 +2698,45 @@ M(c, m) = k + c + m, where k depends on the battery status.</t>
 <section title="Constants">
 
 <t>The choice of time constants is a trade-off between fast detection of
-mobility events and protocol overhead.  Two implementations of Babel with
-different time constants will interoperate, although the resulting
-convergence time will most likely be dictated by the slower of the two.</t>
+mobility events and protocol overhead.  Two instances of Babel running
+with different time constants will interoperate, although the resulting
+worst-case convergence time will be dictated by the slower of the two.</t>
 
-<t>Experience with the sample implementation of Babel indicates that the
-Hello interval is the most important time constant: a mobility event is
-detected within 1.5 to 3 Hello intervals.  Due to Babel's reliance on
-triggered updates and explicit requests, the Update interval only has an
-effect on the time it takes for accurate metrics to be propagated after
-variations in link costs too small to trigger an unscheduled update or in
-the presence of packet loss.</t>
+<t>The Hello interval is the most important time constant: an outage or
+a mobility event is detected within 1.5 to 3.5 Hello intervals.  Due to
+Babel's use of a redundant route table, and due to its reliance on
+triggered updates and explicit requests, the Update interval has little
+influence on the time needed to reconverge after an outage: in practice,
+it only has a significant effect on the time needed to acquire new routes
+after a mobility event.</t>
 
-<t>At the time of writing, the sample implementation of Babel uses the
-following default values:
+<t>The following values are recommended in a network with little mobility,
+and where occasional outages of up to 14 seconds are acceptable:
 <list style="empty">
 <t>Multicast Hello Interval: 4 seconds.</t>
+<t>Unicast Hello Interval: infinite (no Unicast Hellos are sent).</t>
 <t>IHU Interval: the advertised IHU interval is always 3 times the
 Multicast Hello interval.  IHUs are actually sent with each Hello on lossy
 links (as determined from the Hello history), but only with every third
 Multicast Hello on lossless links.</t>
-<t>Unicast Hello Interval: the sample implementation never sends scheduled
-Unicast Hellos;</t>
 <t>Update Interval: 4 times the Multicast Hello interval.</t>
 <t>IHU Hold Time: 3.5 times the advertised IHU interval.</t>
 <t>Route Expiry Time: 3.5 times the advertised update interval.</t>
-<t>Source GC time: 3 minutes.</t>
 <t>Request timeout: initially 2 seconds, doubled every time a request is
 resent, up to a maximum of three times.</t>
+<t>Source GC time: 3 minutes.</t>
+</list></t>
+
+<t>The following values are recommended in a network where reconvergence
+within 2 seconds after a mobility event is desired:
+<list style="empty">
+<t>Multicast Hello Interval: 0.5 seconds.</t>
+<t>Unicast Hello Interval: infinite (no Unicast Hellos are sent).</t>
+<t>IHU Interval, Update Interval, IHU Hold Time, and Route Expiry Time:
+computed as in the first case above.</t>
+<t>Request Timeout: initially 0.5 seconds, doubled every time a request is
+resent, up to a maximum of three times.</t>
+<t>Source GC time: 3 minutes.</t>
 </list></t>
 
 <t>The amount of jitter applied to a packet depends on whether it contains
@@ -2871,7 +2882,7 @@ attached to any TLVs that it understands and check the mandatory bit.
 It must answer acknowledgment requests and must participate in the
 Hello/IHU protocol.  It must also be able to reply to seqno requests for
 routes that it announces and, and it should be able to reply to route
- requests.</t>
+requests.</t>
 
 <t>Experience shows that an IPv6-only stub implementation of Babel can be
 written in less than 1000 lines of C code and compile to 13&nbsp;kB of

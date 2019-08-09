@@ -1603,9 +1603,10 @@ selected TLV types, an optional list of sub-TLVs.</t>
 
 <t>Every TLV carries an explicit length in its header; however, most TLVs
 are self-terminating, in the sense that it is possible to determine the
-length of the body without reference to the explicit Length field.  If a TLV
-has a self-terminating format, then it MAY allow a sequence of sub-TLVs to
-follow the body.</t>
+length of the body without reference to the explicit Length field.  If
+a TLV has a self-terminating format, then the space between the natural
+size of the TLV and the size announced in the Length field may be used to
+store a sequence of sub-TLVs.</t>
 
 <t>Sub-TLVs have the same structure as TLVs.  With the exception of PAD1,
 all TLVs have the following structure:</t>
@@ -1628,12 +1629,13 @@ embedded.</t>
 </list></t>
 
 <t>The most-significant bit of the sub-TLV type (the bit with value 80
-hexadecimal), called the mandatory bit, indicates how to handle unknown
-sub-TLVs.  If the mandatory bit is not set, then an unknown sub-TLV MUST
-be silently ignored, and the rest of the TLV is processed normally.  If the
-mandatory bit is set, then the whole enclosing TLV MUST be silently
-ignored (except for updating the parser state by a Router-Id, Next-Hop or
-Update TLV, as described in the next section).</t>
+hexadecimal), is called the mandatory bit; in other words, sub-TLV types
+128 through 255 have the mandatory bit set.  This bit indicates how to
+handle unknown sub-TLVs.  If the mandatory bit is not set, then an unknown
+sub-TLV MUST be silently ignored, and the rest of the TLV is processed
+normally.  If the mandatory bit is set, then the whole enclosing TLV MUST
+be silently ignored (except for updating the parser state by a Router-Id,
+Next-Hop or Update TLV, as described in the next section).</t>
 
 </section>
 

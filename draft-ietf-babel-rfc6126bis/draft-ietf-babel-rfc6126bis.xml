@@ -999,9 +999,11 @@ fact, a global optimum may not even exist).</t>
 <t>As with cost computation, not all strategies for computing route
 metrics will give good results.  In particular, some metrics are more
 likely than others to lead to routing instabilities (route flapping).  In
-<xref target="metric-computation-examples"/>, we give a number of examples
+<xref target="metric-computation-examples"/>, we give an number of examples
 of strictly monotonic, left-distributive routing metrics that are known to
-work well in practice.</t>
+work well in practice.  See also <xref target="filtering"/>, which
+describes a useful way to make the metric computation configurable by
+a network administrator.</t>
 
 </section>
 
@@ -1271,7 +1273,7 @@ requests, which request an update for a given prefix with a specific
 sequence number.  The former are never forwarded; the latter are forwarded
 if they cannot be satisfied by the receiver.</t>
 
-<section title="Handling Requests">
+<section title="Handling Requests" anchor="handling-requests">
 
 <t>Upon receiving a request, a node either forwards the request or sends an
 update in reply to the request, as described in the following sections.  If
@@ -2731,6 +2733,40 @@ any urgent TLVs or not (<xref target="transmission-reception"/>).  Urgent
 triggered updates and urgent requests are delayed by no more than 200ms;
 acknowledgments, by no more than the associated deadline; and other TLVs
 by no more than one-half the Multicast Hello interval.</t>
+
+</section>
+
+<section title="Route filtering" anchor="filtering">
+
+<t>Route filtering is a procedure where an instance of a routing protocol
+either discards some of the routes announced by its neighbours, or learns
+them with a metric that is higher than what would be expected.  Like all
+distance-vector protocols, Babel has the ability to apply arbitrary
+filtering to the routes it learns, and implementations of Babel that apply
+different sets of filtering rules will interoperate without causing
+routing loops.  The protocol's ability to perform route filtering is
+a consequence of the latitude given in <xref target="metric-computation"/>:
+Babel can use any metric that is strictly monotonic, including one that
+assigns an infinite metric to a selected subset of routes.  (See also
+<xref target="handling-requests"/>, where requests for nonexistent routes
+are treated in the same way as requests for routes with infinite metric.)</t>
+
+<t>It is not in general correct to learn a route with a metric smaller
+than the one it was announced with, or to replace a route's destination
+prefix with a more specific (longer) one.  Doing either of these may cause
+persistent routing loops.</t>
+
+<t>Route filtering is a useful tool, since it allows fine-grained tuning
+of the routing decisions made by the routing protocol.  Accordingly, some
+implementations of Babel implement a rich configuration language that
+allows applying filtering to sets of routes defined, for example, by
+incoming interface and destination prefix.</t>
+
+<t>In order to limit the consequences of misconfiguration, Babel
+implementations provide a reasonable set of default filtering rules even
+when they don't allow configuration of filtering by the user.  At
+a minimum, they discard routes with a destination prefix in fe80::/64,
+ff00::/8, 127.0.0.1/32, 0.0.0.0/32 and 224.0.0.0/8.</t>
 
 </section>
 

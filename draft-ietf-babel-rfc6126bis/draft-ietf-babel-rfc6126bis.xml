@@ -145,7 +145,7 @@ they appear in all capitals, as shown here.</t>
 <section title="Conceptual Description of the Protocol">
 
 <t>Babel is a loop-avoiding distance vector protocol: it is based on the
-Bellman-Ford protocol, just like the venerable RIP <xref target="RIP"/>,
+Bellman-Ford algorithm, just like the venerable RIP <xref target="RIP"/>,
 but includes a number of refinements that either prevent loop formation
 altogether, or ensure that a loop disappears in a timely manner and
 doesn't form again.</t>
@@ -261,17 +261,17 @@ absence of transient "micro-loops" during reconvergence).</t>
 
 <t>Another simple feasibility condition, used in the Destination-Sequenced
 Distance-Vector (DSDV) routing protocol <xref target="DSDV"/> and in the
-Ad hoc On-Demand Distance Vector (AODV) protocol, stems from the following
-observation: a routing loop can only arise after a router has switched to
-a route with a larger metric than the route that it had previously
-selected.  Hence, one could decide that a route is feasible only when its
-metric at the local node would be no larger than the metric of the
-currently selected route, i.e., an announcement carrying a metric D(B) is
-accepted by A when C(A, B) + D(B) &lt;= D(A).  If all routers obey this
-constraint, then the metric at every router is nonincreasing, and the
-following invariant is always preserved: if A has selected B as its
-successor, then D(B) &lt; D(A), which implies that the forwarding graph is
-loop-free.</t>
+Ad hoc On-Demand Distance Vector (AODV) protocol <xref target="RFC3561"/>,
+stems from the following observation: a routing loop can only arise after
+a router has switched to a route with a larger metric than the route that
+it had previously selected.  Hence, one could decide that a route is
+feasible only when its metric at the local node would be no larger than
+the metric of the currently selected route, i.e., an announcement carrying
+a metric D(B) is accepted by A when C(A, B) + D(B) &lt;= D(A).  If all
+routers obey this constraint, then the metric at every router is
+nonincreasing, and the following invariant is always preserved: if A has
+selected B as its next hop, then D(B) &lt; D(A), which implies that the
+forwarding graph is loop-free.</t>
 
 <t>Babel uses a slightly more refined feasibility condition, derived from
 EIGRP <xref target="DUAL"/>.  Given a router A, define the feasibility
@@ -1306,7 +1306,7 @@ prefix.  If the router-ids match but the requested seqno is larger (modulo
 2^16) than the route entry's, the node compares the router-id against its
 own router-id.  If the router-id is its own, then it increases its
 sequence number by 1 (modulo 2^16) and sends an update.  A node MUST NOT
-increase its sequence number by more than 1 in response to a seqno
+increase its sequence number by more than 1 in reaction to a single seqno
 request.</t>
 
 <t>Otherwise, if the requested router-id is not its own, the received
@@ -1461,15 +1461,15 @@ well-known Babel port.  It MAY be silently ignored if its destination
 address is a global IPv6 address.</t>
 
 <t>In order to minimise the number of packets being sent while avoiding
-lower-layer fragmentation, a Babel node SHOULD attempt to maximise the
-size of the packets it sends, up to the outgoing interface's MTU adjusted
-for lower-layer headers (28 octets for UDP over IPv4, 48 octets for UDP
-over IPv6).  It MUST NOT send packets larger than the attached interface's
-MTU adjusted for lower-layer headers or 512 octets, whichever is larger,
-but not exceeding 2^16 - 1 adjusted for lower-layer headers.  Every Babel
+lower-layer fragmentation, a Babel node SHOULD maximise the size of the
+packets it sends, up to the outgoing interface's MTU adjusted for
+lower-layer headers (28 octets for UDP over IPv4, 48 octets for UDP over
+IPv6).  It MUST NOT send packets larger than the attached interface's MTU
+adjusted for lower-layer headers or 512 octets, whichever is larger, but
+not exceeding 2^16 - 1 adjusted for lower-layer headers.  Every Babel
 speaker MUST be able to receive packets that are as large as any attached
-interface's MTU adjusted for lower-layer headers or 512 octets,
-whichever is larger.  Babel packets MUST NOT be sent in IPv6 Jumbograms.</t>
+interface's MTU adjusted for lower-layer headers or 512 octets, whichever
+is larger.  Babel packets MUST NOT be sent in IPv6 Jumbograms.</t>
 
 <t>In order to avoid global synchronisation of a Babel network and to
 aggregate multiple TLVs into large packets, a Babel node SHOULD buffer every
@@ -1583,9 +1583,8 @@ allowed to appear in the trailer.</t>
 <t>Fields :
 <list style="hanging" hangIndent="10">
 <t hangText="Type">The type of the TLV.</t>
-<t hangText="Length">The length of the body, exclusive of the Type and
-  Length fields.  If the body is longer than the expected length of a given
-  type of TLV, any extra data MUST be silently ignored.</t>
+<t hangText="Length">The length in octets of the body, exclusive of the
+Type and Length fields.</t>
 <t hangText="Payload">The TLV payload, which consists of a body and, for
 selected TLV types, an optional list of sub-TLVs.</t>
 </list></t>
@@ -1718,8 +1717,8 @@ trailer.</t>
 <t>Fields :
 <list style="hanging" hangIndent="10">
 <t hangText="Type">Set to 1 to indicate a PadN TLV.</t>
-<t hangText="Length">The length of the body, exclusive of the Type and
-Length fields.</t>
+<t hangText="Length">The length of the body, in octets, exclusive of the
+Type and Length fields.</t>
 <t hangText="MBZ">Must be zero, set to 0 on transmission.</t>
 </list></t>
 
@@ -1746,8 +1745,8 @@ within the number of centiseconds specified by the Interval field.</t>
 <t>Fields :
 <list style="hanging" hangIndent="10">
 <t hangText="Type">Set to 2 to indicate an Acknowledgment Request TLV.</t>
-<t hangText="Length">The length of the body, exclusive of the Type and
-Length fields.</t>
+<t hangText="Length">The length of the body, in octets, exclusive of the
+Type and Length fields.</t>
 <t hangText="Reserved">Sent as 0 and MUST be ignored on
   reception.</t>
 <t hangText="Nonce">An arbitrary value that will be echoed in the
@@ -1777,8 +1776,8 @@ The receiver MUST send an Acknowledgment TLV before this time has elapsed
 <t>Fields :
 <list style="hanging" hangIndent="10">
 <t hangText="Type">Set to 3 to indicate an Acknowledgment TLV.</t>
-<t hangText="Length">The length of the body, exclusive of the Type and
-Length fields.</t>
+<t hangText="Length">The length of the body, in octets, exclusive of the
+Type and Length fields.</t>
 <t hangText="Nonce">Set to the Nonce value of the Acknowledgment Request
 that prompted this Acknowledgment.</t>
 </list></t>
@@ -1808,8 +1807,8 @@ neighbour's reception cost.</t>
 <t>Fields :
 <list style="hanging" hangIndent="10">
 <t hangText="Type">Set to 4 to indicate a Hello TLV.</t>
-<t hangText="Length">The length of the body, exclusive of the Type and
-Length fields.</t>
+<t hangText="Length">The length of the body, in octets, exclusive of the
+Type and Length fields.</t>
 <t hangText="Flags">The individual bits of this field specify special
 handling of this TLV (see below).</t>
 <t hangText="Seqno">If the Unicast flag is set, this is the value of the
@@ -1873,8 +1872,8 @@ reachability and carrying a link's transmission cost.</t>
 <t>Fields :
 <list style="hanging" hangIndent="10">
 <t hangText="Type">Set to 5 to indicate an IHU TLV.</t>
-<t hangText="Length">The length of the body, exclusive of the Type and
-Length fields.</t>
+<t hangText="Length">The length of the body, in octets, exclusive of the
+Type and Length fields.</t>
 <t hangText="AE">The encoding of the Address field.  This should be 1 or 3
 in most cases.  As an optimisation, it MAY be 0 if the TLV is
 sent to a unicast address, if the association is over a point-to-point
@@ -1928,8 +1927,8 @@ sub-TLV.</t>
 <t>Fields :
 <list style="hanging" hangIndent="10">
 <t hangText="Type">Set to 6 to indicate a Router-Id TLV.</t>
-<t hangText="Length">The length of the body, exclusive of the Type and
-Length fields.</t>
+<t hangText="Length">The length of the body, in octets, exclusive of the
+Type and Length fields.</t>
 <t hangText="Reserved">Sent as 0 and MUST be ignored on reception.</t>
 <t hangText="Router-Id">The router-id for routes advertised in subsequent
 Update TLVs.  This MUST NOT consist of all zeroes or all ones.</t>
@@ -1960,8 +1959,8 @@ unknown mandatory sub-TLV.</t>
 <t>Fields :
 <list style="hanging" hangIndent="10">
 <t hangText="Type">Set to 7 to indicate a Next Hop TLV.</t>
-<t hangText="Length">The length of the body, exclusive of the Type and
-Length fields.</t>
+<t hangText="Length">The length of the body, in octets, exclusive of the
+Type and Length fields.</t>
 <t hangText="AE">The encoding of the Address field.  This SHOULD be
 1 (IPv4) or 3 (link-local IPv6), and MUST NOT be 0.</t>
 <t hangText="Reserved">Sent as 0 and MUST be ignored on reception.</t>
@@ -2005,8 +2004,8 @@ router-id and a new default prefix, as described in
 <t>Fields :
 <list style="hanging" hangIndent="10">
 <t hangText="Type">Set to 8 to indicate an Update TLV.</t>
-<t hangText="Length">The length of the body, exclusive of the Type and
-Length fields.</t>
+<t hangText="Length">The length of the body, in octets, exclusive of the
+Type and Length fields.</t>
 <t hangText="AE">The encoding of the Prefix field.</t>
 <t hangText="Flags">The individual bits of this field specify special
 handling of this TLV (see below).</t>
@@ -2118,8 +2117,8 @@ prefix, or a full route table dump.</t>
 <t>Fields :
 <list style="hanging" hangIndent="10">
 <t hangText="Type">Set to 9 to indicate a Route Request TLV.</t>
-<t hangText="Length">The length of the body, exclusive of the Type and
-Length fields.</t>
+<t hangText="Length">The length of the body, in octets, exclusive of the
+Type and Length fields.</t>
 <t hangText="AE">The encoding of the Prefix field.  The value 0 specifies
 that this is a request for a full route table dump (a wildcard
 request).</t>
@@ -2162,8 +2161,8 @@ it cannot be satisfied locally.</t>
 <t>Fields :
 <list style="hanging" hangIndent="10">
 <t hangText="Type">Set to 10 to indicate a Seqno Request TLV.</t>
-<t hangText="Length">The length of the body, exclusive of the Type and
-Length fields.</t>
+<t hangText="Length">The length of the body, in octets, exclusive of the
+Type and Length fields.</t>
 <t hangText="AE">The encoding of the Prefix field.  This MUST NOT be 0.</t>
 <t hangText="Plen">The length of the requested prefix.</t>
 <t hangText="Seqno">The sequence number that is being requested.</t>
@@ -2356,6 +2355,18 @@ technique was inspired by <xref target="PACKETBB"/>.</t>
 <seriesInfo name="DOI" value="10.17487/RFC8174"/>
 </reference>
 
+<reference anchor="RFC8126">
+<front>
+<title>Guidelines for Writing an IANA Considerations Section in RFCs</title>
+<author initials='M.' surname='Cotton' fullname='M. Cotton'></author>
+<author initials='B.' surname='Leiba' fullname='B. Leiba'></author>
+<author initials='T.' surname='Narten' fullname='T. Narten'></author>
+<date year='2017' month='June' />
+</front>
+<seriesInfo name='BCP' value='26' />
+<seriesInfo name='RFC' value='8126' />
+</reference>
+
 </references>
 
 <references title="Informative References">
@@ -2446,6 +2457,18 @@ technique was inspired by <xref target="PACKETBB"/>.</t>
   <seriesInfo name="Proc. Interop" value="94"/>
 </reference>
 
+<reference anchor="RFC3561" target="https://www.rfc-editor.org/info/rfc3561">
+  <front>
+    <title>Ad hoc On-Demand Distance Vector (AODV) Routing</title>
+    <author initials="C." surname="Perkins" fullname="C. Perkins"/>
+    <author initials="E." surname="Belding-Royer" fullname="E. Belding-Royer"/>
+    <author initials="S." surname="Das" fullname="S. Das"/>
+    <date year="2003" month="July"/>
+  </front>
+  <seriesInfo name="RFC" value="3561"/>
+  <seriesInfo name="DOI" value="10.17487/RFC3561"/>
+</reference>
+
 <reference anchor="ETX"><front>
     <title>A high-throughput path metric for multi-hop wireless networks</title>
     <author fullname="Douglas S. J. De Couto" initials="D." surname="De Couto"/>
@@ -2467,18 +2490,6 @@ technique was inspired by <xref target="PACKETBB"/>.</t>
     <date month="February" year="2009"/>
   </front>
   <seriesInfo name="RFC" value="5444"/>
-</reference>
-
-<reference anchor="RFC8126">
-<front>
-<title>Guidelines for Writing an IANA Considerations Section in RFCs</title>
-<author initials='M.' surname='Cotton' fullname='M. Cotton'></author>
-<author initials='B.' surname='Leiba' fullname='B. Leiba'></author>
-<author initials='T.' surname='Narten' fullname='T. Narten'></author>
-<date year='2017' month='June' />
-</front>
-<seriesInfo name='BCP' value='26' />
-<seriesInfo name='RFC' value='8126' />
 </reference>
 
 </references>

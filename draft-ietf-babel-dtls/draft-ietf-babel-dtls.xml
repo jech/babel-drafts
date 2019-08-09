@@ -3,7 +3,6 @@
 <!ENTITY RFC2119 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml">
 <!ENTITY RFC6347 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.6347.xml">
 <!ENTITY RFC7250 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.7250.xml">
-<!ENTITY RFC7525 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.7525.xml">
 <!ENTITY RFC7918 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.7918.xml">
 <!ENTITY RFC7924 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.7924.xml">
 <!ENTITY RFC8094 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.8094.xml">
@@ -112,6 +111,10 @@ features, namely authentication, integrity and replay protection with
 a small number of symmetric keys.  A comparison of Babel security mechanisms
 and their applicability can be found in <xref target="RFC6126bis"/>.</t>
 
+<t>Note that Babel over DTLS provides a single authentication domain, meaning
+that all nodes that have the right credentials can convey any and all routing
+information.</t>
+
 </section>
 
 </section>
@@ -147,7 +150,7 @@ As an example, fe80::1:2 is considered lower than fe80::2:1.</t>
 ephemeral UDP port.  Nodes SHOULD ensure that new client DTLS connections
 use different ephemeral ports from recently used connections to allow
 servers to differentiate between the new and old DTLS connections.
-Alternatively, nodes MAY use DTLS connection identifiers
+Alternatively, nodes could use DTLS connection identifiers
 <xref target="DTLS-CID"/> as a higher-entropy mechanism to distinguish between
 connections.</t>
 
@@ -237,7 +240,7 @@ multicast Hellos are sent unprotected.</t>
 
 </section>
 
-<section title="Simultaneous operation of both Babel over DTLS and unprotected Babel">
+<section title="Simultaneous operation of both Babel over DTLS and unprotected Babel on a Node">
 
 <t>Implementations MAY implement both Babel over DTLS and unprotected Babel.
 Additionally, a node MAY simultaneously run both Babel over DTLS and
@@ -249,6 +252,17 @@ interfaces but not others; this effectively gives nodes on that interface the
 same access as authenticated nodes, and SHOULD NOT be done unless that
 interface has a mechanism to authenticate nodes at a lower
 layer (e.g., IPsec).</t>
+
+</section>
+
+<section title="Simultaneous operation of both Babel over DTLS and unprotected Babel on a Network">
+
+<t>If Babel over DTLS and unprotected Babel are both operated on the same
+network, the Babel over DTLS implementation will receive unprotected multicast
+Hellos and attempt to initiate a DTLS connection.  These connection attempts
+can be sent to nodes that only run unprotected Babel, who will not
+respond.  Babel over DTLS implementations SHOULD therefore rate-limit their
+DTLS connection attempts to avoid causing undue load on the network.</t>
 
 </section>
 
@@ -305,16 +319,26 @@ request to IANA are as follows:
 
 <section title="Security Considerations">
 
-<t>The guidance given in <xref target="RFC7525"/> MUST be followed to avoid
+<t>The guidance given in <xref target="BCP195"/> MUST be followed to avoid
 attacks on DTLS.  Additionally, nodes MUST only negotiate DTLS version 1.2
 or higher.</t>
 
 <t>A malicious client might attempt to perform a high number of DTLS
 handshakes with a server.  As the clients are not uniquely identified
-by the protocol and can be obfuscated with IPv6 temporary addresses,
-a server needs to mitigate the impact of such an attack.  Such mitigation might
-involve rate limiting handshakes from a given subnet or more advanced denial of
+by the protocol until the handshake completes and can be obfuscated with IPv6
+temporary addresses, a server needs to mitigate the impact of such an attack.
+Note that attackers might attempt to keep in-progress handshakes open for as
+long as possible by using variants on the attack commonly known as
+Slowloris <xref target="SLOWLORIS"/>.  Mitigating these atacks might involve
+rate limiting handshakes from a given subnet or more advanced denial of
 service avoidance techniques beyond the scope of this document.</t>
+
+<t>Babel over DTLS allows sending multicast Hellos unprotected; attackers can
+therefore tamper with them.  For example, an attacker could send erroneous
+values for the Seqno and Interval fields, causing bidirectional
+reachability detection to fail.  While implementations MAY use multicast Hellos
+for link quality estimation, they SHOULD also emit protected unicast Hellos to
+prevent this class of denial-of-service attack.</t>
 
 </section>
 
@@ -326,6 +350,34 @@ service avoidance techniques beyond the scope of this document.</t>
 
 &RFC2119;
 &RFC6347;
+
+<reference anchor="BCP195" target="https://www.rfc-editor.org/info/bcp195">
+<front>
+<title>
+Recommendations for Secure Use of Transport Layer Security (TLS) and Datagram Transport Layer Security (DTLS)
+</title>
+<author initials="Y." surname="Sheffer" fullname="Y. Sheffer">
+<organization/>
+</author>
+<author initials="R." surname="Holz" fullname="R. Holz">
+<organization/>
+</author>
+<author initials="P." surname="Saint-Andre" fullname="P. Saint-Andre">
+<organization/>
+</author>
+<date year="2015" month="May"/>
+<abstract>
+<t>
+Transport Layer Security (TLS) and Datagram Transport Layer Security (DTLS) are widely used to protect data exchanged over application protocols such as HTTP, SMTP, IMAP, POP, SIP, and XMPP. Over the last few years, several serious attacks on TLS have emerged, including attacks on its most commonly used cipher suites and their modes of operation. This document provides recommendations for improving the security of deployed services that use TLS and DTLS. The recommendations are applicable to the majority of use cases.
+</t>
+</abstract>
+</front>
+<seriesInfo name="BCP" value="195"/>
+<seriesInfo name="RFC" value="7525"/>
+<seriesInfo name="DOI" value="10.17487/RFC7525"/>
+</reference>
+
+
 &RFC8174;
 
 <reference anchor="RFC6126bis"><front>
@@ -343,7 +395,6 @@ service avoidance techniques beyond the scope of this document.</t>
 &RFC7250;
 &RFC7918;
 &RFC7924;
-&RFC7525;
 &RFC8094;
 
 <reference anchor="BABEL-HMAC"><front>
@@ -363,6 +414,12 @@ service avoidance techniques beyond the scope of this document.</t>
 <author fullname="Tobias Gondrom" initials="T." surname="Gondrom"/>
 <date month="October" year="2018"/></front>
 <seriesInfo name="Internet Draft" value="draft-ietf-tls-dtls-connection-id-05"/>
+</reference>
+
+<reference anchor="SLOWLORIS" target="https://web.archive.org/web/20150315054838/http://ha.ckers.org/slowloris/"><front>
+<title>Welcome to Slowloris...</title>
+<author fullname="RSnake Hansen" initials="R." surname="Hansen"/>
+<date month="June" year="2009"/></front>
 </reference>
 
 </references>
@@ -388,6 +445,7 @@ contain the (encrypted) Babel packet.</t>
 Roman Danyliw,
 Donald Eastlake,
 Thomas Fossati,
+Benjamin Kaduk,
 Gabriel Kerneis,
 Mirja Kuehlewind,
 Antoni Przygienda,

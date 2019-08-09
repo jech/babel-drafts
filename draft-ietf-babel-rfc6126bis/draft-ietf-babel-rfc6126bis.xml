@@ -553,6 +553,11 @@ early enough to meet the explicit deadline (with a small margin to allow
 for propagation delays).  In all other cases, the TLV SHOULD be sent out
 within one-half of the Multicast Hello interval.</t>
 
+<t>In order to avoid packet drops (either at the sender or at the
+receiver), a delay SHOULD be introduced between successive packets sent
+out on the same interface, within the constraints of the previous
+paragraph.</t>
+
 </section>
 
 <section title="Data Structures">
@@ -1198,7 +1203,9 @@ acknowledged the packet, up to some number of times.  If the number of
 neighbours is large, however, requesting acknowledgments from all of them
 might cause a non-negligible amount of network traffic; in that case, it
 may be preferable to simply repeat the update some reasonable number of
-times (say, 5 for wireless and 2 for wired links).</t>
+times (say, 3 for wireless and 2 for wired links).  The number of copies
+MUST NOT exceed 5, and the copies SHOULD be separated by a small interval,
+as described in <xref target="transmission-reception"/>.</t>
 
 <t>A route retraction is somewhat less worrying: if the route retraction
 doesn't reach all neighbours, a black-hole might be created, which, unlike
@@ -1438,17 +1445,6 @@ to the neighbour that advertised this route; since nodes always send
 either updates or retractions in response to non-wildcard route requests
 (<xref target="handling-route-requests"/>), this will usually result in
 the route being either refreshed or retracted.</t>
-
-</section>
-
-<section title="Acquiring New Neighbours">
-
-<t>In order to speed up convergence after a mobility event, a node MAY
-send a unicast wildcard request after acquiring a new neighbour.
-Additionally, a node MAY send a small number of multicast wildcard
-requests shortly after booting.  Note however that doing that carelessly
-can cause serious congestion when a whole network is rebooted, especially
-on link layers with high per-packet overhead (e.g., IEEE&nbsp;802.11).</t>
 
 </section>
 

@@ -623,10 +623,12 @@ with each Multicast Hello TLV on this interface and is incremented (modulo
 2^16) whenever a Multicast Hello is sent.  (Note that an interface's
 Multicast Hello seqno is unrelated to the node's seqno.)</t>
 
-<t>There are two timers associated with each interface table entry &mdash;
-the multicast hello timer, which governs the sending of scheduled
-Multicast Hello and IHU packets, and the update timer, which governs the
-sending of periodic route updates.</t>
+<t>There are two timers associated with each interface table entry.
+The periodic Multicast Hello timer governs the sending of scheduled
+Multicast Hello and IHU packets (<xref target="neighbour-acquisition"/>.
+The periodic Update timer governs the sending of periodic route updates
+(<xref target="periodic-updates"/>).  See <xref target="constants"/> for
+suggested time constants.</t>
 
 </section>
 
@@ -660,10 +662,10 @@ interface's outgoing Multicast Hello seqno.)</t>
 </t>
 
 <t>There are three timers associated with each neighbour entry &mdash; the
-multicast hello timer, which is initialised from the interval value
-carried by scheduled Multicast Hello TLVs, the unicast hello timer, which
-is initialised from the interval value carried by scheduled Unicast Hello
-TLVs, and the IHU timer, which is initialised to a small multiple of the
+multicast hello timer, which is set to the interval value carried by
+scheduled Multicast Hello TLVs sent by this neighbour, the unicast hello
+timer, which is set to the interval value carried by scheduled Unicast
+Hello TLVs, and the IHU timer, which is set to a small multiple of the
 interval carried in IHU TLVs.</t>
 
 <t>Note that the neighbour table is indexed by IP addresses, not by
@@ -772,7 +774,7 @@ Discovery (ND) exchanges.</t>
 
 </section>
 
-<section title="Neighbour Acquisition">
+<section title="Neighbour Acquisition" anchor="neighbour-acquisition">
 
 <t>Neighbour acquisition is the process by which a Babel node discovers the
 set of neighbours heard over each of its interfaces and ascertains
@@ -1172,7 +1174,7 @@ is set to the local router's sequence number.</t>
 router-id and sequence number are copied from the route table entry, and
 the metric is computed as specified in <xref target="metric-computation"/>.</t>
 
-<section title="Periodic Updates">
+<section title="Periodic Updates" anchor="periodic-updates">
 
 <t>Every Babel speaker MUST advertise each of its selected routes on every
 interface, at least once every Update interval.  Since Babel doesn't

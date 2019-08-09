@@ -1111,7 +1111,7 @@ prefix is selected to be used for forwarding packets and to be
 re-advertised to a node's neighbours.</t>
 
 <t>Babel is designed to allow flexible route selection policies.  As far as
-  the protocol's correctness is concerned, the route selection policy MUST
+  the algorithm's correctness is concerned, the route selection policy MUST
   only satisfy the following properties:
 <list style="symbols">
   <t>a route with infinite metric (a retracted route) is never selected;</t>
@@ -1407,9 +1407,10 @@ reach the source.)</t>
 
 <t>In order to compensate for packet loss, a node SHOULD repeat such
 a request a small number of times if no route becomes feasible within
-a short time.  In the presence of heavy packet loss, however, all such
-requests might be lost; in that case, the mechanism in the next section
-will eventually ensure that a new seqno is received.</t>
+a short time (see "Request Timeout" in <xref target="constants"/> for
+suggested values).  In the presence of heavy packet loss, however, all
+such requests might be lost; in that case, the mechanism in the next
+section will eventually ensure that a new seqno is received.</t>
 
 </section>
 
@@ -1494,7 +1495,7 @@ applications of Babel.</t>
 <section title="Router-Id">
 <t>A router-id is an arbitrary 8-octet value.  A router-id MUST NOT
 consist of either all binary zeroes (0000000000000000 hexadecimal) or all
-binary ones ones (FFFFFFFFFFFFFFFF hexadecimal).</t>
+binary ones (FFFFFFFFFFFFFFFF hexadecimal).</t>
 </section>
 
 <section title="Address">
@@ -1531,8 +1532,9 @@ significant bits (up to the prefix length).</t>
 <section title="Packet Format">
 
 <t>A Babel packet consists of a 4-octet header, followed by a sequence of
-TLVs (the packet body), optionally followed by a second sequence of
-TLVs (the packet trailer).</t>
+TLVs (the packet body), optionally followed by a second sequence of TLVs
+(the packet trailer).  The format is designed to be extensible; see
+<xref target="extensions"/> for extensibility considerations.</t>
 
 <figure><artwork><![CDATA[
  0                   1                   2                   3
@@ -1568,8 +1570,8 @@ any TLV unless its definition explicitly states that it is allowed to
 appear there.  Among the TLVs defined in this document, only Pad1 and PadN
 are allowed in the trailer; since these TLVs are ignored in any case, an
 implementation MAY silently ignore the packet trailer without even parsing
-it, unless it implements at least one extension that defines TLVs that are
-allowed to appear in the trailer.</t>
+it, unless it implements at least one protocol extension that defines TLVs
+that are allowed to appear in the trailer.</t>
 
 </section>
 

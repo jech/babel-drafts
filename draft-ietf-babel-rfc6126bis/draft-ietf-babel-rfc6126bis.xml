@@ -535,18 +535,23 @@ address.  Hence, a Babel speaker does not need to determine the destination
 address of a packet that it receives in order to interpret it.</t>
 
 <t>A moderate amount of jitter may be applied to packets sent by a Babel
-speaker: outgoing TLVs are buffered and SHOULD be sent with a small random
+speaker: outgoing TLVs are buffered and SHOULD be sent with a random
 delay.  This is done for two purposes: it avoids synchronisation of
-multiple Babel speakers across a network <xref target="JITTER"/>, and
-it allows for the aggregation of multiple TLVs into a single packet.</t>
+multiple Babel speakers across a network <xref target="JITTER"/>, and it
+allows for the aggregation of multiple TLVs into a single packet.</t>
 
-<t>The exact delay and amount of jitter applied to a packet depends on
-whether it contains any urgent TLVs.  Acknowledgment TLVs MUST be sent
-before the deadline specified in the corresponding request.  The particular
-class of updates specified in <xref target="triggered-updates"/> MUST be
-sent in a timely manner.  The particular class of request and update TLVs
-specified in <xref target="sending-requests"/> SHOULD be sent in a timely
-manner.</t>
+<t>The maximum amount of delay a TLV can be subjected to depends on the
+TLV.  When the protocol description specifies that a TLV is urgent (as in
+<xref target="triggered-updates"/> and <xref target="sending-requests"/>),
+then the TLV MUST be sent within a short time known as the urgent timeout
+(see <xref target="constants"/> for recommended values).  When the TLV is
+governed by a timeout explicitly included in a previous TLV, (such as in
+the case of Acknowledgements <xref target="ack"/>),
+Updates (<xref target="sending-updates"/> and IHUs
+(<xref target="bidirectional-reachability"/>), then the TLV MUST be sent
+early enough to meet the explicit deadline (with a small margin to allow
+for propagation delays).  In all other cases, the TLV SHOULD be sent out
+within one-half of the Multicast Hello interval.</t>
 
 </section>
 
@@ -830,7 +835,8 @@ runs the route selection procedure (<xref target="route-selection"/>).</t>
 
 </section>
 
-<section title="Bidirectional Reachability Detection">
+<section title="Bidirectional Reachability Detection"
+         anchor="bidirectional-reachability">
 
 <t>In order to establish bidirectional reachability, every node sends
 periodic IHU ("I Heard You") TLVs to each of its neighbours.  Since IHUs
@@ -1034,8 +1040,8 @@ If such an entry exists:
   value included in the update.  If the update is unfeasible, then the
   (now unfeasible) entry MUST be immediately unselected.  If the update
   caused the router-id of the entry to change, an update (possibly
-  a retraction) MUST be sent in a timely manner (see <xref
-  target="triggered-updates"/>).</t>
+  a retraction) MUST be sent in a timely manner as described in <xref
+  target="triggered-updates"/>.</t>
 </list>
 Note that the route table may contain unfeasible routes, either because
 they were created by an unfeasible update or due to a metric fluctuation.
@@ -1137,7 +1143,7 @@ switching router-ids too often.</t>
 
 </section>
 
-<section title="Sending Updates">
+<section title="Sending Updates" anchor="sending-updates">
 
 <t>A Babel speaker advertises to its neighbours its set of selected
 routes.  Normally, this is done by sending one or more multicast packets
@@ -1163,12 +1169,12 @@ the metric is computed as specified in <xref target="metric-computation"/>.</t>
 
 <section title="Periodic Updates">
 
-<t>Every Babel speaker periodically advertises all of its selected routes
-on all of its interfaces, including any recently retracted routes.  Since
-Babel doesn't suffer from routing loops (there is no "counting to
-infinity") and relies heavily on triggered updates
-(<xref target="triggered-updates"/>), this full dump only needs to happen
-infrequently.</t>
+<t>Every Babel speaker MUST advertise each of its selected routes on every
+interface, at least once every Update interval.  Since Babel doesn't
+suffer from routing loops (there is no "counting to infinity") and relies
+heavily on triggered updates (<xref target="triggered-updates"/>), this
+full dump only needs to happen infrequently (see <xref target="constants"/>
+for suggested intervals).</t>
 
 </section>
 
@@ -1179,11 +1185,11 @@ unscheduled, or triggered, updates in order to inform its neighbours of
 a significant change in the network topology.</t>
 
 <t>A change of router-id for the selected route to a given prefix may be
-indicative of a routing loop in formation; hence, a node MUST send a
-triggered update in a timely manner whenever it changes the selected
-router-id for a given destination.  Additionally, it SHOULD make a
-reasonable attempt at ensuring that all reachable neighbours receive this
-update.</t>
+indicative of a routing loop in formation; hence, whenever it changes the
+selected router-id for a given destination, a node MUST send an update as
+an urgent TLV (as defined in <xref target="transmission-reception"/>).
+Additionally, it SHOULD make a reasonable attempt at ensuring that all
+reachable neighbours receive this update.</t>
 
 <t>There are two strategies for ensuring that.  If the number of neighbours
 is small, then it is reasonable to send the update together with an
@@ -1326,15 +1332,17 @@ route.</t>
 </list>
 In order to actually forward the request, the node decrements the hop
 count and sends the request in a unicast packet destined to the selected
-neighbour.</t>
+neighbour.  The forwarded request SHOULD be sent as an urgent TLV (as
+defined in <xref target="transmission-reception"/>).</t>
 
 <t>A node SHOULD maintain a list of recently forwarded seqno requests and
 forward the reply (an update with a seqno sufficiently large to satisfy
-the request) in a timely manner.  A node SHOULD compare every incoming
-seqno request against its list of recently forwarded seqno requests and
-avoid forwarding it if it is redundant (i.e., if it has recently sent
-a request with the same prefix, router-id and a seqno that is not smaller
-modulo 2^16).</t>
+the request) as an urgent TLV (as defined in
+<xref target="transmission-reception"/>).  A node SHOULD compare every
+incoming seqno request against its list of recently forwarded seqno
+requests and avoid forwarding it if it is redundant (i.e., if it has
+recently sent a request with the same prefix, router-id and a seqno that
+is not smaller modulo 2^16).</t>
 
 <t>Since the request-forwarding mechanism does not necessarily obey the
 feasibility condition, it may get caught in routing loops; hence, requests
@@ -1763,7 +1771,7 @@ The receiver MUST send an Acknowledgment TLV before this time has elapsed
 
 </section>
 
-<section title="Acknowledgment">
+<section title="Acknowledgment" anchor="ack">
 
 <figure><artwork><![CDATA[
  0                   1                   2                   3
@@ -2695,7 +2703,7 @@ M(c, m) = k + c + m, where k depends on the battery status.</t>
 
 </section>
 
-<section title="Constants">
+<section title="Constants" anchor="constants">
 
 <t>The choice of time constants is a trade-off between fast detection of
 mobility events and protocol overhead.  Two instances of Babel running
@@ -2724,6 +2732,7 @@ Multicast Hello on lossless links.</t>
 <t>Route Expiry Time: 3.5 times the advertised update interval.</t>
 <t>Request timeout: initially 2 seconds, doubled every time a request is
 resent, up to a maximum of three times.</t>
+<t>Urgent timeout: 0.2 seconds.</t>
 <t>Source GC time: 3 minutes.</t>
 </list></t>
 
@@ -2736,14 +2745,9 @@ within 2 seconds after a mobility event is desired:
 computed as in the first case above.</t>
 <t>Request Timeout: initially 0.5 seconds, doubled every time a request is
 resent, up to a maximum of three times.</t>
+<t>Urgent timeout: 0.2 seconds.</t>
 <t>Source GC time: 3 minutes.</t>
 </list></t>
-
-<t>The amount of jitter applied to a packet depends on whether it contains
-any urgent TLVs or not (<xref target="transmission-reception"/>).  Urgent
-triggered updates and urgent requests are delayed by no more than 200ms;
-acknowledgments, by no more than the associated deadline; and other TLVs
-by no more than one-half the Multicast Hello interval.</t>
 
 </section>
 

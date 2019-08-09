@@ -2846,7 +2846,7 @@ per IPv6 entry.  To put these values into perspective, a single full-size
 Ethernet frame can carry some 65 route updates, and a megabyte of memory
 can contain a 20000-entry route table and the associated source table.</t>
 
-<t>Babel is also a reasonably simple protocol.  The sample implementation
+<t>Babel is also a reasonably simple protocol.  One complete implementation
 consists of less than 12&nbsp;000 lines of C code, and it compiles to less
 than 120&nbsp;kB of text on a 32-bit CISC architecture; about half of this
 figure is due to protocol extensions and user-interface code.</t>
@@ -2861,16 +2861,17 @@ one or more directly attached prefixes into a Babel network but doesn't
 reannounce any routes that it has learnt from its neighbours.  It may
 either maintain a full routing table, or simply select a default gateway
 amongst any one of its neighbours that announces a default route.  Since
-a stub implementation never forwards packets except from or to directly
-attached links, it cannot possibly participate in a routing loop, and
+a stub implementation never forwards packets except from or to a directly
+attached link, it cannot possibly participate in a routing loop, and
 hence it need not evaluate the feasibility condition or maintain a source
 table.</t>
 
-<t>No matter how primitive, a stub implementation MUST parse sub-TLVs
+<t>No matter how primitive, a stub implementation must parse sub-TLVs
 attached to any TLVs that it understands and check the mandatory bit.
-It MUST answer acknowledgment requests and MUST participate in the
-Hello/IHU protocol.  It MUST also be able to reply to seqno requests for
-routes that it announces and SHOULD be able to reply to route requests.</t>
+It must answer acknowledgment requests and must participate in the
+Hello/IHU protocol.  It must also be able to reply to seqno requests for
+routes that it announces and, and it should be able to reply to route
+ requests.</t>
 
 <t>Experience shows that an IPv6-only stub implementation of Babel can be
 written in less than 1000 lines of C code and compile to 13&nbsp;kB of

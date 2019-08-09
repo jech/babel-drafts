@@ -103,7 +103,8 @@ particularly adapted to the unmanaged and wireless environment.</t>
 
 <t>Finally, Babel is a hybrid routing protocol, in the sense that it can
 carry routes for multiple network-layer protocols (IPv4 and IPv6),
-whichever protocol the Babel packets are themselves being carried over.</t>
+regardless of which protocol the Babel packets are themselves being
+carried over.</t>
 
 </section>
 
@@ -577,7 +578,8 @@ selected routes and one with fallback routes.</t>
 and they are interpreted as integers modulo 2^16.  For the purposes of
 this document, arithmetic on sequence numbers is defined as follows.</t>
 
-<t>Given a seqno s and an integer n, the sum of s and n is defined by
+<t>Given a seqno s and a non-negative integer n, the sum of s and n is
+defined by
 <list style="empty">
   <t>s + n (modulo 2^16) = (s + n) MOD 2^16</t>
 </list>
@@ -993,8 +995,8 @@ feasible, since they cannot possibly cause a routing loop.</t>
 and the neighbour's link cost.  Just like cost computation, metric
 computation is considered a local policy matter; as far as Babel is
 concerned, the function M(c,&nbsp;m) used for computing a metric from
-a locally computed link cost and the metric advertised by a neighbour MUST
-only satisfy the following conditions:
+a locally computed link cost c and the metric m advertised by a neighbour
+MUST only satisfy the following conditions:
 <list style="symbols">
   <t>if c is infinite, then M(c, m) is infinite;</t>
   <t>M is strictly monotonic: M(c, m) &gt; m.</t>
@@ -1022,9 +1024,9 @@ a network administrator.</t>
 
 <section title="Route Acquisition" anchor="route-acquisition">
 
-<t>When a Babel node receives an update (prefix, plen, router-id, seqno, metric)
-from a neighbour neigh with a link cost value equal to cost, it checks
-whether it already has a route table entry indexed by (prefix, plen, neigh).</t>
+<t>When a Babel node receives an update (prefix, plen, router-id, seqno,
+metric) from a neighbour neigh, it checks whether it already has a route
+table entry indexed by (prefix, plen, neigh).</t>
 
 <t>If no such entry exists:
 <list style="symbols">
@@ -1090,7 +1092,7 @@ by either:
 target="route-acquisition"/>);</t>
 <t>sending a retraction with an acknowledgment request (<xref
 target="acknowledgments"/>) to every reachable neighbour that has not
-explicitly retracted prefix P and waiting for all acknowledgments.</t>
+explicitly retracted prefix P, and waiting for all acknowledgments.</t>
 </list>
 The former option is simpler and ensures that at that point, any routes
 for prefix P pointing at the current node have expired.  However, since
@@ -1160,8 +1162,8 @@ unicast, a node MAY choose to send multiple copies of updates in unicast
 packets, especially when the number of neighbours is small.</t>
 
 <t>Additionally, in order to ensure that any black-holes are reliably
-cleared in a timely manner, a Babel node sends retractions (updates with an
-infinite metric) for any recently retracted prefixes.</t>
+cleared in a timely manner, a Babel node may send retractions (updates
+with an infinite metric) for any recently retracted prefixes.</t>
 
 <t>If an update is for a route injected into the Babel domain by the local
 node (e.g., it carries the address of a local interface, the prefix of

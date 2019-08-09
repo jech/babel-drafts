@@ -16,7 +16,7 @@
 <?rfc compact="no" ?>
 <rfc category="std"
     obsoletes=""
-    docName="draft-ietf-babel-dtls-07"
+    docName="draft-ietf-babel-dtls-08"
     ipr="trust200902">
 <front>
 <title abbrev="Babel over DTLS">Babel Routing Protocol over Datagram
@@ -111,8 +111,8 @@ features, namely authentication, integrity and replay protection with
 a small number of symmetric keys.  A comparison of Babel security mechanisms
 and their applicability can be found in <xref target="RFC6126bis"/>.</t>
 
-<t>Babel over DTLS provides a single authentication domain, in the sense
-that all nodes that have the right credentials can carry any routing
+<t>Note that Babel over DTLS provides a single authentication domain, meaning
+that all nodes that have the right credentials can convey any and all routing
 information.</t>
 
 </section>
@@ -242,7 +242,7 @@ multicast Hellos are sent unprotected.</t>
 
 </section>
 
-<section title="Simultaneous operation of Babel over DTLS and unprotected Babel on a singe node">
+<section title="Simultaneous operation of both Babel over DTLS and unprotected Babel on a Node">
 
 <t>Implementations MAY implement both Babel over DTLS and unprotected Babel.
 Additionally, a node MAY simultaneously run both Babel over DTLS and
@@ -257,12 +257,12 @@ layer (e.g., IPsec).</t>
 
 </section>
 
-<section title="Simultaneous operation of Babel over DTLS and unprotected Babel on a single network">
+<section title="Simultaneous operation of both Babel over DTLS and unprotected Babel on a Network">
 
 <t>If Babel over DTLS and unprotected Babel are both operated on the same
 network, the Babel over DTLS implementation will receive unprotected multicast
 Hellos and attempt to initiate a DTLS connection.  These connection attempts
-might be sent to nodes that only run unprotected Babel, who will not
+can be sent to nodes that only run unprotected Babel, who will not
 respond.  Babel over DTLS implementations SHOULD therefore rate-limit their
 DTLS connection attempts to avoid causing undue load on the network.</t>
 

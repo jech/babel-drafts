@@ -1291,7 +1291,7 @@ exists, it MUST send an update (over unicast or over multicast); if such
 a route does not exist, it MUST send a retraction for that prefix.</t>
 
 <t>When a node receives a wildcard route request, it SHOULD send a full
-route table dump.  Full route dumps MAY be rate-limited, especially if
+route table dump.  Full route dumps SHOULD be rate-limited, especially if
 they are sent over multicast.</t>
 
 </section>

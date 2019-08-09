@@ -2869,12 +2869,14 @@ implementations of the protocol.</t>
 <t>There are many different definitions of a stub router, but for the
 needs of this section a stub implementation of Babel is one that announces
 one or more directly attached prefixes into a Babel network but doesn't
-reannounce any routes that it has learnt from its neighbours.  It may
+reannounce any routes that it has learnt from its neighbours, and always
+prefers the direct route to a directly attached prefix to a route learned
+over the Babel protocol, even when the prefixes are the same.  It may
 either maintain a full routing table, or simply select a default gateway
-amongst any one of its neighbours that announces a default route.  Since
+through any one of its neighbours that announces a default route.  Since
 a stub implementation never forwards packets except from or to a directly
-attached link, it cannot possibly participate in a routing loop, and
-hence it need not evaluate the feasibility condition or maintain a source
+attached link, it cannot possibly participate in a routing loop, and hence
+it need not evaluate the feasibility condition or maintain a source
 table.</t>
 
 <t>No matter how primitive, a stub implementation must parse sub-TLVs

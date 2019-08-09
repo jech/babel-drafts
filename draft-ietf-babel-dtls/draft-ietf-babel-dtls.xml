@@ -327,7 +327,7 @@ by the protocol until the handshake completes and can be obfuscated with IPv6
 temporary addresses, a server needs to mitigate the impact of such an attack.
 Note that attackers might attempt to keep in-progress handshakes open for as
 long as possible by using variants on the attack commonly known as
-Slowloris <xref target="SLOWLORIS"/>.  Mitigating these atacks might involve
+Slowloris <xref target="SLOWLORIS"/>.  Mitigating these attacks might involve
 rate limiting handshakes from a given subnet or more advanced denial of
 service avoidance techniques beyond the scope of this document.</t>
 
@@ -382,8 +382,8 @@ Transport Layer Security (TLS) and Datagram Transport Layer Security (DTLS) are 
 <title>The Babel Routing Protocol</title>
 <author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
 <author fullname="David Schinazi" initials="D." surname="Schinazi"/>
-<date month="June" year="2019"/></front>
-<seriesInfo name="Internet Draft" value="draft-ietf-babel-rfc6126bis-11"/>
+<date month="August" year="2019"/></front>
+<seriesInfo name="Internet Draft" value="draft-ietf-babel-rfc6126bis-12"/>
 </reference>
 
 </references>
@@ -401,7 +401,7 @@ Transport Layer Security (TLS) and Datagram Transport Layer Security (DTLS) are 
 <author fullname="Weronika Kolodziejak" initials="W." surname="Kolodziejak"/>
 <author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
 <date month="June" year="2019"/></front>
-<seriesInfo name="Internet Draft" value="draft-ietf-babel-hmac-07"/>
+<seriesInfo name="Internet Draft" value="draft-ietf-babel-hmac-08"/>
 </reference>
 
 <reference anchor="DTLS-CID"><front>
@@ -410,8 +410,8 @@ Transport Layer Security (TLS) and Datagram Transport Layer Security (DTLS) are 
 <author fullname="Hannes Tschofenig" initials="H." surname="Tschofenig"/>
 <author fullname="Thomas Fossati" initials="T." surname="Fossati"/>
 <author fullname="Tobias Gondrom" initials="T." surname="Gondrom"/>
-<date month="October" year="2018"/></front>
-<seriesInfo name="Internet Draft" value="draft-ietf-tls-dtls-connection-id-05"/>
+<date month="July" year="2019"/></front>
+<seriesInfo name="Internet Draft" value="draft-ietf-tls-dtls-connection-id-06"/>
 </reference>
 
 <reference anchor="SLOWLORIS" target="https://web.archive.org/web/20150315054838/http://ha.ckers.org/slowloris/"><front>

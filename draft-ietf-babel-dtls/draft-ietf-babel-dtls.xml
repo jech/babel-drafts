@@ -68,9 +68,9 @@ Transport Layer Security</title>
 
 <abstract>
 <t>The Babel Routing Protocol does not contain any means to authenticate
-neighbours or protect messages sent between them.  This document specifies
-a mechanism to ensure these properties, using Datagram Transport Layer
-Security (DTLS).</t>
+neighbours or provide integrity or confidentiality for messages sent between
+them.  This document specifies a mechanism to ensure these properties, using
+Datagram Transport Layer Security (DTLS).</t>
 </abstract>
 
 </front>
@@ -162,11 +162,11 @@ fails to authenticate its peer against its local policy, it MUST abort the DTLS
 handshake.  Nodes MUST only negotiate DTLS version 1.2 or higher.  Nodes MUST
 use DTLS replay protection to prevent attackers from replaying stale
 information.  Nodes SHOULD drop packets that have been reordered by more than
-two IHU intervals, to avoid letting attackers make stale information last
-longer.  If a node receives a new DTLS connection from a neighbour to whom
-it already has a connection, the node MUST NOT discard the older connection
-until it has completed the handshake of the new one and validated the
-identity of the peer.</t>
+two IHU (I Heard You) intervals, to avoid letting attackers make stale
+information last longer.  If a node receives a new DTLS connection from a
+neighbour to whom it already has a connection, the node MUST NOT discard the
+older connection until it has completed the handshake of the new one and
+validated the identity of the peer.</t>
 
 </section>
 
@@ -240,12 +240,15 @@ multicast Hellos are sent unprotected.</t>
 <section title="Simultaneous operation of both Babel over DTLS and unprotected Babel">
 
 <t>Implementations MAY implement both Babel over DTLS and unprotected Babel.
-However, accepting unprotected Babel packets (other than multicast Hellos)
-loses the security properties of Babel over DTLS.  A node MAY allow
-configuration options to allow unprotected Babel on some interfaces but not
-others; this effectively gives nodes on that interface the same access as
-authenticated nodes, and SHOULD NOT be done unless that interface has a
-mechanism to authenticate nodes at a lower layer (e.g., IPsec).</t>
+Additionally, a node MAY simultaneously run both Babel over DTLS and
+unprotected Babel. However, a node running both MUST ensure that it runs
+them on separate interfaces, as the security properties of Babel over DTLS
+rely on not accepting unprotected Babel packets (other than multicast Hellos).
+A node MAY allow configuration options to allow unprotected Babel on some
+interfaces but not others; this effectively gives nodes on that interface the
+same access as authenticated nodes, and SHOULD NOT be done unless that
+interface has a mechanism to authenticate nodes at a lower
+layer (e.g., IPsec).</t>
 
 </section>
 
@@ -261,7 +264,7 @@ recommends that DTLS overhead be taken into account when computing maximum
 packet size.</t>
 
 <t> More precisely, nodes SHOULD compute the overhead of DTLS depending on
-the ciphers in use, and SHOULD NOT send Babel packets larger than the
+the ciphersuites in use, and SHOULD NOT send Babel packets larger than the
 interface maximum transmission unit (MTU) minus the overhead of IP, UDP
 and DTLS.  Nodes MUST NOT send Babel packets larger than the attached
 interface's MTU adjusted for known lower-layer headers (at least UDP and
@@ -302,10 +305,9 @@ request to IANA are as follows:
 
 <section title="Security Considerations">
 
-<t>Confidential interaction between two Babel peers requires Datagram Transport
-Layer Security (DTLS) with a cipher suite offering confidentiality
-protection.  The guidance given in <xref target="RFC7525"/> MUST be
-followed to avoid attacks on DTLS.</t>
+<t>The guidance given in <xref target="RFC7525"/> MUST be followed to avoid
+attacks on DTLS.  Additionally, nodes MUST only negotiate DTLS version 1.2
+or higher.</t>
 
 <t>A malicious client might attempt to perform a high number of DTLS
 handshakes with a server.  As the clients are not uniquely identified
@@ -383,6 +385,7 @@ contain the (encrypted) Babel packet.</t>
 <section title="Acknowledgments">
 
 <t>The authors would like to thank
+Roman Danyliw,
 Donald Eastlake,
 Thomas Fossati,
 Gabriel Kerneis,

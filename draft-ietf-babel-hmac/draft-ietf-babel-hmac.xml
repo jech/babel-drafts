@@ -539,6 +539,28 @@ to a value of 5&nbsp;min, and MAY be configurable.</t>
 
 </section>
 
+<section title="Incremental deployment and key rotation"
+         anchor="incremental-deployment">
+
+<t>In order to perform incremental deployment, the nodes in the network
+are first configured in a mode where packets are sent with authentication
+but not checked on reception.  Once all the nodes in the network are
+configured to send authenticated packets, nodes are reconfigured to reject
+unauthenticated packets.</t>
+
+<t>In order to perform key rotation, the new key is added to all the
+nodes; once this is done, both the old and the new key are sent in all
+packets, and packets are accepted if they are properly signed by either of
+the keys.  At that point, the old key is removed.</t>
+
+<t>In order to support the procedures described above, implementations of
+this protocol SHOULD support an interface configuration in which packets
+are sent authenticated but received packets are accepted without
+verification, and they SHOULD allow changing the set of keys associated
+with an interface without a restart.</t>
+
+</section>
+
 <section title="Packet Format">
 
 <section title="HMAC TLV">
@@ -882,33 +904,6 @@ Issues with Existing Cryptographic Protection Methods for Routing Protocols
 <seriesInfo name="DOI" value="10.17487/RFC4987"/>
 </reference>
 </references>
-
-<section title="Incremental deployment and key rotation"
-         anchor="incremental-deployment">
-
-<t>This protocol supports incremental deployment (transitioning from an
-insecure network to a secured network with no service interruption) and
-key rotation (transitioning from a set of keys to a different set of
-keys).</t>
-
-<t>In order to perform incremental deployment, the nodes in the network
-are first configured in a mode where packets are sent with authentication
-but not checked on reception.  Once all the nodes in the network are
-configured to send authenticated packets, nodes are reconfigured to reject
-unauthenticated packets.</t>
-
-<t>In order to perform key rotation, the new key is added to all the
-nodes; once this is done, both the old and the new key are sent in all
-packets, and packets are accepted if they are properly signed by either of
-the keys.  At that point, the old key is removed.</t>
-
-<t>In order to support incremental deployment and key rotation,
-implementations SHOULD support an interface configuration in which they
-send authenticated packets but accept all packets, and SHOULD allow
-changing the set of keys associated with an interface without
-a restart.</t>
-
-</section>
 
 <section title="Changes from previous versions">
 

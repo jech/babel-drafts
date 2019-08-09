@@ -158,11 +158,13 @@ connections.</t>
 IP address is either an IPv6 link-local address or an IPv4 address belonging
 to the local network; if it is neither, it MUST reject the
 connection.  Nodes use mutual authentication (authenticating
-both client and server); servers MUST send a CertificateRequest message and
-subsequently authenticate the client.  Implementations MUST support
+both client and server); clients MUST authenticate servers and servers MUST
+authenticate clients.  Implementations MUST support
 authenticating peers against a local store of credentials.  If either node
 fails to authenticate its peer against its local policy, it MUST abort the DTLS
-handshake.  Nodes MUST only negotiate DTLS version 1.2 or higher.  Nodes MUST
+handshake.  The guidance given in <xref target="BCP195"/> MUST be followed to
+avoid attacks on DTLS.  Additionally, nodes MUST only negotiate DTLS version
+1.2 or higher.  Nodes MUST
 use DTLS replay protection to prevent attackers from replaying stale
 information.  Nodes SHOULD drop packets that have been reordered by more than
 two IHU (I Heard You) intervals, to avoid letting attackers make stale
@@ -318,10 +320,6 @@ request to IANA are as follows:
 </section>
 
 <section title="Security Considerations">
-
-<t>The guidance given in <xref target="BCP195"/> MUST be followed to avoid
-attacks on DTLS.  Additionally, nodes MUST only negotiate DTLS version 1.2
-or higher.</t>
 
 <t>A malicious client might attempt to perform a high number of DTLS
 handshakes with a server.  As the clients are not uniquely identified

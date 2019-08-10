@@ -2267,9 +2267,9 @@ by the Babel protocol.</t>
 IPv4 multicast group 224.0.0.111 for use by the Babel protocol.</t>
 
 <t>IANA has created a registry called "Babel TLV Types".  The allocation
-policy for this registry is Specification Required
-<xref target="RFC8126"/> for Types 0-223 and 255, and Experimental Use for
-Types 224-254.  The values in this registry are as follows:</t>
+policy for this registry is Specification Required <xref target="RFC8126"/>
+for Types 0-223, and Experimental Use for Types 224-254.  The values in
+this registry are as follows:</t>
 <texttable>
 <ttcol>Type</ttcol><ttcol>Name</ttcol><ttcol>Reference</ttcol>
 <c>0</c><c>Pad1</c><c>this document</c>
@@ -2298,9 +2298,9 @@ Types 224-254.  The values in this registry are as follows:</t>
 </texttable>
 
 <t>IANA has created a registry called "Babel TLV Types".  The allocation
-policy for this registry is Specification Required for Types 0-111,
-127-239 and 255, and Experimental Use for Types 112-126 and 240-254.  The
-values in this registry are as follows:</t>
+policy for this registry is Specification Required for Types 0-111 and
+128-239, and Experimental Use for Types 112-126 and 240-254.  The values
+in this registry are as follows:</t>
 <texttable>
 <ttcol>Type</ttcol><ttcol>Name</ttcol><ttcol>Reference</ttcol>
 <c>0</c><c>Pad1</c><c>this document</c>

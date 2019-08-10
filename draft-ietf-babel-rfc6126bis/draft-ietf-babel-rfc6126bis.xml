@@ -3132,6 +3132,25 @@ only.</t>
 </list></t>
 </section>
 
+<section title="Changes since draft-ietf-babel-rfc6126bis-12">
+<t><list style="symbols">
+<t>Removed appendix about software availability.</t>
+<t>Expanded appendix about recommended values and added more references to
+it in the body of the document.</t>
+<t>Added appendix about route filtering.</t>
+<t>Clarified definition of mandatory bit.</t>
+<t>Added recommendations for packet pacing.</t>
+<t>Normative language in a few more places.</t>
+<t>Removed normative language from stub implementations.</t>
+<t>Added requirement to clear the undefined bits in an Update.</t>
+<t>Added error checking requirements.</t>
+<t>Reworked security considerations.</t>
+<t>Added "in octets" and "in bits" in random places.</t>
+<t>Inserted full IANA registries.</t>
+<t>Editorial changes.</t>
+</list></t>
+</section>
+
 </section>
 
 </back>

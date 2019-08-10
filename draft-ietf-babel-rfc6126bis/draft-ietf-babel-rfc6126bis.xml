@@ -2630,24 +2630,23 @@ matter; Babel itself only requires that it comply with the conditions given
 in <xref target="cost-computation"/> and <xref target="metric-computation"/>.
 Different nodes may use different strategies in a single network and may
 use different strategies on different interface types.  This section describes
-the strategies used by the sample implementation of Babel.</t>
+a set of stragies that have been found to work well in actual networks.</t>
 
-<t>The sample implementation of Babel sends periodic Multicast Hellos, and
-never sends Unicast Hellos.  It maintains statistics about the last 16
+<t>In summary, a node maintains per-neighbour statistics about the last 16
 received Hello TLVs of each kind (<xref target="hello-history"/>),
-computes costs by using the 2-out-of-3 strategy (<xref target="k-j"/>) on
+it computes costs by using the 2-out-of-3 strategy (<xref target="k-j"/>) on
 wired links, and ETX (<xref target="etx"/>) on wireless links.  It uses an
 additive algebra for metric computation (<xref target="additive-metric"/>).</t>
 
 <section title="Maintaining Hello History" anchor="hello-history">
 
-<t>For each neighbour, the sample implementation of Babel maintains two
-sets of Hello history, one for each kind of Hello, and an expected
-sequence number, one for Multicast and one for Unicast Hellos.  Each Hello
-history is a vector of 16 bits, where a 1 value represents a received
-Hello, and a 0 value a missed Hello.  For each kind of Hello, the expected
-sequence number, written ne, is the sequence number that is expected to be
-carried by the next received Hello from this neighbour.</t>
+<t>For each neighbour, a node maintains two sets of Hello history, one for
+each kind of Hello, and an expected sequence number, one for Multicast and
+one for Unicast Hellos.  Each Hello history is a vector of 16 bits, where
+a 1 value represents a received Hello, and a 0 value a missed Hello.  For
+each kind of Hello, the expected sequence number, written ne, is the
+sequence number that is expected to be carried by the next received Hello
+from this neighbour.</t>
 
 <t>Whenever it receives a Hello packet of a given kind from a neighbour,
 a node compares the received sequence number nr for that kind of Hello
@@ -2721,7 +2720,7 @@ follows:
 
 <section title="ETX" anchor="etx">
 
-<t>Unlike wired links, which are bimodal (either up or down), wireless
+<t>Unlike wired links which are bimodal (either up or down), wireless
 links exhibit continuous variation of the link quality.  Naive application
 of hop-count routing in networks that use wireless links for transit tends
 to select long, lossy links in preference to shorter, lossless links,

@@ -1145,7 +1145,7 @@ preferred just because it carries a higher (more recent) seqno.  Doing
 otherwise would cause route oscillation while a new seqno propagates
 through the network, possibly following multiple paths of different
 latency, and might even create persistent blackholes if the metric being
-used is not left-distributive <xref target="metric-computation"/>.</t>
+used is not left-distributive (<xref target="metric-computation"/>).</t>
 
 <t>A simple but useful strategy is to choose the feasible route with the
 smallest metric, with a small amount of hysteresis applied to avoid

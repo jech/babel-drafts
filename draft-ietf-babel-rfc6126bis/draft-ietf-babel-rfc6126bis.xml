@@ -53,10 +53,11 @@ obsoletes RFCs 6126 and 7557.</t>
 <section title="Introduction">
 
 <t>Babel is a loop-avoiding distance-vector routing protocol that is
-designed to be robust and efficient both in networks using prefix-
-based routing and in networks using flat routing ("mesh networks"),
-and both in relatively stable wired networks and in highly dynamic
-wireless networks.</t>
+designed to be robust and efficient both in networks using prefix- based
+routing and in networks using flat routing ("mesh networks"), and both in
+relatively stable wired networks and in highly dynamic wireless networks.
+This document describes the Babel routing protocol, and obsoletes RFCs
+6126 and 7557.</t>
 
 <section title="Features">
 
@@ -668,7 +669,8 @@ multicast hello timer, which is set to the interval value carried by
 scheduled Multicast Hello TLVs sent by this neighbour, the unicast hello
 timer, which is set to the interval value carried by scheduled Unicast
 Hello TLVs, and the IHU timer, which is set to a small multiple of the
-interval carried in IHU TLVs.</t>
+interval carried in IHU TLVs (see "IHU Hold time" in
+<xref target="constants"/> for suggested values).</t>
 
 <t>Note that the neighbour table is indexed by IP addresses, not by
 router-ids: neighbourship is a relationship between interfaces, not between
@@ -684,8 +686,8 @@ when wireless nodes with multiple radios are involved.</t>
 by triples of the form (prefix, plen, router-id), and every source table
 entry contains the following data:
 <list style="symbols">
-<t>the prefix (prefix, plen), where plen is the prefix length, that this
-entry applies to;</t>
+<t>the prefix (prefix, plen), where plen is the prefix length in bits,
+that this entry applies to;</t>
 <t>the router-id of a router originating this prefix;</t>
 <t>a pair (seqno, metric), this source's feasibility distance.</t>
 </list>
@@ -868,9 +870,11 @@ cost) from the sender's perspective, used by the neighbour for computing
 link costs (<xref target="cost-computation"/>), and the interval between
 periodic IHU packets.  A node receiving an IHU sets the value of the
 txcost (transmission cost) maintained in the neighbour table to the value
-contained in the IHU, and resets the IHU timer associated to this neighbour
-to a small multiple of the interval value received in the IHU.  When
-a neighbour's IHU timer expires, the neighbour's txcost is set to infinity.</t>
+contained in the IHU, and resets the IHU timer associated to this
+neighbour to a small multiple of the interval value received in the IHU
+(see "IHU Hold time" in <xref target="constants"/> for suggested values).
+When a neighbour's IHU timer expires, the neighbour's txcost is set to
+infinity.</t>
 
 <t>After updating a neighbour's txcost, the receiving node recomputes the
 neighbour's cost (<xref target="cost-computation"/>) and runs the route
@@ -1046,11 +1050,12 @@ If such an entry exists:
   <t>otherwise, the entry's sequence number, advertised metric, metric,
   and router-id are updated and, if the advertised metric is not infinite,
   the route's expiry timer is reset to a small multiple of the Interval
-  value included in the update.  If the update is unfeasible, then the
-  (now unfeasible) entry MUST be immediately unselected.  If the update
-  caused the router-id of the entry to change, an update (possibly
-  a retraction) MUST be sent in a timely manner as described in <xref
-  target="triggered-updates"/>.</t>
+  value included in the update (see "Route Hold time" in
+  <xref target="constants"/> for suggested values).  If the update is
+  unfeasible, then the (now unfeasible) entry MUST be immediately
+  unselected.  If the update caused the router-id of the entry to change,
+  an update (possibly a retraction) MUST be sent in a timely manner as
+  described in <xref target="triggered-updates"/>.</t>
 </list>
 Note that the route table may contain unfeasible routes, either because
 they were created by an unfeasible update or due to a metric fluctuation.
@@ -1328,18 +1333,17 @@ sequence number by 1 (modulo 2^16) and sends an update.  A node MUST NOT
 increase its sequence number by more than 1 in reaction to a single seqno
 request.</t>
 
-<t>Otherwise, if the requested router-id is not its own, the received
-request's hop count is 2 or more, and the node is advertising the prefix
-to its neighbours, the node selects a neighbour to forward the request to
-as follows:
+<t>Otherwise, if the requested router-id is not its own, the received node
+consults the hop count field of the request.  If the hop count is 2 or
+more, and the node is advertising the prefix to its neighbours, the node
+selects a neighbour to forward the request to as follows:
 <list style="symbols">
 <t>if the node has one or more feasible routes toward the requested prefix
 with a next hop that is not the requesting node, then the node MUST
 forward the request to the next hop of one such route;</t>
-<t>otherwise, if the node has one or more (not necessarily feasible)
-routes to the requested prefix with a next hop that is not the requesting
-node, then the node SHOULD forward the request to the next hop of one such
-route.</t>
+<t>otherwise, if the node has one or more (not feasible) routes to the
+requested prefix with a next hop that is not the requesting node, then the
+node SHOULD forward the request to the next hop of one such route.</t>
 </list>
 In order to actually forward the request, the node decrements the hop
 count and sends the request in a unicast packet destined to the selected
@@ -1611,7 +1615,7 @@ a TLV has a self-terminating format, then the space between the natural
 size of the TLV and the size announced in the Length field may be used to
 store a sequence of sub-TLVs.</t>
 
-<t>Sub-TLVs have the same structure as TLVs.  With the exception of PAD1,
+<t>Sub-TLVs have the same structure as TLVs.  With the exception of Pad1,
 all TLVs have the following structure:</t>
 <figure><artwork><![CDATA[
  0                   1                   2                   3
@@ -1683,8 +1687,8 @@ parser state consists of the following pieces of data:
 </list></t>
 
 <t>Since the parser state must be identical across implementations, it is
-updated before checking for mandatory TLVs: parsing a TLV MUST update the
-parser state even if the TLV is otherwise ignored due to an unknown
+updated before checking for mandatory sub-TLVs: parsing a TLV MUST update
+the parser state even if the TLV is otherwise ignored due to an unknown
 mandatory sub-TLV.</t>
 
 <t>None of the TLVs that modify the parser state are allowed in the packet
@@ -2020,7 +2024,8 @@ Type and Length fields.</t>
 <t hangText="AE">The encoding of the Prefix field.</t>
 <t hangText="Flags">The individual bits of this field specify special
 handling of this TLV (see below).</t>
-<t hangText="Plen">The length of the advertised prefix.</t>
+<t hangText="Plen">The length in bits of the advertised prefix.  If AE is
+3 (link-local IPv6), Omitted MUST be 0.</t>
 <t hangText="Omitted">The number of octets that have been omitted at
 the beginning of the advertised prefix and that should be taken from a
 preceding Update TLV in the same address family with the Prefix flag set.</t>
@@ -2075,15 +2080,16 @@ even if it was ignored due to an unknown mandatory sub-TLV; if Omitted is
 not zero and there is no such TLV, then this Update MUST be ignored;</t>
 <t>the next (Plen/8 - Omitted) rounded upwards octets are taken from the
 Prefix field;</t>
-<t>the remaining octets are set to 0.  If AE is 3 (link-local IPv6),
-Omitted MUST be 0)</t>
+<t>if Plen is not a multiple of 8, then any bits beyond Plen (i.e., the
+low-order (8 - Plen MOD 8) bits of the last octet) are cleared;</t>
+<t>the remaining octets are set to 0.</t>
 </list>
 </t>
 
 <t>If the Metric field is finite, the router-id of the originating node
 for this announcement is taken from the prefix advertised by this Update
 if the Router-Id flag is set, computed as described above.  Otherwise, it
-is taken either from the preceding Router-Id packet, or the preceding
+is taken either from the preceding Router-Id TLV, or the preceding
 Update packet with the Router-Id flag set, whichever comes last, even if
 that TLV is otherwise ignored due to an unknown mandatory sub-TLV; if
 there is no suitable TLV, then this update is ignored.</t>
@@ -2133,7 +2139,7 @@ Type and Length fields.</t>
 <t hangText="AE">The encoding of the Prefix field.  The value 0 specifies
 that this is a request for a full route table dump (a wildcard
 request).</t>
-<t hangText="Plen">The length of the requested prefix.</t>
+<t hangText="Plen">The length in bits of the requested prefix.</t>
 <t hangText="Prefix">The prefix being requested.  This field's size is
 Plen/8 rounded upwards.</t>
 </list></t>
@@ -2175,7 +2181,7 @@ it cannot be satisfied locally.</t>
 <t hangText="Length">The length of the body, in octets, exclusive of the
 Type and Length fields.</t>
 <t hangText="AE">The encoding of the Prefix field.  This MUST NOT be 0.</t>
-<t hangText="Plen">The length of the requested prefix.</t>
+<t hangText="Plen">The length in bits of the requested prefix.</t>
 <t hangText="Seqno">The sequence number that is being requested.</t>
 <t hangText="Hop Count">The maximum number of times that this TLV may be
 forwarded, plus 1.  This MUST NOT be 0.</t>
@@ -2342,7 +2348,7 @@ confidentiality or asymmetric keying.</t>
 is often sufficient to determine a mobile node's physical location with
 reasonable precision.  The privacy issues that this causes can be mitigated
 somewhat by using randomly chosen router-ids and randomly chosen IP addresses,
-and changing them periodically.</t>
+and changing them often enough.</t>
 
 <t>When carried over IPv6, Babel packets are ignored unless they are sent
 from a link-local IPv6 address; since routers don't forward link-local IPv6
@@ -2401,10 +2407,6 @@ technique was inspired by <xref target="PACKETBB"/>.</t>
 <seriesInfo name='RFC' value='8126' />
 </reference>
 
-</references>
-
-<references title="Informative References">
-
 <reference anchor="BABEL-HMAC"><front>
 <title>HMAC authentication for the Babel routing protocol</title>
 <author fullname="Clara Do" initials="C." surname="Do"/>
@@ -2413,6 +2415,10 @@ technique was inspired by <xref target="PACKETBB"/>.</t>
 <date month="June" year="2019"/></front>
 <seriesInfo name="Internet Draft" value="draft-ietf-babel-hmac-07"/>
 </reference>
+
+</references>
+
+<references title="Informative References">
 
 <reference anchor="BABEL-DTLS"><front>
 <title>Babel Routing Protocol over Datagram Transport Layer Security</title>
@@ -2578,11 +2584,11 @@ resets the neighbour's hello timer to 1.5 times the advertised Interval
 (the extra margin allows for delay due to jitter).</t>
 
 <t>Whenever either Hello timer associated to a neighbour expires, the
-local node adds a 0 bit to this neighbour's Hello history, and increments
+local node adds a 0 bit to the corresponding Hello history, and increments
 the expected Hello number.  If both Hello histories are empty (they
 contain 0 bits only), the neighbour entry is flushed; otherwise, the
-relevant hello timer is reset to the value advertised in the last Hello
-of that kind received from this neighbour (no extra margin is necessary in
+relevant hello timer is reset to the value advertised in the last Hello of
+that kind received from this neighbour (no extra margin is necessary in
 this case, since jitter was already taken into account when computing the
 timeout that has just expired).</t>
 
@@ -2646,7 +2652,8 @@ Multicast Hello history to compute an estimate, written beta, of the
 probability that a Hello TLV is successfully received.  Beta can be
 computed as the fraction of 1 bits within a small number (say, 6) of the
 most recent entries in the Multicast Hello history, or it can be an
-exponential average, or some combination of both approaches.</t>
+exponential average, or some combination of both approaches.  Let rxcost
+be beta * 256.</t>
 
 <t>Let alpha be MIN(1, 256/txcost), an estimate of the probability of
 successfully sending a Hello TLV.  The cost is then computed by

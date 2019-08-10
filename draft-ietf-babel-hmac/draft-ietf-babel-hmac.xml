@@ -88,7 +88,7 @@ then use a standard unicast security protocol to protect the Babel
 traffic.  In this document, we take the opposite approach: we define
 a cryptographic extension to the Babel protocol that is able to protect
 both unicast and multicast traffic, and thus requires very few changes to
-the core protocol.  This document obsoletes RFC 7298.</t>
+the core protocol.  This document obsoletes <xref target="RFC7298"/>.</t>
 
 <section title="Applicability">
 
@@ -994,6 +994,8 @@ resource exhaustion attacks.</t>
 
 <t><list style="symbols">
 <t>Fix the size of the key to be equal to the block size, not the hash size.</t>
+<t>Moved the information about incremental deployment to the body.</t>
+<t>Clarified the double purpose of rate limitation.</t>
 <t>Editorial changes.</t>
 </list></t>
 

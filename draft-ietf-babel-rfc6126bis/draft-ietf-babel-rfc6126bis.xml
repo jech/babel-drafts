@@ -1732,7 +1732,7 @@ trailer.</t>
 <t>Fields :
 <list style="hanging" hangIndent="10">
 <t hangText="Type">Set to 1 to indicate a PadN TLV.</t>
-<t hangText="Length">The length of the body, in octets, exclusive of the
+<t hangText="Length">The length of the body in octets, exclusive of the
 Type and Length fields.</t>
 <t hangText="MBZ">Must be zero, set to 0 on transmission.</t>
 </list></t>
@@ -1760,7 +1760,7 @@ within the number of centiseconds specified by the Interval field.</t>
 <t>Fields :
 <list style="hanging" hangIndent="10">
 <t hangText="Type">Set to 2 to indicate an Acknowledgment Request TLV.</t>
-<t hangText="Length">The length of the body, in octets, exclusive of the
+<t hangText="Length">The length of the body in octets, exclusive of the
 Type and Length fields.</t>
 <t hangText="Reserved">Sent as 0 and MUST be ignored on
   reception.</t>
@@ -1791,7 +1791,7 @@ The receiver MUST send an Acknowledgment TLV before this time has elapsed
 <t>Fields :
 <list style="hanging" hangIndent="10">
 <t hangText="Type">Set to 3 to indicate an Acknowledgment TLV.</t>
-<t hangText="Length">The length of the body, in octets, exclusive of the
+<t hangText="Length">The length of the body in octets, exclusive of the
 Type and Length fields.</t>
 <t hangText="Nonce">Set to the Nonce value of the Acknowledgment Request
 that prompted this Acknowledgment.</t>
@@ -1822,7 +1822,7 @@ neighbour's reception cost.</t>
 <t>Fields :
 <list style="hanging" hangIndent="10">
 <t hangText="Type">Set to 4 to indicate a Hello TLV.</t>
-<t hangText="Length">The length of the body, in octets, exclusive of the
+<t hangText="Length">The length of the body in octets, exclusive of the
 Type and Length fields.</t>
 <t hangText="Flags">The individual bits of this field specify special
 handling of this TLV (see below).</t>
@@ -1887,7 +1887,7 @@ reachability and carrying a link's transmission cost.</t>
 <t>Fields :
 <list style="hanging" hangIndent="10">
 <t hangText="Type">Set to 5 to indicate an IHU TLV.</t>
-<t hangText="Length">The length of the body, in octets, exclusive of the
+<t hangText="Length">The length of the body in octets, exclusive of the
 Type and Length fields.</t>
 <t hangText="AE">The encoding of the Address field.  This should be 1 or 3
 in most cases.  As an optimisation, it MAY be 0 if the TLV is
@@ -1942,7 +1942,7 @@ sub-TLV.</t>
 <t>Fields :
 <list style="hanging" hangIndent="10">
 <t hangText="Type">Set to 6 to indicate a Router-Id TLV.</t>
-<t hangText="Length">The length of the body, in octets, exclusive of the
+<t hangText="Length">The length of the body in octets, exclusive of the
 Type and Length fields.</t>
 <t hangText="Reserved">Sent as 0 and MUST be ignored on reception.</t>
 <t hangText="Router-Id">The router-id for routes advertised in subsequent
@@ -1974,7 +1974,7 @@ unknown mandatory sub-TLV.</t>
 <t>Fields :
 <list style="hanging" hangIndent="10">
 <t hangText="Type">Set to 7 to indicate a Next Hop TLV.</t>
-<t hangText="Length">The length of the body, in octets, exclusive of the
+<t hangText="Length">The length of the body in octets, exclusive of the
 Type and Length fields.</t>
 <t hangText="AE">The encoding of the Address field.  This SHOULD be
 1 (IPv4) or 3 (link-local IPv6), and MUST NOT be 0.</t>
@@ -2019,7 +2019,7 @@ router-id and a new default prefix, as described in
 <t>Fields :
 <list style="hanging" hangIndent="10">
 <t hangText="Type">Set to 8 to indicate an Update TLV.</t>
-<t hangText="Length">The length of the body, in octets, exclusive of the
+<t hangText="Length">The length of the body in octets, exclusive of the
 Type and Length fields.</t>
 <t hangText="AE">The encoding of the Prefix field.</t>
 <t hangText="Flags">The individual bits of this field specify special
@@ -2090,7 +2090,7 @@ low-order (8 - Plen MOD 8) bits of the last octet) are cleared;</t>
 for this announcement is taken from the prefix advertised by this Update
 if the Router-Id flag is set, computed as described above.  Otherwise, it
 is taken either from the preceding Router-Id TLV, or the preceding
-Update packet with the Router-Id flag set, whichever comes last, even if
+Update TLV with the Router-Id flag set, whichever comes last, even if
 that TLV is otherwise ignored due to an unknown mandatory sub-TLV; if
 there is no suitable TLV, then this update is ignored.</t>
 
@@ -2107,7 +2107,7 @@ used.  AE MAY then be 0, in which case this Update retracts all of the
 routes previously advertised by the sending interface.  If the metric is
 finite, AE MUST NOT be 0; Update TLVs with finite metric and AE equal to
 0 MUST be ignored.  If the metric is infinite and AE is 0, Plen and
-Omitted MUST both be 0.  </t>
+Omitted MUST both be 0.</t>
 
 <t>Update TLVs with an unknown value in the AE field MUST be silently
 ignored.</t>
@@ -2134,7 +2134,7 @@ prefix, or a full route table dump.</t>
 <t>Fields :
 <list style="hanging" hangIndent="10">
 <t hangText="Type">Set to 9 to indicate a Route Request TLV.</t>
-<t hangText="Length">The length of the body, in octets, exclusive of the
+<t hangText="Length">The length of the body in octets, exclusive of the
 Type and Length fields.</t>
 <t hangText="AE">The encoding of the Prefix field.  The value 0 specifies
 that this is a request for a full route table dump (a wildcard
@@ -2178,7 +2178,7 @@ it cannot be satisfied locally.</t>
 <t>Fields :
 <list style="hanging" hangIndent="10">
 <t hangText="Type">Set to 10 to indicate a Seqno Request TLV.</t>
-<t hangText="Length">The length of the body, in octets, exclusive of the
+<t hangText="Length">The length of the body in octets, exclusive of the
 Type and Length fields.</t>
 <t hangText="AE">The encoding of the Prefix field.  This MUST NOT be 0.</t>
 <t hangText="Plen">The length in bits of the requested prefix.</t>
@@ -2244,7 +2244,7 @@ any TLV that allows sub-TLVs.</t>
 <t>Fields :
 <list style="hanging" hangIndent="10">
 <t hangText="Type">Set to 1 to indicate a PadN sub-TLV.</t>
-<t hangText="Length">The length of the body, in octets, exclusive of the
+<t hangText="Length">The length of the body in octets, exclusive of the
 Type and Length fields.</t>
 <t hangText="MBZ">Must be zero, set to 0 on transmission.</t>
 </list></t>
@@ -2357,7 +2357,11 @@ implementation to crash or interfere with the rest of the network;</t>
 <t>replay a previously captured Babel packet, which could cause traffic to
 be redirected or otherwise interfere with the network.</t>
 </list>
-</t>
+When carried over IPv6, Babel packets are ignored unless they are sent
+from a link-local IPv6 address; since routers don't forward link-local
+IPv6 packets, this mitigates the attacks outlined above by restricting
+them to on-link attackers.  No such natural protection exists when Babel
+packets are carried over IPv4.</t>
 
 <t>These issues can be solved by providing a means for Babel to ensure
 datagrams are fresh and originated from a trusted node. This can be achieved
@@ -2367,7 +2371,7 @@ itself.  There are currently two such mechanisms:
 <list style="symbols">
 <t>Babel over DTLS <xref target="BABEL-DTLS"/> runs the majority of Babel
 traffic over DTLS, and leverages DTLS to authenticate nodes and provide
-confidentiality and integrity protection.</t>
+confidentiality and integrity protection;</t>
 <t>HMAC-based authentication <xref target="BABEL-HMAC"/> appends a message
 authentication code to all Babel datagrams to prove they originated from
 a node that possesses a shared secret.</t>
@@ -2379,17 +2383,11 @@ confidentiality.  HMAC is simpler and does not depend on DTLS, and therefore
 its use is RECOMMENDED when the target deployment does not require
 confidentiality or asymmetric keying.</t>
 
-<t>The information that a Babel node announces to the whole routing domain
-is often sufficient to determine a mobile node's physical location with
-reasonable precision.  The privacy issues that this causes can be mitigated
-somewhat by using randomly chosen router-ids and randomly chosen IP addresses,
-and changing them often enough.</t>
-
-<t>When carried over IPv6, Babel packets are ignored unless they are sent
-from a link-local IPv6 address; since routers don't forward link-local IPv6
-packets, this provides protection against spoofed Babel packets being sent
-from the global Internet.  No such natural protection exists when Babel
-packets are carried over IPv4.</t>
+<t>The information that a mobile Babel node announces to the whole routing
+domain is often sufficient to determine a mobile node's physical location
+with reasonable precision.  The privacy issues that this causes can be
+mitigated somewhat by using randomly chosen router-ids and randomly chosen
+IP addresses, and changing them often enough.</t>
 </section>
 
 <section title="Acknowledgments">
@@ -3139,6 +3137,7 @@ it in the body of the document.</t>
 <t>Added appendix about route filtering.</t>
 <t>Clarified definition of mandatory bit.</t>
 <t>Added recommendations for packet pacing.</t>
+<t>Made time limiting of full updates a SHOULD.</t>
 <t>Normative language in a few more places.</t>
 <t>Removed normative language from stub implementations.</t>
 <t>Added requirement to clear the undefined bits in an Update.</t>

@@ -2742,7 +2742,7 @@ probability that a Hello TLV is successfully received.  Beta can be
 computed as the fraction of 1 bits within a small number (say, 6) of the
 most recent entries in the Multicast Hello history, or it can be an
 exponential average, or some combination of both approaches.  Let rxcost
-be beta * 256.</t>
+be 256 / beta.</t>
 
 <t>Let alpha be MIN(1, 256/txcost), an estimate of the probability of
 successfully sending a Hello TLV.  The cost is then computed by

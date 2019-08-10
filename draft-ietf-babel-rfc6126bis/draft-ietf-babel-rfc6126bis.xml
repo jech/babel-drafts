@@ -56,8 +56,8 @@ obsoletes RFCs 6126 and 7557.</t>
 designed to be robust and efficient both in networks using prefix- based
 routing and in networks using flat routing ("mesh networks"), and both in
 relatively stable wired networks and in highly dynamic wireless networks.
-This document describes the Babel routing protocol, and obsoletes RFCs
-6126 and 7557.</t>
+This document describes the Babel routing protocol, and obsoletes
+<xref target="RFC6126"/> and <xref target="RFC7557"/>.</t>
 
 <section title="Features">
 
@@ -2266,35 +2266,71 @@ by the Babel protocol.</t>
 <t>IANA has registered the IPv6 multicast group ff02::1:6 and the
 IPv4 multicast group 224.0.0.111 for use by the Babel protocol.</t>
 
-<t>IANA has created a registry called "Babel TLV Types".  The values in
-this registry are not changed by this specification.</t>
-
-<t>IANA has created a registry called "Babel sub-TLV Types".  Due to the
-addition of a Mandatory bit to the Babel protocol, the values in the
-"Babel sub-TLV Types" registry are amended as follows:</t>
-
+<t>IANA has created a registry called "Babel TLV Types".  The allocation
+policy for this registry is Specification Required
+<xref target="RFC8126"/> for Types 0-223 and 255, and Experimental Use for
+Types 224-254.  The values in this registry are as follows:</t>
 <texttable>
 <ttcol>Type</ttcol><ttcol>Name</ttcol><ttcol>Reference</ttcol>
 <c>0</c><c>Pad1</c><c>this document</c>
 <c>1</c><c>PadN</c><c>this document</c>
+<c>2</c><c>Acknowledgment Request</c><c>this document</c>
+<c>3</c><c>Acknowledgment</c><c>this document</c>
+<c>4</c><c>Hello</c><c>this document</c>
+<c>5</c><c>IHU</c><c>this document</c>
+<c>6</c><c>Router-Id</c><c>this document</c>
+<c>7</c><c>Next Hop</c><c>this document</c>
+<c>8</c><c>Update</c><c>this document</c>
+<c>9</c><c>Route Request</c><c>this document</c>
+<c>10</c><c>Seqno Request</c><c>this document</c>
+<c>11</c><c>TS/PC</c><c><xref target="RFC7298"/></c>
+<c>12</c><c>HMAC</c><c><xref target="RFC7298"/></c>
+<c>13</c><c>Source-specific Update</c><c><xref target="BABEL-SS"/></c>
+<c>14</c><c>Source-specific Request</c><c><xref target="BABEL-SS"/></c>
+<c>15</c><c>Source-specific Seqno Request</c><c><xref target="BABEL-SS"/></c>
+<c>16</c><c>HMAC</c><c><xref target="BABEL-HMAC"/></c>
+<c>17</c><c>PC</c><c><xref target="BABEL-HMAC"/></c>
+<c>18</c><c>Challenge Request</c><c><xref target="BABEL-HMAC"/></c>
+<c>19</c><c>Challenge Reply</c><c><xref target="BABEL-HMAC"/></c>
+<c>20-223</c><c>Unassigned</c><c></c>
+<c>224-254</c><c>Reserved for Experimental Use</c><c>this document</c>
+<c>255</c><c>Reserved for expansion of the type space</c><c>this document</c>
+</texttable>
+
+<t>IANA has created a registry called "Babel TLV Types".  The allocation
+policy for this registry is Specification Required for Types 0-111,
+127-239 and 255, and Experimental Use for Types 112-126 and 240-254.  The
+values in this registry are as follows:</t>
+<texttable>
+<ttcol>Type</ttcol><ttcol>Name</ttcol><ttcol>Reference</ttcol>
+<c>0</c><c>Pad1</c><c>this document</c>
+<c>1</c><c>PadN</c><c>this document</c>
+<c>2</c><c>Diversity</c><c><xref target="BABEL-DIVERSITY"/></c>
+<c>3</c><c>Timestamp</c><c><xref target="BABEL-RTT"/></c>
+<c>4-111</c><c>Unassigned</c><c></c>
 <c>112-126</c><c>Reserved for Experimental Use</c><c>this document</c>
-<c>127</c><c>Reserved for expansion of the type space</c><c>this document</c>
+<c>127</c><c>Reserved for expansion of the type space</c><c>this
+document</c>
+<c>128</c><c>Source Prefix</c><c><xref target="BABEL-SS"/></c>
+<c>129-239</c><c>Unassigned</c><c></c>
 <c>240-254</c><c>Reserved for Experimental Use</c><c>this document</c>
 <c>255</c><c>Reserved for expansion of the type space</c><c>this document</c>
 </texttable>
 
-<t>Existing assignments in the "Babel sub-TLV Types" registry in the range
-2 to 111 are not changed by this specification.  The values 224 through
-239, previously reserved for Experimental Use, are now unassigned.</t>
-
-<t>IANA has created a registry called "Babel Flags Values".  IANA is
-instructed to rename this registry to "Babel Update Flags Values", with
-its contents unchanged.</t>
+<t>IANA has created a registry called "Babel Flags Values".  The
+allocation policy for this registry is Specification Required.  IANA is
+instructed to rename this registry to "Babel Update Flags Values".  The
+values in this registry are as follows:</t>
+<texttable>
+<ttcol>Bit</ttcol><ttcol>Name</ttcol><ttcol>Reference</ttcol>
+<c>0</c><c>Default prefix</c><c>this document</c>
+<c>1</c><c>Default Router-ID</c><c>this document</c>
+<c>2-7</c><c>Unassigned</c><c></c>
+</texttable>
 
 <t>IANA is instructed to create a new registry called "Babel Hello Flags
 Values".  The allocation policy for this registry is Specification
-Required <xref target="RFC8126"/>.  The initial values in this registry
-are as follows:</t>
+Required.  The initial values in this registry are as follows:</t>
 <texttable>
 <ttcol>Bit</ttcol><ttcol>Name</ttcol><ttcol>Reference</ttcol>
 <c>0</c><c>Unicast</c><c>this document</c>
@@ -2303,7 +2339,6 @@ are as follows:</t>
 
 <t>IANA is instructed to replace all references to RFCs&nbsp;6126 and 7557
 in all of the registries mentioned above by references to this document.</t>
-
 
 </section>
 
@@ -2420,6 +2455,24 @@ technique was inspired by <xref target="PACKETBB"/>.</t>
 
 <references title="Informative References">
 
+<reference  anchor="RFC6126"><front>
+<title>The Babel Routing Protocol</title>
+<author initials="J." surname="Chroboczek" fullname="J. Chroboczek"/>
+<date year="2011" month="April"/>
+</front>
+<seriesInfo name="RFC" value="6126"/>
+<seriesInfo name="DOI" value="10.17487/RFC6126"/>
+</reference>
+
+<reference  anchor="RFC7557"><front>
+<title>Extension Mechanism for the Babel Routing Protocol</title>
+<author initials="J." surname="Chroboczek" fullname="J. Chroboczek"/>
+<date year="2015" month="May"/>
+</front>
+<seriesInfo name="RFC" value="7557"/>
+<seriesInfo name="DOI" value="10.17487/RFC7557"/>
+</reference>
+
 <reference anchor="BABEL-DTLS"><front>
 <title>Babel Routing Protocol over Datagram Transport Layer Security</title>
 <author fullname="Antonin Decimo" initials="A." surname="Decimo"/>
@@ -2531,6 +2584,42 @@ technique was inspired by <xref target="PACKETBB"/>.</t>
   </front>
   <seriesInfo name="RFC" value="5444"/>
 </reference>
+
+<reference  anchor="RFC7298"><front>
+<title>Babel Hashed Message Authentication Code (HMAC) Cryptographic Authentication</title>
+<author initials="D." surname="Ovsienko" fullname="D. Ovsienko"/>
+<date year="2014" month="July"/>
+</front>
+<seriesInfo name="RFC" value="7298"/>
+<seriesInfo name="DOI" value="10.17487/RFC7298"/>
+</reference>
+
+<reference anchor="BABEL-SS"><front>
+<title>Source-Specific Routing in Babel</title>
+<author initials="M" surname="Boutier" fullname="Matthieu Boutier"/>
+<author initials="J" surname="Chroboczek" fullname="Juliusz Chroboczek"/>
+<date month="April" day="11" year="2019"/>
+</front>
+<seriesInfo name="Internet-Draft" value="draft-ietf-babel-source-specific-05" />
+</reference>
+
+<reference anchor="BABEL-RTT"><front>
+<title>Delay-based Metric Extension for the Babel Routing Protocol</title>
+<author initials="B" surname="Jonglez" fullname="Baptiste Jonglez"/>
+<author initials="J" surname="Chroboczek" fullname="Juliusz Chroboczek"/>
+<date month="April" day="26" year="2019"/>
+</front>
+<seriesInfo name="Internet-Draft" value="draft-ietf-babel-rtt-extension-00" />
+</reference>
+
+<reference anchor="BABEL-DIVERSITY"><front>
+<title>Diversity Routing for the Babel Routing Protocol</title>
+<author initials="J" surname="Chroboczek" fullname="Juliusz Chroboczek"/>
+<date month="February" day="15" year="2016"/>
+</front>
+<seriesInfo name="Internet-Draft" value="draft-chroboczek-babel-diversity-routing-01" />
+</reference>
+
 
 </references>
 

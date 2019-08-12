@@ -101,7 +101,7 @@ when, they appear in all capitals, as shown here.</t>
 
 <t>The protocol described in this document protects Babel packets with
 DTLS.  As such, it inherits the features offered by DTLS, notably
-authentication, integrity, replay protection, confidentiality and
+authentication, integrity, optional replay protection, confidentiality and
 asymmetric keying.  It is therefore expected to be applicable in a wide
 range of environments.</t>
 
@@ -114,6 +114,11 @@ and their applicability can be found in <xref target="RFC6126bis"/>.</t>
 <t>Note that Babel over DTLS provides a single authentication domain, meaning
 that all nodes that have the right credentials can convey any and all routing
 information.</t>
+
+<t>DTLS supports several mechanisms by which nodes can identify themselves
+and prove possession of secrets tied to these identities.  This document
+does not prescribe which of these mechanisms to use; details of identity
+management are left to deployment profiles of Babel over DTLS.</t>
 
 </section>
 
@@ -238,7 +243,10 @@ attack, nodes MUST discard the DTLS state associated with a neighbour after a
 finite time of not receiving valid DTLS packets.  This can be implemented by,
 for example, discarding a neighbour's DTLS state when its associated IHU timer
 fires. Note that relying solely on the receipt of Hellos is not sufficient as
-multicast Hellos are sent unprotected.</t>
+multicast Hellos are sent unprotected.  Additionally, an attacker could save
+some packets and replay them later in hopes of propagating stale routing
+information at a later time.  To mitigate this, nodes MUST discard received
+packets that have been reordered by more than one IHU interval.</t>
 
 </section>
 
@@ -293,7 +301,7 @@ because the peer may not have the ability to compute the overhead of DTLS
 and the packet may be fragmented by lower layers.</t>
 
 <t>Note that distinct DTLS connections can use different ciphers, which can
-have different amounts of overhead per packet.  Therefore, the MTU to one
+have different amounts of per-packet overhead.  Therefore, the MTU to one
 neighbour can be different from the MTU to another neighbour on the same
 link.</t>
 

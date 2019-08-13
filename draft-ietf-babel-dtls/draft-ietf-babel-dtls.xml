@@ -16,7 +16,7 @@
 <?rfc compact="no" ?>
 <rfc category="std"
     obsoletes=""
-    docName="draft-ietf-babel-dtls-08"
+    docName="draft-ietf-babel-dtls-09"
     ipr="trust200902">
 <front>
 <title abbrev="Babel over DTLS">Babel Routing Protocol over Datagram
@@ -391,7 +391,7 @@ Transport Layer Security (TLS) and Datagram Transport Layer Security (DTLS) are 
 <author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
 <author fullname="David Schinazi" initials="D." surname="Schinazi"/>
 <date month="August" year="2019"/></front>
-<seriesInfo name="Internet Draft" value="draft-ietf-babel-rfc6126bis-12"/>
+<seriesInfo name="Internet Draft" value="draft-ietf-babel-rfc6126bis-13"/>
 </reference>
 
 </references>
@@ -408,8 +408,8 @@ Transport Layer Security (TLS) and Datagram Transport Layer Security (DTLS) are 
 <author fullname="Clara Do" initials="C." surname="Do"/>
 <author fullname="Weronika Kolodziejak" initials="W." surname="Kolodziejak"/>
 <author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
-<date month="June" year="2019"/></front>
-<seriesInfo name="Internet Draft" value="draft-ietf-babel-hmac-08"/>
+<date month="August" year="2019"/></front>
+<seriesInfo name="Internet Draft" value="draft-ietf-babel-hmac-09"/>
 </reference>
 
 <reference anchor="DTLS-CID"><front>

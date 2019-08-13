@@ -10,7 +10,7 @@
      ipr="trust200902"
      obsoletes="7298">
 <front>
-<title abbrev="HMAC authentication for Babel">HMAC authentication for the
+<title abbrev="MAC authentication for Babel">MAC authentication for the
 Babel routing protocol</title>
 <author fullname="Clara Do" initials="C." surname="Do">
 <organization>IRIF, University of Paris-Diderot</organization>
@@ -115,13 +115,13 @@ except for what might be required for storing cryptographic keys.</t>
 
 <t>The correctness of the protocol relies on the following assumptions:
 <list style="symbols">
-<t>that the Hashed Message Authentication Code (HMAC) being used is
+<t>that the Message Authentication Code (MAC) being used is
 invulnerable to pre-image attacks, i.e., that an attacker is unable to
-generate a packet with a correct HMAC without access to the secret key;</t>
+generate a packet with a correct MAC without access to the secret key;</t>
 <t>that a node never generates the same index or nonce twice over the
 lifetime of a key.</t>
 </list>
-The first assumption is a property of the HMAC being used.  The second
+The first assumption is a property of the MAC being used.  The second
 assumption can be met either by using a robust random number generator
 <xref target="RFC4086"/> and sufficiently large indices and nonces, by
 using a reliable hardware clock, or by rekeying whenever a collision
@@ -161,17 +161,16 @@ they appear in all capitals, as shown here.</t>
 <section title="Conceptual overview of the protocol">
 
 <t>When a node B sends out a Babel packet through an interface that is
-configured for HMAC cryptographic protection, it computes one or more
-HMACs <xref target="RFC2104"/> (one per key) which it appends to the
-packet.  When a node A receives a packet over an interface that requires
-HMAC cryptographic protection, it independently computes a set of HMACs
-and compares them to the HMACs appended to the packet; if there is no
-match, the packet is discarded.</t>
+configured for MAC cryptographic protection, it computes one or more MACs
+(one per key) which it appends to the packet.  When a node A receives
+a packet over an interface that requires MAC cryptographic protection, it
+independently computes a set of MACs and compares them to the MACs
+appended to the packet; if there is no match, the packet is discarded.</t>
 
 <t>In order to protect against replay, B maintains a per-interface 32-bit
 integer known as the "packet counter" (PC). Whenever B sends a packet
 through the interface, it embeds the current value of the PC within the
-region of the packet that is protected by the HMACs and increases the PC
+region of the packet that is protected by the MACs and increases the PC
 by at least one.  When A receives the packet, it compares the value of the
 PC with the one contained in the previous packet received from B, and
 unless it is strictly greater, the packet is discarded.</t>
@@ -184,12 +183,12 @@ about B, it has no way to determine whether the packet is freshly
 generated or a replay of a previously sent packet.</t>
 
 <t>In this situation, A discards the packet and challenges B to prove that
-it knows the HMAC key.  It sends a "challenge request", a TLV containing
+it knows the MAC key.  It sends a "challenge request", a TLV containing
 a unique nonce, a value that has never been used before and will never be
 used again.  B replies to the challenge request with a "challenge reply",
 a TLV containing a copy of the nonce chosen by A, in a packet protected by
-HMAC and containing the new value of B's PC.  Since the nonce has never
-been used before, B's reply proves B's knowledge of the HMAC key and the
+MAC and containing the new value of B's PC.  Since the nonce has never
+been used before, B's reply proves B's knowledge of the MAC key and the
 freshness of the PC.</t>
 
 <t>By itself, this mechanism is safe against replay if B never resets its
@@ -224,22 +223,19 @@ extends these data structures as follows.</t>
 
 <t>Every Babel node maintains an interface table, as described in Section
 3.2.3 of <xref target="RFC6126bis"/>.  Implementations of this protocol MUST
-allow each interface to be provisioned with a set of one or more HMAC keys
-and the associated HMAC algorithms (see <xref
-target="hmac-computation"/>).  In order to allow incremental deployment of
-this protocol (see <xref target="incremental-deployment"/>),
-implementations SHOULD allow an interface to be configured in a mode in
-which it participates in the HMAC authentication protocol but accepts
-packets that are not authenticated.</t>
+allow each interface to be provisioned with a set of one or more MAC keys
+and the associated MAC algorithms (see <xref target="mac-computation"/>).
+In order to allow incremental deployment of this protocol (see
+<xref target="incremental-deployment"/>), implementations SHOULD allow an
+interface to be configured in a mode in which it participates in the MAC
+authentication protocol but accepts packets that are not authenticated.</t>
 
 <t>This protocol extends each entry in this table that is associated with
-an interface on which HMAC authentication has been configured with two new
+an interface on which MAC authentication has been configured with two new
 pieces of data:
 <list style="symbols">
-<t> a set of one or more HMAC keys, each associated with a given HMAC
-algorithm; the length of each key is exactly the block size of the
-associated HMAC algorithm (i.e., the key is not subject to the
-preprocessing described in Section 2 of <xref target="RFC2104"/>);</t>
+<t> a set of one or more MAC keys, each associated with a given MAC
+algorithm;</t>
 <t> a pair (Index, PC), where Index is an arbitrary string of 0 to 32
 octets, and PC is a 32-bit (4-octet) integer.</t>
 </list>
@@ -271,11 +267,11 @@ initially undefined, and used as described in
 
 <section title="Protocol Operation">
   
-<section title="HMAC computation" anchor="hmac-computation">
+<section title="MAC computation" anchor="mac-computation">
 
-<t>A Babel node computes the HMAC of a Babel packet as follows.</t>
+<t>A Babel node computes the MAC of a Babel packet as follows.</t>
 
-<t>First, the node builds a pseudo-header that will participate in HMAC
+<t>First, the node builds a pseudo-header that will participate in MAC
 computation but will not be sent.  If the packet is carried over IPv6,
 the pseudo-header has the following format:
 <figure><artwork><![CDATA[
@@ -324,11 +320,11 @@ format:
 <t>The node takes the concatenation of the pseudo-header and the Babel
 packet including the packet header but excluding the packet trailer (from
 octet 0 inclusive up to (Body Length&nbsp;+&nbsp;4) exclusive) and
-computes an HMAC with one of the implemented hash algorithms.  Every
-implementation MUST implement HMAC-SHA256 as defined in <xref
-target="RFC6234"/> and Section 2 of <xref target="RFC2104"/>, SHOULD
-implement keyed BLAKE2s <xref target="RFC7693"/>, and MAY implement other
-HMAC algorithms.</t>
+computes a MAC with one of the implemented hash algorithms.  Every
+implementation MUST implement HMAC-SHA256 as defined in
+<xref target="RFC6234"/> and Section 2 of <xref target="RFC2104"/>,
+SHOULD implement keyed BLAKE2s <xref target="RFC7693"/>, and MAY implement
+other MAC algorithms.</t>
 </section>
 
 <section title="Packet Transmission" anchor="packet-transmission">
@@ -336,9 +332,9 @@ HMAC algorithms.</t>
 <t>A Babel node might delay actually sending TLVs by a small amount, in
 order to aggregate multiple TLVs in a single packet up to the
 interface MTU (Section 4 of <xref target="RFC6126bis"/>).  For an
-interface on which HMAC protection is configured, the TLV aggregation
+interface on which MAC protection is configured, the TLV aggregation
 logic MUST take into account the overhead due to PC TLVs (one in each
-packet) and HMAC TLVs (one per configured key).</t>
+packet) and MAC TLVs (one per configured key).</t>
 
 <t>Before sending a packet, the following actions are performed:
 <list style="symbols">
@@ -348,9 +344,9 @@ incremented by a strictly positive amount (typically just 1); if the
 PC overflows, a fresh index MUST be generated (as defined in
 <xref target="interface-table"/>); a node MUST NOT include multiple PC
 TLVs in a single packet;</t>
-<t>for each key configured on the interface, an HMAC is computed as
-specified in <xref target="hmac-computation"/> above, and stored in an
-HMAC TLV that MUST be appended to the packet trailer (see Section 4.2 of
+<t>for each key configured on the interface, a MAC is computed as
+specified in <xref target="mac-computation"/> above, and stored in a
+MAC TLV that MUST be appended to the packet trailer (see Section 4.2 of
 <xref target="RFC6126bis"/>).</t>
 </list></t>
 
@@ -358,22 +354,22 @@ HMAC TLV that MUST be appended to the packet trailer (see Section 4.2 of
 
 <section title="Packet Reception" anchor="packet-reception">
 
-<t>When a packet is received on an interface that is configured for HMAC
+<t>When a packet is received on an interface that is configured for MAC
 protection, the following steps are performed before the packet is passed
 to normal processing:
 </t>
 <t>
 <list style="symbols">
 <t>First, the receiver checks whether the trailer of the received packet
-carries at least one HMAC TLV; if not, the packet MUST be immediately dropped
+carries at least one MAC TLV; if not, the packet MUST be immediately dropped
 and processing stops.  Then, for each key configured on the receiving
-interface, the receiver computes the HMAC of the packet.  It then
-compares every generated HMAC against every HMAC included in the packet;
+interface, the receiver computes the MAC of the packet.  It then
+compares every generated MAC against every MAC included in the packet;
 if there is at least one match, the packet passes the HMAC test; if there
 is none, the packet MUST be silently dropped and processing stops at this
 point.  In order to avoid memory exhaustion attacks, an entry in the
-Neighbour Table MUST NOT be created before the HMAC test has passed
-successfully.  The HMAC of the packet MUST NOT be computed for each HMAC
+Neighbour Table MUST NOT be created before the MAC test has passed
+successfully.  The MAC of the packet MUST NOT be computed for each MAC
 TLV contained in the packet, but only once for each configured key.</t>
 <t>If an entry for the sender does not exist in the Neighbour Table, it
 MAY be created at this point (or, alternatively, its creation can be
@@ -563,24 +559,24 @@ with an interface without a restart.</t>
 
 <section title="Packet Format">
 
-<section title="HMAC TLV">
+<section title="MAC TLV">
 
 <figure><artwork><![CDATA[
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|   Type = 16   |    Length     |     HMAC...
+|   Type = 16   |    Length     |     MAC...
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
 ]]></artwork></figure>
 
 <t>Fields :
 <list style="hanging" hangIndent="10">
-<t hangText="Type">Set to 16 to indicate an HMAC TLV.</t>
+<t hangText="Type">Set to 16 to indicate a MAC TLV.</t>
 <t hangText="Length">The length of the body, in octets, exclusive of the
-Type and Length fields.  The length of the body depends on the HMAC
-algorithm being used.</t>
-<t hangText="HMAC">The body contains the HMAC of the packet, computed as
-described in <xref target="hmac-computation"/>.</t>
+Type and Length fields.  The length depends on the MAC algorithm being
+used.</t>
+<t hangText="MAC">The body contains the MAC of the packet, computed as
+described in <xref target="mac-computation"/>.</t>
 </list></t>
 
 <t>This TLV is allowed in the packet trailer (see Section 4.2 of
@@ -689,11 +685,11 @@ the one described in <xref target="I-D.ietf-babel-dtls"/>.</t>
 target="security-properties"/>.  First, it assumes that the hash being
 used is invulnerable to pre-image attacks (Section 1.1 of <xref
 target="RFC6039"/>); at the time of writing, SHA-256, which is mandatory
-to implement (<xref target="hmac-computation"/>), is believed to be safe
+to implement (<xref target="mac-computation"/>), is believed to be safe
 against practical attacks.</t>
 
 <t>Second, it assumes that indices and nonces are generated uniquely over
-the lifetime of a key used for HMAC computation (more precisely, indices
+the lifetime of a key used for MAC computation (more precisely, indices
 must be unique for a given (key, source) pair, and nonces must be unique
 for a given (key, source, destination) triple).  This property can be
 satisfied either by using a cryptographically secure random number
@@ -716,7 +712,7 @@ time, even after the sender has left the network.</t>
 <t>While it is probably not possible to be immune against denial of
 service (DoS) attacks in general, this protocol includes a number of
 mechanisms designed to mitigate such attacks.  In particular, reception of
-a packet with no correct HMAC creates no local Babel state
+a packet with no correct MAC creates no local Babel state
 (<xref target="packet-reception"/>).  Reception of a replayed packet with
 correct hash, on the other hand, causes a challenge to be sent; this is
 mitigated somewhat by requiring that challenges be rate-limited
@@ -726,11 +722,11 @@ mitigated somewhat by requiring that challenges be rate-limited
 be created in the Neighbour Table, which, at first sight, makes the
 protocol susceptible to resource exhaustion attacks (similarly to the
 familiar "TCP SYN Flooding" attack <xref target="RFC4987"/>).  However,
-the HMAC computation includes the sender address (<xref
-target="hmac-computation"/>), and thus the amount of storage that an
+the MAC computation includes the sender address (<xref
+target="mac-computation"/>), and thus the amount of storage that an
 attacker can force a node to consume is limited by the number of distinct
-source addresses used with a single HMAC key (see also Section 4 of <xref
-target="RFC6126bis"/>, which mandates that the source address is
+source addresses used with a single MAC key (see also Section 4 of
+<xref target="RFC6126bis"/>, which mandates that the source address is
 a link-local IPv6 address or a local IPv4 address).</t>
 
 <t>In order to make this kind of resource exhaustion attacks less
@@ -751,7 +747,7 @@ per-challenge state as a secure "cookie" within the nonce itself.</t>
 registry:</t>
 <texttable>
 <ttcol>Type</ttcol><ttcol>Name</ttcol><ttcol>Reference</ttcol>
-<c>16</c><c>HMAC</c><c>this document</c>
+<c>16</c><c>MAC</c><c>this document</c>
 <c>17</c><c>PC</c><c>this document</c>
 <c>18</c><c>Challenge Request</c><c>this document</c>
 <c>19</c><c>Challenge Reply</c><c>this document</c>

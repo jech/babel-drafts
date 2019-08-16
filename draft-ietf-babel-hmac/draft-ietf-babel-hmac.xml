@@ -490,7 +490,11 @@ Reply to be sent in a timely manner (within a few seconds), and SHOULD NOT
 send any other packets over the same interface before sending the Challenge
 Reply, as those would be dropped by the challenger.</t>
 
-<t>A challenge sent to a multicast address MUST be silently ignored.</t>
+<t>A challenge sent to a multicast address MUST be silently ignored.
+Since a challenge reply might be caused by a replayed challenge request,
+a node MUST impose a rate limitation to the challenge replies it sends;
+the limit SHOULD default to one challenge reply for each peer every
+300ms and MAY be configurable.</t>
 
 </section>
 

@@ -713,6 +713,19 @@ persist for arbitrary amounts of time (e.g., by repeatedly causing failed
 challenges), then it is able to delay the packet by arbitrary amounts of
 time, even after the sender has left the network.</t>
 
+<t>This protocol exposes large numbers of packets and their MACs to an
+attacker that is able to capture packets; it is therefore vulnerable to
+brute-force attacks.  Keys must be chosen in a manner that makes them
+difficult to guess.  Ideally, they should have a length of 32 octets (both
+for HMAC-SHA256 and Blake2s), and be chosen randomly.  If, for some
+reason, it is necessary to derive keys from a human-readable passphrase,
+it is recommended to use a key derivation function that hampers dictionary
+attacks, such as PBKDF2 <xref target="RFC2898"/>, bcrypt
+<xref target="BCRYPT"/> or scrypt <xref target="RFC7914"/>.  In that case,
+only the derived keys should be communicated to the routers; the original
+passphrase itself should be kept on the host used to perform the key
+generation (e.g., an administators secure laptop computer).</t>
+
 <t>While it is probably not possible to be immune against denial of
 service (DoS) attacks in general, this protocol includes a number of
 mechanisms designed to mitigate such attacks.  In particular, reception of
@@ -903,6 +916,39 @@ Issues with Existing Cryptographic Protection Methods for Routing Protocols
 <seriesInfo name="RFC" value="4987"/>
 <seriesInfo name="DOI" value="10.17487/RFC4987"/>
 </reference>
+
+<reference anchor="BCRYPT">
+<front>
+<title>A Future-Adaptable Password Scheme</title>
+<author initials="P." surname="Niels" fullname="Niels Provos"/>
+<author initials="D." surname="Mazieres" fullname="David Mazieres"/>
+<date year="1999"/>
+</front>
+<annotation>In Proceedings of the 1999 USENIX Annual Technical
+Conference.</annotation>
+</reference>
+
+<reference  anchor="RFC2898" target="https://www.rfc-editor.org/info/rfc2898">
+<front>
+<title>PKCS #5: Password-Based Cryptography Specification Version 2.0</title>
+<author initials="B." surname="Kaliski" fullname="B. Kaliski"/>
+<date year="2000" month="September"/>
+</front>
+<seriesInfo name="RFC" value="2898"/>
+<seriesInfo name="DOI" value="10.17487/RFC2898"/>
+</reference>
+
+<reference  anchor="RFC7914" target="https://www.rfc-editor.org/info/rfc7914">
+<front>
+<title>The scrypt Password-Based Key Derivation Function</title>
+<author initials="C." surname="Percival" fullname="C. Percival"/>
+<author initials="S." surname="Josefsson" fullname="S. Josefsson"/>
+<date year="2016" month="August"/>
+</front>
+<seriesInfo name="RFC" value="7914"/>
+<seriesInfo name="DOI" value="10.17487/RFC7914"/>
+</reference>
+
 </references>
 
 <section title="Changes from previous versions">

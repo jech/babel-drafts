@@ -546,7 +546,7 @@ allows for the aggregation of multiple TLVs into a single packet.</t>
 TLV.  When the protocol description specifies that a TLV is urgent (as in
 <xref target="triggered-updates"/> and <xref target="sending-requests"/>),
 then the TLV MUST be sent within a short time known as the urgent timeout
-(see <xref target="constants"/> for recommended values).  When the TLV is
+(see <xref target="parameters"/> for recommended values).  When the TLV is
 governed by a timeout explicitly included in a previous TLV, (such as in
 the case of Acknowledgements <xref target="ack"/>),
 Updates (<xref target="sending-updates"/> and IHUs
@@ -630,7 +630,7 @@ Multicast Hello seqno is unrelated to the node's seqno.)</t>
 The periodic Multicast Hello timer governs the sending of scheduled
 Multicast Hello and IHU packets (<xref target="neighbour-acquisition"/>.
 The periodic Update timer governs the sending of periodic route updates
-(<xref target="periodic-updates"/>).  See <xref target="constants"/> for
+(<xref target="periodic-updates"/>).  See <xref target="parameters"/> for
 suggested time constants.</t>
 
 </section>
@@ -670,7 +670,7 @@ scheduled Multicast Hello TLVs sent by this neighbour, the unicast hello
 timer, which is set to the interval value carried by scheduled Unicast
 Hello TLVs, and the IHU timer, which is set to a small multiple of the
 interval carried in IHU TLVs (see "IHU Hold time" in
-<xref target="constants"/> for suggested values).</t>
+<xref target="parameters"/> for suggested values).</t>
 
 <t>Note that the neighbour table is indexed by IP addresses, not by
 router-ids: neighbourship is a relationship between interfaces, not between
@@ -872,7 +872,7 @@ periodic IHU packets.  A node receiving an IHU sets the value of the
 txcost (transmission cost) maintained in the neighbour table to the value
 contained in the IHU, and resets the IHU timer associated to this
 neighbour to a small multiple of the interval value received in the IHU
-(see "IHU Hold time" in <xref target="constants"/> for suggested values).
+(see "IHU Hold time" in <xref target="parameters"/> for suggested values).
 When a neighbour's IHU timer expires, the neighbour's txcost is set to
 infinity.</t>
 
@@ -1051,7 +1051,7 @@ If such an entry exists:
   and router-id are updated and, if the advertised metric is not infinite,
   the route's expiry timer is reset to a small multiple of the Interval
   value included in the update (see "Route Hold time" in
-  <xref target="constants"/> for suggested values).  If the update is
+  <xref target="parameters"/> for suggested values).  If the update is
   unfeasible, then the (now unfeasible) entry MUST be immediately
   unselected.  If the update caused the router-id of the entry to change,
   an update (possibly a retraction) MUST be sent in a timely manner as
@@ -1187,7 +1187,7 @@ the metric is computed as specified in <xref target="metric-computation"/>.</t>
 interface, at least once every Update interval.  Since Babel doesn't
 suffer from routing loops (there is no "counting to infinity") and relies
 heavily on triggered updates (<xref target="triggered-updates"/>), this
-full dump only needs to happen infrequently (see <xref target="constants"/>
+full dump only needs to happen infrequently (see <xref target="parameters"/>
 for suggested intervals).</t>
 
 </section>
@@ -1413,7 +1413,7 @@ reach the source.)</t>
 
 <t>In order to compensate for packet loss, a node SHOULD repeat such
 a request a small number of times if no route becomes feasible within
-a short time (see "Request Timeout" in <xref target="constants"/> for
+a short time (see "Request Timeout" in <xref target="parameters"/> for
 suggested values).  In the presence of heavy packet loss, however, all
 such requests might be lost; in that case, the mechanism in the next
 section will eventually ensure that a new seqno is received.</t>
@@ -2702,10 +2702,10 @@ in which case they only occasionally drop a packet, or down, in which case
 they drop all packets.</t>
 
 <t>The k-out-of-j strategy is parameterised by two small integers k and j,
-such that 0 &lt; k &le; j, and the nominal link cost, a constant K &ge; 1.
+such that 0 &lt; k &le; j, and the nominal link cost, a constant C &ge; 1.
 A node keeps a history of the last j hellos; if k or more of those have
 been correctly received, the link is assumed to be up, and the rxcost is
-set to K; otherwise, the link is assumed to be down, and the rxcost is set
+set to C; otherwise, the link is assumed to be down, and the rxcost is set
 to infinity.</t>
 
 <t>Since Babel supports two kinds of Hellos, a Babel node performs
@@ -2793,7 +2793,7 @@ the logarithm (in some suitable base) of the link costs.</t>
 
 </section>
 
-<section title="Constants" anchor="constants">
+<section title="Protocol parameters" anchor="parameters">
 
 <t>The choice of time constants is a trade-off between fast detection of
 mobility events and protocol overhead.  Two instances of Babel running
@@ -2813,6 +2813,8 @@ and where occasional outages of up to 14 seconds are acceptable:
 <list style="empty">
 <t>Multicast Hello Interval: 4 seconds.</t>
 <t>Unicast Hello Interval: infinite (no Unicast Hellos are sent).</t>
+<t>Link cost: estimated using ETX on wireless links; 2-out-of-3 with C=96
+on wired links.</t>
 <t>IHU Interval: the advertised IHU interval is always 3 times the
 Multicast Hello interval.  IHUs are actually sent with each Hello on lossy
 links (as determined from the Hello history), but only with every third
@@ -2831,8 +2833,8 @@ within 2 seconds after a mobility event is desired:
 <list style="empty">
 <t>Multicast Hello Interval: 0.5 seconds.</t>
 <t>Unicast Hello Interval: infinite (no Unicast Hellos are sent).</t>
-<t>IHU Interval, Update Interval, IHU Hold Time, and Route Expiry Time:
-computed as in the first case above.</t>
+<t>Link cost, IHU Interval, Update Interval, IHU Hold Time, and Route
+Expiry Time: computed as in the first case above.</t>
 <t>Request Timeout: initially 0.5 seconds, doubled every time a request is
 resent, up to a maximum of three times.</t>
 <t>Urgent timeout: 0.2 seconds.</t>

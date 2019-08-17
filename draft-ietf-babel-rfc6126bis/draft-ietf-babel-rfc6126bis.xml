@@ -2789,21 +2789,6 @@ the logarithm (in some suitable base) of the link costs.</t>
 
 </section>
 
-<section title="External Sources of Willingness">
-
-<t>A node may want to vary its willingness to forward packets by taking
-into account information that is external to the Babel protocol, such as
-the monetary cost of a link, the node's battery status, CPU load, etc.
-This can be done by adding to every route's metric a value k that depends
-on the external data.  For example, if a battery-powered node receives an
-update with metric m over a link with cost c, it might compute a metric
-M(c, m) = k + c + m, where k depends on the battery status.</t>
-
-<t>In order to preserve strict monotonicity
-(<xref target="metric-computation"/>), the value k must be greater than -c.</t>
-
-</section>
-
 </section>
 
 </section>

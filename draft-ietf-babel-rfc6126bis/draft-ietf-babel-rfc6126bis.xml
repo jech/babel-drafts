@@ -2997,7 +2997,7 @@ the two protocols are not entirely compatible, the new protocol has been
 designed so that it can be deployed in existing RFC 6126 networks without
 requiring a flag day.</t>
 
-<t>There are two optioal features that make the new protocol incompatible
+<t>There are two optional features that make the new protocol incompatible
 with its predecessor.  First of all, RFC 6126 did not define Unicast
 hellos (<xref target="reverse-reachability"/>), and an implementation of
 RFC 6126 will mis-interpret a Unicast Hello for a Multicast one; since the
@@ -3018,8 +3018,8 @@ so that it can safely interoperate in all cases with implementations of
 this protocol.  First, it needs to be modified to either ignore or process
 Unicast Hellos.  Second, it needs to be modified to parse sub-TLVs of all
 the TLVs that it understands and that allow sub-TLVs, and to ignore the
-TLV is an unknown mandatory sub-TLV is found.  It is not necessary to
-parse unknown TLVs, since these are ignored in any case.</t>
+TLV if an unknown mandatory sub-TLV is found.  It is not necessary to
+parse unknown TLVs, as these are ignored in any case.</t>
 
 <t>There are other changes, but these are not of a nature to prevent
 interoperability:
@@ -3033,7 +3033,7 @@ have been relaxed;</t>
 <t>router-ids with a value of all-zeros or all-ones have been forbidden
 (<xref target="router-id-def"/>);</t>
 <t>the compression state is now specific to an address family rather than
-an address encoding <xref target="parser-state"/>;</t>
+an address encoding (<xref target="parser-state"/>);</t>
 <t>packet pacing is now recommended
 (<xref target="transmission-reception"/>).</t>
 </list></t>

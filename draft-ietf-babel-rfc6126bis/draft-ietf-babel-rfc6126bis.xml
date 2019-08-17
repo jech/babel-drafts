@@ -120,15 +120,14 @@ target="OSPF"/>, IS-IS <xref target="IS-IS"/>, or the Enhanced Interior
 Gateway Routing Protocol (EIGRP) <xref target="EIGRP"/> might be more
 suitable.</t>
 
-<t>Second, unless the optional algorithm described in <xref
-target="hold-time"/> is implemented, Babel does impose a hold time when
-a prefix is retracted.  While this hold time does not apply to the exact
-prefix being retracted, and hence does not prevent fast reconvergence
-should it become available again, it does apply to any shorter prefix that
-covers it.  This may make those implementations of Babel that do not
-implement the optional algorithm described in <xref target="hold-time"/>
-unsuitable for use in networks that implement automatic prefix
-aggregation.</t>
+<t>Second, unless the second algorithm described in <xref target="hold-time"/>
+is implemented, Babel does impose a hold time when a prefix is retracted.
+While this hold time does not apply to the exact prefix being retracted,
+and hence does not prevent fast reconvergence should it become available
+again, it does apply to any shorter prefix that covers it.  This may make
+those implementations of Babel that do not implement the optional
+algorithm described in <xref target="hold-time"/> unsuitable for use in
+networks that implement automatic prefix aggregation.</t>
 
 </section>
 
@@ -307,10 +306,11 @@ S     A
 
 <t>To show that this feasibility condition still guarantees loop-freedom,
 recall that at the time when A accepts an update from B, the metric D(B)
-announced by B is no smaller than FD(B); since it is smaller than FD(A), at
-that point in time FD(B) &lt; FD(A).  Since this property is preserved when
-A sends updates, it remains true at all times, which ensures that the
-forwarding graph has no loops.</t>
+announced by B is no smaller than FD(B); since it is smaller than FD(A),
+at that point in time FD(B) &lt; FD(A).  Since this property is preserved
+both when A sends updates and when it picks a different next hop, it
+remains true at all times, which ensures that the forwarding graph has no
+loops.</t>
 
 </section>
 
@@ -706,7 +706,8 @@ by triples of the form (prefix, plen, neighbour), and every route table
 entry contains the following data:
 <list style="symbols">
 <t>the source (prefix, plen, router-id) for which this route is advertised;</t>
-<t>the neighbour that advertised this route;</t>
+<t>the neighbour (an entry in the neighbour table) that advertised this
+route;</t>
 <t>the metric with which this route was advertised by the neighbour, or
 FFFF hexadecimal (infinity) for a recently retracted route;</t>
 <t>the sequence number with which this route was advertised;</t>
@@ -1367,7 +1368,7 @@ initial hop count need not be kept particularly low, and performing an
 expanding horizon search is not necessary.  A single request MUST NOT be
 duplicated: it MUST NOT be forwarded to a multicast address, and it MUST
 NOT be forwarded to multiple neighbours.  However, if a seqno request is
-resent by its originator, the subsequent copies MAY be forwarded to
+resent by its originator, the subsequent copies may be forwarded to
 a different neighbour than the initial one.</t>
 
 </section>
@@ -1408,8 +1409,8 @@ request over all interfaces.</t>
 route's loss.  If the network is still connected, and assuming no packet
 loss, then at least one of these requests will be forwarded to the source,
 resulting in a route being advertised with a new sequence number.  (Due to
-duplicate suppression, only a small number of such requests will actually
-reach the source.)</t>
+duplicate suppression, only a small number of such requests are expected
+to actually reach the source.)</t>
 
 <t>In order to compensate for packet loss, a node SHOULD repeat such
 a request a small number of times if no route becomes feasible within
@@ -1750,7 +1751,7 @@ trailer.</t>
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |    Type = 2   |    Length     |          Reserved             |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|            Nonce              |          Interval             |
+|             Opaque            |          Interval             |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ]]></artwork></figure>
 
@@ -1764,7 +1765,7 @@ within the number of centiseconds specified by the Interval field.</t>
 Type and Length fields.</t>
 <t hangText="Reserved">Sent as 0 and MUST be ignored on
   reception.</t>
-<t hangText="Nonce">An arbitrary value that will be echoed in the
+<t hangText="Opaque">An arbitrary value that will be echoed in the
 receiver's Acknowledgment TLV.</t>
 <t hangText="Interval">A time interval in centiseconds after which the
 sender will assume that this packet has been lost.  This MUST NOT be 0.
@@ -1782,7 +1783,7 @@ The receiver MUST send an Acknowledgment TLV before this time has elapsed
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|    Type = 3   |    Length     |            Nonce              |
+|    Type = 3   |    Length     |           Opaque              |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ]]></artwork></figure>
 
@@ -1793,11 +1794,11 @@ The receiver MUST send an Acknowledgment TLV before this time has elapsed
 <t hangText="Type">Set to 3 to indicate an Acknowledgment TLV.</t>
 <t hangText="Length">The length of the body in octets, exclusive of the
 Type and Length fields.</t>
-<t hangText="Nonce">Set to the Nonce value of the Acknowledgment Request
+<t hangText="Opaque">Set to the Opaque value of the Acknowledgment Request
 that prompted this Acknowledgment.</t>
 </list></t>
 
-<t>Since nonce values are not globally unique, this TLV MUST be sent to
+<t>Since Opaque values are not globally unique, this TLV MUST be sent to
 a unicast address.</t>
 
 <t>This TLV is self-terminating, and allows sub-TLVs.</t>

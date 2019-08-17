@@ -2488,8 +2488,8 @@ technique was inspired by <xref target="PACKETBB"/>.</t>
 <author fullname="Antonin Decimo" initials="A." surname="Decimo"/>
 <author fullname="David Schinazi" initials="D." surname="Schinazi"/>
 <author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
-<date month="July" year="2019"/></front>
-<seriesInfo name="Internet Draft" value="draft-ietf-babel-dtls-07"/>
+<date month="August" year="2019"/></front>
+<seriesInfo name="Internet Draft" value="draft-ietf-babel-dtls-09"/>
 </reference>
 
 <reference anchor="JITTER"><front>

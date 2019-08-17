@@ -1052,6 +1052,18 @@ resource exhaustion attacks.</t>
 </list></t>
 
 </section>
+
+<section title="Changes since draft-ietf-babel-hmac-09">
+
+<t><list style="symbols">
+<t>Renamed HMAC to MAC throughout, relevant rewording.</t>
+<t>Made it mandatory to rate-limit challenge replies in addition to
+requests.</t>
+<t>Added discussion of key generation.</t>
+<t>Added discussion of the consequences of delaying packets.</t>
+</list></t>
+
+</section>
 </section>
 </section>
 

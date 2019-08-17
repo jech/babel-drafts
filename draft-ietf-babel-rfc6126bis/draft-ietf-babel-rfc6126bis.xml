@@ -2407,7 +2407,7 @@ IP addresses, and changing them often enough.</t>
 <t>A number of people have contributed text and ideas to this
 specification.  The authors are particularly indebted to Matthieu Boutier,
 Gwendoline Chouasne, Margaret Cullen, Donald Eastlake, Toke
-Hoiland-Jorgensen, Joao Sobrinho and Martin Vigoureux.
+Hoiland-Jorgensen, Benjamin Kaduk, Joao Sobrinho and Martin Vigoureux.
 Earlier versions of this document
 greatly benefited from the input of Joel Halpern.  The address compression
 technique was inspired by <xref target="PACKETBB"/>.</t>

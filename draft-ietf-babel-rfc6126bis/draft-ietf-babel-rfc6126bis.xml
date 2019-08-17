@@ -2297,7 +2297,7 @@ this registry are as follows:</t>
 <c>255</c><c>Reserved for expansion of the type space</c><c>this document</c>
 </texttable>
 
-<t>IANA has created a registry called "Babel TLV Types".  The allocation
+<t>IANA has created a registry called "Babel sub-TLV Types".  The allocation
 policy for this registry is Specification Required for Types 0-111 and
 128-239, and Experimental Use for Types 112-126 and 240-254.  The values
 in this registry are as follows:</t>

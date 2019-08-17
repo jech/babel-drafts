@@ -2317,6 +2317,17 @@ document</c>
 <c>255</c><c>Reserved for expansion of the type space</c><c>this document</c>
 </texttable>
 
+<t>IANA is instructed to create a registry called "Babel Address
+Encodings".  The allocation policy for this registry is Specification
+Required.  The values in this registry are as follows:</t>
+<texttable>
+<ttcol>AE</ttcol><ttcol>Name</ttcol><ttcol>Reference</ttcol>
+<c>0</c><c>Wildcard address</c><c>this document</c>
+<c>1</c><c>IPv4 address</c><c>this document</c>
+<c>2</c><c>IPv6 address</c><c>this document</c>
+<c>3</c><c>Link-local IPv6 address</c><c>this document</c>
+</texttable>
+
 <t>IANA has created a registry called "Babel Flags Values".  The
 allocation policy for this registry is Specification Required.  IANA is
 instructed to rename this registry to "Babel Update Flags Values".  The

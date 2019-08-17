@@ -3199,6 +3199,19 @@ it in the body of the document.</t>
 </list></t>
 </section>
 
+<section title="Changes since draft-ietf-babel-rfc6126bis-13">
+<t><list style="symbols">
+<t>Added a section about compatibility with 6126.</t>
+<t>Added AE registry to IANA considerations.</t>
+<t>Replaced Babel-HMAC with Babel-MAC, consistent with the change in
+draft-ietf-babel-hmac.</t>
+<t>Removed section about external sources of willingness; filtering is
+a better approach.</t>
+<t>Added recommendation to use a cost of 96 on wired links.</t>
+<t>Editorial changes.</t>
+</list></t>
+</section>
+
 </section>
 
 </back>

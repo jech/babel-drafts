@@ -124,8 +124,8 @@ lifetime of a key.</t>
 The first assumption is a property of the MAC being used.  The second
 assumption can be met either by using a robust random number generator
 <xref target="RFC4086"/> and sufficiently large indices and nonces, by
-using a reliable hardware clock, or by rekeying whenever a collision
-becomes likely.</t>
+using a reliable hardware clock, or by rekeying often enough that
+collisions are unlikely.</t>
 
 <t>If the assumptions above are met, the protocol described in this
 document has the following properties:
@@ -136,9 +136,9 @@ is the exact copy of a packet originally sent by an authorised node;</t>
 previously accepted a given packet, then it will never again accept a copy
 of this packet or an earlier packet from the same sender;</t>
 <t>among different nodes, it is only vulnerable to immediate replay: if
-a node A has accepted a packet from C as valid, then a node B will only
-accept a copy of that packet as authentic if B has accepted an older
-packet from C and B has received no later packet from C.</t>
+a node A has accepted an authentic packet from C, then a node B will only
+accept a copy of that packet if B has accepted an older packet from C and
+B has received no later packet from C.</t>
 </list></t>
 
 <t>While this protocol makes efforts to mitigate the effects of a denial
@@ -224,11 +224,13 @@ extends these data structures as follows.</t>
 <t>Every Babel node maintains an interface table, as described in Section
 3.2.3 of <xref target="RFC6126bis"/>.  Implementations of this protocol MUST
 allow each interface to be provisioned with a set of one or more MAC keys
-and the associated MAC algorithms (see <xref target="mac-computation"/>).
-In order to allow incremental deployment of this protocol (see
-<xref target="incremental-deployment"/>), implementations SHOULD allow an
-interface to be configured in a mode in which it participates in the MAC
-authentication protocol but accepts packets that are not authenticated.</t>
+and the associated MAC algorithms (see <xref target="mac-computation"/>
+for suggested algorithms, and <xref target="security-considerations"/> for
+suggested methods for key generation).  In order to allow incremental
+deployment of this protocol (see <xref target="incremental-deployment"/>),
+implementations SHOULD allow an interface to be configured in a mode in
+which it participates in the MAC authentication protocol but accepts
+packets that are not authenticated.</t>
 
 <t>This protocol extends each entry in this table that is associated with
 an interface on which MAC authentication has been configured with two new
@@ -242,7 +244,8 @@ octets, and PC is a 32-bit (4-octet) integer.</t>
 We say that an index is fresh when it has never been used before with any
 of the keys currently configured on the interface.  The Index field is
 initialised to a fresh index, for example by drawing a random string of
-sufficient length, and the PC is initialised to an arbitrary value
+sufficient length (see <xref target="security-considerations"/> for
+suggested sizes), and the PC is initialised to an arbitrary value
 (typically 0).</t>
 </section>
 
@@ -320,7 +323,7 @@ format:
 <t>The node takes the concatenation of the pseudo-header and the Babel
 packet including the packet header but excluding the packet trailer (from
 octet 0 inclusive up to (Body Length&nbsp;+&nbsp;4) exclusive) and
-computes a MAC with one of the implemented hash algorithms.  Every
+computes a MAC with one of the implemented algorithms.  Every
 implementation MUST implement HMAC-SHA256 as defined in
 <xref target="RFC6234"/> and Section 2 of <xref target="RFC2104"/>,
 SHOULD implement keyed BLAKE2s <xref target="RFC7693"/>, and MAY implement
@@ -427,9 +430,9 @@ rate-limiting described in <xref target="sending-challenges"/> is
 required even if this optimisation is implemented.</t>
 
 <t>The same is true of challenge replies.  However, since validating
-a challenge reply is extremely cheap (it's just a bitwise comparison of
-two strings of octets), a similar optimisation for challenge replies is
-not worthwile.</t>
+a challenge reply has minimal additional cost (it's just a bitwise
+comparison of two strings of octets), a similar optimisation for challenge
+replies is not worthwile.</t>
 
 <t>After the packet has been accepted, it is processed as normal, except
 that any PC, Challenge Request and Challenge Reply TLVs that it contains
@@ -674,7 +677,7 @@ challenge request.</t>
 
 </section>
 
-<section title="Security Considerations">
+<section title="Security Considerations" anchor="security-considerations">
 
 <t>This document defines a mechanism that provides basic security
 properties for the Babel routing protocol.  The scope of this protocol is
@@ -686,7 +689,7 @@ asymmetric keying, should use a more featureful security mechanism such as
 the one described in <xref target="I-D.ietf-babel-dtls"/>.</t>
 
 <t>This mechanism relies on two assumptions, as described in <xref
-target="security-properties"/>.  First, it assumes that the hash being
+target="security-properties"/>.  First, it assumes that the MAC being
 used is invulnerable to pre-image attacks (Section 1.1 of <xref
 target="RFC6039"/>); at the time of writing, SHA-256, which is mandatory
 to implement (<xref target="mac-computation"/>), is believed to be safe
@@ -711,7 +714,9 @@ accepted as long as the corresponding (Index, PC) pair is present at the
 receiver.  If the attacker is able to cause the (Index, PC) pair to
 persist for arbitrary amounts of time (e.g., by repeatedly causing failed
 challenges), then it is able to delay the packet by arbitrary amounts of
-time, even after the sender has left the network.</t>
+time, even after the sender has left the network, which could allow it to
+redirect or blackhole traffic to destinations previously advertised by the
+sender.</t>
 
 <t>This protocol exposes large numbers of packets and their MACs to an
 attacker that is able to capture packets; it is therefore vulnerable to
@@ -731,7 +736,7 @@ service (DoS) attacks in general, this protocol includes a number of
 mechanisms designed to mitigate such attacks.  In particular, reception of
 a packet with no correct MAC creates no local Babel state
 (<xref target="packet-reception"/>).  Reception of a replayed packet with
-correct hash, on the other hand, causes a challenge to be sent; this is
+correct MAC, on the other hand, causes a challenge to be sent; this is
 mitigated somewhat by requiring that challenges be rate-limited
 (<xref target="sending-challenges"/>).</t>
 
@@ -754,7 +759,8 @@ target="RFC6126bis"/> are conceptual, and any data structure that yields the
 same result may be used).  Implementers might also consider using the fact
 that the nonces included in challenge requests and responses can be fairly
 large (up to 192 octets), which should in principle allow encoding the
-per-challenge state as a secure "cookie" within the nonce itself.</t>
+per-challenge state as a secure "cookie" within the nonce itself; note
+however that any such scheme will need to prevent cookie replay.</t>
 
 </section>
 
@@ -779,7 +785,7 @@ protocol defined by Denis Ovsienko <xref target="RFC7298"/>.  The use of
 a pseudo-header was suggested by David Schinazi.  The use of an index to
 avoid replay was suggested by Markus Stenberg.  The authors are also
 indebted to Donald Eastlake, Toke Hoiland-Jorgensen, Florian Horn,
-Dave Taht and Martin Vigoureux.</t>
+Benjamin Kaduk, Dave Taht and Martin Vigoureux.</t>
 
 </section>
 

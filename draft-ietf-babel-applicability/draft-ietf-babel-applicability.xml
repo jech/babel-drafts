@@ -70,11 +70,12 @@ to infinity impossible.</t>
 looping routes but also rejects some loop-free routes.  Thus, it can lead
 to a situation known as "starvation", where a router rejects all routes to
 a given destination, even those that are loop-free.  In order to recover
-from starvation, Babel uses a mechanism pioneered by DSDV <xref
-target="DSDV"/> and known as "sequenced routes".  In Babel, this mechanism
-is generalised to deal with prefixes of arbitrary length and routes
-announced at multiple points in a single routing domain (DSDV was a pure
-mesh protocol, and only dealt with host routes).</t>
+from starvation, Babel uses a mechanism pioneered by the
+Destination-Sequenced Distance-Vector Routing Protocol (DSDV)
+<xref target="DSDV"/> and known as "sequenced routes".  In Babel, this
+mechanism is generalised to deal with prefixes of arbitrary length and
+routes announced at multiple points in a single routing domain (DSDV was
+a pure mesh protocol, and only carried host routes).</t>
 
 <t>In DSDV, the sequenced routes algorithm is slow to react to
 a starvation episode.  In Babel, starvation recovery is accelerated by
@@ -150,12 +151,6 @@ the protocol.</t>
 <xref target="successful"/> below gives examples of successful deployments
 of Babel that illustrate these properties.</t>
 
-<t>In addition to the above, our implementation experience indicates that
-Babel tends to be robust with respect to bugs: in many cases, an
-implementation bug does not violate the properties on which Babel relies,
-and therefore slows down convergence or causes sub-optimal routing rather
-than causing the network to collapse.</t>
-
 <t>These robustness properties have important consequences for the
 applicability of the protocol: Babel works (more or less efficiently) in
 a range of circumstances where traditional routing protocols don't work
@@ -189,7 +184,7 @@ which is useful in overlay network (where both hop count and packet loss
 are poor metrics).</t>
 </list>
 Some other extensions have been designed, but have not seen deployment
-yet (and their usefulness is yet to be demonstrated):
+in production (and their usefulness is yet to be demonstrated):
 <list style="symbols">
 <t>frequency-aware routing <xref target="BABEL-Z"/> aims to minimise radio
 interference in wireless networks;</t>
@@ -209,9 +204,10 @@ unusable in some deployments.</t>
 
 <t>The main mechanisms used by Babel to reconverge after a topology change
 are reactive: triggered updates, triggered retractions and explicit
-requests.  However, in the presence of heavy packet loss, Babel relies on
-periodic updates to clear pathologies.  This reliance on periodic updates
-makes Babel unsuitable in at least two kinds of deployments:
+requests.  However, Babel relies on periodic updates to clear pathologies
+after a mobility event or in the presence of heavy packet loss.  The use
+of periodic updates makes Babel unsuitable in at least two kinds of
+environments:
 <list style="symbols">
 <t>large, stable networks: since Babel sends periodic updates even in the
 absence of topology changes, in well-managed, large, stable networks the
@@ -232,7 +228,7 @@ more generally, performing route aggregation), Babel is designed around
 the assumption that every router has a full routing table.  In networks
 where some nodes are too constrained to hold a full routing table, it
 might be preferable to use a protocol that was designed from the outset to
-work with a partial routing table (such as AODVv2 <xref target="AODVv2"/>,
+work with a partial routing table (such as AODV <xref target="RFC3561"/>,
 RPL <xref target="RFC6550"/> or LOADng <xref target="LOADng"/>).</t>
 
 </section>
@@ -242,10 +238,10 @@ RPL <xref target="RFC6550"/> or LOADng <xref target="LOADng"/>).</t>
 <t>Babel's loop-avoidance mechanism relies on making a route unreachable
 after a retraction until all neighbours have been guaranteed to have acted
 upon the retraction, even in the presence of packet loss.  Unless the
-optional algorithm described in Section 3.5.5 of <xref target="RFC6126bis"/>
+second algorithm described in Section 3.5.5 of <xref target="RFC6126bis"/>
 is implemented, this entails that a node is unreachable for a few minutes
-after the most specific route to it has been retracted.  This delay may
-make Babel slow to recover from a topology change in networks that perform
+after the most specific route to it has been retracted.  This delay makes
+Babel slow to recover from a topology change in networks that perform
 automatic route aggregation.</t>
 
 </section>
@@ -284,11 +280,11 @@ estimation on wireless links.</t>
 <section title="Large scale overlay networks">
 
 <t>The algorithms used by Babel (loop avoidance, hysteresis, delayed
-updates) allow it to remain stable and efficient in the presence of
-unstable metrics, even in the presence of a feedback loop.  For this
-reason, it has been successfully deployed in large scale overlay networks,
-built out of thousands of tunnels spanning continents, where it is used
-with a metric computed from links' latencies.</t>
+updates) allow it to remain stable in the presence of unstable metrics,
+even in the presence of a feedback loop.  For this reason, it has been
+successfully deployed in large scale overlay networks, built out of
+thousands of tunnels spanning continents, where it is used with a metric
+computed from links' latencies.</t>
 
 <t>This particular application depends on the extension for RTT-sensitive
 routing <xref target="DELAY-BASED"/>.</t>
@@ -297,14 +293,13 @@ routing <xref target="DELAY-BASED"/>.</t>
 
 <section title="Pure mesh networks">
 
-<t>While Babel is a general-purpose routing protocol, it has been
-repeatedly shown to be competitive with dedicated routing protocols for
-wireless mesh networks <xref target="REAL-WORLD"/> <xref
-target="BRIDGING-LAYERS"/>.  Although this particular niche is already
-served by a number of mature protocols, notably OLSR-ETX and OLSRv2 <xref
-target="RFC7181"/> (equipped e.g.&nbsp;with the DAT metric <xref
-target="RFC7779"/>), Babel has seen a moderate amount of successful
-deployment in pure mesh networks.</t>
+<t>While Babel is a general-purpose routing protocol, it has been shown to
+be competitive with dedicated routing protocols for wireless mesh networks
+<xref target="REAL-WORLD"/> <xref target="BRIDGING-LAYERS"/>.  Although
+this particular niche is already served by a number of mature protocols,
+notably OLSR-ETX and OLSRv2 <xref target="RFC7181"/> (equipped
+e.g.&nbsp;with the DAT metric <xref target="RFC7779"/>), Babel has seen
+a moderate amount of successful deployment in pure mesh networks.</t>
 
 </section>
 
@@ -335,27 +330,33 @@ section before publication.]</t>
 speaker receives reachability information from its neighbours, which by
 default is trusted by all nodes in the routing domain.</t>
 
-<t>In most deployments, the Babel protocol is run over a network that is
-secured either at the physical layer (e.g., physically protecting Ethernet
-sockets) or at the link layer (using a protocol such as WiFi Protected
-Access (WPA2)).  If Babel is being run over an unprotected network, then
-the routing traffic needs to be protected using a sufficiently strong
-cryptographic mechanism.</t>
+<t>At the time of writing, the Babel protocol is usually run over
+a network that is secured either at the physical layer (e.g., physically
+protecting Ethernet sockets) or at the link layer (using a protocol such
+as WiFi Protected Access (WPA2)).  If Babel is being run over an
+unprotected network, then the routing traffic needs to be protected using
+a sufficiently strong cryptographic mechanism.</t>
 
 <t>At the time of writing, two such mechanisms have been defined.
-Babel-HMAC <xref target="HMAC"/> is a simple and easy to implement
+Babel-MAC <xref target="BABEL-MAC"/> is a simple and easy to implement
 mechanism that only guarantees authenticity, integrity and replay
 protection of the routing traffic, and only supports symmetric keying with
 a small number of keys (typically just one or two).  Babel-DTLS
-<xref target="DTLS"/> is a more complex mechanism, that requires some minor
-changes to be made to a typical Babel implementation and depends on a DTLS
-stack being available, but inherits all of the features of DTLS, notably
-confidentiality, optional replay protection, and the ability to use
-asymmetric keys.</t>
+<xref target="BABEL-DTLS"/> is a more complex mechanism, that requires
+some minor changes to be made to a typical Babel implementation and
+depends on a DTLS stack being available, but inherits all of the features
+of DTLS, notably confidentiality, optional replay protection, and the
+ability to use asymmetric keys.</t>
 
-<t>Due to its simplicity, Babel-HMAC should be the preferred security
+<t>Due to its simplicity, Babel-MAC should be the preferred security
 mechanism in most deployments, with Babel-DTLS available for networks
 that require its additional features.</t>
+
+<t>In addition to the above, the information that a mobile Babel node
+announces to the whole routing domain is often sufficient to determine
+a mobile node's physical location with reasonable precision.  This might
+make Babel unapplicable in scenarios where a node's location is considered
+confidential.</t>
 
 </section>
 
@@ -374,9 +375,9 @@ their input to this document.</t>
 <title>The Babel Routing Protocol</title>
 <author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
 <author fullname="David Schinazi" initials="D." surname="Schinazi"/>
-<date month="November" year="2018"/>
+<date month="August" year="2019"/>
 </front>
-<seriesInfo name="Internet Draft" value="draft-ietf-babel-rfc6126bis-07"/>
+<seriesInfo name="Internet Draft" value="draft-ietf-babel-rfc6126bis-14"/>
 </reference>
 </references>
 
@@ -516,17 +517,16 @@ Use of OSI IS-IS for routing in TCP/IP and dual environments
 <seriesInfo name="RFC" value="1195"/>
 </reference>
 
-<reference anchor='AODVv2'>
+<reference  anchor="RFC3561" target="https://www.rfc-editor.org/info/rfc3561">
 <front>
-<title>Ad Hoc On-demand Distance Vector Version 2 (AODVv2) Routing</title>
-<author initials='C' surname='Perkins' fullname='Charles Perkins'/>
-<author initials='S' surname='Ratliff' fullname='Stan Ratliff'/>
-<author initials='J' surname='Dowdell' fullname='John Dowdell'/>
-<author initials='L' surname='Steenbrink' fullname='Lotte Steenbrink'/>
-<author initials='V' surname='Mercieca' fullname='Victoria Mercieca'/>
-<date month='May' day='3' year='2016' />
+<title>Ad hoc On-Demand Distance Vector (AODV) Routing</title>
+<author initials="C." surname="Perkins" fullname="C. Perkins"/>
+<author initials="E." surname="Belding-Royer" fullname="E. Belding-Royer"/>
+<author initials="S." surname="Das" fullname="S. Das"/>
+<date year="2003" month="July"/>
 </front>
-<seriesInfo name='Internet-Draft' value='draft-ietf-manet-aodvv2-16' />
+<seriesInfo name="RFC" value="3561"/>
+<seriesInfo name="DOI" value="10.17487/RFC3561"/>
 </reference>
 
 <reference anchor="RFC6550">
@@ -636,24 +636,22 @@ Networks</title>
 <annotation>In Proc. IFIP Networking 2015.</annotation>
 </reference>
 
-<reference anchor="HMAC"><front>
-<title>HMAC authentication for the Babel routing protocol</title>
-<author initials="C" surname="Do" fullname="Clara Do"/>
-<author initials="W" surname="Kolodziejak" fullname="Weronika Kolodziejak"/>
-<author initials="J" surname="Chroboczek" fullname="Juliusz Chroboczek"/>
-<date month="June" day="20" year="2019"/>
-</front>
-<seriesInfo name="Internet-Draft" value="draft-ietf-babel-hmac-07"/>
+<reference anchor="BABEL-MAC"><front>
+<title>MAC authentication for the Babel routing protocol</title>
+<author fullname="Clara Do" initials="C." surname="Do"/>
+<author fullname="Weronika Kolodziejak" initials="W." surname="Kolodziejak"/>
+<author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
+<date month="August" year="2019"/></front>
+<seriesInfo name="Internet Draft" value="draft-ietf-babel-hmac-10"/>
 </reference>
 
-<reference anchor="DTLS"><front>
+<reference anchor="BABEL-DTLS"><front>
 <title>Babel Routing Protocol over Datagram Transport Layer Security</title>
-<author initials="A" surname="Decimo" fullname="Antonin Decimo"/>
-<author initials="D" surname="Schinazi" fullname="David Schinazi"/>
-<author initials="J" surname="Chroboczek" fullname="Juliusz Chroboczek"/>
-<date month="July" day="5" year="2019"/>
-</front>
-<seriesInfo name="Internet-Draft" value="draft-ietf-babel-dtls-07"/>
+<author fullname="Antonin Decimo" initials="A." surname="Decimo"/>
+<author fullname="David Schinazi" initials="D." surname="Schinazi"/>
+<author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
+<date month="August" year="2019"/></front>
+<seriesInfo name="Internet Draft" value="draft-ietf-babel-dtls-09"/>
 </reference>
 
 <reference anchor="METAROUTING"><front>

@@ -368,7 +368,7 @@ carries at least one MAC TLV; if not, the packet MUST be immediately dropped
 and processing stops.  Then, for each key configured on the receiving
 interface, the receiver computes the MAC of the packet.  It then
 compares every generated MAC against every MAC included in the packet;
-if there is at least one match, the packet passes the HMAC test; if there
+if there is at least one match, the packet passes the MAC test; if there
 is none, the packet MUST be silently dropped and processing stops at this
 point.  In order to avoid memory exhaustion attacks, an entry in the
 Neighbour Table MUST NOT be created before the MAC test has passed

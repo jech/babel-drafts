@@ -1498,7 +1498,7 @@ minutes with a granularity of 10ms, which should cover all reasonable
 applications of Babel.</t>
 </section>
 
-<section title="Router-Id">
+<section title="Router-Id" anchor="router-id-def">
 <t>A router-id is an arbitrary 8-octet value.  A router-id MUST NOT
 consist of either all binary zeroes (0000000000000000 hexadecimal) or all
 binary ones (FFFFFFFFFFFFFFFF hexadecimal).</t>
@@ -1535,7 +1535,7 @@ significant bits (up to the prefix length).</t>
 </section>
 </section>
 
-<section title="Packet Format">
+<section title="Packet Format" anchor="packet-format">
 
 <t>A Babel packet consists of a 4-octet header, followed by a sequence of
 TLVs (the packet body), optionally followed by a second sequence of TLVs
@@ -1606,7 +1606,7 @@ selected TLV types, an optional list of sub-TLVs.</t>
 
 </section>
 
-<section title="Sub-TLV Format">
+<section title="Sub-TLV Format" anchor="sub-tlv-format">
 
 <t>Every TLV carries an explicit length in its header; however, most TLVs
 are self-terminating, in the sense that it is possible to determine the
@@ -2987,6 +2987,57 @@ requests.</t>
 <t>Experience shows that an IPv6-only stub implementation of Babel can be
 written in less than 1000 lines of C code and compile to 13&nbsp;kB of
 text on 32-bit CISC architecture.</t>
+
+</section>
+
+<section title="Compatibility with previous versions">
+
+<t>The protocol defined in this document is a successor to the protocol
+defined in <xref target="RFC6126"/> and <xref target="RFC7557"/>.  While
+the two protocols are not entirely compatible, the new protocol has been
+designed so that it can be deployed in existing RFC 6126 networks without
+requiring a flag day.</t>
+
+<t>There are two optioal features that make the new protocol incompatible
+with its predecessor.  First of all, RFC 6126 did not define Unicast
+hellos (<xref target="reverse-reachability"/>), and an implementation of
+RFC 6126 will mis-interpret a Unicast Hello for a Multicast one; since the
+sequence number space of Unicast Hellos is distinct from the sequence
+space of Multicast Hellos, sending a Unicast Hello to an implementation of
+RFC 6126 will confuse its link quality estimator.  Second, RFC 7557 did
+not define mandatory sub-TLVs (<xref target="sub-tlv-format"/>); thus, an
+implementation of RFCs 6126 and 7557 will not correctly ignore a TLV that
+carries an unknown mandatory sub-TLV; depending on the sub-TLV, this might
+cause routing pathologies.</t>
+
+<t>An implementation of this specification that never sends Unicast Hellos
+and doesn't implement any extensions that use mandatory sub-TLVs is safe
+to deploy in a network in which some nodes implement the old protocol.</t>
+
+<t>Two changes need to be made to an implementation of RFCs 6126 and 7557
+so that it can safely interoperate in all cases with implementations of
+this protocol.  First, it needs to be modified to either ignore or process
+Unicast Hellos.  Second, it needs to be modified to parse sub-TLVs of all
+the TLVs that it understands and that allow sub-TLVs, and to ignore the
+TLV is an unknown mandatory sub-TLV is found.  It is not necessary to
+parse unknown TLVs, since these are ignored in any case.</t>
+
+<t>There are other changes, but these are not of a nature to prevent
+interoperability:
+<list style="symbols">
+<t>the conditions on route acquisition (<xref target="route-acquisition"/>)
+have been relaxed;</t>
+<t>route selection should no longer use the route's sequence number
+(<xref target="route-selection"/>);</t>
+<t>the format of the packet trailer has been defined
+(<xref target="packet-format"/>);</t>
+<t>router-ids with a value of all-zeros or all-ones have been forbidden
+(<xref target="router-id-def"/>);</t>
+<t>the compression state is now specific to an address family rather than
+an address encoding <xref target="parser-state"/>;</t>
+<t>packet pacing is now recommended
+(<xref target="transmission-reception"/>).</t>
+</list></t>
 
 </section>
 

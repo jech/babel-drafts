@@ -558,7 +558,8 @@ within one-half of the Multicast Hello interval.</t>
 <t>In order to avoid packet drops (either at the sender or at the
 receiver), a delay SHOULD be introduced between successive packets sent
 out on the same interface, within the constraints of the previous
-paragraph.</t>
+paragraph.  Note however that such packet pacing might impair the ability
+of some link layers (e.g., IEEE&nbsp;802.11) to perform link aggregation.</t>
 
 </section>
 
@@ -2835,7 +2836,9 @@ Babel's use of a redundant route table, and due to its reliance on
 triggered updates and explicit requests, the Update interval has little
 influence on the time needed to reconverge after an outage: in practice,
 it only has a significant effect on the time needed to acquire new routes
-after a mobility event.</t>
+after a mobility event.  While the protocol allows intervals as low as
+10ms, such low values would cause significant amounts of protocol traffic
+for little practical benefit.</t>
 
 <t>The following values are recommended in a network with little mobility,
 and where occasional outages of up to 14 seconds are acceptable:

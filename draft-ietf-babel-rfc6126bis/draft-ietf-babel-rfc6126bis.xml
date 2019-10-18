@@ -3255,6 +3255,15 @@ a better approach.</t>
 </list></t>
 </section>
 
+<section title="Changes since draft-ietf-babel-rfc6126bis-14">
+<t><list style="symbols">
+<t>Added unscheduled Hellos to compatibility considerations.</t>
+<t>Created new appendix about route selection.</t>
+<t>Reworked security considerations.</t>
+<t>Added some comments about packet pacing and low update intervals.</t>
+</list></t>
+</section>
+
 </section>
 
 </back>

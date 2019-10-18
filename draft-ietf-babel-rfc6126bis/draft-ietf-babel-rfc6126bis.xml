@@ -3025,29 +3025,32 @@ the two protocols are not entirely compatible, the new protocol has been
 designed so that it can be deployed in existing RFC 6126 networks without
 requiring a flag day.</t>
 
-<t>There are two optional features that make the new protocol incompatible
-with its predecessor.  First of all, RFC 6126 did not define Unicast
-hellos (<xref target="reverse-reachability"/>), and an implementation of
-RFC 6126 will mis-interpret a Unicast Hello for a Multicast one; since the
-sequence number space of Unicast Hellos is distinct from the sequence
-space of Multicast Hellos, sending a Unicast Hello to an implementation of
-RFC 6126 will confuse its link quality estimator.  Second, RFC 7557 did
-not define mandatory sub-TLVs (<xref target="sub-tlv-format"/>); thus, an
-implementation of RFCs 6126 and 7557 will not correctly ignore a TLV that
-carries an unknown mandatory sub-TLV; depending on the sub-TLV, this might
-cause routing pathologies.</t>
+<t>There are three optional features that make the new protocol
+incompatible with its predecessor.  First of all, RFC 6126 did not define
+Unicast hellos (<xref target="reverse-reachability"/>), and an
+implementation of RFC 6126 will mis-interpret a Unicast Hello for
+a Multicast one; since the sequence number space of Unicast Hellos is
+distinct from the sequence space of Multicast Hellos, sending a Unicast
+Hello to an implementation of RFC 6126 will confuse its link quality
+estimator.  Second, RFC 6126 did not define unscheduled Hellos, and an
+implementation of RFC 6126 will mis-parse Hellos with an interval equal to
+0.  Finally, RFC 7557 did not define mandatory sub-TLVs (<xref
+target="sub-tlv-format"/>), and thus, an implementation of RFCs 6126 and
+7557 will not correctly ignore a TLV that carries an unknown mandatory
+sub-TLV; depending on the sub-TLV, this might cause routing pathologies.</t>
 
-<t>An implementation of this specification that never sends Unicast Hellos
-and doesn't implement any extensions that use mandatory sub-TLVs is safe
-to deploy in a network in which some nodes implement the old protocol.</t>
+<t>An implementation of this specification that never sends Unicast or
+unscheduled Hellos and doesn't implement any extensions that use mandatory
+sub-TLVs is safe to deploy in a network in which some nodes implement the
+old protocol.</t>
 
 <t>Two changes need to be made to an implementation of RFCs 6126 and 7557
 so that it can safely interoperate in all cases with implementations of
 this protocol.  First, it needs to be modified to either ignore or process
-Unicast Hellos.  Second, it needs to be modified to parse sub-TLVs of all
-the TLVs that it understands and that allow sub-TLVs, and to ignore the
-TLV if an unknown mandatory sub-TLV is found.  It is not necessary to
-parse unknown TLVs, as these are ignored in any case.</t>
+Unicast and unscheduled Hellos.  Second, it needs to be modified to parse
+sub-TLVs of all the TLVs that it understands and that allow sub-TLVs, and
+to ignore the TLV if an unknown mandatory sub-TLV is found.  It is not
+necessary to parse unknown TLVs, as these are ignored in any case.</t>
 
 <t>There are other changes, but these are not of a nature to prevent
 interoperability:

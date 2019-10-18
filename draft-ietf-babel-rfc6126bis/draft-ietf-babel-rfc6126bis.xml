@@ -1124,33 +1124,20 @@ re-advertised to a node's neighbours.</t>
 <list style="symbols">
   <t>a route with infinite metric (a retracted route) is never selected;</t>
   <t>an unfeasible route is never selected.</t>
-</list>
-Note, however, that Babel does not naturally guarantee the stability of
-routing, and configuring conflicting route selection policies on different
-routers may lead to persistent route oscillation.</t>
+</list></t>
 
-<t>Route selection is a difficult problem, since a good route selection
-policy needs to take into account multiple mutually contradictory
-criteria; in roughly decreasing order of importance, these are:
-<list style="symbols">
-  <t>routes with a small metric should be preferred to routes with a large
-    metric;</t>
-  <t>switching router-ids should be avoided;</t>
-  <t>routes through stable neighbours should be preferred to routes
-    through unstable ones;</t>
-  <t>stable routes should be preferred to unstable ones;</t>
-  <t>switching next hops should be avoided.</t>
-</list>
-Route selection MUST NOT take seqnos into account: a route MUST NOT be
+<t>Route selection MUST NOT take seqnos into account: a route MUST NOT be
 preferred just because it carries a higher (more recent) seqno.  Doing
 otherwise would cause route oscillation while a new seqno propagates
 through the network, possibly following multiple paths of different
 latency, and might even create persistent blackholes if the metric being
 used is not left-distributive (<xref target="metric-computation"/>).</t>
 
-<t>A simple but useful strategy is to choose the feasible route with the
-smallest metric, with a small amount of hysteresis applied to avoid
-switching router-ids too often.</t>
+<t>The obvious route selection strategy is to choose for each destination
+the feasible route with lowest metric.  However, with continuously varying
+costs and metrics this simple strategy will in some cases lead to route
+oscillations.  See <xref target="route-selection-examples"/> for
+a discussion of the issues and suggested strategies for dealing with them.</t>
 
 <t>After the route selection procedure is run, triggered updates
 (<xref target="triggered-updates"/>) and requests
@@ -2646,7 +2633,7 @@ a set of stragies that have been found to work well in actual networks.</t>
 received Hello TLVs of each kind (<xref target="hello-history"/>),
 it computes costs by using the 2-out-of-3 strategy (<xref target="k-j"/>) on
 wired links, and ETX (<xref target="etx"/>) on wireless links.  It uses an
-additive algebra for metric computation (<xref target="additive-metric"/>).</t>
+additive algebra for metric computation (<xref target="metric-computation-examples"/>).</t>
 
 <section title="Maintaining Hello History" anchor="hello-history">
 
@@ -2771,13 +2758,11 @@ Hellos).</t>
 
 </section>
 
-<section title="Metric Computation" anchor="metric-computation-examples">
+<section title="Metric computation" anchor="metric-computation-examples">
 
 <t>As described in <xref target="metric-computation"/>, the metric
 advertised by a neighbour is combined with the link cost to yield
 a metric.</t>
-
-<section title="Additive Metrics" anchor="additive-metric">
 
 <t>The simplest approach for obtaining a monotonic, left-distributive
 metric is to define the metric of a route as the sum of the costs of the
@@ -2789,6 +2774,49 @@ m) = c + m.</t>
 the logarithm (in some suitable base) of the link costs.</t>
 
 </section>
+
+<section title="Route selection" anchor="route-selection-examples">
+
+<t>Route selection (<xref target="route-selection"/>) is the process by
+which a node selects a single route among the routes that it has available
+towards a given destination.  With Babel, any route selection procedure
+that only ever chooses feasible routes with a finite metric will yield
+a set of loop-free routes; however, not all route selection policies will
+yield good reasults.</t>
+
+<t>The obvious route selection procedure is to pick, for every
+destination, the feasible route with minimal metric.  When all metrics are
+stable, this strategy leads to convergence to a tree of shortest paths
+(assuming that the metric is left-distributive).  There are two reasons,
+however, why this strategy leads to instability in the presence of
+continously varying metrics such as ETX (<xref target="etx"/>).  First, if
+two parallel routes oscillate around a common value, then the smallest
+metric strategy will keep switching between the two.  Second, when a route
+is selected, congestion along it increases, which might increase packet
+loss, which in turn could cause its metric to increase; this is a feedback
+loop, of the kind that is prone to causing persistent oscillations.</t>
+
+<t>A simple strategy to avoid this kind of instabilities is to only switch
+routes when the target route's metric is smaller by some constant than the
+currently selected metric.  However, this approach is difficult to tune:
+if the constant is too small, then it fails to avoid oscillations, and if
+it is too large, then it leads to sub-optimal routing.  A better strategy
+is to apply hysteresis (sensitivity to a route's history) to the route
+selection algorithm.  The following hysteresis algorithm appears to yield
+good results with a variety of metrics.</t>
+
+<t>For every route R, in addition to the route's metric m(R) maintain
+a smoothed version of m(R) written ms(R) (we suggest computing ms(R) as an
+exponential average of m(R) with a time constant equal to a small multiple
+of the Hello interval).  If no route to a given destination is selected,
+then select the route with the smallest metric, ignoring the smoothed
+metric.  If a route R is selected, then switch to a route R' only when
+both m(R')&nbsp;&lt;&nbsp;m(R) and ms(R')&nbsp;&lt;&nbsp;ms(R).</t>
+
+<t>Intuitively, the smoothed metric is a long-term estimate of the quality
+of a route.  The algorithm above works by only switching routes when both
+the instananeous and the long-term estimate of the route's quality
+indicate that switching is profitable.</t>
 
 </section>
 

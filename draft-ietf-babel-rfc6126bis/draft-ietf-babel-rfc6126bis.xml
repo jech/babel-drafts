@@ -2783,7 +2783,7 @@ which a node selects a single route among the routes that it has available
 towards a given destination.  With Babel, any route selection procedure
 that only ever chooses feasible routes with a finite metric will yield
 a set of loop-free routes; however, not all route selection policies will
-yield good reasults.</t>
+yield good results.</t>
 
 <t>The obvious route selection procedure is to pick, for every
 destination, the feasible route with minimal metric.  When all metrics are
@@ -2806,7 +2806,7 @@ is to apply hysteresis (sensitivity to a route's history) to the route
 selection algorithm.  The following hysteresis algorithm appears to yield
 good results with a variety of metrics.</t>
 
-<t>For every route R, in addition to the route's metric m(R) maintain
+<t>For every route R, in addition to the route's metric m(R), maintain
 a smoothed version of m(R) written ms(R) (we suggest computing ms(R) as an
 exponential average of m(R) with a time constant equal to a small multiple
 of the Hello interval).  If no route to a given destination is selected,

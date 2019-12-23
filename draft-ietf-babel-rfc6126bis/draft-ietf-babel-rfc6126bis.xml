@@ -2346,7 +2346,7 @@ in all of the registries mentioned above by references to this document.</t>
 
 <t>As defined in this document, Babel is a completely insecure protocol.
 Without additional security mechanisms, Babel trusts any information it
-receives in plaintext UDP datagrams and acts on it. An attacker that is
+receives in plaintext UDP datagrams and acts on it.  An attacker that is
 present on the local network can impact Babel operation in a variety of
 ways; for example they can:
 <list style="symbols">
@@ -2361,16 +2361,16 @@ When carried over IPv6, Babel packets are ignored unless they are sent
 from a link-local IPv6 address; since routers don't forward link-local
 IPv6 packets, this mitigates the attacks outlined above by restricting
 them to on-link attackers.  No such natural protection exists when Babel
-packets are carried over IPv4.</t>
+packets are carried over IPv4, which is one of the reasons why it is
+recommended to deploy Babel over IPv6
+(<xref target="transmission-reception"/>).</t>
 
-<t>If packets arriving at a Babel node cannot be trusted, either because
-it cannot be ensured that they originated on a local link, because the
-local link itself is not protected by a sufficiently strong lower-layer
-mechanism, or because it is not desirable to trust a lower-layer security
-mechanism, then the Babel control traffic must be protected by an
-application-layer mechanism.  There are currently two such mechanisms,
-which implement different tradeoffs between implementation simplicity and
-security:
+<t>It is usually difficult to ensure that packets arriving at a Babel node
+are trusted, even in the case where the local link is believed to be
+secure.  For that reason, it is RECOMMENDED that all Babel traffic be
+protected by an application-layer cryptographic protocol.  There are
+currently two suitable mechanisms, which implement different tradeoffs
+between implementation simplicity and security:
 <list style="symbols">
 <t>Babel over DTLS <xref target="BABEL-DTLS"/> runs the majority of Babel
 traffic over DTLS, and leverages DTLS to authenticate nodes and provide
@@ -2390,13 +2390,15 @@ Babel-DTLS in deployments where its limitations are acceptable, i.e., when
 symmetric keying is sufficient and where the routing information is not
 considered confidential.</t>
 
+<t>Every implementation of Babel SHOULD implement BABEL-MAC.</t>
+
 <t>One should be aware that the information that a mobile Babel node
-announces to the whole routing domain is sufficient to determine a mobile
+announces to the whole routing domain is sufficient to determine the mobile
 node's physical location with reasonable precision, which might cause
 privacy concerns even if the control traffic is protected from
-unauthenticated attackers by Babel-DTLS.  This issue may be mitigated
-somewhat by using randomly chosen router-ids and randomly chosen IP
-addresses, and changing them often enough.</t>
+unauthenticated attackers by a cryptographic mechanism such as Babel-DTLS.
+This issue may be mitigated somewhat by using randomly chosen router-ids
+and randomly chosen IP addresses, and changing them often enough.</t>
 </section>
 
 <section title="Acknowledgments">

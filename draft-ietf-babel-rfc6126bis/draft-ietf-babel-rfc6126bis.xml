@@ -2135,7 +2135,7 @@ Plen/8 rounded upwards.</t>
 
 <t>A Request TLV prompts the receiver to send an update message (possibly
 a retraction) for the prefix specified by the AE, Plen, and Prefix fields,
-or a full dump of its route table if AE is 0 (in which case Plen MUST be
+or a full dump of its route table if AE is 0 (in which case Plen must be
 0 and Prefix is of length 0).</t>
 
 <t>This TLV is self-terminating, and allows sub-TLVs.</t>
@@ -2348,7 +2348,7 @@ in all of the registries mentioned above by references to this document.</t>
 Without additional security mechanisms, Babel trusts any information it
 receives in plaintext UDP datagrams and acts on it. An attacker that is
 present on the local network can impact Babel operation in a variety of
-ways, for example they can:
+ways; for example they can:
 <list style="symbols">
 <t>spoof a Babel packet, and redirect traffic by announcing a route with
 a smaller metric, a larger sequence number, or a longer prefix;</t>
@@ -2807,13 +2807,13 @@ loss, which in turn could cause its metric to increase; this is a feedback
 loop, of the kind that is prone to causing persistent oscillations.</t>
 
 <t>A simple strategy to avoid this kind of instabilities is to only switch
-routes when the target route's metric is smaller by some constant than the
-currently selected metric.  However, this approach is difficult to tune:
-if the constant is too small, then it fails to avoid oscillations, and if
-it is too large, then it leads to sub-optimal routing.  A better strategy
-is to apply hysteresis (sensitivity to a route's history) to the route
-selection algorithm.  The following hysteresis algorithm appears to yield
-good results with a variety of metrics.</t>
+routes when the target route's metric is smaller by some constant margin
+than the currently selected metric.  However, this approach is difficult
+to tune: if the constant is too small, then it fails to avoid oscillations,
+and if it is too large, then it leads to sub-optimal routing.  A better
+strategy is to apply hysteresis (sensitivity to a route's history) to the
+route selection algorithm.  The following hysteresis algorithm appears to
+yield good results with a variety of metrics.</t>
 
 <t>For every route R, in addition to the route's metric m(R), maintain
 a smoothed version of m(R) written ms(R) (we suggest computing ms(R) as an
@@ -3037,7 +3037,7 @@ the two protocols are not entirely compatible, the new protocol has been
 designed so that it can be deployed in existing RFC 6126 networks without
 requiring a flag day.</t>
 
-<t>There are three optional features that make the new protocol
+<t>There are three optional features that make this protocol
 incompatible with its predecessor.  First of all, RFC 6126 did not define
 Unicast hellos (<xref target="reverse-reachability"/>), and an
 implementation of RFC 6126 will mis-interpret a Unicast Hello for
@@ -3054,7 +3054,7 @@ sub-TLV; depending on the sub-TLV, this might cause routing pathologies.</t>
 <t>An implementation of this specification that never sends Unicast or
 unscheduled Hellos and doesn't implement any extensions that use mandatory
 sub-TLVs is safe to deploy in a network in which some nodes implement the
-old protocol.</t>
+protocol described in RFCs 6126 and 7557.</t>
 
 <t>Two changes need to be made to an implementation of RFCs 6126 and 7557
 so that it can safely interoperate in all cases with implementations of

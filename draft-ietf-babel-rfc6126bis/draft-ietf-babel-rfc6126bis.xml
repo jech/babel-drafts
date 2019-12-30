@@ -3265,6 +3265,13 @@ a better approach.</t>
 </list></t>
 </section>
 
+<section title="Changes since draft-ietf-babel-rfc6126bis-14">
+<t><list style="symbols">
+<t>Implementing Babel-MAC is now recommended.</t>
+</list></t>
+
+</section>
+
 </section>
 
 </back>

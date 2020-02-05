@@ -559,7 +559,8 @@ within one-half of the Multicast Hello interval.</t>
 receiver), a delay SHOULD be introduced between successive packets sent
 out on the same interface, within the constraints of the previous
 paragraph.  Note however that such packet pacing might impair the ability
-of some link layers (e.g., IEEE&nbsp;802.11) to perform packet aggregation.</t>
+of some link layers (e.g., IEEE&nbsp;802.11 <xref target="IEEE802.11"/>)
+to perform packet aggregation.</t>
 
 </section>
 
@@ -2628,6 +2629,17 @@ technique was inspired by <xref target="PACKETBB"/>.</t>
 <seriesInfo name="Internet-Draft" value="draft-chroboczek-babel-diversity-routing-01" />
 </reference>
 
+<reference anchor="IEEE802.11"><front>
+<title>IEEE Standard for Information technology--Telecommunications and
+information exchange between systems Local and metropolitan area
+networks--Specific requirements Part 11: Wireless LAN Medium Access
+Control (MAC) and Physical Layer (PHY) Specifications</title>
+<author><organization>IEEE</organization></author>
+<date day="5" month="April" year="2012"/>
+</front>
+<seriesInfo name='IEEE' value='802.11-2012' />
+<seriesInfo name='DOI' value='10.1109/ieeestd.2012.6178212' />
+</reference>
 
 </references>
 
@@ -2711,7 +2723,7 @@ to infinity.</t>
 k-out-of-j twice for each neighbour, once on the Unicast and once on the
 Multicast Hello history.  If either of the instances of k-out-of-j
 indicates that the link is up, then the link is assumed to be up, and the
-rxcost is set to K; if both instances indicate that the link is down, then
+rxcost is set to C; if both instances indicate that the link is down, then
 the link is assumed to be down, and the rxcost is set to infinity.  In
 other words, the resulting rxcost is the minimum of the rxcosts yielded by
 the two instances of k-out-of-j link sensing.</t>
@@ -2736,12 +2748,13 @@ which can dramatically reduce throughput.  For that reason, a routing
 protocol designed to support wireless links must perform some form of
 link-quality estimation.</t>
 
-<t>ETX <xref target="ETX"/> is a simple link-quality estimation algorithm
-that is designed to work well with the IEEE&nbsp;802.11 MAC.  By default,
-the IEEE&nbsp;802.11 MAC performs ARQ and rate adaptation on unicast
-frames, but not on multicast frames, which are sent at a fixed rate with
-no ARQ; therefore, measuring the loss rate of multicast frames yields
-a useful estimate of a link's quality.</t>
+<t>The Expected Transmission Cost algorithm, or ETX <xref target="ETX"/>,
+is a simple link-quality estimation algorithm that is designed to work
+well with the IEEE&nbsp;802.11 MAC <xref target="IEEE802.11"/>.  By
+default, the IEEE&nbsp;802.11 MAC performs Automatic Repeat Query (ARQ)
+and rate adaptation on unicast frames, but not on multicast frames, which
+are sent at a fixed rate with no ARQ; therefore, measuring the loss rate
+of multicast frames yields a useful estimate of a link's quality.</t>
 
 <t>A node performing ETX link quality estimation uses a neighbour's
 Multicast Hello history to compute an estimate, written beta, of the
@@ -3265,7 +3278,7 @@ a better approach.</t>
 </list></t>
 </section>
 
-<section title="Changes since draft-ietf-babel-rfc6126bis-14">
+<section title="Changes since draft-ietf-babel-rfc6126bis-15">
 <t><list style="symbols">
 <t>Implementing Babel-MAC is now recommended.</t>
 </list></t>

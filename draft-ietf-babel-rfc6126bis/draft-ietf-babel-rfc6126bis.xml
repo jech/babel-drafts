@@ -2863,8 +2863,8 @@ after a mobility event.  While the protocol allows intervals as low as
 10ms, such low values would cause significant amounts of protocol traffic
 for little practical benefit.</t>
 
-<t>The following values are recommended in a network with little mobility,
-and where occasional outages of up to 14 seconds are acceptable:
+<t>The following values have been found to work well in a variety of
+environments, and are therefore RECOMMENDED default values:
 <list style="empty">
 <t>Multicast Hello Interval: 4 seconds.</t>
 <t>Unicast Hello Interval: infinite (no Unicast Hellos are sent).</t>
@@ -2878,19 +2878,6 @@ Multicast Hello on lossless links.</t>
 <t>IHU Hold Time: 3.5 times the advertised IHU interval.</t>
 <t>Route Expiry Time: 3.5 times the advertised update interval.</t>
 <t>Request timeout: initially 2 seconds, doubled every time a request is
-resent, up to a maximum of three times.</t>
-<t>Urgent timeout: 0.2 seconds.</t>
-<t>Source GC time: 3 minutes.</t>
-</list></t>
-
-<t>The following values are recommended in a network where reconvergence
-within 2 seconds after a mobility event is desired:
-<list style="empty">
-<t>Multicast Hello Interval: 0.5 seconds.</t>
-<t>Unicast Hello Interval: infinite (no Unicast Hellos are sent).</t>
-<t>Link cost, IHU Interval, Update Interval, IHU Hold Time, and Route
-Expiry Time: computed as in the first case above.</t>
-<t>Request Timeout: initially 0.5 seconds, doubled every time a request is
 resent, up to a maximum of three times.</t>
 <t>Urgent timeout: 0.2 seconds.</t>
 <t>Source GC time: 3 minutes.</t>

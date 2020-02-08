@@ -2112,7 +2112,8 @@ used.  AE MAY then be 0, in which case this Update retracts all of the
 routes previously advertised by the sending interface.  If the metric is
 finite, AE MUST NOT be 0; Update TLVs with finite metric and AE equal to
 0 MUST be ignored.  If the metric is infinite and AE is 0, Plen and
-Omitted MUST both be 0.</t>
+Omitted MUST both be 0; Update TLVs that do not satisfy this requirement
+MUST be ignored.</t>
 
 <t>Update TLVs with an unknown value in the AE field MUST be silently
 ignored.</t>
@@ -2152,7 +2153,8 @@ Plen/8 rounded upwards.</t>
 <t>A Request TLV prompts the receiver to send an update message (possibly
 a retraction) for the prefix specified by the AE, Plen, and Prefix fields,
 or a full dump of its route table if AE is 0 (in which case Plen must be
-0 and Prefix is of length 0).</t>
+0 and Prefix is of length 0).  A Request TLV with AE set to 0 and Plen not
+set to 0 MUST be ignored.</t>
 
 <t>This TLV is self-terminating, and allows sub-TLVs.</t>
 

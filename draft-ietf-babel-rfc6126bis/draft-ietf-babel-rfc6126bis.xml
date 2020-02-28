@@ -913,10 +913,10 @@ concerned, only the following conditions MUST be satisfied:
   <t>if the txcost is infinite, then the cost is infinite.</t>
 </list></t>
 
-<t>Note that while this document does not constrain cost computation any
-further, not all cost computation strategies will give good results.  See
-<xref target="cost-computation-examples"/> for examples of strategies for
-computing a link's cost that are known to work well in practice.</t>
+<t>See <xref target="cost-computation-examples"/> for examples of
+strategies for computing a link's cost that are known to work well in
+practice.  See <xref target="route-selection"/> for a discussion of the
+issues that may occur with continuously varying metrics.</t>
 
 </section>
 
@@ -1018,11 +1018,8 @@ distributivity is not: if it is not satisfied, Babel will still converge
 to a loop-free configuration, but might not reach a global optimum (in
 fact, a global optimum may not even exist).</t>
 
-<t>As with cost computation, not all strategies for computing route
-metrics will give good results.  In particular, some metrics are more
-likely than others to lead to routing instabilities (route flapping).  In
-<xref target="metric-computation-examples"/>, we give an number of examples
-of strictly monotonic, left-distributive routing metrics that are known to
+<t>See <xref target="metric-computation-examples"/> for examples of
+strictly monotonic, left-distributive routing metrics that are known to
 work well in practice.  See also <xref target="filtering"/>, which
 describes a useful way to make the metric computation configurable by
 a network administrator.</t>

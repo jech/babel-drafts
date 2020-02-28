@@ -1018,11 +1018,13 @@ distributivity is not: if it is not satisfied, Babel will still converge
 to a loop-free configuration, but might not reach a global optimum (in
 fact, a global optimum may not even exist).</t>
 
-<t>See <xref target="metric-computation-examples"/> for examples of
-strictly monotonic, left-distributive routing metrics that are known to
-work well in practice.  See also <xref target="filtering"/>, which
-describes a useful way to make the metric computation configurable by
-a network administrator.</t>
+<t>The conditions above are easily satisfied by using the additive metric,
+i.e., by defining M(c,&nbsp;m)&nbsp;= c&nbsp;+&nbsp;m.  Since the additive
+metric is useful with a large range of cost computation strategies, it is
+the RECOMMENDED default.</t>
+
+<t><xref target="filtering"/> describes a useful way to make the metric
+computation configurable by a network administrator.</t>
 
 </section>
 
@@ -2666,7 +2668,7 @@ a set of stragies that have been found to work well in actual networks.</t>
 received Hello TLVs of each kind (<xref target="hello-history"/>),
 it computes costs by using the 2-out-of-3 strategy (<xref target="k-j"/>) on
 wired links, and ETX (<xref target="etx"/>) on wireless links.  It uses an
-additive algebra for metric computation (<xref target="metric-computation-examples"/>).</t>
+additive algebra for metric computation (<xref target="metric-computation"/>).</t>
 
 <section title="Maintaining Hello History" anchor="hello-history">
 
@@ -2789,23 +2791,6 @@ they send periodic Multicast Hellos (possibly in addition to Unicast
 Hellos).</t>
 
 </section>
-
-</section>
-
-<section title="Metric computation" anchor="metric-computation-examples">
-
-<t>As described in <xref target="metric-computation"/>, the metric
-advertised by a neighbour is combined with the link cost to yield
-a metric.</t>
-
-<t>The simplest approach for obtaining a monotonic, left-distributive
-metric is to define the metric of a route as the sum of the costs of the
-component links.  More formally, if a neighbour advertises a route with
-metric m over a link with cost c, then the resulting route has metric M(c,
-m) = c + m.</t>
-
-<t>A multiplicative metric can be converted into an additive one by taking
-the logarithm (in some suitable base) of the link costs.</t>
 
 </section>
 

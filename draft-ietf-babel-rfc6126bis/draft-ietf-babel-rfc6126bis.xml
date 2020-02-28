@@ -3260,7 +3260,15 @@ a better approach.</t>
 <t><list style="symbols">
 <t>Make the values in Appendix B normatively recommended defaults.</t>
 </list></t>
+</section>
 
+
+<section title="Changes since draft-ietf-babel-rfc6126bis-17">
+<t><list style="symbols">
+<t>Hysteresis in route selection is now RECOMMENDED.</t>
+<t>Additive metric algebra is now RECOMMENDED default.</t>
+<t>2-out-of-3 cost computation is now RECOMMENDED on LANs.</t>
+</list></t>
 </section>
 
 </section>

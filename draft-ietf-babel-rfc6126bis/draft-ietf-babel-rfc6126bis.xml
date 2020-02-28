@@ -915,8 +915,11 @@ concerned, only the following conditions MUST be satisfied:
 
 <t>See <xref target="cost-computation-examples"/> for examples of
 strategies for computing a link's cost that are known to work well in
-practice.  See <xref target="route-selection"/> for a discussion of the
-issues that may occur with continuously varying metrics.</t>
+practice.  The 2-out-of-3 strategy is simple to implement, and is
+therefore the RECOMMENDED default on links the quality of which does not
+vary over time and that only exhibit occasional packet loss in normal
+usage (e.g., wired local-area networks), except when link-layer
+information (e.g., link sense) is available.</t>
 
 </section>
 

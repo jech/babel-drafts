@@ -547,8 +547,8 @@ TLV.  When the protocol description specifies that a TLV is urgent (as in
 <xref target="triggered-updates"/> and <xref target="sending-requests"/>),
 then the TLV MUST be sent within a short time known as the urgent timeout
 (see <xref target="parameters"/> for recommended values).  When the TLV is
-governed by a timeout explicitly included in a previous TLV, (such as in
-the case of Acknowledgements <xref target="ack"/>),
+governed by a timeout explicitly included in a previous TLV, such as in
+the case of Acknowledgements (<xref target="ack"/>),
 Updates (<xref target="sending-updates"/> and IHUs
 (<xref target="bidirectional-reachability"/>), then the TLV MUST be sent
 early enough to meet the explicit deadline (with a small margin to allow
@@ -1491,7 +1491,8 @@ adjusted for lower-layer headers or 512 octets, whichever is larger, but
 not exceeding 2^16 - 1 adjusted for lower-layer headers.  Every Babel
 speaker MUST be able to receive packets that are as large as any attached
 interface's MTU adjusted for lower-layer headers or 512 octets, whichever
-is larger.  Babel packets MUST NOT be sent in IPv6 Jumbograms.</t>
+is larger.  Babel packets MUST NOT be sent in IPv6 Jumbograms
+<xref target="RFC2675"/>.</t>
 
 <section title="Data Types">
 
@@ -1499,7 +1500,7 @@ is larger.  Babel packets MUST NOT be sent in IPv6 Jumbograms.</t>
 <t>Relative times are carried as 16-bit values specifying a number of
 centiseconds (hundredths of a second).  This allows times up to roughly 11
 minutes with a granularity of 10ms, which should cover all reasonable
-applications of Babel.</t>
+applications of Babel (see also <xref target="parameters"/>).</t>
 </section>
 
 <section title="Router-Id" anchor="router-id-def">
@@ -2656,6 +2657,17 @@ Control (MAC) and Physical Layer (PHY) Specifications</title>
 <seriesInfo name='DOI' value='10.1109/ieeestd.2012.6178212' />
 </reference>
 
+<reference anchor="RFC2675"><front>
+<title>IPv6 Jumbograms</title>
+<author initials="D." surname="Borman" fullname="D. Borman"/>
+<author initials="S." surname="Deering" fullname="S. Deering"/>
+<author initials="R." surname="Hinden" fullname="R. Hinden"/>
+<date year="1999" month="August"/>
+</front>
+<seriesInfo name="RFC" value="2675"/>
+<seriesInfo name="DOI" value="10.17487/RFC2675"/>
+</reference>
+
 </references>
 
 <section title="Cost and Metric Computation">
@@ -2665,7 +2677,7 @@ matter; Babel itself only requires that it comply with the conditions given
 in <xref target="cost-computation"/> and <xref target="metric-computation"/>.
 Different nodes may use different strategies in a single network and may
 use different strategies on different interface types.  This section describes
-a set of stragies that have been found to work well in actual networks.</t>
+a set of strategies that have been found to work well in actual networks.</t>
 
 <t>In summary, a node maintains per-neighbour statistics about the last 16
 received Hello TLVs of each kind (<xref target="hello-history"/>),
@@ -2824,7 +2836,7 @@ both m(R')&nbsp;&lt;&nbsp;m(R) and ms(R')&nbsp;&lt;&nbsp;ms(R).</t>
 
 <t>Intuitively, the smoothed metric is a long-term estimate of the quality
 of a route.  The algorithm above works by only switching routes when both
-the instananeous and the long-term estimate of the route's quality
+the instantaneous and the long-term estimate of the route's quality
 indicate that switching is profitable.</t>
 
 </section>
@@ -2918,7 +2930,7 @@ compatible manner:
 </list></t>
 
 <t>This appendix is intended to guide designers of protocol extensions in
-chosing a particular encoding.</t>
+choosing a particular encoding.</t>
 
 <t>The version number in the Babel header should only be increased if the
 new version is not backwards compatible with the original protocol.</t>

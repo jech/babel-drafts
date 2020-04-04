@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd" []>
+<?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
+<?rfc toc="yes"?>
+<?rfc tocdepth="2"?>
+<?rfc symrefs="yes"?>
+<?rfc sortrefs="yes" ?>
+<?rfc compact="no" ?>
+<rfc category="exp" docName="draft-bastian-babel-v4ov6"
+    ipr="trust200902"
+    updates="6126">
+<front>
+<title abbrev="Babel v4-over-v6 Extension">
+Announcing IPv4 routes with an IPv6 next-hop in the Babel routing protocol
+</title>
+<author fullname="Theophile Bastian" initials="T." surname="Bastian">
+<organization>Ecole Normale Superieure, Paris</organization>
+<address>
+<postal>
+<street></street>
+<city></city>
+<region></region>
+<code></code>
+<country>France</country>
+</postal>
+<email>theophile.bastian@ens.fr</email>
+</address>
+</author>
+<author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek">
+<organization>IRIF, University of Paris-Diderot</organization>
+<address>
+<postal>
+<street>Case 7014</street>
+<city>75205 Paris Cedex 13</city>
+<region></region>
+<code></code>
+<country>France</country>
+</postal>
+<email>jch@irif.fr</email>
+</address>
+</author>
+
+<date day="04" month="April" year="2020"/>
+
+<abstract>
+<t>
+This document defines an extension to the Babel routing protocol
+that allows routing an IPv4 packet through an IPv6 next-hop,
+enabling Babel to route eg. IPv4 packets over an IPv6 network
+core.
+</t>
+</abstract>
+</front>
+
+<middle>
+
+<section title="Introduction">
+<t>
+Usually, a routing table maps a network prefix of the considered
+address family to an output interface and a next-hop address
+belonging to the same address family.
+</t>
+
+<t>
+However, the sole purpose of the next-hop address is to retrieve the
+layer 2 address of the next-hop (eg. MAC address). It is thus
+technically possible -- provided there is hardware- and
+software-level support for this -- to use a routing table with
+IPv4 prefixes and IPv6 next-hops. Support for this was introduced in
+<eref target="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=d15662682db232da77136cd348f4c9df312ca6f9">Linux 5.2</eref>.
+</t>
+
+<t>
+Such a route, which we will call v4-over-v6 route, can be useful
+when one cannot or does not wish to assign IPv4 addresses to a part
+of an infrastructure, eg. to carry IPv4 packets over an IPv6-only
+network core.
+</t>
+
+<t>
+The present document extends the Babel routing protocol
+<xref target="BABEL"/> to support v4-over-v6 routes.
+</t>
+</section>
+
+<section title="Protocol operation">
+<t>
+The protocol adds a new Address Encoding (AE)
+(<xref target="ae-v4ov6"/>). This AE allows to advertise an IPv4
+route with an IPv6 next-hop.
+</t>
+
+<section title="V4-over-v6 Address Encoding" anchor="ae-v4ov6">
+<t>TODO</t>
+</section>
+
+<section title="Backwards and forwards compatibility">
+
+<t>This protocol extension adds no new TLVs or sub-TLVs.</t>
+
+<t>
+This protocol extension uses a new AE. As discussed in
+Appendix&nbsp;D of <xref target="BABEL"/>, implementations that
+do not understand this extension will silently ignore the various
+TLVs that use this new AE.
+</t>
+
+<t>
+Using a new AE introduces a new compression state, used to parse
+the network prefixes. As this compression state is separated from
+other AEs' states, it will not interfere with the operation of the
+Babel protocol outside the scope of the present extension.
+</t>
+
+<t>
+This extension reuses the next-hop state from AEs 2 and 3 (IPv6),
+but does so in a read-only fashion, causing no compatibility
+issues.
+</t>
+
+<t>
+TODO specify that a node should not send a v4-over-v6 route over
+an interface without a matching pure-v4 route if the interface
+supports IPv4? If not, the peer router could not support this
+extension and ignore the route.
+</t>
+</section>
+
+</section>
+
+<section title="Protocol encoding">
+
+<t>
+This extension defines the v4-over-v6 AE <xref target="BABEL"/>,
+whose value is 4. It defines no new TLVs or sub-TLVs.
+</t>
+
+<section title="Address encoding">
+<t>
+The address encoding for AE 4 (v4-over-v6) is similar to that of
+AE 1 (IPv4 address). Compression is allowed. 4 octets or less.
+IPv4 address family.
+</t>
+</section>
+
+<section title="Changes for existing TLVs">
+<t>
+The new v4-over-v6 AE can be used within the following previously
+existing Babel TLVs :
+
+<list style="symbols">
+<t>Update (Type = 8)</t>
+<t>Route Request (Type = 9)</t>
+<t>Seqno Request (Type = 10)</t>
+</list>
+</t>
+
+<t>
+This AE value MUST NOT be used in any other Babel TLV, unless a
+future extension defines a behaviour for this AE.
+</t>
+
+<section title="Update">
+<t>
+An Update (Type = 8) TLV with AE = 4 has the same behaviour
+as an Update TLV with AE = 1, with only the following differences :
+
+<list style="symbols">
+<t>
+Prefix compression: AE 4 has its own separate compression
+state. This state must be used instead of the AE 1 state for
+compression state update and prefix decoding.
+</t>
+<t>
+Next Hop: the next-hop address for this update is taken from
+the last preceding Next Hop TLV with an IPv6 address family
+in the same packet even if it was otherwise ignored due to
+an unknown mandatory sub-TLV; if no such TLV exists, it is
+taken from the network-layer source address of this packet
+if it belongs to the IPv6 address family; otherwise, this
+Update MUST be ignored.
+</t>
+</list>
+</t>
+</section>
+
+<section title="Route Request">
+<t>TODO</t>
+</section>
+
+<section title="Seqno Request">
+<t>TODO</t>
+</section>
+</section>
+</section>
+
+<section title="IANA Considerations">
+
+<t>
+IANA is instructed to add the following entry to the "Babel Address
+Encodings" registry:
+</t>
+
+<texttable>
+<ttcol>AE</ttcol><ttcol>Name</ttcol><ttcol>Reference</ttcol>
+<c>4</c><c>v4-over-v6</c><c>(this document)</c>
+</texttable>
+
+</section>
+
+<section title="Security Considerations">
+<t>
+This extension merely adds a way of expressing a new kind of route,
+which does not differ much in principle from what could be encoded
+before. Thus, it does not significantly change the security
+properties of the Babel protocol.
+</t>
+</section>
+
+</middle>
+
+<back>
+
+<references title="Normative References">
+
+<reference anchor="BABEL"><front>
+<title>The Babel Routing Protocol</title>
+<author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
+<date month="August" year="2019"/>
+</front>
+<seriesInfo name="RFC" value="6126bis"/>
+</reference>
+
+</references>
+</back>
+</rfc>

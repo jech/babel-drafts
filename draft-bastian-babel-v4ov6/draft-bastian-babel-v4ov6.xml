@@ -10,7 +10,7 @@
     ipr="trust200902"
     updates="6126">
 <front>
-<title abbrev="Babel v4-over-v6 Extension">
+<title abbrev="IPv4 routes with an IPv6 next-hop">
 Announcing IPv4 routes with an IPv6 next-hop in the Babel routing protocol
 </title>
 <author fullname="Theophile Bastian" initials="T." surname="Bastian">
@@ -40,12 +40,13 @@ Announcing IPv4 routes with an IPv6 next-hop in the Babel routing protocol
 </address>
 </author>
 
-<date day="04" month="April" year="2020"/>
+<date day="27" month="April" year="2020"/>
 
 <abstract>
 <t>This document defines an extension to the Babel routing protocol that
-allows routing an IPv4 packet through an IPv6 next-hop, enabling Babel to
-route eg. IPv4 packets over an IPv6 network core.</t>
+allows annoncing IPv4 packet with an IPv6 next-hop, which allows IPv4
+traffic to flow through interfaces that have not been assigned an IPv4
+address.</t>
 </abstract>
 </front>
 
@@ -53,43 +54,54 @@ route eg. IPv4 packets over an IPv6 network core.</t>
 
 <section title="Introduction">
 
-<t>Usually, a routing table maps a network prefix of the considered
-address family to an output interface and a next-hop address belonging to
-the same address family.</t>
+<t>Traditionally a routing table maps a network prefix of a given address
+family to a next-hop address in the same address family.  The sole purpose
+of this next-hop address is to serve as an input to a protocol that will
+map it to a link-layer address (Neighbour Discovery (ND) in the case of
+IPv6, Address Resolution (ARP) in the case of IPv6).  Therefore, there is
+no reason why the address family of the next hop address should match that
+of the prefix being announced: an IPv6 next-hop yields a link-layer
+address that is suitable for forwarding both IPv6 or IPv4 traffic.</t>
 
-<t>However, the sole purpose of the next-hop address is to retrieve the
-layer 2 address of the next-hop (eg. MAC address). It is thus technically
-possible -- provided there is hardware- and software-level support for
-this -- to use a routing table with IPv4 prefixes and IPv6
-next-hops. Support for this was introduced in <eref
-target="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=d15662682db232da77136cd348f4c9df312ca6f9">Linux
-5.2</eref>.</t>
+<t>We call a route towards an IPv4 prefix that uses an IPv6 next hop
+a "v4-over-v6" route.  Since an IPv6 next-hop can use a link-local address
+that is autonomously configured, the use of v4-over-v6 routes enables
+a mode of operation where the network core has no statically assigned IP
+addresses of either family, thus significantly reducing the amount of
+manual configuration.</t>
 
-<t>Such a route, which we will call v4-over-v6 route, can be useful
-when one cannot or does not wish to assign IPv4 addresses to a part
-of an infrastructure, eg. to carry IPv4 packets over an IPv6-only
-network core.</t>
-
-<t>The present document extends the Babel routing protocol
-<xref target="BABEL"/> to support v4-over-v6 routes.</t>
+<t>This document describes an extension that allows the Babel routing
+protocol <xref target="RFC6126bis"/> to announce routes towards IPv6 prefixes
+with IPv4 next hops.  The extension has been inspired by a previously
+defined extension to the BGP protocol <xref target="RFC5549"/>.</t>
 </section>
 
 <section title="Protocol operation">
 
-<t>The protocol adds a new Address Encoding (AE)
-(<xref target="ae-v4ov6"/>). This AE allows to advertise an IPv4 route
-with an IPv6 next-hop.</t>
+<t>In the Babel protocol, both destination prefixes and next hops are
+tagged with an Address Encoding (AE).  V4-over-v6 prefixes are announced
+in a new AE and reuse the existing IPv6 next-hop.</t>
 
-<section title="V4-over-v6 Address Encoding" anchor="ae-v4ov6">
-<t>TODO</t>
+<section title="Announcing v4-over-v6 routes">
+
 </section>
 
-<section title="Backwards and forwards compatibility">
+<section title="Receiving v4-over-v6 routes">
+
+</section>
+
+<section title="Prefix and seqno requests">
+
+</section>
+
+</section>
+
+<section title="Backwards compatibility">
 
 <t>This protocol extension adds no new TLVs or sub-TLVs.</t>
 
 <t>This protocol extension uses a new AE. As discussed in Appendix&nbsp;D
-of <xref target="BABEL"/>, implementations that do not understand this
+of <xref target="RFC6126bis"/>, implementations that do not understand this
 extension will silently ignore the various TLVs that use this new AE.</t>
 
 <t>Using a new AE introduces a new compression state, used to parse the
@@ -107,11 +119,9 @@ extension and ignore the route.</t>
 
 </section>
 
-</section>
-
 <section title="Protocol encoding">
 
-<t>This extension defines the v4-over-v6 AE <xref target="BABEL"/>,
+<t>This extension defines the v4-over-v6 AE <xref target="RFC6126bis"/>,
 whose value is 4. It defines no new TLVs or sub-TLVs.</t>
 
 <section title="Address encoding">
@@ -131,8 +141,7 @@ existing Babel TLVs :
 </list>
 </t>
 
-<t>This AE value MUST NOT be used in any other Babel TLV, unless a future
-extension defines a behaviour for this AE.</t>
+<t>This AE value MUST NOT be used in the Next Hop TLV.</t>
 
 <section title="Update">
 
@@ -174,13 +183,21 @@ Encodings" registry:</t>
 </texttable>
 
 </section>
-
+ 
 <section title="Security Considerations">
 
-<t>This extension merely adds a way of expressing a new kind of route,
-which does not differ much in principle from what could be encoded
-before. Thus, it does not significantly change the security
-properties of the Babel protocol.</t>
+<t>This extension does not fundamentally change the security properties of
+the Babel protocol: as described in Section 6 of <xref target="RFC6126bis"/>,
+Babel must be protected by a suitable cryptographic mechanism in order to
+be made secure.</t>
+
+<t>However, enabling this extension will allow IPv4 traffic to flow
+through sections of a network that have not been assigned IPv4 addresses,
+which, in turn, might allow IPv4 traffic to reach areas of the network
+that were previously inaccessible to such traffic.  If this is
+undesirable, the flow of IPv4 traffic must be restricted by the use of
+suitable filtering rules (Appendix C of <xref target="RFC6126bis"/>)
+together with matching access control rules in the data plane.</t>
 
 </section>
 
@@ -190,12 +207,30 @@ properties of the Babel protocol.</t>
 
 <references title="Normative References">
 
-<reference anchor="BABEL"><front>
+<reference anchor='RFC6126bis'><front>
 <title>The Babel Routing Protocol</title>
-<author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
-<date month="August" year="2019"/>
+<author initials='J' surname='Chroboczek' fullname='Juliusz Chroboczek'/>
+<author initials='D' surname='Schinazi' fullname='David Schinazi'/>
+<date month='February' day='6' year='2020' />
 </front>
-<seriesInfo name="RFC" value="6126bis"/>
+<seriesInfo name='Internet-Draft' value='draft-ietf-babel-rfc6126bis-17'/>
+</reference>
+
+</references>
+
+<references title="Informative References">
+
+<reference anchor="RFC5549">
+<front>
+<title>
+Advertising IPv4 Network Layer Reachability Information with an IPv6 Next Hop
+</title>
+<author initials="F." surname="Le Faucheur" fullname="F. Le Faucheur"/>
+<author initials="E." surname="Rosen" fullname="E. Rosen"/>
+<date year="2009" month="May"/>
+</front>
+<seriesInfo name="RFC" value="5549"/>
+<seriesInfo name="DOI" value="10.17487/RFC5549"/>
 </reference>
 
 </references>

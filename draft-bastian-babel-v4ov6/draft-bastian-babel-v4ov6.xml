@@ -103,7 +103,7 @@ benefit.</t>
 
 <section title="Receiving v4-over-v6 routes">
 
-<t>Upon reception of an Update TLV with a v4-over-v6 AE, a Babel nodes
+<t>Upon reception of an Update TLV with a v4-over-v6 AE, a Babel node
 computes the IPv6 next-hop, as described in Section 4.6.9 of
 <xref target="RFC6126bis"/>.  If no suitable next-hop exists, then the Update
 MUST be silently ignored.  If such a next-hop exists, then the node SHOULD
@@ -138,13 +138,13 @@ requestt with the AE field being set to 1 (IPv4).</t>
 <t>When receiving requests, AEs 1 (IPv4) and TBD (v4-over-v6) MUST be
 treated equivalently: the receiver processes the request as described in
 Section 3.8 of <xref target="RFC6126bis"/>; if an Update is sent, then it
-MAY be sent with AE 1 or TBD, as described in Section <xref target="updates"/>
+MAY be sent with AE 1 or TBD, as described in <xref target="updates"/>
 above, irrespective of which AE was used in the request.</t>
 
 <t>When receiving a request with AE 0 (wildcard), the receiver SHOULD send
 a full route dump, as described in Section 3.8.1.1 of
 <xref target="RFC6126bis"/>.  Any IPv4 routes contained in the route dump
-MAY use either AE 1 or AE TBD, as described in Section <xref target="updates"/>
+MAY use either AE 1 or AE TBD, as described in <xref target="updates"/>
 above.</t>
 
 </section>
@@ -259,7 +259,7 @@ Encodings" registry:</t>
 </texttable>
 
 </section>
- 
+
 <section title="Security Considerations">
 
 <t>This extension does not fundamentally change the security properties of

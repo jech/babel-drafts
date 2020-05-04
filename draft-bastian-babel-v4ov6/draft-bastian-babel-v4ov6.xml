@@ -179,16 +179,16 @@ presence of routers not aware of the present extension.</t>
 
 <section title="Protocol encoding">
 
-<t>This extension defines the v4-over-v6 AE, whose value is 4. It defines no
+<t>This extension defines the v4-over-v6 AE, whose value is TBD. It defines no
 new TLVs or sub-TLVs.</t>
 
 <section title="Address encoding" anchor="address-encoding">
-<t>The address encoding for AE 4 (v4-over-v6) is similar to that of
+<t>The address encoding for AE TBD (v4-over-v6) is similar to that of
 AE 1 (IPv4 address). Compression is allowed. 4 octets or less.
 IPv4 address family.</t>
 
 <t>A compression state distinct from that of AE 1 (IPv4) is introduced, and
-MUST be used to (de)compress prefixes tagged with the AE 4.</t>
+MUST be used to (de)compress prefixes tagged with the AE TBD.</t>
 
 </section>
 
@@ -205,12 +205,12 @@ existing Babel TLVs :
 </t>
 
 <t>This AE value MUST NOT be used in any other TLV. Any other TLV tagged with
-AE 4 SHOULD be silently ignored. Specifically, it must not be used within the
+AE TBD SHOULD be silently ignored. Specifically, it must not be used within the
 Next Hop TLV.</t>
 
 <section title="Update">
 
-<t>An Update (Type = 8) TLV with AE = 4 has the same behaviour as an Update
+<t>An Update (Type = 8) TLV with AE = TBD has the same behaviour as an Update
 with AE = 1, with only the following differences.
 
 <list style="symbols">
@@ -239,9 +239,9 @@ ignored.</t>
 </section>
 -->
 
-<section title="Other valid TLVs tagged with AE = 4">
+<section title="Other valid TLVs tagged with AE = TBD">
 
-<t>Any other valid TLV tagged with AE = 4 MUST be decoded as specified by the
+<t>Any other valid TLV tagged with AE = TBD MUST be decoded as specified by the
 Babel specification, referring to the <xref target="address-encoding"/> above
 to parse network addresses or prefixes within.</t>
 
@@ -257,7 +257,7 @@ Encodings" registry:</t>
 
 <texttable>
 <ttcol>AE</ttcol><ttcol>Name</ttcol><ttcol>Reference</ttcol>
-<c>4</c><c>v4-over-v6</c><c>(this document)</c>
+<c>TBD</c><c>v4-over-v6</c><c>(this document)</c>
 </texttable>
 
 </section>

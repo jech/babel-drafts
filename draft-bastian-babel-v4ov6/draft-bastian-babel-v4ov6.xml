@@ -125,7 +125,7 @@ of the packet.</t>
 
 </section>
 
-<section title="Prefix and seqno requests">
+<section title="Prefix and seqno requests" anchor="requests">
 
 <t>Prefix and seqno requests are used to request an update for a given
 prefix.  Since they are not related to a specific Next-Hop, there is no
@@ -155,23 +155,25 @@ above.</t>
 
 <t>This protocol extension adds no new TLVs or sub-TLVs.</t>
 
-<t>This protocol extension uses a new AE. As discussed in Appendix&nbsp;D of
+<t>This protocol extension uses a new AE.  As discussed in Appendix&nbsp;D of
 <xref target="RFC6126bis"/> and specified in the same document, implementations
 that do not understand the present extension will silently ignore the various
-TLVs that use this new AE.</t>
+TLVs that use this new AE.  As a result, incompatible versions will ignore
+v4-over-v6 routes.  They will also ignore requests with AE TBD, which, as
+stated in <xref target="requests"/>, are NOT RECOMMENDED.</t>
 
 <t>Using a new AE introduces a new compression state, used to parse the
-network prefixes. As this compression state is separated from other AEs'
+network prefixes.  As this compression state is separated from other AEs'
 states, it will not interfere with the operation of the Babel protocol
 outside the scope of the present extension.</t>
 
 <t>This extension reuses the next-hop state from AEs 2 and 3 (IPv6), but
 does so in a read-only fashion, causing no compatibility issues.</t>
 
-<t>[TODO specify that a node should not send a v4-over-v6 route over
-an interface without a matching pure-v4 route if the interface
-supports IPv4? If not, the peer router could not support this
-extension and ignore the route.]</t>
+<t><xref target="updates"/> makes it NOT RECOMMENDED to use AE TBD
+(v4-over-v6) to announce a route through an outgoing interface that has an
+assigned IPv4 address.  Doing so might prevent a route from being used in the
+presence of routers not aware of the present extension.</t>
 
 </section>
 

@@ -82,7 +82,7 @@ defined extension to the BGP protocol <xref target="RFC5549"/>.</t>
 tagged with an Address Encoding (AE).  V4-over-v6 prefixes are announced
 in a new AE and reuse the existing IPv6 next-hop.</t>
 
-<section title="Announcing v4-over-v6 routes">
+<section title="Announcing v4-over-v6 routes" anchor="updates">
 
 <t>A Babel node that needs to announce an IPv4 route over an interface
 that has no assigned IPv4 address MAY make a v4-over-v6 announcement.  In
@@ -127,21 +127,25 @@ of the packet.</t>
 
 <section title="Prefix and seqno requests">
 
-<t>The prefix and seqno requests bear a Prefix field, which is used to filter
-the requested routes. This prefix is encoded as specified by the AE field, but
-has no interaction whatsoever with the next-hop of the requested routes. Thus,
-this extension has no impact on the behaviour of those TLVs. Specifically, the
-answer to those requests SHOULD be entirely agnostic of whether the considered
-locally-installed routes are v4-over-v6.</t>
+<t>Prefix and seqno requests are used to request an update for a given
+prefix.  Since they are not related to a specific Next-Hop, there is no
+difference between ordinary IPv4 and v4-over-v6 requests.</t>
 
-<t>If a prefix request bears AE 0, requesting a full dump of its route table,
-the v4-over-v6 routes, if any, should be included in the dump. [NOTE:
-technically useless, the last sentence of last paragraph already says this. Is
-this paragraph useful as a clarification or should it be removed?]</t>
+<t>A node SHOULD NOT send requests of either kind with the AE field being
+set to TBD (v4-over-v6); instead, it SHOULD request IPv4 updates using
+requestt with the AE field being set to 1 (IPv4).</t>
 
-<t>If a prefix or seqno request bears the v4-over-v6 AE, the Prefix field
-should be parsed according to this AE, and the request should be dealt with
-using this parsed prefix, regardless of the AE.</t>
+<t>When receiving requests, AEs 1 (IPv4) and TBD (v4-over-v6) MUST be
+treated equivalently: the receiver processes the request as described in
+Section 3.8 of <xref target="RFC6126bis"/>; if an Update is sent, then it
+MAY be sent with AE 1 or TBD, as described in Section <xref target="updates"/>
+above, irrespective of which AE was used in the request.</t>
+
+<t>When receiving a request with AE 0 (wildcard), the receiver SHOULD send
+a full route dump, as described in Section 3.8.1.1 of
+<xref target="RFC6126bis"/>.  Any IPv4 routes contained in the route dump
+MAY use either AE 1 or AE TBD, as described in Section <xref target="updates"/>
+above.</t>
 
 </section>
 

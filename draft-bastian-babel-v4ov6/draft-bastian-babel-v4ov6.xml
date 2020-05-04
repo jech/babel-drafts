@@ -84,29 +84,44 @@ in a new AE and reuse the existing IPv6 next-hop.</t>
 
 <section title="Announcing v4-over-v6 routes">
 
-<t>A Babel speaker announces a v4-over-v6 route with an Update TLV, defined in
-<xref target="RFC6126bis"/>, tagged with the v4-over-v6 AE. Its Prefix
-field is an IPv4 address prefix. The route reuses the existing IPv6
-next-hop.</t>
+<t>A Babel node that needs to announce an IPv4 route over an interface
+that has no assigned IPv4 address MAY make a v4-over-v6 announcement.  In
+order to do so, it first establishes an IPv6 next-hop in the usual manner
+(either by sending the Babel packet over IPv6, or by sending a Next Hop
+TLV containing an IPv6 address); it then sends an Update with AE equal to
+TBD containing the IPv4 prefix being announced.</t>
+
+<t>If the outgoing interface has been assigned an IPv4 address, then, in
+the interest of maximising compatibility with existing routers, the sender
+SHOULD prefer an ordinary IPv4 announcement; even in that case, however,
+it MAY use a v4-over-v6 announcement.  A node SHOULD NOT send both
+ordinary IPv4 and v4-over-v6 annoucements for the same prefix, since doing
+that doubles the amount of routing traffic while providing little or no
+benefit.</t>
 
 </section>
 
 <section title="Receiving v4-over-v6 routes">
 
-<t>Upon reception of an Update TLV with a v4-over-v6 AE, a Babel node running
-on hardware and software that supports v4-over-v6 routes SHOULD proceed as for
-the reception of an IPv4 or IPv6 route update, determining whether the route
-should be installed locally according to the Babel protocol specification. If
-the local hardware or software does not support v4-over-v6 routes, the route
-SHOULD be silently ignored.</t>
+<t>Upon reception of an Update TLV with a v4-over-v6 AE, a Babel nodes
+computes the IPv6 next-hop, as described in Section 4.6.9 of
+<xref target="RFC6126bis"/>.  If no suitable next-hop exists, then the Update
+MUST be silently ignored.  If such a next-hop exists, then the node SHOULD
+acquire the route being announced, as described in Section 3.5.3 of
+<xref target="RFC6126bis"/>; the parameters of the route are as follows:
+<list style="symbols">
+<t>the prefix, plen, router-id, seqno, metric MUST be computed as for an
+IPv4 route, as described in Section 4.6.9 of <xref target="RFC6126bis"/>;</t>
+<t>the next-hop MUST be computed as for an IPv6 route, as described in
+Section 4.6.9 of <xref target="RFC6126bis"/>: it is taken from the last
+preceding Next-Hop TLV with an AE field equal to 2 or 3; if no such
+entry exists, and if the Update TLV has been sent in a Babel packet
+carried over IPv6, then the next-hop is the network-layer source address
+of the packet.</t>
+</list></t>
 
-<t>[Note: I am unclear with the first SHOULD above. What I want to say is that
-the implementation is free to ignore the Update TLV if they want to, but if
-they accept it, they MUST parse it according to the Babel protocol. Am I
-overdoing it here?]</t>
-
-<t>Should the route be installed, it [SHOULD|MUST ?] be installed as a
-v4-over-v6 route.</t>
+<t>As usual, a node MAY ignore the update, e.g., due to filtering
+(Appendix C of <xref target="RFC6126bis"/>).</t>
 
 </section>
 

@@ -101,7 +101,7 @@ benefit.</t>
 
 </section>
 
-<section title="Receiving v4-over-v6 routes">
+<section title="Receiving v4-over-v6 routes" anchor="receiving-updates">
 
 <t>Upon reception of an Update TLV with a v4-over-v6 AE, a Babel node
 computes the IPv6 next-hop, as described in Section 4.6.9 of
@@ -179,23 +179,23 @@ presence of routers not aware of the present extension.</t>
 
 <section title="Protocol encoding">
 
-<t>This extension defines the v4-over-v6 AE, whose value is TBD. It defines no
+<t>This extension defines the v4-over-v6 AE, whose value is TBD.  It defines no
 new TLVs or sub-TLVs.</t>
 
 <section title="Address encoding" anchor="address-encoding">
-<t>The address encoding for AE TBD (v4-over-v6) is similar to that of
-AE 1 (IPv4 address). Compression is allowed. 4 octets or less.
-IPv4 address family.</t>
+<t>Addresses and prefixes tagged with AE TBD MUST be encoded and decoded as
+addresses tagged with AE 1 (IPv4), as described in Section&nbsp;4.3.1 of
+<xref target="RFC6126bis"/>.</t>
 
-<t>A compression state distinct from that of AE 1 (IPv4) is introduced, and
-MUST be used to (de)compress prefixes tagged with the AE TBD.</t>
+<t>A new compression state for AE TBD (v4-over-v6) distinct from that of AE 1
+(IPv4) is introduced, and MUST be used for address compression of addresses
+tagged with AE TBD, as described in Section&nbsp;4.6.9 of
+<xref target="RFC6126bis"/></t>
 
 </section>
 
 <section title="Changes for existing TLVs">
-<t>The new v4-over-v6 AE can be used, unless stated otherwise in a further
-protocol extension, exclusively within the following previously
-existing Babel TLVs :
+<t>The following TLVs MAY be tagged with AE TBD:
 
 <list style="symbols">
 <t>Update (Type = 8)</t>
@@ -204,46 +204,35 @@ existing Babel TLVs :
 </list>
 </t>
 
-<t>This AE value MUST NOT be used in any other TLV. Any other TLV tagged with
-AE TBD SHOULD be silently ignored. Specifically, it must not be used within the
-Next Hop TLV.</t>
+<t>Unless specified otherwise in further extensions to the Babel protocol, AE
+TBD SHOULD NOT be used in any other TLV, and such TLVs SHOULD be silently
+ignored if received.</t>
 
 <section title="Update">
 
-<t>An Update (Type = 8) TLV with AE = TBD has the same behaviour as an Update
-with AE = 1, with only the following differences.
+<t>An Update (Type = 8) TLV with AE = TBD is constructed as described in
+Section&nbsp;4.6.9 of <xref target="RFC6126bis"/> for AE 1 (IPv4), with the
+following specificities:
 
 <list style="symbols">
 
-<t>Prefix compression. The Prefix field is parsed according to the
+<t>Prefix.  The Prefix field is constructed according to the
 <xref target="address-encoding"/> above.</t>
 
-<t>Next Hop. The next hop is determined exactly as the next hop for AEs 2 and 3
-is, as defined in <xref target="RFC6126bis"/>. Specifically, if the packet
-bears a previous IPv6 Next-hop TLV (AE = 2 or 3), it is used as a next hop for
-this route. If no such address can be determined, this TLV MUST be silently
-ignored.</t>
+<t>Next hop.  The next hop is determined as described in
+<xref target="receiving-updates"/> above.</t>
 
 </list>
 </t>
 
 </section>
 
-<!--
-<section title="Route Request">
-
-</section>
-
-<section title="Seqno Request">
-<t>TODO</t>
-</section>
--->
-
 <section title="Other valid TLVs tagged with AE = TBD">
 
-<t>Any other valid TLV tagged with AE = TBD MUST be decoded as specified by the
-Babel specification, referring to the <xref target="address-encoding"/> above
-to parse network addresses or prefixes within.</t>
+<t>Any other valid TLV tagged with AE = TBD MUST be constructed and decoded as
+described in Section&nbsp;4.6 of <xref target="RFC6126bis"/>.  Addresses or
+network prefixes within MUST be constructed and decoded as described in
+<xref target="address-encoding"/> above.</t>
 
 </section>
 

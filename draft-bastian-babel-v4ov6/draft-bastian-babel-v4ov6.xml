@@ -44,7 +44,7 @@ Announcing IPv4 routes with an IPv6 next-hop in the Babel routing protocol
 
 <abstract>
 <t>This document defines an extension to the Babel routing protocol that
-allows annoncing toutes to an IPv4 prefix with an IPv6 next-hop, which
+allows annoncing routes to an IPv4 prefix with an IPv6 next-hop, which
 makes it possible for IPv4 traffic to flow through interfaces that have
 not been assigned an IPv4 address.</t>
 </abstract>
@@ -172,7 +172,7 @@ states, it will not interfere with the compression state of unextended
 nodes.</t>
 
 <t>This extension reuses the next-hop state from AEs 2 and 3 (IPv6), but
-makes no changes to the way it is update, and therefore causes no
+makes no changes to the way it is updated, and therefore causes no
 compatibility issues.</t>
 
 <t>As mentioned in <xref target="updates"/>, ordinary IPv4 announcements

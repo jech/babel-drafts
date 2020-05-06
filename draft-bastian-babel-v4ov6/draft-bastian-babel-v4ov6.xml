@@ -44,9 +44,9 @@ Announcing IPv4 routes with an IPv6 next-hop in the Babel routing protocol
 
 <abstract>
 <t>This document defines an extension to the Babel routing protocol that
-allows annoncing IPv4 packet with an IPv6 next-hop, which allows IPv4
-traffic to flow through interfaces that have not been assigned an IPv4
-address.</t>
+allows annoncing toutes to an IPv4 prefix with an IPv6 next-hop, which
+makes it possible for IPv4 traffic to flow through interfaces that have
+not been assigned an IPv4 address.</t>
 </abstract>
 </front>
 
@@ -54,11 +54,11 @@ address.</t>
 
 <section title="Introduction">
 
-<t>Traditionally a routing table maps a network prefix of a given address
+<t>Traditionally, a routing table maps a network prefix of a given address
 family to a next-hop address in the same address family.  The sole purpose
 of this next-hop address is to serve as an input to a protocol that will
-map it to a link-layer address (Neighbour Discovery (ND) in the case of
-IPv6, Address Resolution (ARP) in the case of IPv4).  Therefore, there is
+map it to a link-layer address, Neighbour Discovery (ND) in the case of
+IPv6, Address Resolution (ARP) in the case of IPv4.  Therefore, there is
 no reason why the address family of the next hop address should match that
 of the prefix being announced: an IPv6 next-hop yields a link-layer
 address that is suitable for forwarding both IPv6 or IPv4 traffic.</t>
@@ -71,8 +71,8 @@ addresses of either family, thus significantly reducing the amount of
 manual configuration.</t>
 
 <t>This document describes an extension that allows the Babel routing
-protocol <xref target="RFC6126bis"/> to announce routes towards IPv6 prefixes
-with IPv4 next hops.  The extension has been inspired by a previously
+protocol <xref target="RFC6126bis"/> to announce routes towards IPv6
+prefixes with IPv4 next hops.  The extension is inspired by a previously
 defined extension to the BGP protocol <xref target="RFC5549"/>.</t>
 </section>
 
@@ -87,7 +87,7 @@ in a new AE and reuse the existing IPv6 next-hop.</t>
 <t>A Babel node that needs to announce an IPv4 route over an interface
 that has no assigned IPv4 address MAY make a v4-over-v6 announcement.  In
 order to do so, it first establishes an IPv6 next-hop in the usual manner
-(either by sending the Babel packet over IPv6, or by sending a Next Hop
+(either by sending the Babel packet over IPv6, or by including a Next Hop
 TLV containing an IPv6 address); it then sends an Update with AE equal to
 TBD containing the IPv4 prefix being announced.</t>
 
@@ -95,9 +95,10 @@ TBD containing the IPv4 prefix being announced.</t>
 the interest of maximising compatibility with existing routers, the sender
 SHOULD prefer an ordinary IPv4 announcement; even in that case, however,
 it MAY use a v4-over-v6 announcement.  A node SHOULD NOT send both
-ordinary IPv4 and v4-over-v6 annoucements for the same prefix, since doing
-that doubles the amount of routing traffic while providing little or no
-benefit.</t>
+ordinary IPv4 and v4-over-v6 annoucements for the same prefix over
+a single interface (if the update is sent to a multicast address) or to
+a single neighbour (if sent to a unicast address), since doing that
+doubles the amount of routing traffic while providing no benefit.</t>
 
 </section>
 
@@ -105,8 +106,8 @@ benefit.</t>
 
 <t>Upon reception of an Update TLV with a v4-over-v6 AE, a Babel node
 computes the IPv6 next-hop, as described in Section 4.6.9 of
-<xref target="RFC6126bis"/>.  If no suitable next-hop exists, then the Update
-MUST be silently ignored.  If such a next-hop exists, then the node SHOULD
+<xref target="RFC6126bis"/>.  If no IPv6 next-hop exists, then the Update
+MUST be silently ignored.  If an IPv6 a next-hop exists, then the node MAY
 acquire the route being announced, as described in Section 3.5.3 of
 <xref target="RFC6126bis"/>; the parameters of the route are as follows:
 <list style="symbols">
@@ -133,11 +134,11 @@ difference between ordinary IPv4 and v4-over-v6 requests.</t>
 
 <t>A node SHOULD NOT send requests of either kind with the AE field being
 set to TBD (v4-over-v6); instead, it SHOULD request IPv4 updates using
-requestt with the AE field being set to 1 (IPv4).</t>
+requests with the AE field being set to 1 (IPv4).</t>
 
 <t>When receiving requests, AEs 1 (IPv4) and TBD (v4-over-v6) MUST be
 treated equivalently: the receiver processes the request as described in
-Section 3.8 of <xref target="RFC6126bis"/>; if an Update is sent, then it
+Section 3.8 of <xref target="RFC6126bis"/>.  If an Update is sent, then it
 MAY be sent with AE 1 or TBD, as described in <xref target="updates"/>
 above, irrespective of which AE was used in the request.</t>
 
@@ -163,24 +164,25 @@ v4-over-v6 routes.  They will also ignore requests with AE TBD, which, as
 stated in <xref target="requests"/>, are NOT RECOMMENDED.</t>
 
 <t>Using a new AE introduces a new compression state, used to parse the
-network prefixes.  As this compression state is separated from other AEs'
-states, it will not interfere with the operation of the Babel protocol
-outside the scope of the present extension.</t>
+network prefixes.  As this compression state is separate from other AEs'
+states, it will not interfere with the compression state of unextended
+nodes.</t>
 
 <t>This extension reuses the next-hop state from AEs 2 and 3 (IPv6), but
-does so in a read-only fashion, causing no compatibility issues.</t>
+makes no changes to the way it is update, and therefore causes no
+compatibility issues.</t>
 
-<t><xref target="updates"/> makes it NOT RECOMMENDED to use AE TBD
-(v4-over-v6) to announce a route through an outgoing interface that has an
-assigned IPv4 address.  Doing so might prevent a route from being used in the
-presence of routers not aware of the present extension.</t>
+<t>As mentioned in <xref target="updates"/>, ordinary IPv4 announcements
+are preferred to v4-over-v6 announcements when the outgoing interface has
+an assigned IPv4 address; doing otherwise would prevent routers that do
+not implement this extension from learning the route being announced.</t>
 
 </section>
 
 <section title="Protocol encoding">
 
-<t>This extension defines the v4-over-v6 AE, whose value is TBD.  It defines no
-new TLVs or sub-TLVs.</t>
+<t>This extension defines the v4-over-v6 AE, whose value is TBD.  It
+defines no new TLVs or sub-TLVs.</t>
 
 <section title="Address encoding" anchor="address-encoding">
 <t>Addresses and prefixes tagged with AE TBD MUST be encoded and decoded as
@@ -203,10 +205,6 @@ tagged with AE TBD, as described in Section&nbsp;4.6.9 of
 <t>Seqno Request (Type = 10)</t>
 </list>
 </t>
-
-<t>Unless specified otherwise in further extensions to the Babel protocol, AE
-TBD SHOULD NOT be used in any other TLV, and such TLVs SHOULD be silently
-ignored if received.</t>
 
 <section title="Update">
 

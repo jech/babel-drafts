@@ -124,6 +124,9 @@ of the packet.</t>
 <t>As usual, a node MAY ignore the update, e.g., due to filtering
 (Appendix C of <xref target="RFC6126bis"/>).</t>
 
+<t>Moreover, a node SHOULD ignore the update if it cannot install a v4-over-v6
+route, eg. due to hardware or software incompatibilities.</t>
+
 </section>
 
 <section title="Prefix and seqno requests" anchor="requests">

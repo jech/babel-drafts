@@ -124,8 +124,9 @@ of the packet.</t>
 <t>As usual, a node MAY ignore the update, e.g., due to filtering
 (Appendix C of <xref target="RFC6126bis"/>).</t>
 
-<t>Moreover, a node SHOULD ignore the update if it cannot install a v4-over-v6
-route, eg. due to hardware or software incompatibilities.</t>
+<t>If a node cannot install v4-over-v6 routes, eg. due to hardware or software
+incompatibilities, such routes MUST NOT be selected, as described in
+Section&nbsp;3.5.3 of <xref target="RFC6126bis"/>.</t>
 
 </section>
 

@@ -184,16 +184,19 @@ not implement this extension from learning the route being announced.</t>
 
 <section title="Protocol encoding">
 
-<t>This extension defines the v4-over-v6 AE, whose value is TBD.  It
-defines no new TLVs or sub-TLVs.</t>
+<t>This extension defines the v4-over-v6 AE, whose value is TBD. This AE is
+solely used to tag network prefixes, and MUST NOT be used to tag peers'
+addresses, eg. in Next-Hop or IHU TLVs.</t>
 
-<section title="Address encoding" anchor="address-encoding">
-<t>Addresses and prefixes tagged with AE TBD MUST be encoded and decoded as
-addresses tagged with AE 1 (IPv4), as described in Section&nbsp;4.3.1 of
+<t>This extension defines no new TLVs or sub-TLVs.</t>
+
+<section title="Prefix encoding" anchor="prefix-encoding">
+<t>Network prefixes tagged with AE TBD MUST be encoded and decoded as
+prefixes tagged with AE 1 (IPv4), as described in Section&nbsp;4.3.1 of
 <xref target="RFC6126bis"/>.</t>
 
 <t>A new compression state for AE TBD (v4-over-v6) distinct from that of AE 1
-(IPv4) is introduced, and MUST be used for address compression of addresses
+(IPv4) is introduced, and MUST be used for address compression of prefixes
 tagged with AE TBD, as described in Section&nbsp;4.6.9 of
 <xref target="RFC6126bis"/></t>
 
@@ -203,15 +206,15 @@ tagged with AE TBD, as described in Section&nbsp;4.6.9 of
 <t>The following TLVs MAY be tagged with AE TBD:
 
 <list style="symbols">
-<t>IHU (Type = 5)</t>
 <t>Update (Type = 8)</t>
 <t>Route Request (Type = 9)</t>
 <t>Seqno Request (Type = 10)</t>
 </list>
 </t>
 
-<t>Next-Hop (Type = 7) TLVs MUST NOT be tagged with AE TBD. Such TLVs MUST be
-ignored.</t>
+<t>As AE TBD is suitable only to tag network prefixes, IHU (Type = 5) and
+Next-Hop (Type = 7) TLVs MUST NOT be tagged with AE TBD. Such TLVs MUST be
+silently ignored.</t>
 
 <section title="Update">
 
@@ -222,7 +225,7 @@ following specificities:
 <list style="symbols">
 
 <t>Prefix.  The Prefix field is constructed according to the
-<xref target="address-encoding"/> above.</t>
+<xref target="prefix-encoding"/> above.</t>
 
 <t>Next hop.  The next hop is determined as described in
 <xref target="receiving-updates"/> above.</t>
@@ -235,9 +238,9 @@ following specificities:
 <section title="Other valid TLVs tagged with AE = TBD">
 
 <t>Any other valid TLV tagged with AE = TBD MUST be constructed and decoded as
-described in Section&nbsp;4.6 of <xref target="RFC6126bis"/>.  Addresses or
-network prefixes within MUST be constructed and decoded as described in
-<xref target="address-encoding"/> above.</t>
+described in Section&nbsp;4.6 of <xref target="RFC6126bis"/>.  Network prefixes
+within MUST be constructed and decoded as described in <xref
+target="prefix-encoding"/> above.</t>
 
 </section>
 

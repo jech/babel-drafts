@@ -203,11 +203,15 @@ tagged with AE TBD, as described in Section&nbsp;4.6.9 of
 <t>The following TLVs MAY be tagged with AE TBD:
 
 <list style="symbols">
+<t>IHU (Type = 5)</t>
 <t>Update (Type = 8)</t>
 <t>Route Request (Type = 9)</t>
 <t>Seqno Request (Type = 10)</t>
 </list>
 </t>
+
+<t>Next-Hop (Type = 7) TLVs MUST NOT be tagged with AE TBD. Such TLVs MUST be
+ignored.</t>
 
 <section title="Update">
 

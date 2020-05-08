@@ -113,7 +113,7 @@ doubles the amount of routing traffic while providing no benefit.</t>
 <t>Upon reception of an Update TLV with a v4-over-v6 AE, a Babel node
 computes the IPv6 next-hop, as described in Section 4.6.9 of
 <xref target="RFC6126bis"/>.  If no IPv6 next-hop exists, then the Update
-MUST be silently ignored.  If an IPv6 a next-hop exists, then the node MAY
+MUST be silently ignored.  If an IPv6 next-hop exists, then the node MAY
 acquire the route being announced, as described in Section 3.5.3 of
 <xref target="RFC6126bis"/>; the parameters of the route are as follows:
 <list style="symbols">

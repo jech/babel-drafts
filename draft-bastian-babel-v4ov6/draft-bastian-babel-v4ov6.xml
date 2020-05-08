@@ -57,11 +57,12 @@ not been assigned an IPv4 address.</t>
 <t>Traditionally, a routing table maps a network prefix of a given address
 family to a next-hop address in the same address family.  The sole purpose
 of this next-hop address is to serve as an input to a protocol that will
-map it to a link-layer address, Neighbour Discovery (ND) in the case of
-IPv6, Address Resolution (ARP) in the case of IPv4.  Therefore, there is
-no reason why the address family of the next hop address should match that
-of the prefix being announced: an IPv6 next-hop yields a link-layer
-address that is suitable for forwarding both IPv6 or IPv4 traffic.</t>
+map it to a link-layer address, Neighbour Discovery (ND) <xref target="RFC4861"/>
+in the case of IPv6, Address Resolution (ARP) <xref target="RFC0826"/> in
+the case of IPv4.  Therefore, there is no reason why the address family of
+the next hop address should match that of the prefix being announced: an
+IPv6 next-hop yields a link-layer address that is suitable for forwarding
+both IPv6 or IPv4 traffic.</t>
 
 <t>We call a route towards an IPv4 prefix that uses an IPv6 next hop
 a "v4-over-v6" route.  Since an IPv6 next-hop can use a link-local address
@@ -78,18 +79,23 @@ defined extension to the BGP protocol <xref target="RFC5549"/>.</t>
 
 <section title="Protocol operation">
 
-<t>In the Babel protocol, both destination prefixes and next hops are
-tagged with an Address Encoding (AE).  V4-over-v6 prefixes are announced
-in a new AE and reuse the existing IPv6 next-hop.</t>
+<t>The Babel protocol fully supports double-stack operation: all data that
+represent a neighbour address or a network prefix are tagged by an Address
+Encoding (AE), a small integer that identifies the address family (IPv4 or
+IPv6) of the address of prefix, and describes how it is encoded.  This
+extension defines a new AE, called v4-over-v6, which has the same format
+as the existing AE for IPv4 addresses.  This new AE is only allowed in
+TLVs that carry network prefixes: TLVs that carry a neighbour address use
+the normal encodings for IPv6 addresses.</t>
 
 <section title="Announcing v4-over-v6 routes" anchor="updates">
 
 <t>A Babel node that needs to announce an IPv4 route over an interface
 that has no assigned IPv4 address MAY make a v4-over-v6 announcement.  In
-order to do so, it first establishes an IPv6 next-hop in the usual manner
-(either by sending the Babel packet over IPv6, or by including a Next Hop
-TLV containing an IPv6 address); it then sends an Update with AE equal to
-TBD containing the IPv4 prefix being announced.</t>
+order to do so, it first establishes an IPv6 next-hop address in the usual
+manner (either by sending the Babel packet over IPv6, or by including
+a Next Hop TLV containing an IPv6 address); it then sends an Update with
+AE equal to TBD containing the IPv4 prefix being announced.</t>
 
 <t>If the outgoing interface has been assigned an IPv4 address, then, in
 the interest of maximising compatibility with existing routers, the sender
@@ -122,11 +128,10 @@ of the packet.</t>
 </list></t>
 
 <t>As usual, a node MAY ignore the update, e.g., due to filtering
-(Appendix C of <xref target="RFC6126bis"/>).</t>
-
-<t>If a node cannot install v4-over-v6 routes, eg. due to hardware or software
-incompatibilities, such routes MUST NOT be selected, as described in
-Section&nbsp;3.5.3 of <xref target="RFC6126bis"/>.</t>
+(Appendix C of <xref target="RFC6126bis"/>).  If a node cannot install
+v4-over-v6 routes, eg., due to hardware or software limitations, then
+routes to an IPv4 prefix with an IPv6 next-hop MUST NOT be selected, as
+described in Section&nbsp;3.5.3 of <xref target="RFC6126bis"/>.</t>
 
 </section>
 
@@ -134,16 +139,16 @@ Section&nbsp;3.5.3 of <xref target="RFC6126bis"/>.</t>
 
 <t>Prefix and seqno requests are used to request an update for a given
 prefix.  Since they are not related to a specific Next-Hop, there is no
-difference between ordinary IPv4 and v4-over-v6 requests.</t>
+semantic difference between ordinary IPv4 and v4-over-v6 requests.</t>
 
 <t>A node SHOULD NOT send requests of either kind with the AE field being
 set to TBD (v4-over-v6); instead, it SHOULD request IPv4 updates using
 requests with the AE field being set to 1 (IPv4).</t>
 
 <t>When receiving requests, AEs 1 (IPv4) and TBD (v4-over-v6) MUST be
-treated equivalently: the receiver processes the request as described in
-Section 3.8 of <xref target="RFC6126bis"/>.  If an Update is sent, then it
-MAY be sent with AE 1 or TBD, as described in <xref target="updates"/>
+treated in the sem manner: the receiver processes the request as described
+in Section 3.8 of <xref target="RFC6126bis"/>.  If an Update is sent, then
+it MAY be sent with AE 1 or TBD, as described in <xref target="updates"/>
 above, irrespective of which AE was used in the request.</t>
 
 <t>When receiving a request with AE 0 (wildcard), the receiver SHOULD send
@@ -151,6 +156,14 @@ a full route dump, as described in Section 3.8.1.1 of
 <xref target="RFC6126bis"/>.  Any IPv4 routes contained in the route dump
 MAY use either AE 1 or AE TBD, as described in <xref target="updates"/>
 above.</t>
+
+</section>
+
+<section title="Other TLVs">
+
+<t>The only other TLV defined by <xref target="RFC6126bis"/> that carries
+an AE field is the IHU TLV.  IHU TLVs MUST NOT carry the AE TBD
+(v4-over-v6).</t>
 
 </section>
 
@@ -295,6 +308,30 @@ together with matching access control rules in the data plane.</t>
 </references>
 
 <references title="Informative References">
+
+<reference anchor="RFC0826"><front>
+<title>An Ethernet Address Resolution Protocol: Or Converting Network
+Protocol Addresses to 48.bit Ethernet Address for Transmission on Ethernet
+Hardware</title>
+<author initials="D." surname="Plummer" fullname="D. Plummer"/>
+<date year="1982" month="November"/>
+</front>
+<seriesInfo name="STD" value="37"/>
+<seriesInfo name="RFC" value="826"/>
+<seriesInfo name="DOI" value="10.17487/RFC0826"/>
+</reference>
+
+<reference anchor="RFC4861"><front>
+<title>Neighbor Discovery for IP version 6 (IPv6)</title>
+<author initials="T." surname="Narten" fullname="T. Narten"/>
+<author initials="E." surname="Nordmark" fullname="E. Nordmark"/>
+<author initials="W." surname="Simpson" fullname="W. Simpson"/>
+<author initials="H." surname="Soliman" fullname="H. Soliman"/>
+<date year="2007" month="September"/>
+</front>
+<seriesInfo name="RFC" value="4861"/>
+<seriesInfo name="DOI" value="10.17487/RFC4861"/>
+</reference>
 
 <reference anchor="RFC5549">
 <front>

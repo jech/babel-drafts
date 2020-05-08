@@ -146,7 +146,7 @@ set to TBD (v4-over-v6); instead, it SHOULD request IPv4 updates using
 requests with the AE field being set to 1 (IPv4).</t>
 
 <t>When receiving requests, AEs 1 (IPv4) and TBD (v4-over-v6) MUST be
-treated in the sem manner: the receiver processes the request as described
+treated in the same manner: the receiver processes the request as described
 in Section 3.8 of <xref target="RFC6126bis"/>.  If an Update is sent, then
 it MAY be sent with AE 1 or TBD, as described in <xref target="updates"/>
 above, irrespective of which AE was used in the request.</t>

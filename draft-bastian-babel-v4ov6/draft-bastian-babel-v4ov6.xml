@@ -263,8 +263,8 @@ target="prefix-encoding"/> above.</t>
 
 <section title="IANA Considerations">
 
-<t>IANA is instructed to add the following entry to the "Babel Address
-Encodings" registry:</t>
+<t>IANA is requested to allocate a value (4 suggested) in the "Babel Address
+Encodings" registry as follows:</t>
 
 <texttable>
 <ttcol>AE</ttcol><ttcol>Name</ttcol><ttcol>Reference</ttcol>

@@ -2405,8 +2405,6 @@ Babel-DTLS in deployments where its limitations are acceptable, i.e., when
 symmetric keying is sufficient and where the routing information is not
 considered confidential.</t>
 
-<t>Every implementation of Babel SHOULD implement BABEL-MAC.</t>
-
 <t>One should be aware that the information that a mobile Babel node
 announces to the whole routing domain is sufficient to determine the mobile
 node's physical location with reasonable precision, which might cause
@@ -3283,6 +3281,8 @@ a better approach.</t>
 <t>Hysteresis in route selection is now RECOMMENDED.</t>
 <t>Additive metric algebra is now RECOMMENDED default.</t>
 <t>2-out-of-3 cost computation is now RECOMMENDED on LANs.</t>
+<t>Removed statement that Babel-MAC is RECOMMENDED, since this never
+reflected WG consensus.</t>
 </list></t>
 </section>
 

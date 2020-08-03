@@ -38,7 +38,7 @@
 </address>
 </author>
 
-<date day="18" month="June" year="2020"/>
+<date day="1" month="August" year="2020"/>
 
 <abstract>
 <t>Babel is a loop-avoiding distance-vector routing protocol that is
@@ -100,7 +100,7 @@ is low on battery may choose to use larger time constants (hello and update
 intervals, etc.) than a node that has access to wall power.  Conversely, a
 node that detects high levels of mobility may choose to use smaller time
 constants.  The ability to build such heterogeneous networks makes Babel
-particularly adapted to the unmanaged and wireless environment.</t>
+particularly adapted to the unmanaged or wireless environment.</t>
 
 <t>Finally, Babel is a hybrid routing protocol, in the sense that it can
 carry routes for multiple network-layer protocols (IPv4 and IPv6),
@@ -505,7 +505,7 @@ string of 8 octets that is assumed unique across the routing domain.  For
 example, router-ids could be assigned randomly, or they could be derived
 from a link-layer address.  (The protocol encoding is slightly more
 compact when router-ids are assigned in the same manner as the IPv6 layer
-assigns host IDs, see the definition of the "R" flag in
+assigns host IDs; see the definition of the "R" flag in
 <xref target="update"/>.)</t>
 
 <section title="Message Transmission and Reception"
@@ -1138,7 +1138,7 @@ the feasible route with minimal metric.  When all metrics are stable, this
 approach ensures convergence to a tree of shortest paths (assuming that
 the metric is left-distributive, see <xref target="metric-computation"/>).
 There are two reasons, however, why this strategy may lead to instability
-in the presence of continously varying metrics.  First, if two parallel
+in the presence of continuously varying metrics.  First, if two parallel
 routes oscillate around a common value, then the smallest metric strategy
 will keep switching between the two.  Second, when a route is selected,
 congestion along it increases, which might increase packet loss, which in
@@ -1149,7 +1149,7 @@ kind that is prone to causing persistent oscillations.</t>
 strategy SHOULD include some form of hysteresis, i.e., be sensitive to
 a route's history: if a route is currently selected, then the strategy
 should only switch to a different route if the latter has been
-consistently good for some period of time.  A suggested hysteresis
+consistently good for some period of time.  A RECOMMENDED hysteresis
 algorithm is given in <xref target="route-selection-hysteresis"/>.</t>
 
 <t>After the route selection procedure is run, triggered updates
@@ -2405,6 +2405,8 @@ Babel-DTLS in deployments where its limitations are acceptable, i.e., when
 symmetric keying is sufficient and where the routing information is not
 considered confidential.</t>
 
+<t>Every implementation of Babel SHOULD implement BABEL-MAC.</t>
+
 <t>One should be aware that the information that a mobile Babel node
 announces to the whole routing domain is sufficient to determine the mobile
 node's physical location with reasonable precision, which might cause
@@ -2471,6 +2473,16 @@ technique was inspired by <xref target="PACKETBB"/>.</t>
 <author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
 <date month="August" year="2019"/></front>
 <seriesInfo name="Internet Draft" value="draft-ietf-babel-hmac-10"/>
+</reference>
+
+<reference anchor="RFC793" target="https://www.rfc-editor.org/info/rfc793">
+<front>
+<title>Transmission Control Protocol</title>
+<author initials="J." surname="Postel" fullname="J. Postel"/>
+<date year="1981" month="September"/>
+</front>
+<seriesInfo name="RFC" value="793"/>
+<seriesInfo name="DOI" value="10.17487/RFC0793"/>
 </reference>
 
 </references>
@@ -2828,9 +2840,10 @@ is simple to implement and has been successfully deployed in a variety of
 environments.</t>
 
 <t>For every route R, in addition to the route's metric m(R), maintain
-a smoothed version of m(R) written ms(R) (we suggest computing ms(R) as an
-exponential average of m(R) with a time constant equal to a small multiple
-of the Hello interval).  If no route to a given destination is selected,
+a smoothed version of m(R) written ms(R) (we RECOMMEND computing ms(R) as an
+exponentially smoothed average (see Section 3.7 of <xref target="RFC793"/>)
+of m(R) with a time constant equal to the Hello interval multiplied by
+a small number such as 3).  If no route to a given destination is selected,
 then select the route with the smallest metric, ignoring the smoothed
 metric.  If a route R is selected, then switch to a route R' only when
 both m(R')&nbsp;&lt;&nbsp;m(R) and ms(R')&nbsp;&lt;&nbsp;ms(R).</t>
@@ -3084,6 +3097,8 @@ an address encoding (<xref target="parser-state"/>);</t>
 
 <section title="Changes from previous versions">
 
+<t>[RFC Editor: Please delete this section before publication.]</t>
+
 <section title="Changes since RFC 6126">
 
 <t><list style="symbols">
@@ -3281,8 +3296,7 @@ a better approach.</t>
 <t>Hysteresis in route selection is now RECOMMENDED.</t>
 <t>Additive metric algebra is now RECOMMENDED default.</t>
 <t>2-out-of-3 cost computation is now RECOMMENDED on LANs.</t>
-<t>Removed statement that Babel-MAC is RECOMMENDED, since this never
-reflected WG consensus.</t>
+<t>Reference to RFC 793 Section 3.7 added as exponential smoothing example.</t>
 </list></t>
 </section>
 

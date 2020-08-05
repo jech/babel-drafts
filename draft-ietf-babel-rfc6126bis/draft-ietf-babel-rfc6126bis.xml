@@ -2323,8 +2323,8 @@ document</c>
 
 <t>IANA is instructed to create a registry called "Babel Address
 Encodings".  The allocation policy for this registry is Specification
-Required for Encodings 0-223 and 255, and Experimental Use for
-Encodings 224-254.  The values in this registry are as follows:</t>
+Required for Encodings 0-223, and Experimental Use for Encodings 224-254.
+The values in this registry are as follows:</t>
 <texttable>
 <ttcol>AE</ttcol><ttcol>Name</ttcol><ttcol>Reference</ttcol>
 <c>0</c><c>Wildcard address</c><c>this document</c>
@@ -2333,7 +2333,7 @@ Encodings 224-254.  The values in this registry are as follows:</t>
 <c>3</c><c>Link-local IPv6 address</c><c>this document</c>
 <c>4-223</c><c>Unassigned</c><c></c>
 <c>224-254</c><c>Reserved for Experimental Use</c><c>this document</c>
-<c>255</c><c>Unassigned</c><c></c>
+<c>255</c><c>Reserved for expansion of the encoding space</c><c>this document</c>
 </texttable>
 
 <t>IANA has created a registry called "Babel Flags Values".  The

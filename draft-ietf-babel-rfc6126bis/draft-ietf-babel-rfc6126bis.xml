@@ -3306,7 +3306,8 @@ a better approach.</t>
 
 <section title="Changes since draft-ietf-babel-rfc6126bis-18">
 <t><list style="symbols">
-<t>Reserved Address Encodings 224-254 for Experimental Use.</t>
+<t>Reserved Address Encodings 224-254 for Experimental Use, and 255 for
+future expansion.</t>
 </list></t>
 </section>
 

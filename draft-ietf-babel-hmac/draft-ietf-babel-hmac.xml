@@ -432,7 +432,7 @@ required even if this optimisation is implemented.</t>
 <t>The same is true of challenge replies.  However, since validating
 a challenge reply has minimal additional cost (it's just a bitwise
 comparison of two strings of octets), a similar optimisation for challenge
-replies is not worthwile.</t>
+replies is not worthwhile.</t>
 
 <t>After the packet has been accepted, it is processed as normal, except
 that any PC, Challenge Request and Challenge Reply TLVs that it contains
@@ -729,7 +729,7 @@ attacks, such as PBKDF2 <xref target="RFC2898"/>, bcrypt
 <xref target="BCRYPT"/> or scrypt <xref target="RFC7914"/>.  In that case,
 only the derived keys should be communicated to the routers; the original
 passphrase itself should be kept on the host used to perform the key
-generation (e.g., an administators secure laptop computer).</t>
+generation (e.g., an administator's secure laptop computer).</t>
 
 <t>While it is probably not possible to be immune against denial of
 service (DoS) attacks in general, this protocol includes a number of

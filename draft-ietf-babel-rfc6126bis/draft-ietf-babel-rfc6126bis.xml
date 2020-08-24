@@ -6,7 +6,7 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="no" ?>
-<rfc category="std" docName="draft-ietf-babel-rfc6126bis-19"
+<rfc category="std" docName="draft-ietf-babel-rfc6126bis-20"
      ipr="trust200902"
      obsoletes="6126,7557">
 <front>
@@ -38,7 +38,7 @@
 </address>
 </author>
 
-<date day="6" month="August" year="2020"/>
+<date day="25" month="August" year="2020"/>
 
 <abstract>
 <t>Babel is a loop-avoiding distance-vector routing protocol that is
@@ -3327,6 +3327,13 @@ a better approach.</t>
 <t><list style="symbols">
 <t>Reserved Address Encodings 224-254 for Experimental Use, and 255 for
 future expansion.</t>
+</list></t>
+</section>
+
+<section title="Changes since draft-ietf-babel-rfc6126bis-19">
+<t><list style="symbols">
+<t>Mention that multi-octet fields are in big-endian.</t>
+<t>Minor typos and clarifications.</t>
 </list></t>
 </section>
 

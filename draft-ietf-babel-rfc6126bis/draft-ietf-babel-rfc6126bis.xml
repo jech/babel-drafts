@@ -1145,7 +1145,7 @@ congestion along it increases, which might increase packet loss, which in
 turn could cause its metric to increase; this is a feedback loop, of the
 kind that is prone to causing persistent oscillations.</t>
 
-<t>In order to limit this kind of instabilities, a route selection
+<t>In order to limit these kinds of instabilities, a route selection
 strategy SHOULD include some form of hysteresis, i.e., be sensitive to
 a route's history: if a route is currently selected, then the strategy
 should only switch to a different route if the latter has been
@@ -1493,6 +1493,16 @@ is larger.  Babel packets MUST NOT be sent in IPv6 Jumbograms
 
 <section title="Data Types">
 
+<section title="Representation of integers">
+
+<t>All multi-octet fields that represent integers are encoded with the
+most significant octet first (in Big-Endian format <xref target="IEN137"/>,
+also called Network Order).  The base protocol only carries unsigned
+values; if an extension needs to carry signed values, it will need to
+specify their encoding (e.g., two's complement).</t>
+
+</section>
+
 <section title="Interval">
 <t>Relative times are carried as 16-bit values specifying a number of
 centiseconds (hundredths of a second).  This allows times up to roughly 11
@@ -1668,7 +1678,7 @@ being announced, which is then extracted from the preceding Update TLV
 in the same address family (IPv4 or IPv6).  Finally, as a special
 optimisation for the case when a router-id coincides with the interface-id
 part of an IPv6 address, Router-ID TLV itself may be omitted and the
-router-id derived derived from the low-order bits of the advertised prefix
+router-id derived from the low-order bits of the advertised prefix
 (<xref target="update"/>).</t>
 
 <t>In order to implement these compression techniques, Babel uses
@@ -2681,6 +2691,14 @@ Control (MAC) and Physical Layer (PHY) Specifications</title>
 <seriesInfo name="DOI" value="10.17487/RFC2675"/>
 </reference>
 
+<reference anchor="IEN137"><front>
+<title>On holy wars and a plea for peace</title>
+<author initials="D." surname="Cohen" fullname="Dany Cohen"/>
+<date day="1" month="April" year="1980"/>
+</front>
+<seriesInfo name="IEN" value="137"/>
+</reference>
+
 </references>
 
 <section title="Cost and Metric Computation">
@@ -2839,7 +2857,7 @@ selection procedure might lead to persistent oscillations.  Such
 oscillations can be limited or avoided altogether by implementing
 hysteresis within the route selection algorithm, i.e., by making the route
 selection algorithm sensitive to a route's history.  Any reasonable
-hysteresis algorithm should yield good results ; the following algorithm
+hysteresis algorithm should yield good results; the following algorithm
 is simple to implement and has been successfully deployed in a variety of
 environments.</t>
 

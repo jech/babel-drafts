@@ -1229,8 +1229,9 @@ prefix changes in a significant manner, due to a received update, because
 a link's cost has changed, or because a different next hop has been
 selected.  A node SHOULD NOT send triggered updates for other reasons,
 such as when there is a minor fluctuation in a route's metric, when the
-selected next hop changes, or to propagate a new sequence number (except
-to satisfy a request, as specified in <xref target="requests"/>).</t>
+selected next hop changes without inducing a significant change to the
+route's metric, or to propagate a new sequence number (except to satisfy
+a request, as specified in <xref target="requests"/>).</t>
 
 </section>
 

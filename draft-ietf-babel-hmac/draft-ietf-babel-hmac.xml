@@ -6,7 +6,7 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="no" ?>
-<rfc category="std" docName="draft-ietf-babel-hmac-11"
+<rfc category="std" docName="draft-ietf-babel-hmac-12"
      ipr="trust200902"
      obsoletes="7298">
 <front>
@@ -52,7 +52,7 @@ Babel routing protocol</title>
 </address>
 </author>
 
-<date day="25" month="August" year="2020"/>
+<date day="4" month="September" year="2020"/>
 
 <abstract>
 <t>This document describes a cryptographic authentication mechanism for
@@ -115,9 +115,9 @@ except for what might be required for storing cryptographic keys.</t>
 
 <t>The correctness of the protocol relies on the following assumptions:
 <list style="symbols">
-<t>that the Message Authentication Code (MAC) being used is
-invulnerable to pre-image attacks, i.e., that an attacker is unable to
-generate a packet with a correct MAC without access to the secret key;</t>
+<t>that the Message Authentication Code (MAC) being used is invulnerable
+to forgery, i.e., that an attacker is unable to generate a packet with
+a correct MAC without access to the secret key;</t>
 <t>that a node never generates the same index or nonce twice over the
 lifetime of a key.</t>
 </list>
@@ -260,7 +260,7 @@ is a 32-bit (4-octet) integer;</t>
 associated challenge expiry timer.</t>
 </list>
 The Index and PC are initially undefined, and are managed as described in
-<xref target="packet-reception"/>.  The Nonce and expiry timer are
+<xref target="packet-reception"/>.  The Nonce and challenge expiry timer are
 initially undefined, and used as described in
 <xref target="sending-challenges"/>.</t>
 
@@ -378,8 +378,8 @@ TLV contained in the packet, but only once for each configured key.</t>
 MAY be created at this point (or, alternatively, its creation can be
 delayed until a challenge needs to be sent, see below);</t>
 <t>The packet body is then parsed a first time.  During this "preparse"
-phase, the packet body is traversed and all TLVs are ignored except PC
-TLVs, Challenge Requests and Challenge Replies.  When a PC TLV is
+phase, the packet body is traversed and all TLVs are ignored except PC,
+Challenge Request and Challenge Reply TLVs.  When a PC TLV is
 encountered, the enclosed PC and Index are saved for later processing; if
 multiple PCs are found (which should not happen, see
 <xref target="packet-transmission"/> above), only the first one is
@@ -438,7 +438,7 @@ replies is not worthwhile.</t>
 that any PC, Challenge Request and Challenge Reply TLVs that it contains
 are silently ignored.</t>
 
-<section title="Challenge Requests and Replies">
+<section title="Challenge requests and replies">
 
 <t>During the preparse stage, the receiver might encounter a mismatched
 Index, to which it will react by scheduling a Challenge Request.  It might
@@ -483,18 +483,17 @@ multiple packets in flight from a single neighbour.</t>
 a node constructs a Challenge Reply TLV by copying the Nonce from the
 Challenge Request into the Challenge Reply.  It MUST then send the
 Challenge Reply to the unicast address from which the Challenge Request
-was sent.</t>
+was sent.  A challenge sent to a multicast address MUST be silently ignored.</t>
 
 <t>A node MAY aggregate a Challenge Reply with other TLVs; in other words,
 if it has already buffered TLVs to be sent to the unicast address of the
 sender of the Challenge Request, it MAY send the buffered TLVs in the same
 packet as the Challenge Reply.  However, it MUST arrange for the Challenge
 Reply to be sent in a timely manner (within a few seconds), and SHOULD NOT
-send any other packets over the same interface before sending the Challenge
-Reply, as those would be dropped by the challenger.</t>
+send any other packets over the same interface before sending the
+Challenge Reply, as those would be dropped by the challenger.</t>
 
-<t>A challenge sent to a multicast address MUST be silently ignored.
-Since a challenge reply might be caused by a replayed challenge request,
+<t>Since a challenge reply might be caused by a replayed challenge request,
 a node MUST impose a rate limitation to the challenge replies it sends;
 the limit SHOULD default to one challenge reply for each peer every
 300ms and MAY be configurable.</t>
@@ -506,14 +505,16 @@ the limit SHOULD default to one challenge reply for each peer every
 <t>When it encounters a Challenge Reply during the preparse phase, a node
 consults the Neighbour Table entry corresponding to the neighbour that
 sent the Challenge Reply.  If no challenge is in progress, i.e., if
-there is no Nonce stored in the Neighbour Table entry or the Challenge
+there is no Nonce stored in the Neighbour Table entry or the challenge
 timer has expired, the Challenge Reply MUST be silently ignored and the
 challenge has failed.</t>
 
 <t>Otherwise, the node compares the Nonce contained in the Challenge Reply
 with the Nonce contained in the Neighbour Table entry.  If the two are
-equal (they have the same length and content), then the
-challenge has succeeded; otherwise, the challenge has failed.</t>
+equal (they have the same length and content), then the challenge has
+succeeded and the nonce stored in the Neighbour Table for this neighbour
+SHOULD be discarded; otherwise, the challenge has failed (and the nonce is
+not discarded).</t>
 
 </section>
 
@@ -609,7 +610,7 @@ packet body.</t>
 <t hangText="Type">Set to 17 to indicate a PC TLV.</t>
 <t hangText="Length">The length of the body, in octets, exclusive of the
 Type and Length fields.</t>
-<t hangText="PC">The Packet Counter (PC), a 32-bit (4 octet) unsigned
+<t hangText="PC">The Packet Counter (PC), a 32-bit (4-octet) unsigned
 integer which is increased with every packet sent over this interface.
 A fresh index (as defined in <xref target="interface-table"/>) MUST be
 generated whenever the PC overflows.</t>
@@ -689,11 +690,11 @@ asymmetric keying, should use a more featureful security mechanism such as
 the one described in <xref target="I-D.ietf-babel-dtls"/>.</t>
 
 <t>This mechanism relies on two assumptions, as described in <xref
-target="security-properties"/>.  First, it assumes that the MAC being
-used is invulnerable to pre-image attacks (Section 1.1 of <xref
-target="RFC6039"/>); at the time of writing, SHA-256, which is mandatory
-to implement (<xref target="mac-computation"/>), is believed to be safe
-against practical attacks.</t>
+target="security-properties"/>.  First, it assumes that the MAC being used
+is invulnerable to forgery (Section 1.1 of <xref target="RFC6039"/>); at
+the time of writing, HMAC-SHA256, which is mandatory to implement
+(<xref target="mac-computation"/>), is believed to be safe against
+practical attacks.</t>
 
 <t>Second, it assumes that indices and nonces are generated uniquely over
 the lifetime of a key used for MAC computation (more precisely, indices
@@ -757,7 +758,7 @@ challenges that is separate from the Neighbour Table used by the core
 protocol (the data structures described in Section 3.2 of <xref
 target="RFC6126bis"/> are conceptual, and any data structure that yields the
 same result may be used).  Implementers might also consider using the fact
-that the nonces included in challenge requests and responses can be fairly
+that the nonces included in challenge requests and replies can be fairly
 large (up to 192 octets), which should in principle allow encoding the
 per-challenge state as a secure "cookie" within the nonce itself; note
 however that any such scheme will need to prevent cookie replay.</t>
@@ -784,8 +785,8 @@ registry:</t>
 protocol defined by Denis Ovsienko <xref target="RFC7298"/>.  The use of
 a pseudo-header was suggested by David Schinazi.  The use of an index to
 avoid replay was suggested by Markus Stenberg.  The authors are also
-indebted to Donald Eastlake, Toke Hoiland-Jorgensen, Florian Horn,
-Benjamin Kaduk, Dave Taht and Martin Vigoureux.</t>
+indebted to Antonin Decimo, Donald Eastlake, Toke Hoiland-Jorgensen,
+Florian Horn, Benjamin Kaduk, Dave Taht and Martin Vigoureux.</t>
 
 </section>
 
@@ -1073,6 +1074,15 @@ requests.</t>
 
 </section>
 
+<section title="Changes since draft-ietf-babel-hmac-11">
+
+<t><list style="symbols">
+<t>Clarified that the state SHOULD be discarded after a successful challenge.</t>
+<t>Replaced "pre-image attack" with "forgery", this is more accurate.</t>
+<t>Minor editorial changes.</t>
+</list></t>
+
+</section>
 </section>
 </section>
 

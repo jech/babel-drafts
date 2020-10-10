@@ -6,7 +6,7 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="yes" ?>
-<rfc category="std" docName="draft-ietf-babel-source-specific-05"
+<rfc category="std" docName="draft-ietf-babel-source-specific-06"
 ipr="trust200902">
 <front>
 <title>Source-Specific Routing in Babel</title>
@@ -37,7 +37,7 @@ ipr="trust200902">
 </address>
 </author>
 
-<date day="11" month="April" year="2019"/>
+<date day="10" month="October" year="2020"/>
 
 <abstract>
 <t>Source-specific routing (also known as Source-Address Dependent
@@ -66,16 +66,15 @@ routing is a simple, well understood paradigm that works satisfactorily in
 a large number of cases.</t>
 
 <t>Source-specific routing <xref target="SS-ROUTING"/>, or Source Address
-Dependent Routing (SADR) <xref target="DSR"/>, is a modest extension to
-next-hop routing where the forwarding decision depends not only on the
-destination address but also on the source address of the packet being
-routed, which makes it possible for two packets with the same destination
-but different source addresses to be routed following different paths.
-The forwarding tables are extended to map pairs of prefixes (destination,
-source) to next hops.  When multiple entries match a given packet, the one
-with the most specific destination prefix is chosen, and, in the case of
-equally specific destination prefixes, the one with the most specific
-source prefix.</t>
+Dependent Routing (SADR), is a modest extension to next-hop routing where
+the forwarding decision depends not only on the destination address but
+also on the source address of the packet being routed, which makes it
+possible for two packets with the same destination but different source
+addresses to be routed following different paths.  The forwarding tables
+are extended to map pairs of prefixes (destination, source) to next hops.
+When multiple entries match a given packet, the one with the most specific
+destination prefix is chosen, and, in the case of equally specific
+destination prefixes, the one with the most specific source prefix.</t>
 
 <t>The main application of source-specific routing is a form of
 multihoming known as multihoming with multiple addresses.  When using this
@@ -87,8 +86,7 @@ is connected to the corresponding provider, which is compatible with <xref
 target="BCP84"/>.  Unlike classical multihoming, this technique is
 applicable to small networks, as it does not require the use of
 provider-independent addresses, or cause excessive growth of the global
-routing table.  More details are given in <xref target="SS-ROUTING"/> and
-<xref target="DSR"/>.</t>
+routing table.  More details are given in <xref target="SS-ROUTING"/>.</t>
 
 <t>This document describes a source-specific routing extension for the
 Babel routing protocol <xref target="BABEL"/>.  This involves minor
@@ -187,7 +185,7 @@ example the following routing table:</t>
 <t>This specifies that all packets with destination in 2001:DB8:0:1::/64
 are to be routed through A, while all packets with source in
 2001:DB8:0:2::/64 are to be routed through B.  A packet with source
-2001:DB8:0:2::42 and destination 2001:DB8:0:1::57 matches both rules,
+2001:DB8:0:2::42 and destination 2001:DB8:0:1::57 matches both entries,
 although neither is more specific than the other.  A choice is necessary,
 and unless the choice being made is the same on all routers in a routing
 domain, persistent routing loops may occur.  More details are
@@ -197,11 +195,9 @@ given in Section IV.C of <xref target="SS-ROUTING"/>.</t>
 so-called destination-first ordering, where a routing table entry R1 is
 preferred to a routing table entry R2 when either R1's destination prefix
 is more specific than R2's, or the destination prefixes are equal and R1's
-source prefix is more specific than R2's.  (In more formal terms, routing
-table entries are compared using the lexicographic product of the
-destination prefix ordering by the source prefix ordering.)  This is
-consistent with the behaviour described in Section 3.3 of
-<xref target="DSR"/>.</t>
+source prefix is more specific than R2's.  (In other words, routing table
+entries are compared using the lexicographic product of the destination
+prefix ordering by the source prefix ordering.)</t>
 
 <t>In practice, this means that a source-specific Babel implementation
 must take care that any lower layer that performs packet forwarding obey
@@ -209,13 +205,14 @@ this semantics.  More precisely:</t>
 
 <t><list style="symbols">
 <t>If the lower layers implement the destination-first ordering, then the
-Babel implementation MAY use them directly;</t>
+Babel implementation SHOULD use them directly;</t>
 <t>If the lower layers can hold source-specific routes, but not with the
-right semantics, then the Babel implementation MUST disambiguate the
-routing table by using a suitable disambiguation algorithm (see Section
-V.B of <xref target="SS-ROUTING"/> for such an algorithm);</t>
+right semantics, then the Babel implementation MUST either silently ignore
+any source-specific routes, or disambiguate the routing table by using
+a suitable disambiguation algorithm (see Section V.B of
+<xref target="SS-ROUTING"/> for such an algorithm);</t>
 <t>If the lower layers cannot hold source-specific routes, then a Babel
-implementation MUST silently ignore (drop) any source-specific routes.</t>
+implementation MUST silently ignore any source-specific routes.</t>
 </list></t>
 
 </section>
@@ -380,12 +377,12 @@ ignore the whole packet.</t>
 <list style="hanging" hangIndent="10">
 <t hangText="Type">Set to 128 to indicate a Source Prefix
 sub-TLV.</t>
-<t hangText="Length">The length of the body, exclusive of the Type and
-Length fields.</t>
+<t hangText="Length">The length of the body, in octets, exclusive of the
+Type and Length fields.</t>
 <t hangText="Source Plen">The length of the advertised source prefix.
 This MUST NOT be 0.</t>
 <t hangText="Source Prefix">The source prefix being advertised.  This
-field's size is (Source Plen)/8 rounded upwards.</t>
+field's size is (Source Plen)/8 octets rounded upwards.</t>
 </list>
 </t>
 
@@ -453,10 +450,23 @@ the Babel sub-TLV types registry.</t>
 <section title="Security considerations">
 
 <t>The extension defined in this document adds a new sub-TLV to three TLVs
-already present in the original Babel protocol, and does not in itself
-change the security properties of the protocol.  However, source-specific
-routing gives more control over routing to the sending hosts, which might
-have security implications (see Section 8 of <xref target="DSR"/>).</t>
+already present in the original Babel protocol, and does not change the
+security properties of the protocol itself.  However, the additional
+flexibility provided by source-specific routing might invalidate the
+assumptions made by some network administrators, which could conceivably
+lead to security issues.</t>
+
+<t>For example, a network administrator might be tempted to abuse route
+filtering (Appendix C of <xref target="BABEL"/>) as a security mechanism.
+Unless the filtering rules are designed to take source-specific routing
+into account, they might be bypassed by a source-specific route, which
+might cause traffic to reach a portion of a network that was thought to be
+protected.  Similarly, a network administrator might assume that no route
+is more specific than a host route, and use a host route in order to
+direct traffic for a given destination through a security device (e.g.,
+a firewall); source-specific routing invalidates this assumption, and in
+some topologies announcing a source-specific route might conceivably be
+used to bypass the security device.</t>
 
 </section>
 
@@ -523,16 +533,6 @@ help with this document.</t>
 </front>
 <seriesInfo name="RFC" value="6126"/>
 <seriesInfo name="DOI" value="10.17487/RFC6126"/>
-</reference>
-
-<reference anchor="DSR"><front>
-<title>Destination/Source Routing</title>
-<author fullname="David Lamparter" initials="D." surname="Lamparter"/>
-<author fullname="Anton Smirnov" initials="A." surname="Smirnov"/>
-<date month="May" year="2018"/>
-</front>
-<seriesInfo name="Internet Draft"
-            value="draft-ietf-rtgwg-dst-src-routing-06"/>
 </reference>
 
 <reference anchor="SS-ROUTING">

@@ -506,9 +506,10 @@ help with this document.</t>
 <reference anchor="BABEL"><front>
 <title>The Babel Routing Protocol</title>
 <author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
-<date month="October" year="2018"/>
+<author fullname="David Schinazi" initials="D." surname="Schinazi"/>
+<date month="September" year="2020"/>
 </front>
-<seriesInfo name="Internet Draft" value="draft-ietf-babel-rfc6126bis-06"/>
+<seriesInfo name="Internet Draft" value="draft-ietf-babel-rfc6126bis-20"/>
 </reference>
 
 <reference anchor="RFC8174"><front>

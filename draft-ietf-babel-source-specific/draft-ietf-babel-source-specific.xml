@@ -225,15 +225,15 @@ protocol and the extended protocol.</t>
 
 <t>In the original protocol, three TLVs carry a destination prefix:
 Updates, Route Requests and Seqno Requests.  This specification extends
-these messages to optionally carry a Source Prefix sub-TLV, as described
-in <xref target="protocol-encoding"/> below.  The sub-TLV is marked as
-mandatory, so that an unextended implementation will silently ignore the
-whole enclosing TLV.  A node obeying this specification MUST NOT send
-a TLV with a zero-length source prefix: instead, it sends a TLV with no
-Source Prefix sub-TLV.  Conversely, an extended implementation MUST
-interpret an unextended TLV as carrying a source prefix of zero length.
-Taken together, these properties ensure interoperability between the
-original and extended protocols (see <xref target="compatibility"/>
+these messages so that they may carry a Source Prefix sub-TLV, as
+described in <xref target="protocol-encoding"/> below.  The sub-TLV is
+marked as mandatory, so that an unextended implementation will silently
+ignore the whole enclosing TLV.  A node obeying this specification MUST
+NOT send a TLV with a zero-length source prefix: instead, it sends a TLV
+with no Source Prefix sub-TLV.  Conversely, an extended implementation
+MUST interpret an unextended TLV as carrying a source prefix of zero
+length.  Taken together, these properties ensure interoperability between
+the original and extended protocols (see <xref target="compatibility"/>
 below).</t>
 
 <section title="Protocol Messages">
@@ -360,8 +360,8 @@ these TLVs.</t>
 <t>Since a source-specific routing entry is characterized by a single
 destination prefix and a single source prefix, a source-specific message
 contains exactly one Source Prefix sub-TLV.  A node MUST NOT send more
-that one Source Prefix sub-TLV in a TLV, and a node receiving more than
-one Source Prefix sub-TLV in a single TLV SHOULD ignore this TLV.  It MAY
+than one Source Prefix sub-TLV in a TLV, and a node receiving more than
+one Source Prefix sub-TLV in a single TLV MUST ignore this TLV.  It MAY
 ignore the whole packet.</t>
 
 <section title="Source Prefix sub-TLV">

@@ -6,12 +6,12 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="no" ?>
-<rfc category="exp" docName="draft-bastian-babel-v4ov6-00"
+<rfc category="exp" docName="draft-ietf-babel-v4viav6-00"
     ipr="trust200902"
-    updates="6126">
+    updates="6126bis">
 <front>
 <title abbrev="IPv4 routes with an IPv6 next-hop">
-Announcing IPv4 routes with an IPv6 next-hop in the Babel routing protocol
+IPv4 routes with an IPv6 next-hop in the Babel routing protocol
 </title>
 <author fullname="Theophile Bastian" initials="T." surname="Bastian">
 <organization>Ecole Normale Superieure, Paris</organization>
@@ -23,7 +23,7 @@ Announcing IPv4 routes with an IPv6 next-hop in the Babel routing protocol
 <code></code>
 <country>France</country>
 </postal>
-<email>theophile.bastian@ens.fr</email>
+<email>contact@tobast.fr</email>
 </address>
 </author>
 <author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek">
@@ -40,7 +40,7 @@ Announcing IPv4 routes with an IPv6 next-hop in the Babel routing protocol
 </address>
 </author>
 
-<date day="8" month="May" year="2020"/>
+<date day="20" month="October" year="2020"/>
 
 <abstract>
 <t>This document defines an extension to the Babel routing protocol that
@@ -75,6 +75,17 @@ manual configuration.</t>
 protocol <xref target="RFC6126bis"/> to announce routes towards IPv6
 prefixes with IPv4 next hops.  The extension is inspired by a previously
 defined extension to the BGP protocol <xref target="RFC5549"/>.</t>
+
+<section title="Specification of Requirements">
+
+<t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+"SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+"OPTIONAL" in this document are to be interpreted as described in BCP 14
+<xref target="RFC2119"/> <xref target="RFC8174"/> when, and only when,
+they appear in all capitals, as shown here.</t>
+
+</section>
+
 </section>
 
 <section title="Protocol operation">
@@ -295,6 +306,26 @@ together with matching access control rules in the data plane.</t>
 <back>
 
 <references title="Normative References">
+
+<reference anchor="RFC2119"><front>
+<title>Key words for use in RFCs to Indicate Requirement Levels</title>
+<author initials="S." surname="Bradner" fullname="S. Bradner"/>
+<date year="1997" month="March"/>
+</front>
+<seriesInfo name="BCP" value="14"/>
+<seriesInfo name="RFC" value="2119"/>
+<seriesInfo name="DOI" value="10.17487/RFC2119"/>
+</reference>
+
+<reference anchor="RFC8174"><front>
+<title>Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words</title>
+<author initials="B." surname="Leiba" fullname="B. Leiba"/>
+<date year="2017" month="May"/>
+</front>
+<seriesInfo name="BCP" value="14"/>
+<seriesInfo name="RFC" value="8174"/>
+<seriesInfo name="DOI" value="10.17487/RFC8174"/>
+</reference>
 
 <reference anchor='RFC6126bis'><front>
 <title>The Babel Routing Protocol</title>

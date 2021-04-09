@@ -8,13 +8,13 @@
 <?rfc compact="no" ?>
 <rfc category="exp" docName="draft-ietf-babel-v4viav6-00"
     ipr="trust200902"
-    updates="6126bis">
+    updates="8966">
 <front>
 <title abbrev="IPv4 routes with an IPv6 next-hop">
 IPv4 routes with an IPv6 next-hop in the Babel routing protocol
 </title>
 <author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek">
-<organization>IRIF, University of Paris-Diderot</organization>
+<organization>IRIF, University of Paris</organization>
 <address>
 <postal>
 <street>Case 7014</street>
@@ -168,6 +168,44 @@ AE field are Next-Hop and TLV.  Next-Hop and IHU TLVs MUST NOT carry the
 AE TBD (v4-via-v6).</t>
 
 </section>
+
+</section>
+
+<section title="ICMPv4 and PMTU discovery">
+
+<t>The Internet Control Message Protocol (ICMPv4, or simply ICMP) <xref
+target="RFC792"/> is a protocol related to IPv4 that carries diagnostic
+and debugging information.  ICMPv4 packets may be originated by end hosts
+(e.g., the "destination unreachable, port unreachable" ICMPv4 packet), but
+they may also be originated by intermediate routers (e.g., most other
+kinds of "destination unreachable" packets).</t>
+
+<t>Path MTU Discovery (PMTUd) <xref target="RFC1191"/> is an algorithm
+executed by end hosts to discover the maximum packet size that a route is
+able to carry.  While there exist variants of PMTUd that are purely
+end-to-end <xref target="RFC4821"/>, the variant most commonly deployed in
+the Internet has a hard dependency on ICMPv4 packets originated by
+intermediate routers: if intermediate routers are unable to send ICMPv4
+packets, PMTUd may lead to persistent blackholing of IPv4 traffic.</t>
+
+<t>For that reason, every Babel router that is able to forward IPv4
+traffic MUST be able originate ICMPv4 traffic.  Since the extension
+described in this document enables routers to forward IPv4 traffic even
+when they have not been assigned an IPv4 address, a router implementing
+this extension MUST be able to originate ICMPv4 packets even when it has
+not been assigned an IPv4 address.</t>
+
+<t>There are various ways to meet this requirement, and choosing between
+them is left to the implementation.  For example, if a router has an
+interface that has been assigned an IPv4 address, or if it has an IPv4
+address that has been assigned to the router itself (to the "loopback
+interface"), then that IPv4 address may be "borrowed" to serve as the
+source of originated ICMPv4 packets.  If no IPv4 address is available,
+a router may use a dummy IPv4 address as the source of outgoing ICMPv4
+packets, for example an address taken from a private address range <xref
+target="RFC1918"/> that is known to not be used in the local routing
+domain.  Note however that using the same address on multiple routers may
+hamper debugging and fault isolation.</t>
 
 </section>
 
@@ -337,6 +375,19 @@ helped coin the expression "V4-via-V6".</t>
 <seriesInfo name="DOI" value="10.17487/RFC8966"/>
 </reference>
 
+<reference anchor="RFC792" target="https://www.rfc-editor.org/info/rfc792">
+<front>
+<title>Internet Control Message Protocol</title>
+<author initials="J." surname="Postel" fullname="J. Postel">
+<organization/>
+</author>
+<date year="1981" month="September"/>
+</front>
+<seriesInfo name="STD" value="5"/>
+<seriesInfo name="RFC" value="792"/>
+<seriesInfo name="DOI" value="10.17487/RFC0792"/>
+</reference>
+
 </references>
 
 <references title="Informative References">
@@ -376,6 +427,43 @@ Advertising IPv4 Network Layer Reachability Information with an IPv6 Next Hop
 </front>
 <seriesInfo name="RFC" value="5549"/>
 <seriesInfo name="DOI" value="10.17487/RFC5549"/>
+</reference>
+
+<reference anchor="RFC1191" target="https://www.rfc-editor.org/info/rfc1191">
+<front>
+<title>Path MTU discovery</title>
+<author initials="J.C." surname="Mogul" fullname="J.C. Mogul"/>
+<author initials="S.E." surname="Deering" fullname="S.E. Deering"/>
+<date year="1990" month="November"/>
+</front>
+<seriesInfo name="RFC" value="1191"/>
+<seriesInfo name="DOI" value="10.17487/RFC1191"/>
+</reference>
+
+<reference anchor="RFC4821" target="https://www.rfc-editor.org/info/rfc4821">
+<front>
+<title>Packetization Layer Path MTU Discovery</title>
+<author initials="M." surname="Mathis" fullname="M. Mathis"/>
+<author initials="J." surname="Heffner" fullname="J. Heffner"/>
+<date year="2007" month="March"/>
+</front>
+<seriesInfo name="RFC" value="4821"/>
+<seriesInfo name="DOI" value="10.17487/RFC4821"/>
+</reference>
+
+<reference anchor="RFC1918" target="https://www.rfc-editor.org/info/rfc1918">
+<front>
+<title>Address Allocation for Private Internets</title>
+<author initials="Y." surname="Rekhter" fullname="Y. Rekhter"/>
+<author initials="B." surname="Moskowitz" fullname="B. Moskowitz"/>
+<author initials="D." surname="Karrenberg" fullname="D. Karrenberg"/>
+<author initials="G. J." surname="de Groot" fullname="G. J. de Groot"/>
+<author initials="E." surname="Lear" fullname="E. Lear"/>
+<date year="1996" month="February"/>
+</front>
+<seriesInfo name="BCP" value="5"/>
+<seriesInfo name="RFC" value="1918"/>
+<seriesInfo name="DOI" value="10.17487/RFC1918"/>
 </reference>
 
 </references>

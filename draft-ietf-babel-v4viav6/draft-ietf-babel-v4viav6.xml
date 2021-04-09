@@ -13,19 +13,6 @@
 <title abbrev="IPv4 routes with an IPv6 next-hop">
 IPv4 routes with an IPv6 next-hop in the Babel routing protocol
 </title>
-<author fullname="Theophile Bastian" initials="T." surname="Bastian">
-<organization>Ecole Normale Superieure, Paris</organization>
-<address>
-<postal>
-<street></street>
-<city></city>
-<region></region>
-<code></code>
-<country>France</country>
-</postal>
-<email>contact@tobast.fr</email>
-</address>
-</author>
 <author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek">
 <organization>IRIF, University of Paris-Diderot</organization>
 <address>
@@ -40,7 +27,7 @@ IPv4 routes with an IPv6 next-hop in the Babel routing protocol
 </address>
 </author>
 
-<date day="20" month="October" year="2020"/>
+<date day="09" month="April" year="2021"/>
 
 <abstract>
 <t>This document defines an extension to the Babel routing protocol that
@@ -65,14 +52,14 @@ IPv6 next-hop yields a link-layer address that is suitable for forwarding
 both IPv6 or IPv4 traffic.</t>
 
 <t>We call a route towards an IPv4 prefix that uses an IPv6 next hop
-a "v4-over-v6" route.  Since an IPv6 next-hop can use a link-local address
-that is autonomously configured, the use of v4-over-v6 routes enables
+a "v4-via-v6" route.  Since an IPv6 next-hop can use a link-local address
+that is autonomously configured, the use of v4-via-v6 routes enables
 a mode of operation where the network core has no statically assigned IP
 addresses of either family, thus significantly reducing the amount of
 manual configuration.</t>
 
 <t>This document describes an extension that allows the Babel routing
-protocol <xref target="RFC6126bis"/> to announce routes towards IPv6
+protocol <xref target="RFC8966"/> to announce routes towards IPv6
 prefixes with IPv4 next hops.  The extension is inspired by a previously
 defined extension to the BGP protocol <xref target="RFC5549"/>.</t>
 
@@ -94,15 +81,15 @@ they appear in all capitals, as shown here.</t>
 represent a neighbour address or a network prefix are tagged by an Address
 Encoding (AE), a small integer that identifies the address family (IPv4 or
 IPv6) of the address of prefix, and describes how it is encoded.  This
-extension defines a new AE, called v4-over-v6, which has the same format
+extension defines a new AE, called v4-via-v6, which has the same format
 as the existing AE for IPv4 addresses.  This new AE is only allowed in
 TLVs that carry network prefixes: TLVs that carry a neighbour address use
 the normal encodings for IPv6 addresses.</t>
 
-<section title="Announcing v4-over-v6 routes" anchor="updates">
+<section title="Announcing v4-via-v6 routes" anchor="updates">
 
 <t>A Babel node that needs to announce an IPv4 route over an interface
-that has no assigned IPv4 address MAY make a v4-over-v6 announcement.  In
+that has no assigned IPv4 address MAY make a v4-via-v6 announcement.  In
 order to do so, it first establishes an IPv6 next-hop address in the usual
 manner (either by sending the Babel packet over IPv6, or by including
 a Next Hop TLV containing an IPv6 address); it then sends an Update with
@@ -111,38 +98,43 @@ AE equal to TBD containing the IPv4 prefix being announced.</t>
 <t>If the outgoing interface has been assigned an IPv4 address, then, in
 the interest of maximising compatibility with existing routers, the sender
 SHOULD prefer an ordinary IPv4 announcement; even in that case, however,
-it MAY use a v4-over-v6 announcement.  A node SHOULD NOT send both
-ordinary IPv4 and v4-over-v6 annoucements for the same prefix over
+it MAY use a v4-via-v6 announcement.  A node SHOULD NOT send both
+ordinary IPv4 and v4-via-v6 annoucements for the same prefix over
 a single interface (if the update is sent to a multicast address) or to
 a single neighbour (if sent to a unicast address), since doing that
 doubles the amount of routing traffic while providing no benefit.</t>
 
 </section>
 
-<section title="Receiving v4-over-v6 routes" anchor="receiving-updates">
+<section title="Receiving v4-via-v6 routes" anchor="receiving-updates">
 
-<t>Upon reception of an Update TLV with a v4-over-v6 AE, a Babel node
-computes the IPv6 next-hop, as described in Section 4.6.9 of
-<xref target="RFC6126bis"/>.  If no IPv6 next-hop exists, then the Update
+<t>Upon reception of an Update TLV with a v4-via-v6 AE and finite metric,
+a Babel node computes the IPv6 next-hop, as described in Section 4.6.9 of
+<xref target="RFC8966"/>.  If no IPv6 next-hop exists, then the Update
 MUST be silently ignored.  If an IPv6 next-hop exists, then the node MAY
-acquire the route being announced, as described in Section 3.5.3 of
-<xref target="RFC6126bis"/>; the parameters of the route are as follows:
+acquire the route being announced, as described in Section 3.5.3 of <xref
+target="RFC8966"/>; the parameters of the route are as follows:
 <list style="symbols">
 <t>the prefix, plen, router-id, seqno, metric MUST be computed as for an
-IPv4 route, as described in Section 4.6.9 of <xref target="RFC6126bis"/>;</t>
+IPv4 route, as described in Section 4.6.9 of <xref target="RFC8966"/>;</t>
 <t>the next-hop MUST be computed as for an IPv6 route, as described in
-Section 4.6.9 of <xref target="RFC6126bis"/>: it is taken from the last
+Section 4.6.9 of <xref target="RFC8966"/>: it is taken from the last
 preceding Next-Hop TLV with an AE field equal to 2 or 3; if no such
 entry exists, and if the Update TLV has been sent in a Babel packet
 carried over IPv6, then the next-hop is the network-layer source address
 of the packet.</t>
 </list></t>
 
+<t>An Update TLV with a v4-via-v6 AE and metric equal to infinity is
+a retraction: it announces that a previously available route is being
+retracted.  In that case, no next-hop is necessary, and the retraction is
+treated as described in Section 4.6.9 of <xref target="RFC8966"/>.</t>
+
 <t>As usual, a node MAY ignore the update, e.g., due to filtering
-(Appendix C of <xref target="RFC6126bis"/>).  If a node cannot install
-v4-over-v6 routes, eg., due to hardware or software limitations, then
+(Appendix C of <xref target="RFC8966"/>).  If a node cannot install
+v4-via-v6 routes, eg., due to hardware or software limitations, then
 routes to an IPv4 prefix with an IPv6 next-hop MUST NOT be selected, as
-described in Section&nbsp;3.5.3 of <xref target="RFC6126bis"/>.</t>
+described in Section&nbsp;3.5.3 of <xref target="RFC8966"/>.</t>
 
 </section>
 
@@ -150,21 +142,20 @@ described in Section&nbsp;3.5.3 of <xref target="RFC6126bis"/>.</t>
 
 <t>Prefix and seqno requests are used to request an update for a given
 prefix.  Since they are not related to a specific Next-Hop, there is no
-semantic difference between ordinary IPv4 and v4-over-v6 requests.</t>
+semantic difference between IPv4 and v4-via-v6 requests.  Therefore,
+a node SHOULD NOT send requests of either kind with the AE field being set
+to TBD (v4-via-v6); instead, it SHOULD request IPv4 updates using requests
+with the AE field being set to 1 (IPv4).</t>
 
-<t>A node SHOULD NOT send requests of either kind with the AE field being
-set to TBD (v4-over-v6); instead, it SHOULD request IPv4 updates using
-requests with the AE field being set to 1 (IPv4).</t>
-
-<t>When receiving requests, AEs 1 (IPv4) and TBD (v4-over-v6) MUST be
+<t>When receiving requests, AEs 1 (IPv4) and TBD (v4-via-v6) MUST be
 treated in the same manner: the receiver processes the request as described
-in Section 3.8 of <xref target="RFC6126bis"/>.  If an Update is sent, then
+in Section 3.8 of <xref target="RFC8966"/>.  If an Update is sent, then
 it MAY be sent with AE 1 or TBD, as described in <xref target="updates"/>
 above, irrespective of which AE was used in the request.</t>
 
 <t>When receiving a request with AE 0 (wildcard), the receiver SHOULD send
 a full route dump, as described in Section 3.8.1.1 of
-<xref target="RFC6126bis"/>.  Any IPv4 routes contained in the route dump
+<xref target="RFC8966"/>.  Any IPv4 routes contained in the route dump
 MAY use either AE 1 or AE TBD, as described in <xref target="updates"/>
 above.</t>
 
@@ -172,9 +163,9 @@ above.</t>
 
 <section title="Other TLVs">
 
-<t>The only other TLV defined by <xref target="RFC6126bis"/> that carries
-an AE field is the IHU TLV.  IHU TLVs MUST NOT carry the AE TBD
-(v4-over-v6).</t>
+<t>The only other TLVs defined by <xref target="RFC8966"/> that carry an
+AE field are Next-Hop and TLV.  Next-Hop and IHU TLVs MUST NOT carry the
+AE TBD (v4-via-v6).</t>
 
 </section>
 
@@ -185,10 +176,10 @@ an AE field is the IHU TLV.  IHU TLVs MUST NOT carry the AE TBD
 <t>This protocol extension adds no new TLVs or sub-TLVs.</t>
 
 <t>This protocol extension uses a new AE.  As discussed in Appendix&nbsp;D of
-<xref target="RFC6126bis"/> and specified in the same document, implementations
+<xref target="RFC8966"/> and specified in the same document, implementations
 that do not understand the present extension will silently ignore the various
 TLVs that use this new AE.  As a result, incompatible versions will ignore
-v4-over-v6 routes.  They will also ignore requests with AE TBD, which, as
+v4-via-v6 routes.  They will also ignore requests with AE TBD, which, as
 stated in <xref target="requests"/>, are NOT RECOMMENDED.</t>
 
 <t>Using a new AE introduces a new compression state, used to parse the
@@ -201,7 +192,7 @@ makes no changes to the way it is updated, and therefore causes no
 compatibility issues.</t>
 
 <t>As mentioned in <xref target="updates"/>, ordinary IPv4 announcements
-are preferred to v4-over-v6 announcements when the outgoing interface has
+are preferred to v4-via-v6 announcements when the outgoing interface has
 an assigned IPv4 address; doing otherwise would prevent routers that do
 not implement this extension from learning the route being announced.</t>
 
@@ -209,7 +200,7 @@ not implement this extension from learning the route being announced.</t>
 
 <section title="Protocol encoding">
 
-<t>This extension defines the v4-over-v6 AE, whose value is TBD. This AE is
+<t>This extension defines the v4-via-v6 AE, whose value is TBD. This AE is
 solely used to tag network prefixes, and MUST NOT be used to tag peers'
 addresses, eg. in Next-Hop or IHU TLVs.</t>
 
@@ -218,12 +209,12 @@ addresses, eg. in Next-Hop or IHU TLVs.</t>
 <section title="Prefix encoding" anchor="prefix-encoding">
 <t>Network prefixes tagged with AE TBD MUST be encoded and decoded as
 prefixes tagged with AE 1 (IPv4), as described in Section&nbsp;4.3.1 of
-<xref target="RFC6126bis"/>.</t>
+<xref target="RFC8966"/>.</t>
 
-<t>A new compression state for AE TBD (v4-over-v6) distinct from that of AE 1
+<t>A new compression state for AE TBD (v4-via-v6) distinct from that of AE 1
 (IPv4) is introduced, and MUST be used for address compression of prefixes
 tagged with AE TBD, as described in Section&nbsp;4.6.9 of
-<xref target="RFC6126bis"/></t>
+<xref target="RFC8966"/></t>
 
 </section>
 
@@ -238,23 +229,19 @@ tagged with AE TBD, as described in Section&nbsp;4.6.9 of
 </t>
 
 <t>As AE TBD is suitable only to tag network prefixes, IHU (Type = 5) and
-Next-Hop (Type = 7) TLVs MUST NOT be tagged with AE TBD. Such TLVs MUST be
-silently ignored.</t>
+Next-Hop (Type = 7) TLVs MUST NOT be tagged with AE TBD.  Such (incorrect)
+TLVs MUST be silently ignored upon reception.</t>
 
 <section title="Update">
 
 <t>An Update (Type = 8) TLV with AE = TBD is constructed as described in
-Section&nbsp;4.6.9 of <xref target="RFC6126bis"/> for AE 1 (IPv4), with the
+Section&nbsp;4.6.9 of <xref target="RFC8966"/> for AE 1 (IPv4), with the
 following specificities:
-
 <list style="symbols">
-
 <t>Prefix.  The Prefix field is constructed according to the
 <xref target="prefix-encoding"/> above.</t>
-
 <t>Next hop.  The next hop is determined as described in
 <xref target="receiving-updates"/> above.</t>
-
 </list>
 </t>
 
@@ -262,10 +249,10 @@ following specificities:
 
 <section title="Other valid TLVs tagged with AE = TBD">
 
-<t>Any other valid TLV tagged with AE = TBD MUST be constructed and decoded as
-described in Section&nbsp;4.6 of <xref target="RFC6126bis"/>.  Network prefixes
-within MUST be constructed and decoded as described in <xref
-target="prefix-encoding"/> above.</t>
+<t>Any other valid TLV tagged with AE = TBD MUST be constructed and
+decoded as described in Section&nbsp;4.6 of <xref target="RFC8966"/>.
+Network prefixes within MUST be constructed and decoded as described in
+<xref target="prefix-encoding"/> above.</t>
 
 </section>
 
@@ -279,25 +266,37 @@ Encodings" registry as follows:</t>
 
 <texttable>
 <ttcol>AE</ttcol><ttcol>Name</ttcol><ttcol>Reference</ttcol>
-<c>TBD</c><c>v4-over-v6</c><c>(this document)</c>
+<c>TBD</c><c>v4-via-v6</c><c>(this document)</c>
 </texttable>
 
 </section>
 
 <section title="Security Considerations">
 
-<t>This extension does not fundamentally change the security properties of
-the Babel protocol: as described in Section 6 of <xref target="RFC6126bis"/>,
-Babel must be protected by a suitable cryptographic mechanism in order to
-be made secure.</t>
+<t>The extension defined in this document does not fundamentally change
+the security properties of the Babel protocol.  However, by allowing IPv4
+routes to be propagated across routers that have not been assigned IPv4
+addresses, it might invalidate the assumptions made by some network
+administatoris, which could conceivably lead to security issues.</t>
 
-<t>However, enabling this extension will allow IPv4 traffic to flow
-through sections of a network that have not been assigned IPv4 addresses,
-which, in turn, might allow IPv4 traffic to reach areas of the network
-that were previously inaccessible to such traffic.  If this is
-undesirable, the flow of IPv4 traffic must be restricted by the use of
-suitable filtering rules (Appendix C of <xref target="RFC6126bis"/>)
-together with matching access control rules in the data plane.</t>
+<t>For example, if an island of IPv4-only hosts is separated from the IPv4
+Internet by an area of routers that have not been assigned IPv4 addresses,
+a network administrator might reasonably assume that the IPv4-only hosts
+are unreachable from the IPv4 Internet.  This assumption is broken if the
+intermediary routers implement the extension described in this document,
+which might expose the IPv4-only hosts to traffic from the IPv4 Internet.
+If this is undesirable, the flow of IPv4 traffic must be restricted by the
+use of suitable filtering rules (Appendix C of <xref target="RFC8966"/>)
+together with matching packet filters in the data plane.</t>
+
+</section>
+
+<section title="Acknowledgments">
+
+<t>This protocol extension was originally designed, described and
+implemented in collaboration with Theophile Bastian.  The author is also
+indebted to Margaret Cullen, who pointed out the issues with ICMP and
+helped coin the expression "V4-via-V6".</t>
 
 </section>
 
@@ -327,13 +326,15 @@ together with matching access control rules in the data plane.</t>
 <seriesInfo name="DOI" value="10.17487/RFC8174"/>
 </reference>
 
-<reference anchor='RFC6126bis'><front>
+<reference anchor="RFC8966" target="https://www.rfc-editor.org/info/rfc8966">
+<front>
 <title>The Babel Routing Protocol</title>
-<author initials='J' surname='Chroboczek' fullname='Juliusz Chroboczek'/>
-<author initials='D' surname='Schinazi' fullname='David Schinazi'/>
-<date month='February' day='6' year='2020' />
+<author initials="J." surname="Chroboczek" fullname="J. Chroboczek"/>
+<author initials="D." surname="Schinazi" fullname="D. Schinazi"/>
+<date year="2021" month="January"/>
 </front>
-<seriesInfo name='Internet-Draft' value='draft-ietf-babel-rfc6126bis-17'/>
+<seriesInfo name="RFC" value="8966"/>
+<seriesInfo name="DOI" value="10.17487/RFC8966"/>
 </reference>
 
 </references>

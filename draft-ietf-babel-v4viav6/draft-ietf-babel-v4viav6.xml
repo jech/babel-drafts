@@ -6,7 +6,7 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="no" ?>
-<rfc category="exp" docName="draft-ietf-babel-v4viav6-00"
+<rfc category="exp" docName="draft-ietf-babel-v4viav6-01"
     ipr="trust200902"
     updates="8966">
 <front>
@@ -19,8 +19,6 @@ IPv4 routes with an IPv6 next-hop in the Babel routing protocol
 <postal>
 <street>Case 7014</street>
 <city>75205 Paris Cedex 13</city>
-<region></region>
-<code></code>
 <country>France</country>
 </postal>
 <email>jch@irif.fr</email>

@@ -36,7 +36,7 @@
 </address>
 </author>
 
-<date day="13" month="April" year="2020"/>
+<date day="13" month="April" year="2021"/>
 
 <abstract>
 <t>Source-specific routing (also known as Source-Address Dependent
@@ -69,7 +69,7 @@ system in two ways.  First, since the routing decision is local to each
 router, a router A can only select a route ABC...Z if its neighbouring
 router B has selected the route BC...Z.  Second, the only criterion used
 by a router to choose a route is the destination address: two packets with
-the same destination follow the same router.  Yet, there are other data in
+the same destination follow the same route.  Yet, there are other data in
 the IP header that could conceivably be used to guide the routing decision
 &mdash; the ToS octet, the IPv6 flow-id, and, of course, the source
 address.</t>
@@ -104,16 +104,15 @@ networks.  Unfortunately, it is not possible to implement classical
 multihoming with ordinary provider-dependent addresses: in a network
 connected to two providers A and B, a packet with a source address
 allocated by A needs to be routed through the edge router connected to A.
-if it is routed through the edge router connected to B, it will most
-likely be filtered (dropped), in accordance with <xref
-target="BCP84"/>.</t>
+If it is routed through the edge router connected to B, it will most
+likely be filtered (dropped), in accordance with <xref target="BCP84"/>.</t>
 
 <t>In multihoming with multiple addresses, every host in the multihomed
 network is assigned multiple addresses, one for each transit provider.
 Additional mechanisms are needed in order (i) to choose, for each packet,
 a source address that is associated with a provider that is currently up,
 and (ii) to route each packet towards the router associated with the
-provider indicated by its source address.  One might argue that
+provider associated with its source address.  One might argue that
 multihoming with multiple addresses splits the difficult problem of
 multihoming into two simpler sub-problems.</t>
 
@@ -136,7 +135,7 @@ a packet to the edge router indicated by its source address.  Every edge
 router announces into the routing domain a default route specific to the
 prefix associated with the provider it is connected to.  This route is
 propagated all the way to the routers on the access link, which are
-therefore able to route every packet to the right router.  Hosts simply
+therefore able to route every packet to the correct router.  Hosts simply
 send packets to their default router &mdash; no host changes are necessary
 at the network layer.</t>
 
@@ -150,26 +149,26 @@ encapsulation techniques that are commonly used in the Internet to
 establish a network-layer topology that is different from the physical
 topology.  In some deployments, the default route points at the tunnel or
 VPN; this causes the network stack to attempt to send encapsulated packets
-through the tunnel or VPN, which causes it to break.  Various solutions to
-this problem are possible, the most common of which is to point a host
-route at the tunnel endpoint.</t>
+through the tunnel or VPN, which in turn causes it to break.  Various
+solutions to this problem are possible, the most common of which is to
+point a host route at the tunnel endpoint.</t>
 
 <t>With source-specific routing, it becomes possible to announce through
 the tunnel a default route that is specific to the prefix served by the
 tunnel.  Since the encapsulated packets have a source address that is not
 in that prefix, they are not routed through the tunnel.</t>
 
-<t>The final application of source-specific routing is controlled anycast.
+<t>The third application of source-specific routing is controlled anycast.
 Anycast is a technique in which a single destination address is used to
-represent multiple network endpoints, called an "anycast group".  A packet
-destined to the anycast group is routed to an arbitrary member of the
-group, typically the one that is closest according to the routing
-protocol.</t>
+represent multiple network endpoints, collectively called an "anycast
+group".  A packet destined to the anycast group is routed to an arbitrary
+member of the group, typically the one that is nearest according to the
+routing protocol.</t>
 
 <t>In many applications of anycast, such as DNS root servers, the
 nondeterminism of anycast is acceptable.  Some applications, however,
 require finer control.  For example, in Content Distribution Networks
-(CDNs) every endpoint is meant to handle a well-defined subset of the
+(CDNs) every endpoint is expected to handle a well-defined subset of the
 client population.  With source-specific routing, it is possible for each
 member of the anycast group to announce a route specific to its client
 population, a technique that is both simpler and more robust than manually

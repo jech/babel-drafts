@@ -6,7 +6,7 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="no" ?>
-<rfc category="exp" docName="draft-ietf-babel-v4viav6-01"
+<rfc category="std" docName="draft-ietf-babel-v4viav6-02"
     ipr="trust200902"
     updates="8966">
 <front>
@@ -25,7 +25,7 @@ IPv4 routes with an IPv6 next-hop in the Babel routing protocol
 </address>
 </author>
 
-<date day="09" month="April" year="2021"/>
+<date day="13" month="April" year="2021"/>
 
 <abstract>
 <t>This document defines an extension to the Babel routing protocol that

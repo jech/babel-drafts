@@ -172,38 +172,44 @@ AE TBD (v4-via-v6).</t>
 <section title="ICMPv4 and PMTU discovery">
 
 <t>The Internet Control Message Protocol (ICMPv4, or simply ICMP) <xref
-target="RFC792"/> is a protocol related to IPv4 that carries diagnostic
-and debugging information.  ICMPv4 packets may be originated by end hosts
-(e.g., the "destination unreachable, port unreachable" ICMPv4 packet), but
-they may also be originated by intermediate routers (e.g., most other
-kinds of "destination unreachable" packets).</t>
+target="RFC792"/> is a protocol related to IPv4 that is primarily used to
+carry diagnostic and debugging information.  ICMPv4 packets may be
+originated by end hosts (e.g., the "destination unreachable, port
+unreachable" ICMPv4 packet), but they may also be originated by
+intermediate routers (e.g., most other kinds of "destination unreachable"
+packets).</t>
 
-<t>Path MTU Discovery (PMTUd) <xref target="RFC1191"/> is an algorithm
-executed by end hosts to discover the maximum packet size that a route is
-able to carry.  While there exist variants of PMTUd that are purely
-end-to-end <xref target="RFC4821"/>, the variant most commonly deployed in
-the Internet has a hard dependency on ICMPv4 packets originated by
-intermediate routers: if intermediate routers are unable to send ICMPv4
-packets, PMTUd may lead to persistent blackholing of IPv4 traffic.</t>
+<t>Some protocols deployed in the Internet rely on ICMPv4 packets sent by
+intermediate routers.  Most notably, path MTU Discovery (PMTUd) <xref
+target="RFC1191"/> is an algorithm executed by end hosts to discover the
+maximum packet size that a route is able to carry.  While there exist
+variants of PMTUd that are purely end-to-end <xref target="RFC4821"/>, the
+variant most commonly deployed in the Internet has a hard dependency on
+ICMPv4 packets originated by intermediate routers: if intermediate routers
+are unable to send ICMPv4 packets, PMTUd may lead to persistent
+blackholing of IPv4 traffic.</t>
 
-<t>For that reason, every Babel router that is able to forward IPv4
+<t>Due to this dependency, every Babel router that is able to forward IPv4
 traffic MUST be able originate ICMPv4 traffic.  Since the extension
-described in this document enables routers to forward IPv4 traffic even
-when they have not been assigned an IPv4 address, a router implementing
-this extension MUST be able to originate ICMPv4 packets even when it has
-not been assigned an IPv4 address.</t>
+described in this document enables routers to forward IPv4 traffic
+received over an interface that has not been assigned an IPv4 address,
+a router implementing this extension MUST be able to originate ICMPv4
+packets, even when the outgoing interface has not been assigned an IPv4
+address.</t>
 
 <t>There are various ways to meet this requirement, and choosing between
 them is left to the implementation.  For example, if a router has an
-interface that has been assigned an IPv4 address, or if it has an IPv4
-address that has been assigned to the router itself (to the "loopback
-interface"), then that IPv4 address may be "borrowed" to serve as the
-source of originated ICMPv4 packets.  If no IPv4 address is available,
-a router may use a dummy IPv4 address as the source of outgoing ICMPv4
-packets, for example an address taken from a private address range <xref
-target="RFC1918"/> that is known to not be used in the local routing
-domain.  Note however that using the same address on multiple routers may
-hamper debugging and fault isolation.</t>
+interface that has been assigned an IPv4 address, or if an IPv4 address
+has been assigned to the router itself (to the "loopback interface"), then
+that IPv4 address may be "borrowed" to serve as the source of originated
+ICMPv4 packets.  If no IPv4 address is available, a router may use a dummy
+IPv4 address as the source of outgoing ICMPv4 packets, for example an
+address taken from a private address range <xref target="RFC1918"/> that
+is known to not be used in the local routing domain (either dynamically
+chosen, for example drawn randomly or derived algorithmically from an IPv6
+address, or statically configured).  Note however that using the same
+address on multiple routers may hamper debugging and fault isolation,
+e.g., when using the "traceroute" utility.</t>
 
 </section>
 
@@ -330,9 +336,10 @@ together with matching packet filters in the data plane.</t>
 <section title="Acknowledgments">
 
 <t>This protocol extension was originally designed, described and
-implemented in collaboration with Theophile Bastian.  The author is also
-indebted to Margaret Cullen, who pointed out the issues with ICMP and
-helped coin the expression "V4-via-V6".</t>
+implemented in collaboration with Theophile Bastian.  Margaret Cullen
+pointed out the issues with ICMP and helped coin the phrase "v4-via-v6".
+The author is also indebted to Donald Eastlake, Toke Hoiland-Jorgensen,
+and David Schinazi.</t>
 
 </section>
 

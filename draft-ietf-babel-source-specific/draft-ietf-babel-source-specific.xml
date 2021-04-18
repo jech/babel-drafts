@@ -10,7 +10,7 @@
 <front>
 <title>Source-Specific Routing in Babel</title>
 <author fullname="Matthieu Boutier" initials="M." surname="Boutier">
-<organization>IRIF, University of Paris-Diderot</organization>
+<organization>IRIF, University of Paris</organization>
 <address>
 <postal>
 <street>Case 7014</street>
@@ -23,7 +23,7 @@
 </address>
 </author>
 <author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek">
-<organization>IRIF, University of Paris-Diderot</organization>
+<organization>IRIF, University of Paris</organization>
 <address>
 <postal>
 <street>Case 7014</street>
@@ -36,7 +36,7 @@
 </address>
 </author>
 
-<date day="13" month="April" year="2021"/>
+<date day="18" month="April" year="2021"/>
 
 <abstract>
 <t>Source-specific routing (also known as Source-Address Dependent
@@ -71,8 +71,7 @@ router B has selected the route BC...Z.  Second, the only criterion used
 by a router to choose a route is the destination address: two packets with
 the same destination follow the same route.  Yet, there are other data in
 the IP header that could conceivably be used to guide the routing decision
-&mdash; the ToS octet, the IPv6 flow-id, and, of course, the source
-address.</t>
+&mdash; the ToS octet and, of course, the source address.</t>
 
 <t>Source-specific routing <xref target="SS-ROUTING"/>, or Source Address
 Dependent Routing (SADR), is a modest extension to next-hop routing where
@@ -111,10 +110,10 @@ likely be filtered (dropped), in accordance with <xref target="BCP84"/>.</t>
 network is assigned multiple addresses, one for each transit provider.
 Additional mechanisms are needed in order (i) to choose, for each packet,
 a source address that is associated with a provider that is currently up,
-and (ii) to route each packet towards the router associated with the
-provider associated with its source address.  One might argue that
-multihoming with multiple addresses splits the difficult problem of
-multihoming into two simpler sub-problems.</t>
+and (ii) to route each packet towards the router connected to the provider
+associated with its source address.  One might argue that multihoming with
+multiple addresses splits the difficult problem of multihoming into two
+simpler sub-problems.</t>
 
 <t>The issue of choosing a suitable source address is a decision local to
 the sending host, and an area of active research.  The simplest solution
@@ -128,16 +127,16 @@ of view of the user, all TCP connections are dropped when the network
 environment changes).  A better user experience can be provided by making
 available all of the potential source and destination addresses to higher
 layer protocols, either at the transport layer <xref target="RFC8684"/>
-<xref target="RFC4960"/> or at the applicaton layer <xref target="RFC8445"/>.</t>
+<xref target="RFC4960"/>, or at the applicaton layer
+<xref target="RFC8445"/>.</t>
 
-<t>Source-specific routing solves the second sub-problem, that of routing
-a packet to the edge router indicated by its source address.  Every edge
-router announces into the routing domain a default route specific to the
-prefix associated with the provider it is connected to.  This route is
-propagated all the way to the routers on the access link, which are
-therefore able to route every packet to the correct router.  Hosts simply
-send packets to their default router &mdash; no host changes are necessary
-at the network layer.</t>
+<t>Source-specific routing solves the problem of routing a packet to the
+edge router indicated by its source address.  Every edge router announces
+into the routing domain a default route specific to the prefix associated
+with the provider it is connected to.  This route is propagated all the
+way to the routers on the access link, which are therefore able to route
+every packet to the correct router.  Hosts simply send packets to their
+default router &mdash; no host changes are necessary at the network layer.</t>
 
 </section>
 
@@ -147,16 +146,17 @@ at the network layer.</t>
 applications of source-specific routing.  Tunnels and VPNs are packet
 encapsulation techniques that are commonly used in the Internet to
 establish a network-layer topology that is different from the physical
-topology.  In some deployments, the default route points at the tunnel or
-VPN; this causes the network stack to attempt to send encapsulated packets
-through the tunnel or VPN, which in turn causes it to break.  Various
-solutions to this problem are possible, the most common of which is to
-point a host route at the tunnel endpoint.</t>
+topology.  In some deployments, the default route points at the tunnel;
+this causes the network stack to attempt to send encapsulated packets
+through the tunnel, which in causes it to break.  Various solutions to
+this problem are possible, the most common of which is to point a host
+route at the tunnel endpoint.</t>
 
-<t>With source-specific routing, it becomes possible to announce through
-the tunnel a default route that is specific to the prefix served by the
-tunnel.  Since the encapsulated packets have a source address that is not
-in that prefix, they are not routed through the tunnel.</t>
+<t>When source-specific routing is available, it becomes possible to
+announce through the tunnel a default route that is specific to the prefix
+served by the tunnel.  Since the encapsulated packets have a source
+address that is not within that prefix, they are not routed through the
+tunnel.</t>
 
 <t>The third application of source-specific routing is controlled anycast.
 Anycast is a technique in which a single destination address is used to
@@ -166,7 +166,7 @@ member of the group, typically the one that is nearest according to the
 routing protocol.</t>
 
 <t>In many applications of anycast, such as DNS root servers, the
-nondeterminism of anycast is acceptable.  Some applications, however,
+nondeterminism of anycast is acceptable; some applications, however,
 require finer control.  For example, in Content Distribution Networks
 (CDNs) every endpoint is expected to handle a well-defined subset of the
 client population.  With source-specific routing, it is possible for each
@@ -203,16 +203,16 @@ as the original, non-source-specific data.</t>
 target="RFC8966"/> Section&nbsp;3.2.5.  A source-specific Babel node
 extends this table with the following field:</t>
 <t><list style="symbols">
-<t>The source prefix specifying the source address of packets to which
-this entry applies.</t>
+<t>The source prefix (sprefix,&nbsp;splen) specifying the source address of
+packets to which this entry applies.</t>
 </list></t>
 
-<t>The source table is now indexed by triples of the form (prefix, source
-prefix, router-id).</t>
+<t>The source table is now indexed by 5-tuples of the form (prefix, plen,
+sprefix, splen, router-id).</t>
 
-<t>Note that the route entry contains a source (see sections 2 and 3.2.5 of
-<xref target="RFC8966"/>) which itself contains a source prefix.  These are two
-very different concepts that should not be confused.</t>
+<t>Note that the route entry contains a source (see sections 2 and 3.2.5
+of <xref target="RFC8966"/>) which itself contains a source prefix.  These
+are two different concepts, and must not be confused.</t>
 
 </section>
 
@@ -221,9 +221,9 @@ very different concepts that should not be confused.</t>
 <t>Every Babel node maintains a route table, as described in <xref
 target="RFC8966"/> Section&nbsp;3.2.6.  Each route table entry contains,
 among other data, a source, which this specification extends with a source
-prefix as described above.  The route table is now indexed by triples of
-the form (prefix, source prefix, neighbour), where the prefix and source
-prefix are obtained from the source.</t>
+prefix as described above.  The route table is now indexed by 5-tuples of
+the form (prefix, plen, sprefix, splen, neighbour), where the first four
+components are obtained from the source.</t>
 
 </section>
 
@@ -234,11 +234,11 @@ described in <xref target="RFC8966"/>, Section&nbsp;3.2.7.  A
 source-specific Babel node extends this table with the following entry:</t>
 
 <t><list style="symbols">
-<t>The source prefix being requested.</t>
+<t>The source prefix (sprefix,&nbsp;splen) being requested.</t>
 </list></t>
 
-<t>The table of pending seqno requests is now indexed by triples of the
-form (prefix, source prefix, router-id).</t>
+<t>The table of pending seqno requests is now indexed by 5-tuples of the
+form (prefix, plen, sprefix, splen, router-id).</t>
 
 </section>
 
@@ -319,16 +319,16 @@ below).</t>
 <section title="Protocol Messages">
 
 <t>This extension allows three TLVs of the original Babel protocol to
-carry a source prefix: Update TLVs, Route Request TLVs and Seqno Request
+carry a source prefix: Update TLVs, Route Request TLVs, and Seqno Request
 TLVs.</t>
 
 <t>In order to advertise a route with a non-zero length source prefix,
 a node sends a source-specific Update, i.e., an Update with a Source
 Prefix sub-TLV.  When a node receives a source-specific Update (prefix,
 source prefix, router-id, seqno, metric) from a neighbour neigh, it
-behaves as described in <xref target="RFC8966"/> Section&nbsp;3.5.4, except
-that the entry under consideration is indexed by (prefix, source prefix,
-neigh) rather than just (prefix, neigh).</t>
+behaves as described in <xref target="RFC8966"/> Section&nbsp;3.5.4,
+except that the entry under consideration is indexed by (prefix, plen,
+sprefix, splen, neigh) rather than just (prefix, plen, neigh).</t>
 
 <t>Similarly, when a node needs to send a Request of either kind that
 applies to a route with a non-zero length source prefix, it sends
@@ -382,36 +382,12 @@ non-source-specific routers and source-specific routers are mixed in
 a single routing domain, Babel's loop-avoidance properties are preserved,
 and, in particular, no persistent routing loops will occur.</t>
 
-<t>However, this extension is encoded using mandatory sub-TLVs, introduced in
-<xref target="RFC8966"/>, and therefore is not compatible with the older version
-of the Babel Routing Protocol <xref target="RFC6126"/> which does not support
-such sub-TLVs.  Consequently, this extension MUST NOT be used with routers
-implementing RFC 6126, otherwise persistent routing loops may occur.</t>
-
-<section title="Loop-avoidance" anchor="loop">
-
-<t>The extension defined in this protocol uses a new Mandatory sub-TLV to
-carry the source prefix information.  As discussed in Section&nbsp;4.4 of
-<xref target="RFC8966"/>, this encoding ensures that non-source-specific
-routers will silently ignore the whole TLV, which is necessary to avoid
-persistent routing loops in hybrid networks.</t>
-
-<t>Consider two nodes A and B, with A source-specific announcing a route
-to (D,&nbsp;S).  Suppose that B (non-source-specific) merely ignores the
-source prefix information when it receives the update rather than ignoring
-the whole TLV, and re-announces the route as D.  This re-announcement
-reaches A, which treats it as (D,&nbsp;::/0).  Packets destined to D but
-not sourced in S will be forwarded by A to B, and by B to A, causing a
-persistent routing loop:</t>
-<figure><artwork><![CDATA[
-    (D,S)                 (D)
-     <--                 <--
-  ------ A ----------------- B
-           -->
-          (D,::/0)
-]]></artwork></figure>
-
-</section>
+<t>However, this extension is encoded using mandatory sub-TLVs, introduced
+in <xref target="RFC8966"/>, and therefore is not compatible with the
+older version of the Babel Routing Protocol <xref target="RFC6126"/> which
+does not support mandatory sub-TLVs.  Consequently, this extension MUST
+NOT be used with routers implementing RFC 6126, otherwise persistent
+routing loops may occur.</t>
 
 <section title="Starvation and Blackholes">
 
@@ -421,10 +397,11 @@ unless there are enough non-source-specific routes in the network,
 non-source-specific routers will suffer starvation, and discard packets
 for destinations that are only announced by source-specific routers.</t>
 
-<t>A simple yet sufficient condition for avoiding starvation is to build a
-connected source-specific backbone that includes all of the edge routers,
-and announce a (non-source-specific) default route towards the
-backbone.</t>
+<t>In the common case where all source-specific routes are originated at
+one of a small set of edge routers, a simple yet sufficient condition for
+avoiding starvation is to build a connected source-specific backbone that
+includes all of the edge routers, and announce a non-source-specific
+default route towards the backbone.</t>
 
 </section>
 
@@ -442,7 +419,7 @@ these TLVs.</t>
 destination prefix and a single source prefix, a source-specific message
 contains exactly one Source Prefix sub-TLV.  A node MUST NOT send more
 than one Source Prefix sub-TLV in a TLV, and a node receiving more than
-one Source Prefix sub-TLV in a single TLV MUST ignore this TLV.  It MAY
+one Source Prefix sub-TLV in a single TLV MUST ignore the TLV.  It MAY
 ignore the whole packet.</t>
 
 <section title="Source Prefix sub-TLV">
@@ -469,14 +446,13 @@ field's size is (Source Plen)/8 octets rounded upwards.</t>
 
 <t>The contents of the Source Prefix sub-TLV are interpreted according to
 the AE of the enclosing TLV.  If a TLV with AE equal to 0 contains
-a Source Prefix sub-TLV, then the whole TLV MUST be ignored.  Similarly,
-if a TLV contains multiple Source Prefix sub-TLVs, then the whole TLV MUST
-be ignored.</t>
+a Source Prefix sub-TLV, then the whole TLV MUST be ignored.  If a TLV
+contains multiple Source Prefix sub-TLVs, then the whole TLV MUST be
+ignored.</t>
 
 <t>Note that this sub-TLV is a mandatory sub-TLV.  Therefore, as described
 in Section 4.4 of <xref target="RFC8966"/>, the whole TLV MUST be ignored if
-that sub-TLV is not understood (or malformed).  Otherwise, routing loops
-may occur (see <xref target="loop"/>).</t>
+that sub-TLV is not understood (or malformed).</t>
 
 </section>
 
@@ -542,7 +518,7 @@ filtering (Appendix C of <xref target="RFC8966"/>) as a security mechanism.
 Unless the filtering rules are designed to take source-specific routing
 into account, they might be bypassed by a source-specific route, which
 might cause traffic to reach a portion of a network that was thought to be
-protected.  Similarly, a network administrator might assume that no route
+protected.  A network administrator might also assume that no route
 is more specific than a host route, and use a host route in order to
 direct traffic for a given destination through a security device (e.g.,
 a firewall); source-specific routing invalidates this assumption, and in

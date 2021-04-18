@@ -176,6 +176,85 @@ tweaking the routing protocol's metric ("prepending" in BGP).</t>
 
 </section>
 
+<section title="Specificity of prefix pairs">
+
+<t>In ordinary next-hop routing, when multiple routing table entries match
+the destination of a packet, the "longest prefix rule" mandates that the
+most specific one applies.  The reason why this rule makes sense is that
+the set of prefixes has the following "tree property":</t>
+<list style="empty">
+<t>for any prefixes P and P', either P and P' are disjoint, or one is more
+specific than the other.</t>
+</list>
+
+<t>It would be a natural proposition to order pairs of prefixes pointwise:
+to define that (D,S) is more specific than (D',S') when D is more specific
+than D and S is more specific than S'.  Unfortunately, the set of pairs of
+prefixes with the pointwise ordering doesn't satisfy the tree property.
+Indeed, consider the following two pairs:</t>
+<list style="empty">
+<t>(2001:db8:0:1::/64, ::/0) and (::/0, 2001:db8:0:2::/64)</t>
+</list>
+<t>These two pairs are not disjoint (a packet with destination
+2001:db8:0:1::1 and source 2001:db8:0:2::1 is matched by both), but
+neither is more specific than the other.  The effect is that there is no
+natural unambiguous way to interpret a routing table such as the
+following:</t>
+<figure><artwork><![CDATA[
+          destination                source     next-hop
+    2001:db8:0:1::/64                  ::/0            A
+                 ::/0     2001:db8:0:2::/64            B
+]]></artwork></figure>
+
+<t>A more refined ordering over pairs of prefixes is required in order to
+avoid all ambiguities.  There are two natural choices: the
+destination-first ordering, where (D,S) is more specific than (D',S')
+when</t>
+<list style="empty">
+<t>D is strictly more specific than D'; or</t>
+<t>D&nbsp;=&nbsp;D' and S is more specific than S',</t>
+</list>
+<t>and, symmetrically, the source-first ordering, in which sources are
+compared first and destinations second.</t>
+
+<t>Expedient as it would be to leave the choice to the implementation,
+this is not possible: all routers in a routing domain must use the same
+ordering, lest persistent routing loops occur.  Indeed, consider the
+following topology:</t>
+
+<figure><artwork><![CDATA[
+   A --- B --- C --- D
+]]></artwork></figure>
+
+<t>Suppose that A announces a route for (::/0, 2001:db8:0:2::/64), while
+D announces a route for (2001:db8:0:1::/64, ::/0).  Suppose further that
+B uses the destination-first ordering, while C uses the source-first
+ordering.  Then a packet that matches both routes, say, with destination
+2001:db8:0:1::1 and source 2001:db8:0:2::1, will be sent by B towards
+D and by C towards A, and will therefore loop indefinitely between B and
+C.</t>
+
+<t>The extension described in this document mandates that all routers use
+the destination-first ordering, which is generally believed to be more
+useful than the source-first ordering.  Consider the following topology,
+where A is an edge router connected to the Internet and B is an internal
+router connected to an access network N:</t>
+
+<figure><artwork><![CDATA[
+  (::/0, S)             (D, ::/0)
+   Internet --- A --- B --- N
+]]></artwork></figure>
+
+<t>A announces a source-specific default route with source
+S (::/0,&nbsp;S), while B announces a non-specific route to prefix D.
+Consider what happens to a packet with a desination in D and a source in
+S.  With the destination-first ordering, the packet is routed towards the
+network N, which is the only way it can possibly reach its destination.
+With the source-first ordering, on the other hand, the packet is sent
+towards the Internet, with no hope to ever reach its destination N.</t>
+
+</section>
+
 </section>
 
 <section title="Specification of Requirements">
@@ -386,8 +465,8 @@ and, in particular, no persistent routing loops will occur.</t>
 in <xref target="RFC8966"/>, and therefore is not compatible with the
 older version of the Babel Routing Protocol <xref target="RFC6126"/> which
 does not support mandatory sub-TLVs.  Consequently, this extension MUST
-NOT be used with routers implementing RFC 6126, otherwise persistent
-routing loops may occur.</t>
+NOT be used in a routing domain in which some routers implement RFC 6126,
+otherwise persistent routing loops may occur.</t>
 
 <section title="Starvation and Blackholes">
 
@@ -416,8 +495,8 @@ Table, in conjunction with the destination prefix natively carried by
 these TLVs.</t>
 
 <t>Since a source-specific routing entry is characterized by a single
-destination prefix and a single source prefix, a source-specific message
-contains exactly one Source Prefix sub-TLV.  A node MUST NOT send more
+destination prefix and a single source prefix, a source-specific contains
+message exactly one Source Prefix sub-TLV.  A node MUST NOT send more
 than one Source Prefix sub-TLV in a TLV, and a node receiving more than
 one Source Prefix sub-TLV in a single TLV MUST ignore the TLV.  It MAY
 ignore the whole packet.</t>

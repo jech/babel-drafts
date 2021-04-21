@@ -6,7 +6,7 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="yes" ?>
-<rfc category="std" docName="draft-ietf-babel-source-specific-07" ipr="trust200902">
+<rfc category="std" docName="draft-ietf-babel-source-specific-08" ipr="trust200902">
 <front>
 <title>Source-Specific Routing in Babel</title>
 <author fullname="Matthieu Boutier" initials="M." surname="Boutier">
@@ -36,7 +36,7 @@
 </address>
 </author>
 
-<date day="18" month="April" year="2021"/>
+<date day="21" month="April" year="2021"/>
 
 <abstract>
 <t>Source-specific routing (also known as Source-Address Dependent
@@ -92,19 +92,19 @@ a source prefix.  The source prefix is encoded using a mandatory sub-TLV
 
 <t>Multihoming is the practice of connecting a single network to two or
 more transit networks.  The main application of source-specific routing is
-a form of multihoming known as multihoming with multiple addresses.</t>
+a form of multihoming known as "multihoming with multiple addresses".</t>
 
 <t>Classical multihoming consists in assigning a provider-independent
 range of addresses to the multihomed network and announcing it to all
-transit providers.  While classical multihoming works reasonably well for
-large networks, the cost of obtaining a provider-independent address range
-and announcing it globally in the Internet is prohibitive for small
-networks.  Unfortunately, it is not possible to implement classical
-multihoming with ordinary provider-dependent addresses: in a network
-connected to two providers A and B, a packet with a source address
-allocated by A needs to be routed through the edge router connected to A.
-If it is routed through the edge router connected to B, it will most
-likely be filtered (dropped), in accordance with <xref target="BCP84"/>.</t>
+transit providers.  While classical multihoming works well for large
+networks, the cost of obtaining a provider-independent address range and
+announcing it globally in the Internet is prohibitive for small networks.
+Unfortunately, it is not possible to implement classical multihoming with
+ordinary provider-dependent addresses: in a network connected to two
+providers A and B, a packet with a source address allocated by A needs to
+be routed through the edge router connected to A.  If it is routed through
+the edge router connected to B, it will most likely be filtered (dropped),
+in accordance with <xref target="BCP84"/>.</t>
 
 <t>In multihoming with multiple addresses, every host in the multihomed
 network is assigned multiple addresses, one for each transit provider.
@@ -118,16 +118,16 @@ simpler sub-problems.</t>
 <t>The issue of choosing a suitable source address is a decision local to
 the sending host, and an area of active research.  The simplest solution
 is to use a traditional transport-layer protocol, such as TCP, and to
-probe all available source addresses at connection time, similarly to what
-is already done with destination addresses, either sequentially <xref
-target="RFC3484"/> or in parallel <xref target="RFC8305"/>.  Since the
-transport-layer protocol is not aware of the multiple available addresses,
-flows are interrupted when the selected provider goes down (from the point
-of view of the user, all TCP connections are dropped when the network
-environment changes).  A better user experience can be provided by making
-available all of the potential source and destination addresses to higher
-layer protocols, either at the transport layer <xref target="RFC8684"/>
-<xref target="RFC4960"/>, or at the applicaton layer
+probe all available source addresses at connection time, analogously to
+what is already done with destination addresses, either sequentially
+<xref target="RFC3484"/> or in parallel <xref target="RFC8305"/>.  Since
+the transport-layer protocol is not aware of the multiple available
+addresses, flows are interrupted when the selected provider goes down
+(from the point of view of the user, all TCP connections are dropped when
+the network environment changes).  A better user experience can be
+provided by making available all of the potential source and destination
+addresses to higher layer protocols, either at the transport layer <xref
+target="RFC8684"/> <xref target="RFC4960"/>, or at the applicaton layer
 <xref target="RFC8445"/>.</t>
 
 <t>Source-specific routing solves the problem of routing a packet to the
@@ -148,9 +148,9 @@ encapsulation techniques that are commonly used in the Internet to
 establish a network-layer topology that is different from the physical
 topology.  In some deployments, the default route points at the tunnel;
 this causes the network stack to attempt to send encapsulated packets
-through the tunnel, which in causes it to break.  Various solutions to
-this problem are possible, the most common of which is to point a host
-route at the tunnel endpoint.</t>
+through the tunnel, which causes it to break.  Various solutions to this
+problem are possible, the most common of which is to point a host route at
+the tunnel endpoint.</t>
 
 <t>When source-specific routing is available, it becomes possible to
 announce through the tunnel a default route that is specific to the prefix
@@ -167,7 +167,7 @@ routing protocol.</t>
 
 <t>In many applications of anycast, such as DNS root servers, the
 nondeterminism of anycast is acceptable; some applications, however,
-require finer control.  For example, in Content Distribution Networks
+require finer control.  For example, in some Content Distribution Networks
 (CDNs) every endpoint is expected to handle a well-defined subset of the
 client population.  With source-specific routing, it is possible for each
 member of the anycast group to announce a route specific to its client
@@ -176,25 +176,26 @@ tweaking the routing protocol's metric ("prepending" in BGP).</t>
 
 </section>
 
-<section title="Specificity of prefix pairs">
+<section title="Specificity of prefix pairs" anchor="specificity">
 
 <t>In ordinary next-hop routing, when multiple routing table entries match
 the destination of a packet, the "longest prefix rule" mandates that the
 most specific one applies.  The reason why this rule makes sense is that
-the set of prefixes has the following "tree property":</t>
+the set of prefixes has the following "tree property":
 <list style="empty">
 <t>for any prefixes P and P', either P and P' are disjoint, or one is more
 specific than the other.</t>
-</list>
+</list></t>
 
 <t>It would be a natural proposition to order pairs of prefixes pointwise:
 to define that (D,S) is more specific than (D',S') when D is more specific
 than D and S is more specific than S'.  Unfortunately, the set of pairs of
 prefixes with the pointwise ordering doesn't satisfy the tree property.
-Indeed, consider the following two pairs:</t>
+Indeed, consider the following two pairs:
 <list style="empty">
 <t>(2001:db8:0:1::/64, ::/0) and (::/0, 2001:db8:0:2::/64)</t>
-</list>
+</list></t>
+
 <t>These two pairs are not disjoint (a packet with destination
 2001:db8:0:1::1 and source 2001:db8:0:2::1 is matched by both), but
 neither is more specific than the other.  The effect is that there is no
@@ -209,12 +210,12 @@ following:</t>
 <t>A more refined ordering over pairs of prefixes is required in order to
 avoid all ambiguities.  There are two natural choices: the
 destination-first ordering, where (D,S) is more specific than (D',S')
-when</t>
-<list style="empty">
+when
+<list style="symbols">
 <t>D is strictly more specific than D'; or</t>
 <t>D&nbsp;=&nbsp;D' and S is more specific than S',</t>
 </list>
-<t>and, symmetrically, the source-first ordering, in which sources are
+and, symmetrically, the source-first ordering, in which sources are
 compared first and destinations second.</t>
 
 <t>Expedient as it would be to leave the choice to the implementation,
@@ -230,12 +231,12 @@ following topology:</t>
 D announces a route for (2001:db8:0:1::/64, ::/0).  Suppose further that
 B uses the destination-first ordering, while C uses the source-first
 ordering.  Then a packet that matches both routes, say, with destination
-2001:db8:0:1::1 and source 2001:db8:0:2::1, will be sent by B towards
-D and by C towards A, and will therefore loop indefinitely between B and
+2001:db8:0:1::1 and source 2001:db8:0:2::1, would be sent by B towards
+D and by C towards A, and would therefore loop indefinitely between B and
 C.</t>
 
-<t>The extension described in this document mandates that all routers use
-the destination-first ordering, which is generally believed to be more
+<t>This document mandates (<xref target="forwarding"/>) that all routers
+use the destination-first ordering, which is generally believed to be more
 useful than the source-first ordering.  Consider the following topology,
 where A is an edge router connected to the Internet and B is an internal
 router connected to an access network N:</t>
@@ -251,7 +252,7 @@ Consider what happens to a packet with a desination in D and a source in
 S.  With the destination-first ordering, the packet is routed towards the
 network N, which is the only way it can possibly reach its destination.
 With the source-first ordering, on the other hand, the packet is sent
-towards the Internet, with no hope to ever reach its destination N.</t>
+towards the Internet, with no hope to ever reach its destination in N.</t>
 
 </section>
 
@@ -280,8 +281,8 @@ as the original, non-source-specific data.</t>
 
 <t>Every Babel node maintains a source table, as described in <xref
 target="RFC8966"/> Section&nbsp;3.2.5.  A source-specific Babel node
-extends this table with the following field:</t>
-<t><list style="symbols">
+extends this table with the following field:
+<list style="symbols">
 <t>The source prefix (sprefix,&nbsp;splen) specifying the source address of
 packets to which this entry applies.</t>
 </list></t>
@@ -290,8 +291,9 @@ packets to which this entry applies.</t>
 sprefix, splen, router-id).</t>
 
 <t>Note that the route entry contains a source (see sections 2 and 3.2.5
-of <xref target="RFC8966"/>) which itself contains a source prefix.  These
-are two different concepts, and must not be confused.</t>
+of <xref target="RFC8966"/>) which itself contains both destination and
+source prefixes.  These are two different concepts, and must not be
+confused.</t>
 
 </section>
 
@@ -323,45 +325,20 @@ form (prefix, plen, sprefix, splen, router-id).</t>
 
 </section>
 
-<section title="Data Forwarding">
+<section title="Data Forwarding" anchor="forwarding">
 
-<t>In next-hop routing, if two routing table entries overlap, then one is
-necessarily more specific than the other; the "longest prefix rule"
-specifies that the most specific applicable routing table entry is
-chosen.</t>
-
-<t>With source-specific routing, there might no longer be a most specific
-applicable entry: two routing table entries might match a given packet
-without one necessarily being more specific than the other.  Consider for
-example the following routing table:</t>
-
-<figure><artwork><![CDATA[
-          destination                source     next-hop
-    2001:db8:0:1::/64                  ::/0            A
-                 ::/0     2001:db8:0:2::/64            B
-]]></artwork></figure>
-
-<t>This specifies that all packets with destination in 2001:db8:0:1::/64
-are to be routed through A, while all packets with source in
-2001:db8:0:2::/64 are to be routed through B.  A packet with source
-2001:db8:0:2::42 and destination 2001:db8:0:1::57 matches both entries,
-although neither is more specific than the other.  A choice is necessary,
-and unless the choice being made is the same on all routers in a routing
-domain, persistent routing loops may occur.  More details are
-given in Section IV.C of <xref target="SS-ROUTING"/>.</t>
-
-<t>A Babel implementation MUST choose routing table entries by using the
-so-called destination-first ordering, where a routing table entry R1 is
-preferred to a routing table entry R2 when either R1's destination prefix
-is more specific than R2's, or the destination prefixes are equal and R1's
-source prefix is more specific than R2's.  (In other words, routing table
-entries are compared using the lexicographic product of the destination
-prefix ordering by the source prefix ordering.)</t>
+<t>As noted in <xref target="specificity"/> above, source-specific tables
+can, in general, be ambiguous, and all routers in a routing domain must
+use the same algorithm for choosing applicable routes.  An implementation
+of the extension described in this document MUST choose routing table
+entries by using the destination-first ordering, where a routing table
+entry R1 is preferred to a routing table entry R2 when either R1's
+destination prefix is more specific than R2's, or the destination prefixes
+are equal and R1's source prefix is more specific than R2's.</t>
 
 <t>In practice, this means that a source-specific Babel implementation
 must take care that any lower layer that performs packet forwarding obey
 this semantics.  More precisely:</t>
-
 <t><list style="symbols">
 <t>if the lower layers implement the destination-first ordering, then the
 Babel implementation SHOULD use them directly;</t>
@@ -405,7 +382,7 @@ TLVs.</t>
 a node sends a source-specific Update, i.e., an Update with a Source
 Prefix sub-TLV.  When a node receives a source-specific Update (prefix,
 source prefix, router-id, seqno, metric) from a neighbour neigh, it
-behaves as described in <xref target="RFC8966"/> Section&nbsp;3.5.4,
+behaves as described in <xref target="RFC8966"/> Section&nbsp;3.5.3,
 except that the entry under consideration is indexed by (prefix, plen,
 sprefix, splen, neigh) rather than just (prefix, plen, neigh).</t>
 
@@ -421,21 +398,21 @@ Source Prefix sub-TLV.</t>
 
 <section title="Wildcard Messages">
 
-<t>In the original protocol, the Address Encoding value 0 is used for
+<t>In the original protocol, the Address Encoding (AE) value 0 is used for
 wildcard messages: messages that apply to all routes, of any address
-family and with any destination prefix.  Wildcard messages are allowed
-in two places in the protocol: wildcard retractions are used to retract
-all of the routes previously advertised by a node on a given interface,
-and wildcard Route Requests are used to request a full dump of the Route
-Table from a given node.  Wildcard messages are intended to apply to all
-routes, including routes decorated with additional data and AE values to
-be defined by future extensions, and hence this specification extends
+family and with any destination prefix.  Wildcard messages are allowed in
+two places in the protocol: wildcard retractions are used to retract all
+of the routes previously advertised by a node on a given interface, and
+wildcard Route Requests are used to request a full dump of the Route Table
+from a given node.  Wildcard messages are intended to apply to all routes,
+including routes decorated with additional data and AE values to be
+defined by future extensions, and hence this specification extends
 wildcard operations to apply to all routes, whatever the value of the
 source prefix.</t>
 
 <t>More precisely, a node receiving an Update with the AE field set to
 0 and the Metric field set to infinity (a wildcard retraction) MUST apply
-the route acquisition procedure described in Section 3.5.4 of <xref
+the route acquisition procedure described in Section 3.5.3 of <xref
 target="RFC8966"/> to all of the routes that it has learned from the sending
 node, whatever the value of the source prefix.  A node MUST NOT send
 a wildcard retraction with an attached source prefix, and a node that
@@ -446,7 +423,7 @@ retraction.</t>
 to 0 (a wildcard route request) SHOULD send a full routing table dump,
 including routes with a non-zero length source prefix.  A node MUST NOT
 send a wildcard request that carries a source prefix, and a node receiving
-a wildcard request with a source prefix MUST ignore it.</t>
+a wildcard request with a source prefix MUST ignore the request.</t>
 
 </section>
 
@@ -523,10 +500,16 @@ field's size is (Source Plen)/8 octets rounded upwards.</t>
 </list>
 </t>
 
+<t>The length of the body TLV is normally of size 1+(Source Plen)/8
+rounded upwards.  If the Length field indicates a length smaller than
+that, then the sub-TLV is corrupt, and the whole enclosing TLV must be
+ignored; if the Length field indicates a length that is larger, then the
+extra octets contained in the sub-TLV MUST be silently ignored.</t>
+
 <t>The contents of the Source Prefix sub-TLV are interpreted according to
 the AE of the enclosing TLV.  If a TLV with AE equal to 0 contains
-a Source Prefix sub-TLV, then the whole TLV MUST be ignored.  If a TLV
-contains multiple Source Prefix sub-TLVs, then the whole TLV MUST be
+a Source Prefix sub-TLV, then the whole enclosing TLV MUST be ignored.  If
+a TLV contains multiple Source Prefix sub-TLVs, then the whole TLV MUST be
 ignored.</t>
 
 <t>Note that this sub-TLV is a mandatory sub-TLV.  Therefore, as described
@@ -553,7 +536,7 @@ update their parser state while otherwise ignoring the whole TLV.</t>
 
 </section>
 
-<section title="Source-specific (Route) Request" anchor="ss-request">
+<section title="Source-specific Route Request" anchor="ss-request">
 
 <t>A source-specific Route Request is a Route Request TLV with a Source
 Prefix sub-TLV.  It prompts the receiver to send an update for a given
@@ -585,12 +568,12 @@ the Babel sub-TLV types registry.</t>
 
 <section title="Security considerations">
 
-<t>The extension defined in this document adds a new sub-TLV to three TLVs
-already present in the original Babel protocol, and does not change the
-security properties of the protocol itself.  However, the additional
-flexibility provided by source-specific routing might invalidate the
-assumptions made by some network administrators, which could conceivably
-lead to security issues.</t>
+<t>The extension defined in this document adds a new sub-TLV to three
+sub-TLVs already present in the original Babel protocol, and does not
+change the security properties of the protocol itself.  However, the
+additional flexibility provided by source-specific routing might
+invalidate the assumptions made by some network administrators, which
+could conceivably lead to security issues.</t>
 
 <t>For example, a network administrator might be tempted to abuse route
 filtering (Appendix C of <xref target="RFC8966"/>) as a security mechanism.
@@ -608,8 +591,8 @@ used to bypass the security device.</t>
 
 <section title="Acknowledgments">
 
-<t>The authors are grateful to Donald Eastlake and Joel Halpern for their
-help with this document.</t>
+<t>The authors are indebted to Donald Eastlake, Joel Halpern, and Toke
+Hoiland-Jorgensen for their help with this document.</t>
     
 </section>
 

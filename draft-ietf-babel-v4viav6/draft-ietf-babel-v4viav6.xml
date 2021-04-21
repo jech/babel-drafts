@@ -6,7 +6,7 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="no" ?>
-<rfc category="std" docName="draft-ietf-babel-v4viav6-02"
+<rfc category="std" docName="draft-ietf-babel-v4viav6-03"
     ipr="trust200902"
     updates="8966">
 <front>
@@ -25,7 +25,7 @@ IPv4 routes with an IPv6 next-hop in the Babel routing protocol
 </address>
 </author>
 
-<date day="13" month="April" year="2021"/>
+<date day="21" month="April" year="2021"/>
 
 <abstract>
 <t>This document defines an extension to the Babel routing protocol that
@@ -189,28 +189,89 @@ ICMPv4 packets originated by intermediate routers: if intermediate routers
 are unable to send ICMPv4 packets, PMTUd may lead to persistent
 blackholing of IPv4 traffic.</t>
 
-<t>Due to this dependency, every Babel router that is able to forward IPv4
-traffic MUST be able originate ICMPv4 traffic.  Since the extension
-described in this document enables routers to forward IPv4 traffic
-received over an interface that has not been assigned an IPv4 address,
-a router implementing this extension MUST be able to originate ICMPv4
-packets, even when the outgoing interface has not been assigned an IPv4
-address.</t>
+<t>Due to this kind of dependency, every Babel router that is able to
+forward IPv4 traffic MUST be able originate ICMPv4 traffic.  Since the
+extension described in this document enables routers to forward IPv4
+traffic received over an interface that has not been assigned an IPv4
+address, a router implementing this extension MUST be able to originate
+ICMPv4 packets even when the outgoing interface has not been assigned an
+IPv4 address.</t>
 
 <t>There are various ways to meet this requirement, and choosing between
 them is left to the implementation.  For example, if a router has an
 interface that has been assigned an IPv4 address, or if an IPv4 address
 has been assigned to the router itself (to the "loopback interface"), then
 that IPv4 address may be "borrowed" to serve as the source of originated
-ICMPv4 packets.  If no IPv4 address is available, a router may use a dummy
-IPv4 address as the source of outgoing ICMPv4 packets, for example an
-address taken from a private address range <xref target="RFC1918"/> that
-is known to not be used in the local routing domain (either dynamically
-chosen, for example drawn randomly or derived algorithmically from an IPv6
-address, or statically configured).  Note however that using the same
-address on multiple routers may hamper debugging and fault isolation,
-e.g., when using the "traceroute" utility.</t>
+ICMPv4 packets.  If no IPv4 address is available, a router may choose
+a source address from a prefix known to be unused, for example from
+a suitably chosen private address range <xref target="RFC1918"/>.  If no
+more suitable address is available, then a router MAY use the IPv4 dummy
+address 192.0.0.8 as the source address of the IMCPv4 packets that it
+sends.  Note however that using the same address on multiple routers may
+hamper debugging and fault isolation, e.g., when using the "traceroute"
+utility.</t>
 
+</section>
+
+<section title="Protocol encoding">
+
+<t>This extension defines the v4-via-v6 AE, whose value is TBD. This AE is
+solely used to tag network prefixes, and MUST NOT be used to tag peers'
+addresses, eg. in Next-Hop or IHU TLVs.</t>
+
+<t>This extension defines no new TLVs or sub-TLVs.</t>
+
+<section title="Prefix encoding" anchor="prefix-encoding">
+<t>Network prefixes tagged with AE TBD MUST be encoded and decoded just
+like prefixes tagged with AE 1 (IPv4), as described in Section&nbsp;4.3.1
+of <xref target="RFC8966"/>.</t>
+
+<t>A new compression state for AE TBD (v4-via-v6) distinct from that of AE
+1 (IPv4) is introduced, and MUST be used for address compression of
+prefixes tagged with AE TBD, as described in Section&nbsp;4.6.9 of
+<xref target="RFC8966"/></t>
+
+</section>
+
+<section title="Changes to existing TLVs">
+<t>The following TLVs MAY be tagged with AE TBD:
+
+<list style="symbols">
+<t>Update (Type = 8)</t>
+<t>Route Request (Type = 9)</t>
+<t>Seqno Request (Type = 10)</t>
+</list>
+</t>
+
+<t>As AE TBD is suitable only for network prefixes, IHU (Type = 5) and
+Next-Hop (Type = 7) TLVs MUST NOT be tagged with AE TBD.  Such (incorrect)
+TLVs MUST be ignored upon reception.</t>
+
+<section title="Update">
+
+<t>An Update (Type = 8) TLV with AE = TBD is constructed as described in
+Section&nbsp;4.6.9 of <xref target="RFC8966"/> for AE 1 (IPv4), with the
+following specificities:
+<list style="symbols">
+<t>Prefix.  The Prefix field is constructed according to
+<xref target="prefix-encoding"/> above.</t>
+<t>Next hop.  The next hop is determined as described in
+<xref target="receiving-updates"/> above.</t>
+</list>
+</t>
+
+</section>
+
+<section title="Other TLVs">
+
+<t>When tagged with the AE TBD, Route Request and Seqno Request updates
+MUST be constructed and decoded as described in Section&nbsp;4.6 of
+<xref target="RFC8966"/>, and the network prefixes contained within them
+decoded as described in <xref target="prefix-encoding"/> above.</t>
+
+</section>
+
+</section>
 </section>
 
 <section title="Backwards compatibility">
@@ -238,67 +299,6 @@ are preferred to v4-via-v6 announcements when the outgoing interface has
 an assigned IPv4 address; doing otherwise would prevent routers that do
 not implement this extension from learning the route being announced.</t>
 
-</section>
-
-<section title="Protocol encoding">
-
-<t>This extension defines the v4-via-v6 AE, whose value is TBD. This AE is
-solely used to tag network prefixes, and MUST NOT be used to tag peers'
-addresses, eg. in Next-Hop or IHU TLVs.</t>
-
-<t>This extension defines no new TLVs or sub-TLVs.</t>
-
-<section title="Prefix encoding" anchor="prefix-encoding">
-<t>Network prefixes tagged with AE TBD MUST be encoded and decoded as
-prefixes tagged with AE 1 (IPv4), as described in Section&nbsp;4.3.1 of
-<xref target="RFC8966"/>.</t>
-
-<t>A new compression state for AE TBD (v4-via-v6) distinct from that of AE 1
-(IPv4) is introduced, and MUST be used for address compression of prefixes
-tagged with AE TBD, as described in Section&nbsp;4.6.9 of
-<xref target="RFC8966"/></t>
-
-</section>
-
-<section title="Changes for existing TLVs">
-<t>The following TLVs MAY be tagged with AE TBD:
-
-<list style="symbols">
-<t>Update (Type = 8)</t>
-<t>Route Request (Type = 9)</t>
-<t>Seqno Request (Type = 10)</t>
-</list>
-</t>
-
-<t>As AE TBD is suitable only to tag network prefixes, IHU (Type = 5) and
-Next-Hop (Type = 7) TLVs MUST NOT be tagged with AE TBD.  Such (incorrect)
-TLVs MUST be silently ignored upon reception.</t>
-
-<section title="Update">
-
-<t>An Update (Type = 8) TLV with AE = TBD is constructed as described in
-Section&nbsp;4.6.9 of <xref target="RFC8966"/> for AE 1 (IPv4), with the
-following specificities:
-<list style="symbols">
-<t>Prefix.  The Prefix field is constructed according to the
-<xref target="prefix-encoding"/> above.</t>
-<t>Next hop.  The next hop is determined as described in
-<xref target="receiving-updates"/> above.</t>
-</list>
-</t>
-
-</section>
-
-<section title="Other valid TLVs tagged with AE = TBD">
-
-<t>Any other valid TLV tagged with AE = TBD MUST be constructed and
-decoded as described in Section&nbsp;4.6 of <xref target="RFC8966"/>.
-Network prefixes within MUST be constructed and decoded as described in
-<xref target="prefix-encoding"/> above.</t>
-
-</section>
-
-</section>
 </section>
 
 <section title="IANA Considerations">

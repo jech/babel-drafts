@@ -6,12 +6,12 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="no" ?>
-<rfc category="std" docName="draft-ietf-babel-v4viav6-04"
+<rfc category="std" docName="draft-ietf-babel-v4viav6-05"
     ipr="trust200902"
     updates="8966">
 <front>
 <title abbrev="IPv4 routes with an IPv6 next-hop">
-IPv4 routes with an IPv6 next-hop in the Babel routing protocol
+IPv4 routes with an IPv6 next hop in the Babel routing protocol
 </title>
 <author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek">
 <organization>IRIF, University of Paris</organization>
@@ -25,7 +25,7 @@ IPv4 routes with an IPv6 next-hop in the Babel routing protocol
 </address>
 </author>
 
-<date day="8" month="June" year="2021"/>
+<date day="9" month="June" year="2021"/>
 
 <abstract>
 <t>This document defines an extension to the Babel routing protocol that
@@ -50,11 +50,11 @@ address, for example:</t>
 ]]></artwork></figure>
 
 <t>When a packet is routed according to a given routing table entry, the
-forwarding plane uses a neighbour discovery protocol (the Neighbour
-Discovery protocol (ND) <xref target="RFC4861"/> in the case of IPv6, the
-Address Resolution Protocol (ARP) <xref target="RFC0826"/> in the case of
-IPv4) to map the next hop address to a link-layer address (a "MAC
-address"), which is then used to construct the link-layer frames that
+forwarding plane typically uses a neighbour discovery protocol (the
+Neighbour Discovery protocol (ND) <xref target="RFC4861"/> in the case of
+IPv6, the Address Resolution Protocol (ARP) <xref target="RFC0826"/> in
+the case of IPv4) to map the next-hop address to a link-layer address (a
+"MAC address"), which is then used to construct the link-layer frames that
 encapsulate forwarded packets.</t>
 
 <t>It is apparent from the description above that there is no fundamental
@@ -64,13 +64,13 @@ being routed through a next hop with an IPv4 address (in which case the
 next hop's MAC address will be obtained using ARP), or, conversely, an
 IPv4 packet from being routed through a next hop with an IPv6 address.
 (In fact, it is even possible to store link-layer addresses directly in
-the next hop entry of the routing table, which is commonly done in
+the next-hop entry of the routing table, which is commonly done in
 networks using the OSI protocol suite).</t>
 
 <t>The case of routing IPv4 packets through an IPv6 next hop is
 particularly interesting, since it makes it possible to build networks
 that have no IPv4 addresses except at the edges and still provide IPv4
-connectivity to edge hosts.  In addition, since an IPv6 next-hop can use
+connectivity to edge hosts.  In addition, since an IPv6 next hop can use
 a link-local address that is autonomously configured, the use of such
 routes enables a mode of operation where the network core has no
 statically assigned IP addresses of either family, which significantly
@@ -101,7 +101,7 @@ they appear in all capitals, as shown here.</t>
 
 <section title="Protocol operation">
 
-<t>The Babel protocol fully supports double-stack operation: all data that
+<t>The Babel protocol fully supports dual-stack operation: all data that
 represent a neighbour address or a network prefix are tagged by an Address
 Encoding (AE), a small integer that identifies the address family (IPv4 or
 IPv6) of the address of prefix, and describes how it is encoded.  This
@@ -124,7 +124,7 @@ being announced.</t>
 the interest of maximising compatibility with existing routers, the sender
 SHOULD prefer an ordinary IPv4 announcement; even in that case, however,
 it MAY send a v4-via-v6 announcement.  A node SHOULD NOT send both
-ordinary IPv4 and v4-via-v6 annoucements for the same prefix over a single
+ordinary IPv4 and v4-via-v6 announcements for the same prefix over a single
 interface (if the update is sent to a multicast address) or to a single
 neighbour (if sent to a unicast address), since doing that provides no
 benefit while doubling the amount of routing traffic.</t>
@@ -141,32 +141,32 @@ been assigned an IPv4 address.</t>
 <section title="Receiving v4-via-v6 routes" anchor="receiving-updates">
 
 <t>Upon reception of an Update TLV with AE equal to 4 (v4-via-v6) and
-finite metric, a Babel node computes the IPv6 next-hop, as described in
-Section 4.6.9 of <xref target="RFC8966"/>.  If no IPv6 next-hop exists,
-then the Update MUST be silently ignored.  If an IPv6 next-hop exists,
+finite metric, a Babel node computes the IPv6 next hop, as described in
+Section 4.6.9 of <xref target="RFC8966"/>.  If no IPv6 next hop exists,
+then the Update MUST be silently ignored.  If an IPv6 next hop exists,
 then the node MAY acquire the route being announced, as described in
 Section 3.5.3 of <xref target="RFC8966"/>; the parameters of the route are
 as follows:
 <list style="symbols">
 <t>the prefix, plen, router-id, seqno, metric MUST be computed as for an
 IPv4 route, as described in Section 4.6.9 of <xref target="RFC8966"/>;</t>
-<t>the next-hop MUST be computed as for an IPv6 route, as described in
+<t>the next hop MUST be computed as for an IPv6 route, as described in
 Section 4.6.9 of <xref target="RFC8966"/>: it is taken from the last
-preceding Next-Hop TLV with an AE field equal to 2 or 3; if no such
+preceding Next Hop TLV with an AE field equal to 2 or 3; if no such
 entry exists, and if the Update TLV has been sent in a Babel packet
-carried over IPv6, then the next-hop is the network-layer source address
+carried over IPv6, then the next hop is the network-layer source address
 of the packet.</t>
 </list></t>
 
 <t>An Update TLV with a v4-via-v6 AE and metric equal to infinity is
 a retraction: it announces that a previously available route is being
-retracted.  In that case, no next-hop is necessary, and the retraction is
+retracted.  In that case, no next hop is necessary, and the retraction is
 treated as described in Section 4.6.9 of <xref target="RFC8966"/>.</t>
 
 <t>As usual, a node MAY ignore the update, e.g., due to filtering
 (Appendix C of <xref target="RFC8966"/>).  If a node cannot install
-v4-via-v6 routes, eg., due to hardware or software limitations, then
-routes to an IPv4 prefix with an IPv6 next-hop MUST NOT be selected, as
+v4-via-v6 routes, e.g., due to hardware or software limitations, then
+routes to an IPv4 prefix with an IPv6 next hop MUST NOT be selected, as
 described in Section&nbsp;3.5.3 of <xref target="RFC8966"/>.</t>
 
 </section>
@@ -174,7 +174,7 @@ described in Section&nbsp;3.5.3 of <xref target="RFC8966"/>.</t>
 <section title="Prefix and seqno requests" anchor="requests">
 
 <t>Prefix and seqno requests are used to request an update for a given
-prefix.  Since they are not related to a specific Next-Hop, there is no
+prefix.  Since they are not related to a specific next hop, there is no
 semantic difference between IPv4 and v4-via-v6 requests.  Therefore,
 a node SHOULD NOT send requests of either kind with the AE field being set
 to 4 (v4-via-v6); instead, it SHOULD request IPv4 updates by sending
@@ -197,7 +197,7 @@ above.</t>
 <section title="Other TLVs">
 
 <t>The only other TLVs defined by <xref target="RFC8966"/> that carry an
-AE field are Next-Hop and TLV.  Next-Hop and IHU TLVs MUST NOT carry the
+AE field are Next Hop and TLV.  Next Hop and IHU TLVs MUST NOT carry the
 AE 4 (v4-via-v6).</t>
 
 </section>
@@ -252,7 +252,7 @@ utility.</t>
 
 <t>This extension defines the v4-via-v6 AE, whose value is 4. This AE is
 solely used to tag network prefixes, and MUST NOT be used to tag neighbour
-addresses, eg. in Next-Hop or IHU TLVs.</t>
+addresses, e.g. in Next Hop or IHU TLVs.</t>
 
 <t>This extension defines no new TLVs or sub-TLVs.</t>
 
@@ -290,7 +290,7 @@ following specificities:
 <list style="symbols">
 <t>Prefix.  The Prefix field is constructed according to
 <xref target="prefix-encoding"/> above.</t>
-<t>Next hop.  The next hop is determined as described in
+<t>Next Hop.  The next hop is determined as described in
 <xref target="receiving-updates"/> above.</t>
 </list>
 </t>

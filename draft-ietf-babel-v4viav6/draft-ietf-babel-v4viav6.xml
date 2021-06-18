@@ -6,7 +6,7 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="no" ?>
-<rfc category="std" docName="draft-ietf-babel-v4viav6-05"
+<rfc category="std" docName="draft-ietf-babel-v4viav6-06"
     ipr="trust200902"
     updates="8966">
 <front>
@@ -25,13 +25,13 @@ IPv4 routes with an IPv6 next hop in the Babel routing protocol
 </address>
 </author>
 
-<date day="9" month="June" year="2021"/>
+<date day="18" month="June" year="2021"/>
 
 <abstract>
 <t>This document defines an extension to the Babel routing protocol that
 allows annoncing routes to an IPv4 prefix with an IPv6 next-hop, which
 makes it possible for IPv4 traffic to flow through interfaces that have
-not been assigned an IPv4 address.</t>
+not been assigned an IPv4 address.  This document updates RFC 8966.</t>
 </abstract>
 </front>
 
@@ -85,7 +85,8 @@ can originate ICMPv4 packets, even if they have not been assigned any IPv4
 addresses.</t>
 
 <t>The extension described in this document is inspired by a previously
-defined extension to the BGP protocol <xref target="RFC5549"/>.</t>
+defined extension to the BGP protocol <xref target="RFC5549"/>.  This
+document updates <xref target="RFC8966"/>.</t>
 
 <section title="Specification of Requirements">
 
@@ -207,7 +208,7 @@ AE 4 (v4-via-v6).</t>
 <section title="ICMPv4 and PMTU discovery" anchor="icmp">
 
 <t>The Internet Control Message Protocol (ICMPv4, or simply ICMP) <xref
-target="RFC792"/> is a protocol related to IPv4 that is primarily used to
+target="RFC0792"/> is a protocol related to IPv4 that is primarily used to
 carry diagnostic and debugging information.  ICMPv4 packets may be
 originated by end hosts (e.g., the "destination unreachable, port
 unreachable" ICMPv4 packet), but they may also be originated by
@@ -415,12 +416,10 @@ and David Schinazi.</t>
 <seriesInfo name="DOI" value="10.17487/RFC8966"/>
 </reference>
 
-<reference anchor="RFC792" target="https://www.rfc-editor.org/info/rfc792">
+<reference anchor="RFC0792" target="https://www.rfc-editor.org/info/rfc792">
 <front>
 <title>Internet Control Message Protocol</title>
-<author initials="J." surname="Postel" fullname="J. Postel">
-<organization/>
-</author>
+<author initials="J." surname="Postel" fullname="J. Postel"/>
 <date year="1981" month="September"/>
 </front>
 <seriesInfo name="STD" value="5"/>

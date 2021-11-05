@@ -6,7 +6,7 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="no" ?>
-<rfc category="std" docName="draft-ietf-babel-v4viav6-06"
+<rfc category="std" docName="draft-ietf-babel-v4viav6-07"
     ipr="trust200902"
     updates="8966">
 <front>
@@ -25,7 +25,7 @@ IPv4 routes with an IPv6 next hop in the Babel routing protocol
 </address>
 </author>
 
-<date day="18" month="June" year="2021"/>
+<date day="5" month="November" year="2021"/>
 
 <abstract>
 <t>This document defines an extension to the Babel routing protocol that
@@ -113,13 +113,13 @@ one of the normal encodings for IPv6 addresses.</t>
 
 <section title="Announcing v4-via-v6 routes" anchor="updates">
 
-<t>A Babel node that needs to announce an IPv4 route over an interface
-that has no assigned IPv4 address MAY make a v4-via-v6 announcement.  In
-order to do so, it first establishes an IPv6 next-hop address in the usual
-manner (either by sending the Babel packet over IPv6, or by including
-a Next Hop TLV containing an IPv6 address and using AE 2 or 3); it then
-sends an Update, with AE equal to 4 (v4-via-v6) containing the IPv4 prefix
-being announced.</t>
+<t>A Babel node can use a v4-via-v6 announcement to announce an IPv4 route
+over an interface that has no assigned IPv4 address.  In order to do so,
+it first establishes an IPv6 next-hop address in the usual manner (either
+by sending the Babel packet over IPv6, or by including a Next Hop TLV
+containing an IPv6 address and using AE 2 or 3); it then sends an Update,
+with AE equal to 4 (v4-via-v6) containing the IPv4 prefix being
+announced.</t>
 
 <t>If the outgoing interface has been assigned an IPv4 address, then, in
 the interest of maximising compatibility with existing routers, the sender
@@ -238,14 +238,13 @@ them is left to the implementation.  For example, if a router has an
 interface that has been assigned an IPv4 address, or if an IPv4 address
 has been assigned to the router itself (to the "loopback interface"), then
 that IPv4 address may be "borrowed" to serve as the source of originated
-ICMPv4 packets.  If no IPv4 address is available, a router may choose
-a source address from a prefix known to be unused, for example from
-a suitably chosen private address range <xref target="RFC1918"/>.  If no
-more suitable address is available, then a router MAY use the IPv4 dummy
-address 192.0.0.8 as the source address of the IMCPv4 packets that it
-sends.  Note however that using the same address on multiple routers may
-hamper debugging and fault isolation, e.g., when using the "traceroute"
-utility.</t>
+ICMPv4 packets.  If no IPv4 address is available, a router may use some
+address from a prefix assigned to the local network that is known to not
+be used by any node in that network.  If no more suitable address is
+available, then a router MAY use the IPv4 dummy address 192.0.0.8 as the
+source address of the ICMPv4 packets that it sends.  Note however that
+using the same address on multiple routers may hamper debugging and fault
+isolation, e.g., when using the "traceroute" utility.</t>
 
 </section>
 
@@ -375,7 +374,7 @@ together with matching packet filters in the data plane.</t>
 implemented in collaboration with Theophile Bastian.  Margaret Cullen
 pointed out the issues with ICMP and helped coin the phrase "v4-via-v6".
 The author is also indebted to Donald Eastlake, Toke Hoiland-Jorgensen,
-and David Schinazi.</t>
+David Schinazi, and Donald Sharp.</t>
 
 </section>
 
@@ -488,21 +487,6 @@ Advertising IPv4 Network Layer Reachability Information with an IPv6 Next Hop
 </front>
 <seriesInfo name="RFC" value="4821"/>
 <seriesInfo name="DOI" value="10.17487/RFC4821"/>
-</reference>
-
-<reference anchor="RFC1918" target="https://www.rfc-editor.org/info/rfc1918">
-<front>
-<title>Address Allocation for Private Internets</title>
-<author initials="Y." surname="Rekhter" fullname="Y. Rekhter"/>
-<author initials="B." surname="Moskowitz" fullname="B. Moskowitz"/>
-<author initials="D." surname="Karrenberg" fullname="D. Karrenberg"/>
-<author initials="G. J." surname="de Groot" fullname="G. J. de Groot"/>
-<author initials="E." surname="Lear" fullname="E. Lear"/>
-<date year="1996" month="February"/>
-</front>
-<seriesInfo name="BCP" value="5"/>
-<seriesInfo name="RFC" value="1918"/>
-<seriesInfo name="DOI" value="10.17487/RFC1918"/>
 </reference>
 
 </references>

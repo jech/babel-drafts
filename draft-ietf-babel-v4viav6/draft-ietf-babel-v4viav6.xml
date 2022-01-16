@@ -25,7 +25,7 @@ IPv4 routes with an IPv6 next hop in the Babel routing protocol
 </address>
 </author>
 
-<date day="5" month="November" year="2021"/>
+<date day="16" month="January" year="2022"/>
 
 <abstract>
 <t>This document defines an extension to the Babel routing protocol that
@@ -233,18 +233,16 @@ address, a router implementing this extension MUST be able to originate
 ICMPv4 packets even when the outgoing interface has not been assigned an
 IPv4 address.</t>
 
-<t>There are various ways to meet this requirement, and choosing between
-them is left to the implementation.  For example, if a router has an
-interface that has been assigned an IPv4 address, or if an IPv4 address
-has been assigned to the router itself (to the "loopback interface"), then
-that IPv4 address may be "borrowed" to serve as the source of originated
-ICMPv4 packets.  If no IPv4 address is available, a router may use some
-address from a prefix assigned to the local network that is known to not
-be used by any node in that network.  If no more suitable address is
-available, then a router MAY use the IPv4 dummy address 192.0.0.8 as the
-source address of the ICMPv4 packets that it sends.  Note however that
-using the same address on multiple routers may hamper debugging and fault
-isolation, e.g., when using the "traceroute" utility.</t>
+<t>In such a situation, if a Babel router has an interface that has been
+assigned an IPv4 address, or if an IPv4 address has been assigned to the
+router itself (to the "loopback interface"), then that IPv4 address may be
+used as the source of originated ICMPv4 packets.  If no IPv4 address is
+available, a Babel router could use the experimental mechanism described
+in Section 22 of <xref target="RFC7600"/>, which consists of using the
+dummy address 192.0.0.8 as the source address of originated ICMPv4
+packets.  Note however that using the same address on multiple routers may
+hamper debugging and fault isolation, e.g., when using the "traceroute"
+utility.</t>
 
 </section>
 
@@ -487,6 +485,21 @@ Advertising IPv4 Network Layer Reachability Information with an IPv6 Next Hop
 </front>
 <seriesInfo name="RFC" value="4821"/>
 <seriesInfo name="DOI" value="10.17487/RFC4821"/>
+</reference>
+
+<reference anchor="RFC7600" target="https://www.rfc-editor.org/info/rfc7600">
+<front>
+<title>IPv4 Residual Deployment via IPv6 - A Stateless Solution (4rd)</title>
+<author initials="R." surname="Despres" fullname="R. Despres"/>
+<author initials="S." surname="Jiang" fullname="S. Jiang" role="editor"/>
+<author initials="R." surname="Penno" fullname="R. Penno"/>
+<author initials="Y." surname="Lee" fullname="Y. Lee"/>
+<author initials="G." surname="Chen" fullname="G. Chen"/>
+<author initials="M." surname="Chen" fullname="M. Chen"/>
+<date year="2015" month="July"/>
+</front>
+<seriesInfo name="RFC" value="7600"/>
+<seriesInfo name="DOI" value="10.17487/RFC7600"/>
 </reference>
 
 </references>

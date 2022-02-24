@@ -6,9 +6,8 @@
 <?rfc symrefs="yes"?>
 <?rfc sortrefs="yes" ?>
 <?rfc compact="no" ?>
-<rfc category="std" docName="draft-ietf-babel-v4viav6-07"
-    ipr="trust200902"
-    updates="8966">
+<rfc category="exp" docName="draft-ietf-babel-v4viav6-08"
+    ipr="trust200902">
 <front>
 <title abbrev="IPv4 routes with an IPv6 next-hop">
 IPv4 routes with an IPv6 next hop in the Babel routing protocol
@@ -25,13 +24,13 @@ IPv4 routes with an IPv6 next hop in the Babel routing protocol
 </address>
 </author>
 
-<date day="16" month="January" year="2022"/>
+<date day="24" month="February" year="2022"/>
 
 <abstract>
 <t>This document defines an extension to the Babel routing protocol that
 allows annoncing routes to an IPv4 prefix with an IPv6 next-hop, which
 makes it possible for IPv4 traffic to flow through interfaces that have
-not been assigned an IPv4 address.  This document updates RFC 8966.</t>
+not been assigned an IPv4 address.</t>
 </abstract>
 </front>
 
@@ -85,8 +84,7 @@ can originate ICMPv4 packets, even if they have not been assigned any IPv4
 addresses.</t>
 
 <t>The extension described in this document is inspired by a previously
-defined extension to the BGP protocol <xref target="RFC5549"/>.  This
-document updates <xref target="RFC8966"/>.</t>
+defined extension to the BGP protocol <xref target="RFC5549"/>.</t>
 
 <section title="Specification of Requirements">
 

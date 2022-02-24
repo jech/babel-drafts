@@ -1,0 +1,520 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd" []>
+<?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
+<?rfc toc="yes"?>
+<?rfc tocdepth="2"?>
+<?rfc symrefs="yes"?>
+<?rfc sortrefs="yes" ?>
+<?rfc compact="no" ?>
+<rfc category="exp" docName="draft-ietf-babel-v4viav6-08"
+    ipr="trust200902">
+<front>
+<title abbrev="IPv4 routes with an IPv6 next-hop">
+IPv4 routes with an IPv6 next hop in the Babel routing protocol
+</title>
+<author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek">
+<organization>IRIF, University of Paris</organization>
+<address>
+<postal>
+<street>Case 7014</street>
+<city>75205 Paris Cedex 13</city>
+<country>France</country>
+</postal>
+<email>jch@irif.fr</email>
+</address>
+</author>
+
+<date day="24" month="February" year="2022"/>
+
+<abstract>
+<t>This document defines an extension to the Babel routing protocol that
+allows announcing routes to an IPv4 prefix with an IPv6 next-hop, which
+makes it possible for IPv4 traffic to flow through interfaces that have
+not been assigned an IPv4 address.</t>
+</abstract>
+</front>
+
+<middle>
+
+<section title="Introduction">
+
+<t>The role of a routing protocol is to build a routing table, a data
+structure that maps network prefixes in a given family (IPv4 or IPv6) to
+next hops, pairs of an outgoing interface and a neighbour's network
+address, for example:</t>
+<figure><artwork><![CDATA[
+          destination                      next hop
+      2001:db8:0:1::/64               eth0, fe80::1234:5678
+      203.0.113.0/24                  eth0, 192.0.2.1
+]]></artwork></figure>
+
+<t>When a packet is routed according to a given routing table entry, the
+forwarding plane typically uses a neighbour discovery protocol (the
+Neighbour Discovery protocol (ND) <xref target="RFC4861"/> in the case of
+IPv6, the Address Resolution Protocol (ARP) <xref target="RFC0826"/> in
+the case of IPv4) to map the next-hop address to a link-layer address (a
+"MAC address"), which is then used to construct the link-layer frames that
+encapsulate forwarded packets.</t>
+
+<t>It is apparent from the description above that there is no fundamental
+reason why the destination prefix and the next-hop address should be in
+the same address family: there is nothing preventing an IPv6 packet from
+being routed through a next hop with an IPv4 address (in which case the
+next hop's MAC address will be obtained using ARP), or, conversely, an
+IPv4 packet from being routed through a next hop with an IPv6 address.
+(In fact, it is even possible to store link-layer addresses directly in
+the next-hop entry of the routing table, which is commonly done in
+networks using the OSI protocol suite).</t>
+
+<t>The case of routing IPv4 packets through an IPv6 next hop is
+particularly interesting, since it makes it possible to build networks
+that have no IPv4 addresses except at the edges and still provide IPv4
+connectivity to edge hosts.  In addition, since an IPv6 next hop can use
+a link-local address that is autonomously configured, the use of such
+routes enables a mode of operation where the network core has no
+statically assigned IP addresses of either family, which significantly
+reduces the amount of manual configuration required.  (See also
+<xref target="RFC7404"/> for a discussion of the issues involved with such
+an approach.)</t>
+
+<t>We call a route towards an IPv4 prefix that uses an IPv6 next hop
+a "v4-via-v6" route.  This document describes an extension that allows the
+Babel routing protocol <xref target="RFC8966"/> to announce v4-via-v6
+routes across interfaces that have no IPv4 addresses assigned but are
+capable of forwarding IPv4 traffic.  <xref target="icmp"/> describes
+procedures that ensure that all routers can originate ICMPv4 packets, even
+if they have not been assigned any IPv4 addresses.</t>
+
+<t>The extension described in this document is inspired by a previously
+defined extension to the BGP protocol <xref target="RFC5549"/>.</t>
+
+<section title="Specification of Requirements">
+
+<t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+"SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+"OPTIONAL" in this document are to be interpreted as described in BCP 14
+<xref target="RFC2119"/> <xref target="RFC8174"/> when, and only when,
+they appear in all capitals, as shown here.</t>
+
+</section>
+
+</section>
+
+<section title="Protocol operation">
+
+<t>The Babel protocol fully supports dual-stack operation: all data that
+represent a neighbour address or a network prefix are tagged by an Address
+Encoding (AE), a small integer that identifies the address family (IPv4 or
+IPv6) of the address of prefix, and describes how it is encoded.  This
+extension defines a new AE, called v4-via-v6, which has the same format as
+the existing AE for IPv4 addresses (AE&nbsp;1).  This new AE is only
+allowed in TLVs that carry network prefixes: TLVs that carry an IPv6
+neighbour address use one of the normal encodings for IPv6 addresses.</t>
+
+<section title="Announcing v4-via-v6 routes" anchor="updates">
+
+<t>A Babel node can use a v4-via-v6 announcement to announce an IPv4 route
+over an interface that has no assigned IPv4 address.  In order to do so,
+it first establishes an IPv6 next-hop address in the usual manner (either
+by sending the Babel packet over IPv6, or by including a Next Hop TLV
+containing an IPv6 address and using AE 2 or 3); it then sends an Update,
+with AE equal to 4 (v4-via-v6) containing the IPv4 prefix being
+announced.</t>
+
+<t>If the outgoing interface has been assigned an IPv4 address, then, in
+the interest of maximising compatibility with existing routers, the sender
+SHOULD prefer an ordinary IPv4 announcement; even in that case, however,
+it MAY send a v4-via-v6 announcement.  A node SHOULD NOT send both
+ordinary IPv4 and v4-via-v6 announcements for the same prefix over
+a single interface (if the update is sent to a multicast address) or to
+a single neighbour (if sent to a unicast address), since doing that
+provides no benefit while doubling the amount of routing traffic.</t>
+
+<t>Updates with infinite metric are retractions: they indicate that
+a previously announced route is no longer available.  Retractions do not
+require a next hop, and there is therefore no difference between v4-via-v6
+retractions and ordinary retractions.  A node MAY send IPv4 retractions
+only, or it MAY send v4-via-v6 retractions on interfaces that have not
+been assigned an IPv4 address.</t>
+
+</section>
+
+<section title="Receiving v4-via-v6 routes" anchor="receiving-updates">
+
+<t>Upon reception of an Update TLV with AE equal to 4 (v4-via-v6) and
+finite metric, a Babel node computes the IPv6 next hop, as described in
+Section 4.6.9 of <xref target="RFC8966"/>.  If no IPv6 next hop exists,
+then the Update MUST be ignored.  If an IPv6 next hop exists,
+then the node MAY acquire the route being announced, as described in
+Section 3.5.3 of <xref target="RFC8966"/>; the parameters of the route are
+as follows:
+<list style="symbols">
+<t>the prefix, plen, router-id, seqno, metric MUST be computed as for an
+IPv4 route, as described in Section 4.6.9 of <xref target="RFC8966"/>;</t>
+<t>the next hop MUST be computed as for an IPv6 route, as described in
+Section 4.6.9 of <xref target="RFC8966"/>: it is taken from the last
+preceding Next Hop TLV with an AE field equal to 2 or 3; if no such
+entry exists, and if the Update TLV has been sent in a Babel packet
+carried over IPv6, then the next hop is the network-layer source address
+of the packet.</t>
+</list></t>
+
+<t>An Update TLV with a v4-via-v6 AE and metric equal to infinity is
+a retraction: it announces that a previously available route is being
+retracted.  In that case, no next hop is necessary, and the retraction is
+treated as described in Section 4.6.9 of <xref target="RFC8966"/>.</t>
+
+<t>As usual, a node MAY ignore the update, e.g., due to filtering
+(Appendix C of <xref target="RFC8966"/>).  If a node cannot install
+v4-via-v6 routes, e.g., due to hardware or software limitations, then
+routes to an IPv4 prefix with an IPv6 next hop MUST NOT be selected.</t>
+
+</section>
+
+<section title="Route and seqno requests" anchor="requests">
+
+<t>Route and seqno requests are used to request an update for a given
+prefix.  Since they are not related to a specific next hop, there is no
+semantic difference between IPv4 and v4-via-v6 requests.  Therefore,
+a node SHOULD NOT send requests of either kind with the AE field being set
+to 4 (v4-via-v6); instead, it SHOULD request IPv4 updates by sending
+requests with the AE field being set to 1 (IPv4).</t>
+
+<t>When receiving requests, AEs 1 (IPv4) and 4 (v4-via-v6) MUST be treated
+in the same manner: the receiver processes the request as described in
+Section 3.8 of <xref target="RFC8966"/>.  If an Update is sent, then it
+MAY be an ordinary IPv4 announcement (AE&nbsp;=&nbsp;1) or an v4-via-v6
+announcement (AE&nbsp;=&nbsp;4), as described in <xref target="updates"/>
+above, irrespective of which AE was used in the request.</t>
+
+<t>When receiving a request with AE 0 (wildcard), the receiver SHOULD send
+a full route dump, as described in Section 3.8.1.1 of <xref
+target="RFC8966"/>.  Any IPv4 routes contained in the route dump may use
+either AE 1 (IPv4) or AE 4 (v4-via-v6), as described <xref target="updates"/>
+above.</t>
+
+</section>
+
+<section title="Other TLVs">
+
+<t>The only other TLVs defined by <xref target="RFC8966"/> that carry an
+AE field are Next Hop and IHU.  Next Hop and IHU TLVs MUST NOT carry the
+AE 4 (v4-via-v6).</t>
+
+</section>
+
+</section>
+
+<section title="ICMPv4 and PMTU discovery" anchor="icmp">
+
+<t>The Internet Control Message Protocol (ICMPv4, or simply ICMP) <xref
+target="RFC0792"/> is a protocol related to IPv4 that is primarily used to
+carry diagnostic and debugging information.  ICMPv4 packets may be
+originated by end hosts (e.g., the "destination unreachable, port
+unreachable" ICMPv4 packet), but they may also be originated by
+intermediate routers (e.g., most other kinds of "destination unreachable"
+packets).</t>
+
+<t>Some protocols deployed in the Internet rely on ICMPv4 packets sent by
+intermediate routers.  Most notably, path MTU Discovery (PMTUd) <xref
+target="RFC1191"/> is an algorithm executed by end hosts to discover the
+maximum packet size that a route is able to carry.  While there exist
+variants of PMTUd that are purely end-to-end <xref target="RFC4821"/>, the
+variant most commonly deployed in the Internet has a hard dependency on
+ICMPv4 packets originated by intermediate routers: if intermediate routers
+are unable to send ICMPv4 packets, PMTUd may lead to persistent
+blackholing of IPv4 traffic.</t>
+
+<t>Due to this kind of dependency, every Babel router that is able to
+forward IPv4 traffic MUST be able originate ICMPv4 traffic.  Since the
+extension described in this document enables routers to forward IPv4
+traffic received over an interface that has not been assigned an IPv4
+address, a router implementing this extension MUST be able to originate
+ICMPv4 packets even when the outgoing interface has not been assigned an
+IPv4 address.</t>
+
+<t>In such a situation, if a Babel router has an interface that has been
+assigned an IPv4 address (other than the loopback address), or if an IPv4
+address has been assigned to the router itself (to the "loopback
+interface"), then that IPv4 address may be used as the source of
+originated ICMPv4 packets.  If no IPv4 address is available, a Babel
+router could use the experimental mechanism described in Requirement
+R-22&nbsp;of Section&nbsp;4.8 <xref target="RFC7600"/>, which consists of
+using the dummy address 192.0.0.8 as the source address of originated
+ICMPv4 packets.  Note however that using the same address on multiple
+routers may hamper debugging and fault isolation, e.g., when using the
+"traceroute" utility.</t>
+
+</section>
+
+<section title="Protocol encoding">
+
+<t>This extension defines the v4-via-v6 AE, whose value is 4. This AE is
+solely used to tag network prefixes, and MUST NOT be used to tag neighbour
+addresses, e.g. in Next Hop or IHU TLVs.</t>
+
+<t>This extension defines no new TLVs or sub-TLVs.</t>
+
+<section title="Prefix encoding" anchor="prefix-encoding">
+<t>Network prefixes tagged with AE 4 (v4-via-v6) MUST be encoded and
+decoded just like prefixes tagged with AE 1 (IPv4), as described in
+Section&nbsp;4.3.1 of <xref target="RFC8966"/>.</t>
+
+<t>A new compression state for AE 4 (v4-via-v6) distinct from that of AE
+1 (IPv4) is introduced, and MUST be used for address compression of
+prefixes tagged with AE 4, as described in Sections 4.5 and 4.6.9 of
+<xref target="RFC8966"/></t>
+
+</section>
+
+<section title="Changes to existing TLVs">
+<t>The following TLVs MAY be tagged with AE 4 (v4-via-v6):
+
+<list style="symbols">
+<t>Update (Type&nbsp;=&nbsp;8)</t>
+<t>Route Request (Type&nbsp;=&nbsp;9)</t>
+<t>Seqno Request (Type&nbsp;=&nbsp;10)</t>
+</list>
+</t>
+
+<t>As AE 4 (v4-via-v6) is suitable only for network prefixes, IHU
+(Type&nbsp;=&nbsp;5) and Next-Hop (Type&nbsp;=&nbsp;7) TLVs are never sent
+with AE 4.  Such (incorrect) TLVs MUST be ignored upon reception.</t>
+
+<section title="Update">
+
+<t>An Update (Type = 8) TLV with AE 4 is constructed as described in
+Section&nbsp;4.6.9 of <xref target="RFC8966"/> for AE 1 (IPv4), with the
+following specificities:
+<list style="symbols">
+<t>Prefix.  The Prefix field is constructed according to
+<xref target="prefix-encoding"/> above.</t>
+<t>Next Hop.  The next hop is built and prased as described in
+<xref target="updates"/> and <xref target="receiving-updates"/> above.</t>
+</list>
+</t>
+
+</section>
+
+<section title="Requests">
+
+<t>When tagged with the AE 4, Route Request and Seqno Request updates
+MUST be constructed and decoded as described in Section&nbsp;4.6 of
+<xref target="RFC8966"/>, and the network prefixes contained within them
+decoded as described in <xref target="prefix-encoding"/> above (see also
+<xref target="requests"/>).</t>
+
+</section>
+
+</section>
+</section>
+
+<section title="Backwards compatibility">
+
+<t>This protocol extension adds no new TLVs or sub-TLVs.</t>
+
+<t>This protocol extension uses a new AE.  As discussed in Appendix&nbsp;D of
+<xref target="RFC8966"/> and specified in the same document, implementations
+that do not understand the present extension will silently ignore the various
+TLVs that use this new AE.  As a result, incompatible versions will ignore
+v4-via-v6 routes.  They will also ignore requests with AE 4, which, as
+stated in <xref target="requests"/>, are not recommended.</t>
+
+<t>Using a new AE introduces a new compression state, used to parse the
+network prefixes.  As this compression state is separate from other AEs'
+states, it will not interfere with the compression state of unextended
+nodes.</t>
+
+<t>This extension reuses the next-hop state from AEs 2 and 3 (IPv6), but
+makes no changes to the way in which it is updated, and therefore causes
+no compatibility issues.</t>
+
+<t>As mentioned in <xref target="updates"/>, ordinary IPv4 announcements
+are preferred to v4-via-v6 announcements when the outgoing interface has
+an assigned IPv4 address; doing otherwise would prevent routers that do
+not implement this extension from learning the route being announced.</t>
+
+</section>
+
+<section title="IANA Considerations">
+
+<t>IANA has allocated value 4 in the "Babel Address Encodings" registry as
+follows:</t>
+
+<texttable>
+<ttcol>AE</ttcol><ttcol>Name</ttcol><ttcol>Reference</ttcol>
+<c>4</c><c>v4-via-v6</c><c>(this document)</c>
+</texttable>
+
+</section>
+
+<section title="Security Considerations">
+
+<t>The extension defined in this document does not fundamentally change
+the security properties of the Babel protocol.  However, by allowing IPv4
+routes to be propagated across routers that have not been assigned IPv4
+addresses, it might invalidate the assumptions made by network
+administrators, which could conceivably lead to security issues.</t>
+
+<t>For example, if an island of IPv4-only hosts is separated from the IPv4
+Internet by routers that have not been assigned IPv4 addresses, a network
+administrator might reasonably assume that the IPv4-only hosts are
+unreachable from the IPv4 Internet.  This assumption is broken if the
+intermediary routers implement the extension described in this document,
+which might expose the IPv4-only hosts to traffic from the IPv4 Internet.
+If this is undesirable, the flow of IPv4 traffic must be restricted by the
+use of suitable filtering rules (Appendix C of <xref target="RFC8966"/>)
+together with matching packet filters in the data plane.</t>
+
+</section>
+
+<section title="Acknowledgments">
+
+<t>This protocol extension was originally designed, described and
+implemented in collaboration with Theophile Bastian.  Margaret Cullen
+pointed out the issues with ICMP and helped coin the phrase "v4-via-v6".
+The author is also indebted to Donald Eastlake, Toke Hoiland-Jorgensen,
+David Schinazi, and Donald Sharp.</t>
+
+</section>
+
+</middle>
+
+<back>
+
+<references title="Normative References">
+
+<reference anchor="RFC2119"><front>
+<title>Key words for use in RFCs to Indicate Requirement Levels</title>
+<author initials="S." surname="Bradner" fullname="S. Bradner"/>
+<date year="1997" month="March"/>
+</front>
+<seriesInfo name="BCP" value="14"/>
+<seriesInfo name="RFC" value="2119"/>
+<seriesInfo name="DOI" value="10.17487/RFC2119"/>
+</reference>
+
+<reference anchor="RFC8174"><front>
+<title>Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words</title>
+<author initials="B." surname="Leiba" fullname="B. Leiba"/>
+<date year="2017" month="May"/>
+</front>
+<seriesInfo name="BCP" value="14"/>
+<seriesInfo name="RFC" value="8174"/>
+<seriesInfo name="DOI" value="10.17487/RFC8174"/>
+</reference>
+
+<reference anchor="RFC8966" target="https://www.rfc-editor.org/info/rfc8966">
+<front>
+<title>The Babel Routing Protocol</title>
+<author initials="J." surname="Chroboczek" fullname="J. Chroboczek"/>
+<author initials="D." surname="Schinazi" fullname="D. Schinazi"/>
+<date year="2021" month="January"/>
+</front>
+<seriesInfo name="RFC" value="8966"/>
+<seriesInfo name="DOI" value="10.17487/RFC8966"/>
+</reference>
+
+<reference anchor="RFC0792" target="https://www.rfc-editor.org/info/rfc792">
+<front>
+<title>Internet Control Message Protocol</title>
+<author initials="J." surname="Postel" fullname="J. Postel"/>
+<date year="1981" month="September"/>
+</front>
+<seriesInfo name="STD" value="5"/>
+<seriesInfo name="RFC" value="792"/>
+<seriesInfo name="DOI" value="10.17487/RFC0792"/>
+</reference>
+
+</references>
+
+<references title="Informative References">
+
+<reference anchor="RFC0826"><front>
+<title>An Ethernet Address Resolution Protocol: Or Converting Network
+Protocol Addresses to 48.bit Ethernet Address for Transmission on Ethernet
+Hardware</title>
+<author initials="D." surname="Plummer" fullname="D. Plummer"/>
+<date year="1982" month="November"/>
+</front>
+<seriesInfo name="STD" value="37"/>
+<seriesInfo name="RFC" value="826"/>
+<seriesInfo name="DOI" value="10.17487/RFC0826"/>
+</reference>
+
+<reference anchor="RFC4861"><front>
+<title>Neighbor Discovery for IP version 6 (IPv6)</title>
+<author initials="T." surname="Narten" fullname="T. Narten"/>
+<author initials="E." surname="Nordmark" fullname="E. Nordmark"/>
+<author initials="W." surname="Simpson" fullname="W. Simpson"/>
+<author initials="H." surname="Soliman" fullname="H. Soliman"/>
+<date year="2007" month="September"/>
+</front>
+<seriesInfo name="RFC" value="4861"/>
+<seriesInfo name="DOI" value="10.17487/RFC4861"/>
+</reference>
+
+<reference anchor="RFC5549">
+<front>
+<title>
+Advertising IPv4 Network Layer Reachability Information with an IPv6 Next Hop
+</title>
+<author initials="F." surname="Le Faucheur" fullname="F. Le Faucheur"/>
+<author initials="E." surname="Rosen" fullname="E. Rosen"/>
+<date year="2009" month="May"/>
+</front>
+<seriesInfo name="RFC" value="5549"/>
+<seriesInfo name="DOI" value="10.17487/RFC5549"/>
+</reference>
+
+<reference anchor="RFC1191" target="https://www.rfc-editor.org/info/rfc1191">
+<front>
+<title>Path MTU discovery</title>
+<author initials="J.C." surname="Mogul" fullname="J.C. Mogul"/>
+<author initials="S.E." surname="Deering" fullname="S.E. Deering"/>
+<date year="1990" month="November"/>
+</front>
+<seriesInfo name="RFC" value="1191"/>
+<seriesInfo name="DOI" value="10.17487/RFC1191"/>
+</reference>
+
+<reference anchor="RFC4821" target="https://www.rfc-editor.org/info/rfc4821">
+<front>
+<title>Packetization Layer Path MTU Discovery</title>
+<author initials="M." surname="Mathis" fullname="M. Mathis"/>
+<author initials="J." surname="Heffner" fullname="J. Heffner"/>
+<date year="2007" month="March"/>
+</front>
+<seriesInfo name="RFC" value="4821"/>
+<seriesInfo name="DOI" value="10.17487/RFC4821"/>
+</reference>
+
+<reference anchor="RFC7600" target="https://www.rfc-editor.org/info/rfc7600">
+<front>
+<title>IPv4 Residual Deployment via IPv6 - A Stateless Solution (4rd)</title>
+<author initials="R." surname="Despres" fullname="R. Despres"/>
+<author initials="S." surname="Jiang" fullname="S. Jiang" role="editor"/>
+<author initials="R." surname="Penno" fullname="R. Penno"/>
+<author initials="Y." surname="Lee" fullname="Y. Lee"/>
+<author initials="G." surname="Chen" fullname="G. Chen"/>
+<author initials="M." surname="Chen" fullname="M. Chen"/>
+<date year="2015" month="July"/>
+</front>
+<seriesInfo name="RFC" value="7600"/>
+<seriesInfo name="DOI" value="10.17487/RFC7600"/>
+</reference>
+
+<reference anchor="RFC7404" target="https://www.rfc-editor.org/info/rfc7404">
+<front>
+<title>Using Only Link-Local Addressing inside an IPv6 Network</title>
+<author initials="M." surname="Behringer" fullname="M. Behringer"/>
+<author initials="E." surname="Vyncke" fullname="E. Vyncke"/>
+<date year="2014" month="November"/>
+</front>
+<seriesInfo name="RFC" value="7404"/>
+<seriesInfo name="DOI" value="10.17487/RFC7404"/>
+</reference>
+
+</references>
+</back>
+</rfc>

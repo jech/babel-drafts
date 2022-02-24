@@ -78,10 +78,10 @@ reduces the amount of manual configuration required.</t>
 <t>We call a route towards an IPv4 prefix that uses an IPv6 next hop
 a "v4-via-v6" route.  This document describes an extension that allows the
 Babel routing protocol <xref target="RFC8966"/> to announce v4-via-v6
-routes across interfaces that have no IPv4 addresses assigned.
-<xref target="icmp"/> describes procedures that ensure that all routers
-can originate ICMPv4 packets, even if they have not been assigned any IPv4
-addresses.</t>
+routes across interfaces that have no IPv4 addresses assigned but are
+capable of forwarding IPv4 traffic.  <xref target="icmp"/> describes
+procedures that ensure that all routers can originate ICMPv4 packets, even
+if they have not been assigned any IPv4 addresses.</t>
 
 <t>The extension described in this document is inspired by a previously
 defined extension to the BGP protocol <xref target="RFC5549"/>.</t>

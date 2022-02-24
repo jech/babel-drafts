@@ -142,7 +142,7 @@ been assigned an IPv4 address.</t>
 <t>Upon reception of an Update TLV with AE equal to 4 (v4-via-v6) and
 finite metric, a Babel node computes the IPv6 next hop, as described in
 Section 4.6.9 of <xref target="RFC8966"/>.  If no IPv6 next hop exists,
-then the Update MUST be silently ignored.  If an IPv6 next hop exists,
+then the Update MUST be ignored.  If an IPv6 next hop exists,
 then the node MAY acquire the route being announced, as described in
 Section 3.5.3 of <xref target="RFC8966"/>; the parameters of the route are
 as follows:

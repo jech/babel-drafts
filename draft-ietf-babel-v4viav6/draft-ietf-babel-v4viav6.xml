@@ -106,8 +106,8 @@ Encoding (AE), a small integer that identifies the address family (IPv4 or
 IPv6) of the address of prefix, and describes how it is encoded.  This
 extension defines a new AE, called v4-via-v6, which has the same format as
 the existing AE for IPv4 addresses (AE&nbsp;1).  This new AE is only
-allowed in TLVs that carry network prefixes: TLVs that carry a neighbour
-address use one of the normal encodings for IPv6 addresses.</t>
+allowed in TLVs that carry network prefixes: TLVs that carry an IPv6
+neighbour address use one of the normal encodings for IPv6 addresses.</t>
 
 <section title="Announcing v4-via-v6 routes" anchor="updates">
 
@@ -123,10 +123,10 @@ announced.</t>
 the interest of maximising compatibility with existing routers, the sender
 SHOULD prefer an ordinary IPv4 announcement; even in that case, however,
 it MAY send a v4-via-v6 announcement.  A node SHOULD NOT send both
-ordinary IPv4 and v4-via-v6 announcements for the same prefix over a single
-interface (if the update is sent to a multicast address) or to a single
-neighbour (if sent to a unicast address), since doing that provides no
-benefit while doubling the amount of routing traffic.</t>
+ordinary IPv4 and v4-via-v6 announcements for the same prefix over
+a single interface (if the update is sent to a multicast address) or to
+a single neighbour (if sent to a unicast address), since doing that
+provides no benefit while doubling the amount of routing traffic.</t>
 
 <t>Updates with infinite metric are retractions: they indicate that
 a previously announced route is no longer available.  Retractions do not
@@ -165,8 +165,7 @@ treated as described in Section 4.6.9 of <xref target="RFC8966"/>.</t>
 <t>As usual, a node MAY ignore the update, e.g., due to filtering
 (Appendix C of <xref target="RFC8966"/>).  If a node cannot install
 v4-via-v6 routes, e.g., due to hardware or software limitations, then
-routes to an IPv4 prefix with an IPv6 next hop MUST NOT be selected, as
-described in Section&nbsp;3.5.3 of <xref target="RFC8966"/>.</t>
+routes to an IPv4 prefix with an IPv6 next hop MUST NOT be selected.</t>
 
 </section>
 
@@ -182,13 +181,14 @@ requests with the AE field being set to 1 (IPv4).</t>
 <t>When receiving requests, AEs 1 (IPv4) and 4 (v4-via-v6) MUST be treated
 in the same manner: the receiver processes the request as described in
 Section 3.8 of <xref target="RFC8966"/>.  If an Update is sent, then it
-MAY be sent with AE 1 or 4, as described in <xref target="updates"/>
+MAY be an ordinary IPv4 announcement (AE&nbsp;=&nbsp;1) or an v4-via-v6
+announcement (AE&nbsp;=&nbsp;4), as described in <xref target="updates"/>
 above, irrespective of which AE was used in the request.</t>
 
 <t>When receiving a request with AE 0 (wildcard), the receiver SHOULD send
 a full route dump, as described in Section 3.8.1.1 of <xref
-target="RFC8966"/>.  Any IPv4 routes contained in the route dump MAY use
-either AE 1 (IPv4) or AE 4 (v4-via-v6), as described in <xref target="updates"/>
+target="RFC8966"/>.  Any IPv4 routes contained in the route dump may use
+either AE 1 (IPv4) or AE 4 (v4-via-v6), as described <xref target="updates"/>
 above.</t>
 
 </section>
@@ -260,7 +260,7 @@ Section&nbsp;4.3.1 of <xref target="RFC8966"/>.</t>
 
 <t>A new compression state for AE 4 (v4-via-v6) distinct from that of AE
 1 (IPv4) is introduced, and MUST be used for address compression of
-prefixes tagged with AE 4, as described in Section&nbsp;4.6.9 of
+prefixes tagged with AE 4, as described in Sections 4.5 and 4.6.9 of
 <xref target="RFC8966"/></t>
 
 </section>
@@ -276,8 +276,8 @@ prefixes tagged with AE 4, as described in Section&nbsp;4.6.9 of
 </t>
 
 <t>As AE 4 (v4-via-v6) is suitable only for network prefixes, IHU
-(Type&nbsp;=&nbsp;5) and Next-Hop (Type&nbsp;=&nbsp;7) TLVs MUST NOT be
-tagged with AE 4.  Such (incorrect) TLVs MUST be ignored upon reception.</t>
+(Type&nbsp;=&nbsp;5) and Next-Hop (Type&nbsp;=&nbsp;7) TLVs are never sent
+with AE 4.  Such (incorrect) TLVs MUST be ignored upon reception.</t>
 
 <section title="Update">
 
@@ -287,8 +287,8 @@ following specificities:
 <list style="symbols">
 <t>Prefix.  The Prefix field is constructed according to
 <xref target="prefix-encoding"/> above.</t>
-<t>Next Hop.  The next hop is determined as described in
-<xref target="receiving-updates"/> above.</t>
+<t>Next Hop.  The next hop is built and prased as described in
+<xref target="updates"/> and <xref target="receiving-updates"/> above.</t>
 </list>
 </t>
 
@@ -316,7 +316,7 @@ decoded as described in <xref target="prefix-encoding"/> above (see also
 that do not understand the present extension will silently ignore the various
 TLVs that use this new AE.  As a result, incompatible versions will ignore
 v4-via-v6 routes.  They will also ignore requests with AE 4, which, as
-stated in <xref target="requests"/>, are NOT RECOMMENDED.</t>
+stated in <xref target="requests"/>, are not recommended.</t>
 
 <t>Using a new AE introduces a new compression state, used to parse the
 network prefixes.  As this compression state is separate from other AEs'

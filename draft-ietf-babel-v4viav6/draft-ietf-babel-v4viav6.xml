@@ -236,12 +236,12 @@ assigned an IPv4 address (other than the loopback address), or if an IPv4
 address has been assigned to the router itself (to the "loopback
 interface"), then that IPv4 address may be used as the source of
 originated ICMPv4 packets.  If no IPv4 address is available, a Babel
-router could use the experimental mechanism described in Section 22 of
-<xref target="RFC7600"/>, which consists of using the dummy address
-192.0.0.8 as the source address of originated ICMPv4 packets.  Note
-however that using the same address on multiple routers may hamper
-debugging and fault isolation, e.g., when using the "traceroute"
-utility.</t>
+router could use the experimental mechanism described in Requirement
+R-22&nbsp;of Section&nbsp;4.8 <xref target="RFC7600"/>, which consists of
+using the dummy address 192.0.0.8 as the source address of originated
+ICMPv4 packets.  Note however that using the same address on multiple
+routers may hamper debugging and fault isolation, e.g., when using the
+"traceroute" utility.</t>
 
 </section>
 

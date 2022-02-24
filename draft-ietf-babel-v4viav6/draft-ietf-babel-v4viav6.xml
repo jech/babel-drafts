@@ -28,7 +28,7 @@ IPv4 routes with an IPv6 next hop in the Babel routing protocol
 
 <abstract>
 <t>This document defines an extension to the Babel routing protocol that
-allows annoncing routes to an IPv4 prefix with an IPv6 next-hop, which
+allows announcing routes to an IPv4 prefix with an IPv6 next-hop, which
 makes it possible for IPv4 traffic to flow through interfaces that have
 not been assigned an IPv4 address.</t>
 </abstract>
@@ -196,7 +196,7 @@ above.</t>
 <section title="Other TLVs">
 
 <t>The only other TLVs defined by <xref target="RFC8966"/> that carry an
-AE field are Next Hop and TLV.  Next Hop and IHU TLVs MUST NOT carry the
+AE field are Next Hop and IHU.  Next Hop and IHU TLVs MUST NOT carry the
 AE 4 (v4-via-v6).</t>
 
 </section>

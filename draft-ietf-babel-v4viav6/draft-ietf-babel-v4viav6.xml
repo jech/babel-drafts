@@ -104,10 +104,10 @@ they appear in all capitals, as shown here.</t>
 represent a neighbour address or a network prefix are tagged by an Address
 Encoding (AE), a small integer that identifies the address family (IPv4 or
 IPv6) of the address of prefix, and describes how it is encoded.  This
-extension defines a new AE, called v4-via-v6, which has the same format
-as the existing AE for IPv4 addresses.  This new AE is only allowed in
-TLVs that carry network prefixes: TLVs that carry a neighbour address use
-one of the normal encodings for IPv6 addresses.</t>
+extension defines a new AE, called v4-via-v6, which has the same format as
+the existing AE for IPv4 addresses (AE&nbsp;1).  This new AE is only
+allowed in TLVs that carry network prefixes: TLVs that carry a neighbour
+address use one of the normal encodings for IPv6 addresses.</t>
 
 <section title="Announcing v4-via-v6 routes" anchor="updates">
 
@@ -170,9 +170,9 @@ described in Section&nbsp;3.5.3 of <xref target="RFC8966"/>.</t>
 
 </section>
 
-<section title="Prefix and seqno requests" anchor="requests">
+<section title="Route and seqno requests" anchor="requests">
 
-<t>Prefix and seqno requests are used to request an update for a given
+<t>Route and seqno requests are used to request an update for a given
 prefix.  Since they are not related to a specific next hop, there is no
 semantic difference between IPv4 and v4-via-v6 requests.  Therefore,
 a node SHOULD NOT send requests of either kind with the AE field being set
@@ -232,14 +232,15 @@ ICMPv4 packets even when the outgoing interface has not been assigned an
 IPv4 address.</t>
 
 <t>In such a situation, if a Babel router has an interface that has been
-assigned an IPv4 address, or if an IPv4 address has been assigned to the
-router itself (to the "loopback interface"), then that IPv4 address may be
-used as the source of originated ICMPv4 packets.  If no IPv4 address is
-available, a Babel router could use the experimental mechanism described
-in Section 22 of <xref target="RFC7600"/>, which consists of using the
-dummy address 192.0.0.8 as the source address of originated ICMPv4
-packets.  Note however that using the same address on multiple routers may
-hamper debugging and fault isolation, e.g., when using the "traceroute"
+assigned an IPv4 address (other than the loopback address), or if an IPv4
+address has been assigned to the router itself (to the "loopback
+interface"), then that IPv4 address may be used as the source of
+originated ICMPv4 packets.  If no IPv4 address is available, a Babel
+router could use the experimental mechanism described in Section 22 of
+<xref target="RFC7600"/>, which consists of using the dummy address
+192.0.0.8 as the source address of originated ICMPv4 packets.  Note
+however that using the same address on multiple routers may hamper
+debugging and fault isolation, e.g., when using the "traceroute"
 utility.</t>
 
 </section>
@@ -293,12 +294,13 @@ following specificities:
 
 </section>
 
-<section title="Other TLVs">
+<section title="Requests">
 
 <t>When tagged with the AE 4, Route Request and Seqno Request updates
 MUST be constructed and decoded as described in Section&nbsp;4.6 of
 <xref target="RFC8966"/>, and the network prefixes contained within them
-decoded as described in <xref target="prefix-encoding"/> above.</t>
+decoded as described in <xref target="prefix-encoding"/> above (see also
+<xref target="requests"/>).</t>
 
 </section>
 

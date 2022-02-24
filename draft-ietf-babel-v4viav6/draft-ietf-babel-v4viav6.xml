@@ -73,7 +73,9 @@ connectivity to edge hosts.  In addition, since an IPv6 next hop can use
 a link-local address that is autonomously configured, the use of such
 routes enables a mode of operation where the network core has no
 statically assigned IP addresses of either family, which significantly
-reduces the amount of manual configuration required.</t>
+reduces the amount of manual configuration required.  (See also
+<xref target="RFC7404"/> for a discussion of the issues involved with such
+an approach.)</t>
 
 <t>We call a route towards an IPv4 prefix that uses an IPv6 next hop
 a "v4-via-v6" route.  This document describes an extension that allows the
@@ -500,6 +502,17 @@ Advertising IPv4 Network Layer Reachability Information with an IPv6 Next Hop
 </front>
 <seriesInfo name="RFC" value="7600"/>
 <seriesInfo name="DOI" value="10.17487/RFC7600"/>
+</reference>
+
+<reference anchor="RFC7404" target="https://www.rfc-editor.org/info/rfc7404">
+<front>
+<title>Using Only Link-Local Addressing inside an IPv6 Network</title>
+<author initials="M." surname="Behringer" fullname="M. Behringer"/>
+<author initials="E." surname="Vyncke" fullname="E. Vyncke"/>
+<date year="2014" month="November"/>
+</front>
+<seriesInfo name="RFC" value="7404"/>
+<seriesInfo name="DOI" value="10.17487/RFC7404"/>
 </reference>
 
 </references>

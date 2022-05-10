@@ -1,0 +1,194 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE rfc>
+<rfc version='3' 
+     ipr='trust200902'
+     consensus='true'
+     submissionType='IETF'
+     category='std'
+     updates='8967'
+     xml:lang='en'
+     xmlns:xi="http://www.w3.org/2001/XInclude">
+<front>
+<title abbrev='Babel-MAC Relaxed PC'>
+Relaxed Packet Counter Verification for Babel MAC Authentication
+</title>
+
+<author fullname='Juliusz Chroboczek' initials='J.' surname='Chroboczek'>
+</author>
+
+<date year='2022' month='May' day='10'/>
+
+<abstract>
+<t>This document relaxes the procedures described in RFC 8967
+to allow it to better deal with packet reordering.</t>
+</abstract>
+</front>
+
+<middle>
+
+<section><name>Introduction</name>
+
+<t>The Babel MAC authentication mechanism <xref target="RFC8967"/> assumes
+that packet reordering is an exceptional occurrence, and therefore drops
+any packets that arrive out-of-order.  This assumption is generally
+correct on wired links, but turns out to be incorrect on some types of
+wireless links.</t>
+
+<t>In particular, IEEE 802.11 (WiFi) defines a number of power-saving
+modes that allow stations (mobile nodes) to switch their radio off for
+intervals of up to hundreds of milliseconds.  The access point (network
+switch) buffers all multicast packets, and only send them out after the
+power-saving interval ends.  The result is that multicast packets are
+delayed by up to a few hundred seconds with respect to unicast packets,
+which, under some traffic patterns, causes the PC verification procedure
+in RFC 8967 to systematically fail for multicast packets.</t>
+
+<t>This document defines two ways to relax the PC validation: using
+separate receiver-side PC values for unicast and multicast, and using
+a window of previously received PC values.  Usage of the former is
+strongly RECOMMENDED, while usage of the latter is OPTIONAL.
+The two MAY be used simultaneously.  This document updates RFC 8967.</t>
+
+</section>
+
+<section><name>Relaxing PC validation</name>
+
+<t>The Babel MAC authentication mechanism prevents replay by decorating
+every sent packet with a strictly increasing value, the Packet Counter
+(PC).  The PC does not actually count packets: it is allowed to increment
+the PC by more than one between two packets.</t>
+
+<t>A receiver maintains the last PC received from each neighbour.  When
+a new packet is received, the receiver compares the PC contained in the
+packet with the last received PC; if the new value is smaller or equal,
+the packet is discarded; otherwise, the packet is accepted, and the last
+PC value for that neighbour is updated.</t>
+
+<t>Note that there is not a one-to-one correspondence between sender state
+and receiver state: to a single sender state correspond multiple receiver
+states, one in every neighbour.  The receiver states corresponding to
+single sender state are not identical, since only a subset of receiver
+states are updated when a packet is sent to a unicast address or when
+a multicast packet is dropped by some receivers.</t>
+
+<section><name>Multiple last PC values</name>
+
+<t>Instead of a single last PC value maintained for each neighbour, an
+implementation of the procedure described in this section uses two values,
+the last unicast PC and the last multicast PC.  More precisely, the
+(Index, PC) pair contained in the Neighbour Table (Section 3.2 of RFC
+8967) is replaced by:</t>
+<ul>
+<li>a triple (Index, PCm, PCu), where Index is an arbitrary string of 0 to
+32 octets, and PCm and PCu are 32-bit (4-octet) integers.</li>
+</ul>
+
+<t>When a challenge reply is successful, both last PC values are updated
+to the value contained in PC TLV from the packet containing the successful
+challenge.  More precisely, the last sentence of the fourth bullet point of
+Section 4.3 of RFC 8967 is replaced by:</t>
+<ul>
+<li>If the packet contains a successful Challenge Reply, then the Index
+contained in the PC TLV MUST be stored in the Index field of the Neighbour
+Table entry corresponding to the sender packet is accepted, and the PC
+contained in the TLV MUST be stored in both the PCm and PCu fields of the
+Neighbour Table entry.</li>
+</ul>
+
+<t>When a packet that does not contain a successful challenge reply is
+received, then the PC value it contains is compared to either the PCm or
+the PCu field of the corresponding neighbour entry, depending on whether
+the packet was sent to a unicast or a multicast address.  If the
+comparison is successful, then the same value (PCm or PCu) is updated.
+More precisely, the last bullet point of Section 4.3 of RFC 8967 is
+replaced by:</t>
+<ul>
+<li>At this stage, the packet contains no successful challenge reply and
+the Index contained in the PC TLV is equal to the Index in the Neighbour
+Table entry corresponding to the sender.  The receiver compares the
+received PC with either PCm field (if the packet was sent to a multicast
+address) or the PCu field (otherwise) in the Neighbour Table; if the
+received PC is smaller or equal than the value contained in the Neighbour
+Table, the packet MUST be dropped and processing stops (no challenge is
+sent in this case, since the mismatch might be caused by harmless packet
+reordering on the link).  Otherwise, the PCm (if the packet was sent to
+a multicast address) or the PCu (otherwise) field contained in the
+Neighbour Table entry is set to the received PC, and the packet is
+accepted.</li>
+</ul>
+
+<section><name>Generalisations</name>
+
+<t>Since networking hardware tends to maintain more than just two queues,
+it might be tempting to generalise the approach taken to more than just to
+last PC values.  For example, one might be tempted to use distinct last PC
+values for packets received with different Type of Service (ToS) fields or
+with different 802.11e priorities.  However, chosing a last PC field by
+using a value that is not protected by the MAC (Section 4.1 of RFC 8967)
+would not be safe, in that it would not protect against replay.  In
+practice, this means that only the destination address and the packet body
+may be used for choosing the last PC value, since these are the only
+fields that are protected by the MAC (in addition to the source address,
+which is already used when choosing the Neighbour Table entry and
+therefore provides no additional information).</t>
+
+<t>Suppose that a node B were to maintain multiple last PC values for
+different values of the ToS field; for the sake of concreteness, suppose
+that all of the last PC fields at B have value 42.  Suppose that a node
+A sends a packet P1 with ToS equal to T1 and PC equal to 43; when
+B receives the packet, it sets the last PC value associated with ToS T1 to
+43.  Suppose now that an attacker sends P2, a copy of P1 with ToS equal to
+T2; if B uses a different last PC field for packet with a ToS value equal
+to T2, then the last PC field will still have value 42, and B will accept
+the replayed packet.</t>
+</section>
+
+</section>
+
+<section><name>Window-based validation</name>
+
+</section>
+
+</section>
+
+<section><name>Security considerations</name>
+
+<t>If implemented correctly, the procedures described in this document do
+not change the security properties described in Section 1.2 of RFC 8967.
+While they do slightly increase the amount of per-neighbour state
+maintained by each node, this increase is negligible (32 bits per
+neighbour for duplicating the last PC, and a few hundred bits for
+window-based validation), and should not significantly impact the ability
+of nodes to survive denial-of-service attacks.</t>
+
+</section>
+
+</middle>
+
+<back>
+<references><name>References</name>
+<reference anchor="RFC8967" target="https://www.rfc-editor.org/info/rfc8967">
+<front>
+<title>MAC Authentication for the Babel Routing Protocol</title>
+<author initials="C." surname="Dô" fullname="C. Dô">
+<organization/>
+</author>
+<author initials="W." surname="Kolodziejak" fullname="W. Kolodziejak">
+<organization/>
+</author>
+<author initials="J." surname="Chroboczek" fullname="J. Chroboczek">
+<organization/>
+</author>
+<date year="2021" month="January"/>
+<abstract>
+<t>This document describes a cryptographic authentication mechanism for the Babel routing protocol that has provisions for replay avoidance. This document obsoletes RFC 7298.</t>
+</abstract>
+</front>
+<seriesInfo name="RFC" value="8967"/>
+<seriesInfo name="DOI" value="10.17487/RFC8967"/>
+</reference>
+</references>
+</back>
+</rfc>
+  
+

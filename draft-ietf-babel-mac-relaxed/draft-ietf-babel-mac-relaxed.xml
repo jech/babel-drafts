@@ -27,6 +27,14 @@ Relaxed Packet Counter Verification for Babel MAC Authentication
 </address>
 </author>
 
+<author fullname='Toke Høiland-Jørgensen' initials='T.'
+        surname='Høiland-Jørgensen'>
+  <organization>Red Hat</organization>
+  <address>
+    <email>toke@toke.dk</email>
+  </address>
+</author>
+
 <date year='2022' month='May' day='22'/>
 
 <abstract>

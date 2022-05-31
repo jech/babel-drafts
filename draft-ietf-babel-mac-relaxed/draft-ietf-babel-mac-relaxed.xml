@@ -35,7 +35,7 @@ Relaxed Packet Counter Verification for Babel MAC Authentication
   </address>
 </author>
 
-<date year='2022' month='May' day='22'/>
+<date year='2022' month='May' day='31'/>
 
 <abstract>
 <t>This document relaxes packet verification rules defined in the Babel
@@ -182,12 +182,14 @@ T2, which is still equal to 42, and accept the replayed packet.</t>
 
 <section anchor="window"><name>Window-based validation</name>
 
-<t>When using window-based validation, in addition to remembering the highest PC
-value seen from a given neighbour, an implementation maintains a fixed-size
-window of individual sequence numbers below this highest PC value. The PC value
-itself is updated if the new packet PC value is higher than the existing value
-being remembered, while the window is used to track individual values so that
-out-of-order PC values can be accepted without allowing any duplicates.</t>
+<t>Window-based validation is similar to that described in <relref
+target="RFC4303" section="3.4.3"/>. When using window-based validation, in
+addition to remembering the highest PC value seen from a given neighbour, an
+implementation maintains a fixed-size window of individual sequence numbers
+below this highest PC value. The PC value itself is updated if the new packet PC
+value is higher than the existing value being remembered, while the window is
+used to track individual values so that out-of-order PC values can be accepted
+without allowing any duplicates.</t>
 
 <t>Conceptually, the window is a fixed-size vector of boolean values, each
 position indicating whether a packet with that PC (offset from the remembered

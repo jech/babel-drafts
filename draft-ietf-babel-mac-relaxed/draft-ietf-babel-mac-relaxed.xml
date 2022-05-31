@@ -184,10 +184,10 @@ T2, which is still equal to 42, and accept the replayed packet.</t>
 
 <t>When using window-based validation, in addition to remembering the highest PC
 value seen from a given neighbour, an implementation maintains a fixed-size
-window of individual sequence numbers above this highest PC value. The PC value
-itself is only updated if the new packet PC value is consecutive with the value
-being remembered, otherwise, the window is used to track individual values so
-that out-of-order PC values can be allowed without allowing any duplicates.</t>
+window of individual sequence numbers below this highest PC value. The PC value
+itself is updated if the new packet PC value is higher than the existing value
+being remembered, while the window is used to track individual values so that
+out-of-order PC values can be accepted without allowing any duplicates.</t>
 
 <t>Conceptually, the window is a fixed-size vector of boolean values, each
 position indicating whether a packet with that PC (offset from the remembered
@@ -196,29 +196,33 @@ fixed-size bitmap, but other more complicated data structures, such as a sorted
 tree, are also possible.</t>
 
 <t>Whenever a packet is received, its PC value is first compared with the PC
-value kept in the neighbour table. If it is smaller than or equal to the saved
-PC value, the packet is discarded. Otherwise, the <em>window index</em> of the
-received PC value is computed as the saved PC value subtracted from the received
-value. Then, this window index is compared with the window as follows:</t>
+value kept in the neighbour table, and the <em>window index</em> of the received
+PC value is computed as the received PC value subtracted from the saved highest
+PC. Then, this window index is compared with the window as follows:</t>
 
 <ol>
-  <li>If the window index is less than or equal to the size of the window, the
-  window value at the window index is checked; if this value is already set, the
-  received PC has been seen before and the packet is dropped. Otherwise, the
-  corresponding window value is marked as set, and the packet is accepted.</li>
+  <li>If the window index is larger than the size of the window, the packet is
+  considered too old and discarded.</li>
 
-  <li>If the window index is larger than the size of the window, the window is
-  shifted upwards by the number of places required to fit the new value inside
-  the window (thus preserving as many of the existing places in the window as
-  possible). As the window is shifted, the remembered PC value is incremented by
-  the same value as the number of places the window is shifted by. Then, the
-  window index is re-computed and the window value check in the paragraph above
-  is performed.</li>
+  <li>If the window index is non-negative and less than or equal to the size of
+  the window, the window value at the window index is checked; if this value is
+  already set, the received PC has been seen before and the packet is dropped.
+  Otherwise, the corresponding window value is marked as set, and the packet is
+  accepted.</li>
+
+  <li>If the window index is negative (i.e., the received PC is higher than the
+  largest received value), the window is shifted upwards by the number of places
+  required to fit the new value inside the window (thus preserving as many of
+  the existing places in the window as possible). As the window is shifted, the
+  remembered PC value is incremented by the same value as the number of places
+  the window is shifted by. Then, the window index is re-computed and the window
+  value check in the paragraph above is performed.</li>
 </ol>
 
 <t>Whenever the index value stored in the neighbour table changes (upon
-processing of a successful Challenge Reply), the new PC value is stored in the
-neighbour table and the window is reset (all places set to 0).</t>
+processing of a successful Challenge Reply), the remembered highest PC value is
+set to the value received in the challenge reply, plus the size of the window.
+All places in the window are set to 0.</t>
 
 <t>If an implementation combines the window-based verification with the use of
 multiple PC values (as described in the previous section), it MUST keep separate

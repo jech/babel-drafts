@@ -263,6 +263,13 @@ survive denial-of-service attacks.</t>
 
 </section>
 
+<section title="Acknowledgments">
+
+<t>The authors are indebted to Daniel Gröber, who first identified the
+problem that the procedures in this document aim to solve.</t>
+
+</section>
+
 </middle>
 
 <back>

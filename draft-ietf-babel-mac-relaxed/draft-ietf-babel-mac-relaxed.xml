@@ -35,7 +35,7 @@ Relaxed Packet Counter Verification for Babel MAC Authentication
   </address>
 </author>
 
-<date year='2022' month='May' day='31'/>
+<date year='2022' month='June' day='11'/>
 
 <abstract>
 <t>This document relaxes packet verification rules defined in the Babel
@@ -191,44 +191,43 @@ value is higher than the existing value being remembered, while the window is
 used to track individual values so that out-of-order PC values can be accepted
 without allowing any duplicates.</t>
 
-<t>Conceptually, the window is a fixed-size vector of boolean values, each
-position indicating whether a packet with that PC (offset from the remembered
-highest PC value) has been seen before. Thus, the window can be stored as a
-fixed-size bitmap, but other more complicated data structures, such as a sorted
-tree, are also possible.</t>
+<t>Conceptually, the window is a vector of S boolean values numbered from
+0 (the "left edge" of the window) up to (S - 1) (the "right edge").  Thus,
+the window can be stored as a fixed-size bitmap, but other more
+complicated data structures are also possible.  Shifting the window to the
+left by an integer amount k consists in moving all values so that the
+value previously at index n is now at index (n - k); k values are
+discarded at the left edge, and k new unset values are inserted at the
+right edge.</t>
 
-<t>Whenever a packet is received, its PC value is first compared with the PC
-value kept in the neighbour table, and the <em>window index</em> of the received
-PC value is computed as the received PC value subtracted from the saved highest
-PC. Then, this window index is compared with the window as follows:</t>
+<t>Whenever a packet is received, its PC value is first compared with the
+PC value kept in the neighbour table, and the <em>window index</em> of the
+received PC value is computed as the difference between the received PC
+value and the stored highest PC value plus the window size.</t>
 
 <ol>
-  <li>If the window index is larger than the size of the window, the packet is
-  considered too old and discarded.</li>
+  <li>If the window index is negative, the packet is considered too old
+  and MUST be discarded.</li>
 
-  <li>If the window index is non-negative and less than or equal to the size of
-  the window, the window value at the window index is checked; if this value is
-  already set, the received PC has been seen before and the packet is dropped.
-  Otherwise, the corresponding window value is marked as set, and the packet is
+  <li>If the window index is non-negative and less than or equal to the
+  size of the window, the window value at the window index is checked; if
+  this value is already set, the received PC has been seen before and the
+  packet MUST be discarded.  Otherwise, the corresponding window value is
+  marked as set, and the packet is accepted.</li>
+
+  <li>If the window index is larger than the window size (i.e., the
+  received PC is higher than the largest received value), the window MUST
+  be shifted to the left by the difference between the window index and
+  the window size (or, equivalently, by the difference between the
+  received PC and the highest PC stored in the neighbour table) and the
+  highest PC value MUST be set to the received PC.  The value at the right
+  of the window (the value numbered S - 1) MUST be set, and the packet is
   accepted.</li>
-
-  <li>If the window index is negative (i.e., the received PC is higher than the
-  largest received value), the window is shifted upwards by the number of places
-  required to fit the new value inside the window (thus preserving as many of
-  the existing places in the window as possible). As the window is shifted, the
-  remembered PC value is incremented by the same value as the number of places
-  the window is shifted by. Then, the window index is re-computed and the window
-  value check in the paragraph above is performed.</li>
 </ol>
 
-<t>Whenever the index value stored in the neighbour table changes (upon
-processing of a successful Challenge Reply), the remembered highest PC value is
-set to the value received in the challenge reply, plus the size of the window.
-All places in the window are set to 0.</t>
-
-<t>If an implementation combines the window-based verification with the use of
-multiple PC values (as described in the previous section), it MUST keep separate
-windows for each of the remembered PC values.</t>
+<t>When receiving a successful Challenge Reply, the remembered highest PC
+value MUST be set to the value received in the challenge reply, and all of
+the values in the window MUST be reset.</t>
 
 </section>
 
@@ -255,12 +254,12 @@ be consluted and possibly updated.</t>
 
 <section><name>Security considerations</name>
 
-<t>If implemented correctly, the procedures described in this document do
-not change the security properties described in Section 1.2 of RFC 8967.
-While they do slightly increase the amount of per-neighbour state
-maintained by each node, this increase is marginal (between 4 and 32
-octets, depending on implementation choices), and should not significantly
-impact the ability of nodes to survive denial-of-service attacks.</t>
+<t>The procedures described in this document do not change the security
+properties described in Section 1.2 of RFC 8967.  While they do slightly
+increase the amount of per-neighbour state maintained by each node, this
+increase is marginal (between 4 and 32 octets, depending on implementation
+choices), and should not significantly impact the ability of nodes to
+survive denial-of-service attacks.</t>
 
 </section>
 

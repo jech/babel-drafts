@@ -92,10 +92,10 @@ every sent packet with a strictly increasing value, the Packet Counter
 it is permitted for a sender to increment the PC by more than one between
 two packets.</t>
 
-<t>A receiver maintains the last PC received from each neighbour.  When
+<t>A receiver maintains the highest PC received from each neighbour.  When
 a new packet is received, the receiver compares the PC contained in the
-packet with the last received PC; if the new value is smaller or equal,
-the packet is discarded; otherwise, the packet is accepted, and the last
+packet with the highest received PC; if the new value is smaller or equal,
+the packet is discarded; otherwise, the packet is accepted, and the highest
 PC value for that neighbour is updated.</t>
 
 <t>Note that there does not exist a one-to-one correspondence between
@@ -105,11 +105,11 @@ are not necessarily identical, since only a subset of receiver states are
 updated when a packet is sent to a unicast address or when a multicast
 packet is received by a subset of the receivers.</t>
 
-<section anchor="separate-pc"><name>Multiple last PC values</name>
+<section anchor="separate-pc"><name>Multiple highest PC values</name>
 
-<t>Instead of a single last PC value maintained for each neighbour, an
+<t>Instead of a single highest PC value maintained for each neighbour, an
 implementation of the procedure described in this section uses two values,
-the last unicast PC and the last multicast PC.  More precisely, the
+the highest unicast PC and the highest multicast PC.  More precisely, the
 (Index, PC) pair contained in the Neighbour Table (<relref
 target="RFC8967" section="3.2"/>) is replaced by:</t>
 <ul>
@@ -117,7 +117,7 @@ target="RFC8967" section="3.2"/>) is replaced by:</t>
 32 octets, and PCm and PCu are 32-bit (4-octet) integers.</li>
 </ul>
 
-<t>When a challenge reply is successful, both last PC values are updated
+<t>When a challenge reply is successful, both highest PC values are updated
 to the value contained in PC TLV from the packet containing the successful
 challenge.  More precisely, the last sentence of the fourth bullet point
 of <relref target="RFC8967" section="4.3"/> is replaced by:</t>
@@ -158,23 +158,23 @@ and it might be tempting to generalise the approach taken to more than
 just two last PC values.  For example, one might be tempted to use
 distinct last PC values for packets received with different values of the
 Type of Service (ToS) field, or with different IEEE 802.11e access
-categories.  However, chosing a last PC field by consulting a value that
+categories.  However, chosing a highest PC field by consulting a value that
 is not protected by the MAC (<relref target="RFC8967" section="4.1"/>)
 would no longer protect against replay.  In practice, this means that only
 the destination address and port number and data stored in the packet body
-may be used for choosing the last PC value, since these are the only
+may be used for choosing the highest PC value, since these are the only
 fields that are protected by the MAC (in addition to the source address
 and porte number, which are already used when choosing the Neighbour Table
 entry and therefore provide no additional information).</t>
 
-<t>The following example shows why it would be unsafe to select the last
+<t>The following example shows why it would be unsafe to select the highest
 PC depending on the ToS field.  Suppose that a node B were to maintain
-distinct last PC values for different values T1 and T2 of the ToS field,
-and that initially all of the last PC fields at B have value 42.  Suppose
+distinct highest PC values for different values T1 and T2 of the ToS field,
+and that initially all of the highest PC fields at B have value 42.  Suppose
 now that a node A sends a packet P1 with ToS equal to T1 and PC equal to
-43; when B receives the packet, it sets the last PC value associated with
+43; when B receives the packet, it sets the highest PC value associated with
 ToS T1 to 43.  If an attacker were now to send an exact copy of P1 but
-with ToS equal to T2, B would consult the last PC value associated with
+with ToS equal to T2, B would consult the highest PC value associated with
 T2, which is still equal to 42, and accept the replayed packet.</t>
 </section>
 

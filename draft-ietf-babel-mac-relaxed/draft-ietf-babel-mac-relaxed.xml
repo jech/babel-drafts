@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!DOCTYPE rfc>
 <rfc version='3' 
-     docName='draft-ietf-babel-mac-relaxed-01'
+     docName='draft-ietf-babel-mac-relaxed-02'
      ipr='trust200902'
      consensus='true'
      submissionType='IETF'
@@ -35,7 +35,7 @@ Relaxed Packet Counter Verification for Babel MAC Authentication
   </address>
 </author>
 
-<date year='2022' month='June' day='11'/>
+<date year='2022' month='August' day='29'/>
 
 <abstract>
 <t>This document relaxes packet verification rules defined in the Babel
@@ -54,7 +54,7 @@ occurrence, and the protocol drops any packets that arrive out-of-order.
 This assumption is generally correct on wired links, but turns out to be
 incorrect on some kinds of wireless links.</t>
 
-<t>In particular, IEEE 802.11 (WiFi) defines a number of power-saving
+<t>In particular, IEEE 802.11 (Wi-Fi) defines a number of power-saving
 modes that allow stations (mobile nodes) to switch their radio off for
 extended periods of time, ranging in the hundreds of milliseconds.  The
 access point (network switch) buffers all multicast packets, and only
@@ -66,8 +66,10 @@ packets.</t>
 
 <t>This document defines two ways to relax the PC validation: using two
 separate receiver-side states, one for unicast and one for multicast
-packets (<xref target="separate-pc"/>), and using a window of previously
-received PC values (<xref target="window"/>).  Usage of the former is
+packets (<xref target="separate-pc"/>), which allows arbitrary reordering
+between unicast and multicast packets, and using a window of previously
+received PC values (<xref target="window"/>), which allows a bounded
+amount of reordering between arbitrary packets.  Usage of the former is
 RECOMMENDED, while usage of the latter is OPTIONAL.  The two MAY be used
 simultaneously (<xref target="combining"/>).  This document updates RFC
 8967.</t>
@@ -89,14 +91,14 @@ they appear in all capitals, as shown here.</t>
 <t>The Babel MAC authentication mechanism prevents replay by decorating
 every sent packet with a strictly increasing value, the Packet Counter
 (PC).  Notwithstanding the name, the PC does not actually count packets:
-it is permitted for a sender to increment the PC by more than one between
-two packets.</t>
+a sender is permitted to increment the PC by more than one between two
+packets.</t>
 
 <t>A receiver maintains the highest PC received from each neighbour.  When
 a new packet is received, the receiver compares the PC contained in the
 packet with the highest received PC; if the new value is smaller or equal,
-the packet is discarded; otherwise, the packet is accepted, and the highest
-PC value for that neighbour is updated.</t>
+the packet is discarded; otherwise, the packet is accepted, and the
+highest PC value for that neighbour is updated.</t>
 
 <t>Note that there does not exist a one-to-one correspondence between
 sender states and receiver states: multiple receiver states track a single
@@ -118,19 +120,20 @@ target="RFC8967" section="3.2"/>) is replaced by:</t>
 </ul>
 
 <t>When a challenge reply is successful, both highest PC values are updated
-to the value contained in PC TLV from the packet containing the successful
-challenge.  More precisely, the last sentence of the fourth bullet point
-of <relref target="RFC8967" section="4.3"/> is replaced by:</t>
+to the value contained in the PC TLV from the packet containing the
+successful challenge.  More precisely, the last sentence of the fourth
+bullet point of <relref target="RFC8967" section="4.3"/> is replaced
+by:</t> 
 <ul>
 <li>If the packet contains a successful Challenge Reply, then the Index
 contained in the PC TLV MUST be stored in the Index field of the Neighbour
-Table entry corresponding to the sender packet is accepted, and the PC
-contained in the TLV MUST be stored in both the PCm and PCu fields of the
-Neighbour Table entry.</li>
+Table entry corresponding to the sender, and the PC contained in the TLV
+MUST be stored in both the PCm and PCu fields of the Neighbour Table
+entry.</li>
 </ul>
 
 <t>When a packet that does not contain a successful challenge reply is
-received, then the PC value it contains is compared to either the PCm or
+received, the PC value that it contains is compared to either the PCm or
 the PCu field of the corresponding neighbour entry, depending on whether
 the packet was sent to a unicast or a multicast address.  If the
 comparison is successful, then the same value (PCm or PCu) is updated.
@@ -158,13 +161,13 @@ and it might be tempting to generalise the approach taken to more than
 just two last PC values.  For example, one might be tempted to use
 distinct last PC values for packets received with different values of the
 Type of Service (ToS) field, or with different IEEE 802.11e access
-categories.  However, chosing a highest PC field by consulting a value that
+categories.  However, choosing a highest PC field by consulting a value that
 is not protected by the MAC (<relref target="RFC8967" section="4.1"/>)
 would no longer protect against replay.  In practice, this means that only
 the destination address and port number and data stored in the packet body
 may be used for choosing the highest PC value, since these are the only
 fields that are protected by the MAC (in addition to the source address
-and porte number, which are already used when choosing the Neighbour Table
+and port number, which are already used when choosing the Neighbour Table
 entry and therefore provide no additional information).</t>
 
 <t>The following example shows why it would be unsafe to select the highest
@@ -182,71 +185,70 @@ T2, which is still equal to 42, and accept the replayed packet.</t>
 
 <section anchor="window"><name>Window-based validation</name>
 
-<t>Window-based validation is similar to that described in <relref
-target="RFC4303" section="3.4.3"/>. When using window-based validation, in
-addition to remembering the highest PC value seen from a given neighbour, an
-implementation maintains a fixed-size window of individual sequence numbers
-below this highest PC value. The PC value itself is updated if the new packet PC
-value is higher than the existing value being remembered, while the window is
-used to track individual values so that out-of-order PC values can be accepted
-without allowing any duplicates.</t>
+<t>Window-based validation is similar to what is described in <relref
+target="RFC4303" section="3.4.3"/>.  When using window-based validation,
+in addition to retaining within its neighbour table the highest PC value
+PCh seen from every neighbour, an implementation maintains a fixed-size
+window of booleans corresponding to PC values directly below PCh.  More
+precisely, the (Index, PC) pair contained in the Neighbour Table (<relref
+target="RFC8967" section="3.2"/>) is replaced by:</t>
+<ul>
+<li>a triple (Index, PCh, Window), where Index is an arbitrary string of
+0 to 32 octets, PCh is a 32-bit (4-octet) integer, and Window is a vector
+of booleans of size S (the default value S=128 is RECOMMENDED).</li>
+</ul>
 
-<t>Conceptually, the window is a vector of S boolean values numbered from
-0 (the "left edge" of the window) up to (S - 1) (the "right edge").  Thus,
-the window can be stored as a fixed-size bitmap, but other more
-complicated data structures are also possible.  Shifting the window to the
-left by an integer amount k consists in moving all values so that the
-value previously at index n is now at index (n - k); k values are
-discarded at the left edge, and k new unset values are inserted at the
-right edge.</t>
+<t>The window is a vector of S boolean values numbered from 0 (the "left
+edge" of the window) up to S-1 (the "right edge"); the boolean associated
+with the index i indicates whether a packet with PC value (PCh - (S-1) + i)
+has been seen before.  Shifting the window to the left by an integer
+amount k is defined as moving all values so that the value previously at
+index n is now at index (n - k); k values are discarded at the left edge,
+and k new unset values are inserted at the right edge.</t>
 
-<t>Whenever a packet is received, its PC value is first compared with the
-PC value kept in the neighbour table, and the <em>window index</em> of the
-received PC value is computed as the difference between the received PC
-value and the stored highest PC value plus the window size.</t>
-
+<t>Whenever a packet is received, the receiver computes its <em>index</em>
+i = (PC - PCh + S - 1).  It then proceeds as follows:</t>
 <ol>
-  <li>If the window index is negative, the packet is considered too old
+  <li>If the index i is negative, the packet is considered too old,
   and MUST be discarded.</li>
 
-  <li>If the window index is non-negative and less than or equal to the
-  size of the window, the window value at the window index is checked; if
-  this value is already set, the received PC has been seen before and the
+  <li>If the index i is non-negative and strictly less than the
+  window size S, the window value at the index is checked; if this
+  value is already set, the received PC has been seen before and the
   packet MUST be discarded.  Otherwise, the corresponding window value is
   marked as set, and the packet is accepted.</li>
 
-  <li>If the window index is larger than the window size (i.e., the
-  received PC is higher than the largest received value), the window MUST
-  be shifted to the left by the difference between the window index and
-  the window size (or, equivalently, by the difference between the
-  received PC and the highest PC stored in the neighbour table) and the
-  highest PC value MUST be set to the received PC.  The value at the right
-  of the window (the value numbered S - 1) MUST be set, and the packet is
-  accepted.</li>
+  <li>If the index i is larger or equal to the window size (i.e., PC
+  is strictly larger than PCh), the window MUST be shifted to the left by
+  (i - S + 1) values (or, equivalently, by the difference PC - PCh) and
+  the highest PC value PCh MUST be set to the received PC.  The value at
+  the right of the window (the value with index S - 1) MUST be set, and
+  the packet is accepted.</li>
 </ol>
 
 <t>When receiving a successful Challenge Reply, the remembered highest PC
-value MUST be set to the value received in the challenge reply, and all of
-the values in the window MUST be reset.</t>
+value PCh MUST be set to the value received in the challenge reply, and
+all of the values in the window MUST be reset except the value at index
+S - 1, which MUST be set.</t>
 
 </section>
 
 <section anchor="combining"><name>Combining the two techniques</name>
 
-<t>The two techniques defined above serve complementar purposes: splitting
-the state allows multicast packets to be reordered with respect to unicast
-ones by an arbitrary number of PC values, while the window-based technique
-allows arbitrary packets to be reordered but only by a bounded number of
-PC values.  Thus, they can profitably be combined.</t>
+<t>The two techniques described above serve complementary purposes:
+splitting the state allows multicast packets to be reordered with respect
+to unicast ones by an arbitrary number of PC values, while the
+window-based technique allows arbitrary packets to be reordered but only
+by a bounded number of PC values.  Thus, they can profitably be combined.</t>
 
-<t>An implementation of both techniques MUST maintain, for every entry of
-the Neighbour table, two distinct windows, one for multicast and one for
-unicast packets.  When a successful challenge reply is received, both
-windows MUST be reset.  When a packet that does not contain a challenge
-reply is received, then if the packet's destination address is a multicast
-address, the multicast window MUST be consulted and possibly updated, as
-described in <xref target="window"/>; otherwise, the unicast window MUST
-be consluted and possibly updated.</t>
+<t>An implementation that uses both techniques MUST maintain, for every
+entry of the Neighbour table, two distinct windows, one for multicast and
+one for unicast packets.  When a successful challenge reply is received,
+both windows MUST be reset.  When a packet that does not contain
+a challenge reply is received, then if the packet's destination address is
+a multicast address, the multicast window MUST be consulted and possibly
+updated, as described in <xref target="window"/>; otherwise, the unicast
+window MUST be consulted and possibly updated.</t>
 
 </section>
 
@@ -257,7 +259,7 @@ be consluted and possibly updated.</t>
 <t>The procedures described in this document do not change the security
 properties described in Section 1.2 of RFC 8967.  While they do slightly
 increase the amount of per-neighbour state maintained by each node, this
-increase is marginal (between 4 and 32 octets, depending on implementation
+increase is marginal (between 4 and 36 octets, depending on implementation
 choices), and should not significantly impact the ability of nodes to
 survive denial-of-service attacks.</t>
 

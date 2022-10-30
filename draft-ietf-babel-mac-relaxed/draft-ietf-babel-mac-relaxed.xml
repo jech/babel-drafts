@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!DOCTYPE rfc>
 <rfc version='3' 
-     docName='draft-ietf-babel-mac-relaxed-02'
+     docName='draft-ietf-babel-mac-relaxed-03'
      ipr='trust200902'
      consensus='true'
      submissionType='IETF'
@@ -35,7 +35,7 @@ Relaxed Packet Counter Verification for Babel MAC Authentication
   </address>
 </author>
 
-<date year='2022' month='August' day='29'/>
+<date year='2022' month='October' day='30'/>
 
 <abstract>
 <t>This document relaxes packet verification rules defined in the Babel
@@ -112,7 +112,7 @@ packet is received by a subset of the receivers.</t>
 <t>Instead of a single highest PC value maintained for each neighbour, an
 implementation of the procedure described in this section uses two values,
 the highest unicast PC and the highest multicast PC.  More precisely, the
-(Index, PC) pair contained in the Neighbour Table (<relref
+(Index, PC) pair contained in the neighbour table (<relref
 target="RFC8967" section="3.2"/>) is replaced by:</t>
 <ul>
 <li>a triple (Index, PCm, PCu), where Index is an arbitrary string of 0 to
@@ -126,10 +126,10 @@ bullet point of <relref target="RFC8967" section="4.3"/> is replaced
 by:</t> 
 <ul>
 <li>If the packet contains a successful Challenge Reply, then the Index
-contained in the PC TLV MUST be stored in the Index field of the Neighbour
-Table entry corresponding to the sender, and the PC contained in the TLV
-MUST be stored in both the PCm and PCu fields of the Neighbour Table
-entry.</li>
+contained in the PC TLV MUST be stored in the Index field of the neighbour
+table entry corresponding to the sender (which already exists in this
+case), the PC contained in the TLV MUST be stored in both the PCm and
+PCu fields of the neighbour table entry, and the packet is accepted.</li>
 </ul>
 
 <t>When a packet that does not contain a successful challenge reply is
@@ -141,16 +141,16 @@ More precisely, the last bullet point of <relref target="RFC8967"
 section="4.3"/> is replaced by:</t>
 <ul>
 <li>At this stage, the packet contains no successful challenge reply and
-the Index contained in the PC TLV is equal to the Index in the Neighbour
-Table entry corresponding to the sender.  The receiver compares the
-received PC with either PCm field (if the packet was sent to a multicast
-address) or the PCu field (otherwise) in the Neighbour Table; if the
-received PC is smaller or equal than the value contained in the Neighbour
-Table, the packet MUST be dropped and processing stops (no challenge is
+the Index contained in the PC TLV is equal to the Index in the neighbour
+table entry corresponding to the sender.  The receiver compares the
+received PC with either the PCm field (if the packet was sent to a multicast
+address) or the PCu field (otherwise) in the neighbour table; if the
+received PC is smaller or equal than the value contained in the neighbour
+table, the packet MUST be dropped and processing stops (no challenge is
 sent in this case, since the mismatch might be caused by harmless packet
 reordering on the link).  Otherwise, the PCm (if the packet was sent to
 a multicast address) or the PCu (otherwise) field contained in the
-Neighbour Table entry is set to the received PC, and the packet is
+neighbour table entry is set to the received PC, and the packet is
 accepted.</li>
 </ul>
 
@@ -167,7 +167,7 @@ would no longer protect against replay.  In practice, this means that only
 the destination address and port number and data stored in the packet body
 may be used for choosing the highest PC value, since these are the only
 fields that are protected by the MAC (in addition to the source address
-and port number, which are already used when choosing the Neighbour Table
+and port number, which are already used when choosing the neighbour table
 entry and therefore provide no additional information).</t>
 
 <t>The following example shows why it would be unsafe to select the highest
@@ -190,7 +190,7 @@ target="RFC4303" section="3.4.3"/>.  When using window-based validation,
 in addition to retaining within its neighbour table the highest PC value
 PCh seen from every neighbour, an implementation maintains a fixed-size
 window of booleans corresponding to PC values directly below PCh.  More
-precisely, the (Index, PC) pair contained in the Neighbour Table (<relref
+precisely, the (Index, PC) pair contained in the neighbour table (<relref
 target="RFC8967" section="3.2"/>) is replaced by:</t>
 <ul>
 <li>a triple (Index, PCh, Window), where Index is an arbitrary string of
@@ -242,7 +242,7 @@ window-based technique allows arbitrary packets to be reordered but only
 by a bounded number of PC values.  Thus, they can profitably be combined.</t>
 
 <t>An implementation that uses both techniques MUST maintain, for every
-entry of the Neighbour table, two distinct windows, one for multicast and
+entry of the neighbour table, two distinct windows, one for multicast and
 one for unicast packets.  When a successful challenge reply is received,
 both windows MUST be reset.  When a packet that does not contain
 a challenge reply is received, then if the packet's destination address is
@@ -268,7 +268,8 @@ survive denial-of-service attacks.</t>
 <section title="Acknowledgments">
 
 <t>The authors are indebted to Daniel Gröber, who first identified the
-problem that the procedures in this document aim to solve.</t>
+problem that the procedures in this document aim to solve and suggested
+the solution described in <xref target="separate-pc"/>.</t>
 
 </section>
 
@@ -328,5 +329,3 @@ problem that the procedures in this document aim to solve.</t>
 
 </back>
 </rfc>
-  
-

@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!DOCTYPE rfc>
 <rfc version='3' 
-     docName='draft-ietf-babel-mac-relaxed-03'
+     docName='draft-ietf-babel-mac-relaxed-04'
      ipr='trust200902'
      consensus='true'
      submissionType='IETF'
@@ -35,7 +35,7 @@ Relaxed Packet Counter Verification for Babel MAC Authentication
   </address>
 </author>
 
-<date year='2022' month='October' day='30'/>
+<date year='2022' month='November' day='29'/>
 
 <abstract>
 <t>This document relaxes packet verification rules defined in the Babel
@@ -54,15 +54,15 @@ occurrence, and the protocol drops any packets that arrive out-of-order.
 This assumption is generally correct on wired links, but turns out to be
 incorrect on some kinds of wireless links.</t>
 
-<t>In particular, IEEE 802.11 (Wi-Fi) defines a number of power-saving
-modes that allow stations (mobile nodes) to switch their radio off for
-extended periods of time, ranging in the hundreds of milliseconds.  The
-access point (network switch) buffers all multicast packets, and only
-sends them out after the power-saving interval ends.  The result is that
-multicast packets are delayed by up to a few hundred milliseconds with
-respect to unicast packets, which, under some traffic patterns, causes the
-PC verification procedure in RFC 8967 to systematically fail for multicast
-packets.</t>
+<t>In particular, IEEE 802.11 (Wi-Fi) <xref target="IEEE80211"/> defines
+a number of power-saving modes that allow stations (mobile nodes) to
+switch their radio off for extended periods of time, ranging in the
+hundreds of milliseconds.  The access point (network switch) buffers all
+multicast packets, and only sends them out after the power-saving interval
+ends.  The result is that multicast packets are delayed by up to a few
+hundred milliseconds with respect to unicast packets, which, under some
+traffic patterns, causes the PC verification procedure in RFC 8967 to
+systematically fail for multicast packets.</t>
 
 <t>This document defines two ways to relax the PC validation: using two
 separate receiver-side states, one for unicast and one for multicast
@@ -160,15 +160,18 @@ accepted.</li>
 and it might be tempting to generalise the approach taken to more than
 just two last PC values.  For example, one might be tempted to use
 distinct last PC values for packets received with different values of the
-Type of Service (ToS) field, or with different IEEE 802.11e access
-categories.  However, choosing a highest PC field by consulting a value that
-is not protected by the MAC (<relref target="RFC8967" section="4.1"/>)
-would no longer protect against replay.  In practice, this means that only
-the destination address and port number and data stored in the packet body
-may be used for choosing the highest PC value, since these are the only
-fields that are protected by the MAC (in addition to the source address
-and port number, which are already used when choosing the neighbour table
-entry and therefore provide no additional information).</t>
+Type of Service (ToS) field, or with different IEEE 802.11 <xref
+target="IEEE80211"/> access categories.  However, choosing a highest PC
+field by consulting a value that is not protected by the MAC (<relref
+target="RFC8967" section="4.1"/>) would no longer protect against replay.
+In effect, this means that only the destination address and port number
+and data stored in the packet body may be used for choosing the highest PC
+value, since these are the only fields that are protected by the MAC (in
+addition to the source address and port number, which are already used
+when choosing the neighbour table entry and therefore provide no
+additional information).  Since Babel implementations do not usually send
+packets using different ToS values or IEEE 802.11 access categories, this
+is not an issue in practice.</t>
 
 <t>The following example shows why it would be unsafe to select the highest
 PC depending on the ToS field.  Suppose that a node B were to maintain
@@ -265,6 +268,12 @@ survive denial-of-service attacks.</t>
 
 </section>
 
+<section title="IANA Considerations">
+
+<t>This document requires no IANA actions.</t>
+
+</section>  
+
 <section title="Acknowledgments">
 
 <t>The authors are indebted to Daniel Gröber, who first identified the
@@ -314,8 +323,17 @@ the solution described in <xref target="separate-pc"/>.</t>
 
 <references><name>Informative references</name>
 
-<reference  anchor='RFC4303' target='https://www.rfc-editor.org/info/rfc4303'>
+<reference anchor="IEEE80211" target="https://ieeexplore.ieee.org/document/9363693">
+<front>
+<title>IEEE Standard for Information Technology — Telecommunications and
+information exchange between systems Local and metropolitan area
+networks — Specific requirements — Part 11: Wireless LAN Medium Access
+Control (MAC) and Physical Layer (PHY) Specifications.</title>
+<author/>
+</front>
+</reference>
 
+<reference anchor='RFC4303' target='https://www.rfc-editor.org/info/rfc4303'>
 <front>
 <title>IP Encapsulating Security Payload (ESP)</title>
 <author initials='S.' surname='Kent' fullname='S. Kent'/>

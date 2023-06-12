@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!DOCTYPE rfc>
 <rfc version='3' 
-     docName='draft-ietf-babel-mac-relaxed-04'
+     docName='draft-ietf-babel-mac-relaxed-05'
      ipr='trust200902'
      consensus='true'
      submissionType='IETF'
@@ -35,12 +35,13 @@ Relaxed Packet Counter Verification for Babel MAC Authentication
   </address>
 </author>
 
-<date year='2022' month='November' day='29'/>
+<date year='2023' month='June' day='12'/>
 
 <abstract>
 <t>This document relaxes packet verification rules defined in the Babel
 MAC Authentication protocol in order to make it more robust in the
-presence of packet reordering.</t>
+presence of packet reordering.  This document updates RFC 8967 by relaxing
+the packet validation rules defined therein.</t>
 </abstract>
 </front>
 
@@ -51,8 +52,9 @@ presence of packet reordering.</t>
 <t>The design of the Babel MAC authentication mechanism <xref
 target="RFC8967"/> assumes that packet reordering is an exceptional
 occurrence, and the protocol drops any packets that arrive out-of-order.
-This assumption is generally correct on wired links, but turns out to be
-incorrect on some kinds of wireless links.</t>
+The assumption that packets are not routinely reordered is generally
+correct on wired links, but turns out to be incorrect on some kinds of
+wireless links.</t>
 
 <t>In particular, IEEE 802.11 (Wi-Fi) <xref target="IEEE80211"/> defines
 a number of power-saving modes that allow stations (mobile nodes) to
@@ -61,18 +63,22 @@ hundreds of milliseconds.  The access point (network switch) buffers all
 multicast packets, and only sends them out after the power-saving interval
 ends.  The result is that multicast packets are delayed by up to a few
 hundred milliseconds with respect to unicast packets, which, under some
-traffic patterns, causes the PC verification procedure in RFC 8967 to
-systematically fail for multicast packets.</t>
+traffic patterns, causes the Packet Counter (PC) verification procedure in
+RFC 8967 to systematically fail for multicast packets.</t>
 
-<t>This document defines two ways to relax the PC validation: using two
-separate receiver-side states, one for unicast and one for multicast
-packets (<xref target="separate-pc"/>), which allows arbitrary reordering
-between unicast and multicast packets, and using a window of previously
-received PC values (<xref target="window"/>), which allows a bounded
-amount of reordering between arbitrary packets.  Usage of the former is
-RECOMMENDED, while usage of the latter is OPTIONAL.  The two MAY be used
-simultaneously (<xref target="combining"/>).  This document updates RFC
-8967.</t>
+<t>This document defines two distinct ways to relax the PC validation:
+using two separate receiver-side states, one for unicast and one for
+multicast packets (<xref target="separate-pc"/>), which allows arbitrary
+reordering between unicast and multicast packets, and using a window of
+previously received PC values (<xref target="window"/>), which allows
+a bounded amount of reordering between arbitrary packets.  We assume that
+reordering between arbitrary packets only happens occasionally, and, since
+Babel is designed to gracefully deal with occasional packet loss, usage of
+the former mechanism is RECOMMENDED, while usage of the latter is OPTIONAL.
+The two mechanisms MAY be used simultaneously (<xref target="combining"/>).</t>
+
+<t>This document updates RFC 8967 by relaxing the packet validation rules
+defined therein.  It does not change the security properties of the protocol.</t>
 
 </section>
 
@@ -111,9 +117,10 @@ packet is received by a subset of the receivers.</t>
 
 <t>Instead of a single highest PC value maintained for each neighbour, an
 implementation of the procedure described in this section uses two values,
-the highest unicast PC and the highest multicast PC.  More precisely, the
-(Index, PC) pair contained in the neighbour table (<relref
-target="RFC8967" section="3.2"/>) is replaced by:</t>
+the highest multicast value PCm and the highest non-multicast (unicast)
+value PCu.  More precisely, the (Index, PC) pair contained in the
+neighbour table (<relref target="RFC8967" section="3.2"/>) is replaced
+by:</t>
 <ul>
 <li>a triple (Index, PCm, PCu), where Index is an arbitrary string of 0 to
 32 octets, and PCm and PCu are 32-bit (4-octet) integers.</li>
@@ -133,18 +140,18 @@ PCu fields of the neighbour table entry, and the packet is accepted.</li>
 </ul>
 
 <t>When a packet that does not contain a successful challenge reply is
-received, the PC value that it contains is compared to either the PCm or
-the PCu field of the corresponding neighbour entry, depending on whether
-the packet was sent to a unicast or a multicast address.  If the
-comparison is successful, then the same value (PCm or PCu) is updated.
-More precisely, the last bullet point of <relref target="RFC8967"
-section="4.3"/> is replaced by:</t>
+received, the PC value that it contains is compared to either the PCu or
+the PCm field of the corresponding neighbour entry, depending on whether
+the packet was sent to a muticast address or not.  If the comparison is
+successful, then the same value (PCm or PCu) is updated.  More precisely,
+the last bullet point of <relref target="RFC8967" section="4.3"/> is
+replaced by:</t>
 <ul>
 <li>At this stage, the packet contains no successful challenge reply and
 the Index contained in the PC TLV is equal to the Index in the neighbour
 table entry corresponding to the sender.  The receiver compares the
 received PC with either the PCm field (if the packet was sent to a multicast
-address) or the PCu field (otherwise) in the neighbour table; if the
+IP address) or the PCu field (otherwise) in the neighbour table; if the
 received PC is smaller or equal than the value contained in the neighbour
 table, the packet MUST be dropped and processing stops (no challenge is
 sent in this case, since the mismatch might be caused by harmless packet
@@ -170,8 +177,8 @@ value, since these are the only fields that are protected by the MAC (in
 addition to the source address and port number, which are already used
 when choosing the neighbour table entry and therefore provide no
 additional information).  Since Babel implementations do not usually send
-packets using different ToS values or IEEE 802.11 access categories, this
-is not an issue in practice.</t>
+packets with differing ToS values or IEEE 802.11 access categories, this
+is unlikely to be an issue in practice.</t>
 
 <t>The following example shows why it would be unsafe to select the highest
 PC depending on the ToS field.  Suppose that a node B were to maintain
@@ -260,11 +267,19 @@ window MUST be consulted and possibly updated.</t>
 <section><name>Security considerations</name>
 
 <t>The procedures described in this document do not change the security
-properties described in Section 1.2 of RFC 8967.  While they do slightly
-increase the amount of per-neighbour state maintained by each node, this
-increase is marginal (between 4 and 36 octets, depending on implementation
-choices), and should not significantly impact the ability of nodes to
-survive denial-of-service attacks.</t>
+properties described in Section 1.2 of RFC 8967.  In particular, the
+choice between the multicast and the unicast packet counter is done by
+examining a packet's destination IP address, which is included in the
+pseudo-header and therefore participates in MAC computation; hence, an
+attacker cannot change the destination address without invalidating the
+MAC, and therefore cannot replay a unicast packet as a multicast one or
+vice versa.</t>
+
+<t>While these procedures do slightly increase the amount of per-neighbour
+state maintained by each node, this increase is marginal (between 4 and 36
+octets per neighbour, depending on implementation choices), and should not
+significantly impact the ability of nodes to survive denial-of-service
+attacks.</t>
 
 </section>
 
@@ -276,9 +291,9 @@ survive denial-of-service attacks.</t>
 
 <section title="Acknowledgments">
 
-<t>The authors are indebted to Daniel Gröber, who first identified the
-problem that the procedures in this document aim to solve and suggested
-the solution described in <xref target="separate-pc"/>.</t>
+<t>The authors are greatly indebted to Daniel Gröber, who first identified
+the problem that document aims to solve and first suggested the solution
+described in <xref target="separate-pc"/>.</t>
 
 </section>
 

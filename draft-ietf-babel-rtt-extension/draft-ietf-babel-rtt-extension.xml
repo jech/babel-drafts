@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!DOCTYPE rfc>
 <rfc version='3' 
-     docName='draft-ietf-babel-rtt-extension-00'
+     docName='draft-ietf-babel-rtt-extension-01'
      ipr='trust200902'
      consensus='true'
      submissionType='IETF'
@@ -38,7 +38,7 @@
 </address>
 </author>
 
-<date day="26" month="April" year="2019"/>
+<date day="22" month="June" year="2023"/>
 
 <abstract>
 <t>This document defines an extension to the Babel routing protocol that
@@ -91,49 +91,66 @@ cases.</t>
 that enables precise measurement of the round-trip time (RTT) of a link,
 and allows its usage in metric computation.  Since this causes a negative
 feedback loop, special care is needed to ensure that the resulting network
-is reasonably stable (<xref target="stability-issues"/>).</t>
+is reasonably stable (<xref target="route-selection"/>).</t>
 
 <t>We believe that this protocol may be useful in other situations than
 the one described above, such as when running Babel in a congested
 wireless mesh network or over a complex link layer that performs its own
 routing; the high granularity of the timestamps used (1ms) should make it
-easier to experiment with RTT-based metrics on this kind of link
+possible to experiment with RTT-based metrics on this kind of link
 layers.</t>
+
+</section>
+
+<section title="RTT sampling">
+
+<section title="Data structures">
+
+<t>We assume that every Babel speaker maintains a local clock, that counts
+milliseconds from an arbitrary origin.  We do not assume that clocks are
+synchronised: clocks local to distinct nodes need not share a common
+origin.  The protocol will eventually recover if the clock is stepped, so
+clocks need not persist across node reboots.</t>
+
+<t>Every Babel speaker maintains a Neighbour Table, described in
+Section 3.2.4 of <xref target="RFC8966"/>.  This extesion extends every
+etry in the Neighbour Table with the following data:</t>
+<ul spacing="normal">
+<li>the Origin Timestamp, a 32-bit timestamp (modulo 2^32) according to
+the neighbour's clock;</li>
+<li>the Receive Timestamp, a 32-bit timestamp according to the local clock.</li>
+</ul>
+<t>Both values are initially undefined.</t>
 
 </section>
 
 <section title="Protocol operation">
 
-<t>The protocol estimates the RTT to each neighbour
-(<xref target="delay-estimation"/>) which it then uses for metric
-computation (<xref target="metric-computation"/>).</t>
-
-<section title="Delay estimation" anchor="delay-estimation">
-
 <t>The RTT to a neighbour is estimated using an algorithm due to Mills
 <xref target="MILLS"/>, originally developed for the HELLO routing
 protocol and later used in NTP <xref target="NTP"/>.</t>
 
-<t>A Babel speaker periodically sends a multicast Hello message over all
-of its interfaces (Section 3.4.1 of <xref target="RFC8966"/>).  This Hello
-is usually accompanied with a set of IHU messages, one per neighbour
-(Section 3.4.2 of <xref target="RFC8966"/>).</t>
+<t>A Babel speaker periodically sends Hello messages to its neighbours
+(Section 3.4.1 of <xref target="RFC8966"/>).  Additionally, it ocasionally
+sends a set of IHU messages, at most one per neighbour (Section 3.4.2 of
+<xref target="RFC8966"/>).</t>
 
-<t>In order to enable the computation of RTTs, a node A SHOULD include in
-every Hello that it sends a timestamp t1 (according to A's clock).  When
-a node B receives A's Hello, it records in its neighbour table the
-timestamp t1 as well as the time t1' according to its own (B's) clock at
-which it received the packet.</t>
+<t>In order to enable the computation of RTTs, a node A MUST include in
+every Hello that it sends a timestamp t1 (according to A's local clock).
+When a node B receives A's Hello equipped with a timestamp, it computes
+the time t1' at which the Hello was received (according to B's local
+clock).  It then MUST record the value t1 in the Origin Timestamp field
+of the Neighbor Table entry corresponding to A, and the value t1' in the
+Receive Timestamp field of the Neighbour Table entry.</t>
 
-<t>When B later sends an IHU to A, it SHOULD attach to the IHU the
-timestamps t1 and t1' which it has stored in its neighbour table.
-Additionally, it SHOULD ensure that the packet within which the IHU is
-sent contains a Hello TLV with an associated timestamp t2' (according to
-B's clock).  Symmetrically, A will record in its neighbour table the
-timestamp t2' as well as the time t2 (according to A's clock) at which it
-has received the Hello.  This is illustrated in the following sequence
-diagram:</t>
+<t>When B sends an IHU to A, it checks whether both timestamps are
+defined.  If that is the case, then it MUST ensure that its IHU TLV is
+sent in a packet that also contains a timestamped Hello TLV (either
+a normally scheduled Hello, or an unscheduled Hello, see Section 3.4.1 of
+<xref target="RFC8966"/>).  It MUST include in the IHU both the Origin
+Timestamp and the Receive Timestamp stored in the neighbor table.</t>
 
+<t>This is illustrated in the followsing sequence diagram:</t>
 <artwork><![CDATA[
  A          B
    |      |
@@ -160,16 +177,20 @@ t2 +      |
    v      v
 ]]></artwork>
 
-<t>A then estimates the RTT between A and B as
-(t2 - t1) - (t2' - t1').</t>
+<t>Upon receiving B's packet, A MUST verify that it contains both
+a timestamped Hello and an IHU containing two timestamps.  If that is the
+case, it computes the time t2 (according to its local clock) at which it
+was received.  A then computes the value d = (t2 - t1) - (t2' - t1')
+(where all computations are done modulo 2^32), which is a measurement of
+the RTT between A and B.</t>
 
 <t>This algorithm has a number of desirable properties.  First, since
 there is no requirement that t1' and t2' be equal, the protocol remains
 asynchronous: the only change to Babel's message scheduling is the
 requirement that a packet containing an IHU also contains a Hello.
-Second, since only differences of timestamps according to a single clock
-are computed, it does not require synchronised clocks.  Third, it requires
-very little additional state: a node only needs to store the two
+Second, since it only ever computes differences of timestamps according to
+a single clock, it does not require synchronised clocks.  Third, it
+requires very little additional state: a node only needs to store the two
 timestamps associated with the last hello received from each neighbour.
 Finally, since it only requires piggybacking one or two timestamps on each
 Hello and IHU packet, it makes efficient use of network resources.</t>
@@ -181,22 +202,90 @@ significant clock drift is unlikely to happen at that time scale.</t>
 
 </section>
 
-<section title="Metric computation" anchor="metric-computation">
+<section title="Wrap-around and node restart">
 
-<t>The algorithm described in the previous section allows computing an RTT
-to every neighbour.  How to map this value to a link cost is a local
-implementation matter.</t>
+<t>Timestamp values are a count of milliseconds stored as a 32-bit
+unsigned integer; thus, they wrap around every 50 days or so.  What is
+more, a node may occasionally reboot and restart its clock at an arbitrary
+origin.  For these reasons, very old timestamps or nonsensical timestamps
+MUST NOT be used to yield RTT samples.</t>
 
-<t>Obviously, the mapping should be monotonic (larger RTTs imply larger
-costs).  In addition, in order to enhance stability (<xref
-target="stability-issues"/>), the mapping should be bounded: above
-a certain RTT, all links are equally bad.</t>
+<t>We suggest the following algorithm to achieve that.  When a node
+receives a packet containing a Hello and an IHU, it SHOULD compare the
+current local time t2 with the Origin Timestamp contained in the IHU; if
+the Origin Timestamp appears to be in the future, or if it is in the past
+by more than a time T (the value T=3 minutes is RECOMMENDED), then the
+timestamps are still recorded in the neighbour table, but SHOULD NOT be
+used for computation of an RTT sample.</t>
 
-<section title="Example metric computation">
+<t>Similary, the node compares the Hello's timestamp with the Receive
+Timestamp recorded in the Neighbour Table; if the Hello's timestamp
+appears to be older than the recorded timestamp, or if it appears to be
+more recent by an interval larger than the value T, then the packet SHOULD
+NOT be used for RTT computation.</t>
 
-<t>The current implementation of Babel uses the following function for
-mapping RTTs to link costs, parameterised by three parameters rtt-min,
-rtt-max and max-rtt-penalty:</t>
+</section>
+
+</section>
+
+<section title="RTT-based route selection" anchor="route-selection">
+
+<t>The protocol described above yields a series of RTT samples.  While
+these samples are fairly accurate, they are not directly usable as an
+input to the route selection procedure, for at least three reasons.</t>
+
+<t>First of all, in the presence of bursty traffic, routers experience
+transient congestion, which causes occasional spikes in the measured RTT.
+Thus, the RTT signal is often noisy, and requires smoothing before it can
+be used for route selection.</t>
+
+<t>Second, using the RTT signal for route selection gives rise to
+a negative feedback loop: when a route has a low RTT, it is deemed to be
+more desirable, which causes it to be used for more data traffic, which
+may lead to congestion, which in turn increases the RTT.  Without some
+form of hysteresis, using RTT for route selection would lead to
+oscillations between parallel routes, which might lead to packet
+reordering and negatively affect upper-layer protocols (such as TCP).</t>
+
+<t>Third, even in the absence of congestion, the RTT tends to exhibit some
+variation.  If two parallel routes have their RTT oscillate around
+a common value, using the RTT as input to route selection will cause
+frequent routing oscillations, which, again, indicates the need for some
+form of hysteresis.</t>
+
+<t>In this section, we describe an algorithm that integrates both
+smoothing and hysteresis and has been shown to behave well both in
+simulation and experimentally over the Internet <xref target="DELAY-BASED"/>.
+This algorithm is considered experimental, since we do not
+currently have a theoretical understanding of its behaviour, and in
+particular we do not know by how much it could be simplified without
+impairing its functionality.</t>
+
+<section title="Smoothing">
+
+<t>The RTT samples provided by Mills algorithm are fairly accurate, but
+rather noisy: individual samples may be outliers and indicate a value much
+larger than the correct one.  Thus, some smoothing needs to be applied
+first, in order to get rid of these outliers.</t>
+
+<t>Our current implementation uses a simple exponential average, as
+described in <xref target="DELAY-BASED"/>.  Other algorithms have also
+been considered, such as a moving average or a moving minimum.</t>
+
+</section>
+
+<section title="Cost computation" anchor="cost-computation">
+
+<t>The smoothed RTT value obtained in the previous step needs to be mapped
+to a link cost, suitable for input to the metric computation procedure
+(Section 3.5.2 of <xref target="RFC8966"/>).  Obviously, the mapping
+should be monotonic (larger RTTs imply larger costs).  In addition, in
+order to enhance stability (<xref target="route-selection"/>), the
+mapping should be bounded: above a certain RTT, all links are equally
+bad, and hence their costs no longer oscillate.</t>
+
+<t>We currently use the following function for mapping RTTs to link costs,
+parameterised by three parameters rtt-min, rtt-max and max-rtt-penalty:</t>
 
 <artwork><![CDATA[
   cost
@@ -226,33 +315,20 @@ rtt-max and max-rtt-penalty:</t>
 
 <t>For RTTs below rtt-min, the link cost is just the nominal cost of
 a single hop, C.  Between rtt-min and rtt-max, the cost increases linearly;
-abover rtt-max, the constant value max-rtt-penalty is added to the nominal
+above rtt-max, the constant value max-rtt-penalty is added to the nominal
 cost.</t>
 
 </section>
 
+<section title="Hysteresis">
+
+<t>Even after applying a bounded mapping from smoothed RTT to a cost
+value, the cost may fluctuate when a link's RTT is between rtt-min and
+rtt-max.  This is effectively mitigated by using a robust hysteresis
+algorithm, such as the one described in Appendix A.3 of
+<xref target="RFC8966"/>.</t>
+
 </section>
-
-<section title="Stability issues" anchor="stability-issues">
-
-<t>Using delay as an input to the routing metric in congested networks
-gives rise to a negative feedback loop: low RTT encourages traffic, which
-in turn causes the RTT to increase.  In a congested network, such
-a feedback loop can cause persistent oscillations.</t>
-
-<t>The current implementation of Babel uses three techniques that
-collaborate to limit the frequency of oscillations:</t>
-<ul>
-<li>the measured RTT is smoothed, which limits Babel's response to
-short-term RTT variations;</li>
-<li>the mapping function is bounded, which avoids switching between
-congested routes;</li>
-<li>a hysteresis algorithm is applied to the metric before route selection,
-which limits the worst-case frequency of route oscillations.</li>
-</ul>
-
-<t>These techniques are discussed in more detail in
-<xref target="DELAY-BASED"/>.</t>
 
 </section>
 
@@ -269,10 +345,9 @@ from blackholes or routing loops.</t>
 
 <t>If a sub-TLV defined in this extension is longer than expected, the
 additional data is silently ignored.  This provision is made in order to
-allow a future version of this document to extend the packet format with
-additional data.</t>
-
-</section>
+allow a future version of this protocol to extend the packet format with
+additional data, for example higher-precision timestamps or absolute
+timestamps.</t>
 
 </section>
 
@@ -338,10 +413,11 @@ Timestamp sub-TLV has the following format:</t>
 <dt>Length</dt><dd>The length of the body, exclusive of the Type and
 Length fields.</dd>
 <dt>Origin timestamp</dt><dd>A copy of the transmit timestamp of the last
-Timestamp sub-TLV contained in a Hello TLV received from node A.</dd>
-<dt>Receive timestamp</dt><dd>The time at which the last Hello with
-a Timestamp sub-TLV was received from node A according to the sender's
-clock.</dd>
+Timestamp sub-TLV contained in a Hello TLV received from the node to which
+the enclosing IHU applies.</dd>
+<dt>Receive timestamp</dt><dd>The time, according to the sender's clock,
+at which the last timestamped sub-TLV was received from the node to which
+the enclosing IHU applies.</dd>
 </dl>
 
 <t>If the Length field is larger than the expected 8 octets, the sub-TLV
@@ -370,9 +446,20 @@ Types" registry:</t>
 
 <section title="Security Considerations">
 
-<t>This extension merely adds additional timestamping data to two of the
-TLVs sent by a Babel router, and does not significantly change the
-security properties of the Babel protocol.</t>
+<t>This extension adds additional timestamping data to two of the TLVs
+sent by a Babel router.  Since the timestamps use an arbitrary origin,
+they do not leak private data, such as a node's timezone.  However, by
+broadcasting the value of a reasonably accurate local clock, they might
+make a node more susceptible to timing attacks.</t>
+
+</section>
+
+<section title="Acknowledgements">
+
+<t>The authors are indebted to Jean-Paul Smetz, who prompted the
+investigation that originally lead to this protocol.  Toke
+Høyland-Jørgensen, Maria Matejka and Ondřej Zajiček provided helpful
+comments about a draft version of this document.</t>
 
 </section>
 

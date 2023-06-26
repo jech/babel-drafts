@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!DOCTYPE rfc>
 <rfc version='3' 
-     docName='draft-ietf-babel-rtt-extension-01'
+     docName='draft-ietf-babel-rtt-extension-02'
      ipr='trust200902'
      consensus='true'
      submissionType='IETF'
-     category='exp'
+     category='std'
      updates='8967'
      xml:lang='en'
      xmlns:xi="http://www.w3.org/2001/XInclude">
@@ -38,12 +38,12 @@
 </address>
 </author>
 
-<date day="22" month="June" year="2023"/>
+<date day="26" month="June" year="2023"/>
 
 <abstract>
 <t>This document defines an extension to the Babel routing protocol that
 uses symmetric delay in metric computation and therefore makes it possible
-to prefer lower latency links to higher latency ones.</t>
+to prefer lower latency links over higher latency ones.</t>
 </abstract>
 
 </front>
@@ -59,9 +59,9 @@ on all other types of links.  While this strategy works reasonably well in
 many networks, it fails to select reasonable routes in some topologies
 involving tunnels or VPNs.</t>
 
-<t>Consider for example the following topology, with three
-routers A, B and D located in Paris and a fourth router located in Tokyo,
-connected through tunnels in a diamond topology.</t>
+<t>Consider for example the following topology, with three routers A,
+B and D located in Paris and a fourth router located in Tokyo, connected
+through tunnels in a diamond topology.</t>
 <artwork><![CDATA[
                    +------------+
                    | A (Paris)  +---------------+
@@ -96,9 +96,19 @@ is reasonably stable (<xref target="route-selection"/>).</t>
 <t>We believe that this protocol may be useful in other situations than
 the one described above, such as when running Babel in a congested
 wireless mesh network or over a complex link layer that performs its own
-routing; the high granularity of the timestamps used (1ms) should make it
+routing; the high granularity of the timestamps used (1µs) should make it
 possible to experiment with RTT-based metrics on this kind of link
 layers.</t>
+
+</section>
+
+<section><name>Specification of Requirements</name>
+
+<t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+"SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+"OPTIONAL" in this document are to be interpreted as described in BCP 14
+<xref target="RFC2119"/> <xref target="RFC8174"/> when, and only when,
+they appear in all capitals, as shown here.</t>
 
 </section>
 
@@ -107,14 +117,14 @@ layers.</t>
 <section title="Data structures">
 
 <t>We assume that every Babel speaker maintains a local clock, that counts
-milliseconds from an arbitrary origin.  We do not assume that clocks are
+microseconds from an arbitrary origin.  We do not assume that clocks are
 synchronised: clocks local to distinct nodes need not share a common
 origin.  The protocol will eventually recover if the clock is stepped, so
 clocks need not persist across node reboots.</t>
 
 <t>Every Babel speaker maintains a Neighbour Table, described in
-Section 3.2.4 of <xref target="RFC8966"/>.  This extesion extends every
-etry in the Neighbour Table with the following data:</t>
+Section 3.2.4 of <xref target="RFC8966"/>.  This extension extends every
+entry in the Neighbour Table with the following data:</t>
 <ul spacing="normal">
 <li>the Origin Timestamp, a 32-bit timestamp (modulo 2^32) according to
 the neighbour's clock;</li>
@@ -131,7 +141,7 @@ the neighbour's clock;</li>
 protocol and later used in NTP <xref target="NTP"/>.</t>
 
 <t>A Babel speaker periodically sends Hello messages to its neighbours
-(Section 3.4.1 of <xref target="RFC8966"/>).  Additionally, it ocasionally
+(Section 3.4.1 of <xref target="RFC8966"/>).  Additionally, it occasionally
 sends a set of IHU messages, at most one per neighbour (Section 3.4.2 of
 <xref target="RFC8966"/>).</t>
 
@@ -150,7 +160,7 @@ a normally scheduled Hello, or an unscheduled Hello, see Section 3.4.1 of
 <xref target="RFC8966"/>).  It MUST include in the IHU both the Origin
 Timestamp and the Receive Timestamp stored in the neighbor table.</t>
 
-<t>This is illustrated in the followsing sequence diagram:</t>
+<t>This is illustrated in the following sequence diagram:</t>
 <artwork><![CDATA[
  A          B
    |      |
@@ -204,8 +214,8 @@ significant clock drift is unlikely to happen at that time scale.</t>
 
 <section title="Wrap-around and node restart">
 
-<t>Timestamp values are a count of milliseconds stored as a 32-bit
-unsigned integer; thus, they wrap around every 50 days or so.  What is
+<t>Timestamp values are a count of microseconds stored as a 32-bit
+unsigned integer; thus, they wrap around every 71 minutes or so.  What is
 more, a node may occasionally reboot and restart its clock at an arbitrary
 origin.  For these reasons, very old timestamps or nonsensical timestamps
 MUST NOT be used to yield RTT samples.</t>
@@ -221,8 +231,8 @@ used for computation of an RTT sample.</t>
 <t>Similary, the node compares the Hello's timestamp with the Receive
 Timestamp recorded in the Neighbour Table; if the Hello's timestamp
 appears to be older than the recorded timestamp, or if it appears to be
-more recent by an interval larger than the value T, then the packet SHOULD
-NOT be used for RTT computation.</t>
+more recent by an interval larger than the value T, then the timestamps
+SHOULD NOT be used for computation of an RTT sample.</t>
 
 </section>
 
@@ -387,7 +397,9 @@ this sub-TLV was sent, according to the sender's clock.</dd>
 
 <t>If the Length field is larger than the expected 4 octets, the sub-TLV
 MUST be processed normally and any extra data contained in this sub-TLV
-MUST be silently ignored.</t>
+MUST be silently ignored.  If the Length field is smaller than the
+expected 4 octets, then this sub-TLV MUST be silently ignored (and the
+remainder of the enclosing TLV processed as usual).</t>
 
 </section>
 
@@ -422,7 +434,9 @@ the enclosing IHU applies.</dd>
 
 <t>If the Length field is larger than the expected 8 octets, the sub-TLV
 MUST be processed normally and any extra data contained in this sub-TLV
-MUST be silently ignored.</t>
+MUST be silently ignored.  If the Length field is smaller than the
+expected 8 octets, then this sub-TLV MUST be silently ignored (and the
+remainder of the enclosing TLV processed as usual).</t>
 
 </section>
 
@@ -430,8 +444,8 @@ MUST be silently ignored.</t>
 
 <section title="IANA Considerations">
 
-<t>IANA is instructed to add the following entry to the "Babel Sub-TLV
-Types" registry:</t>
+<t>IANA has added the following entry to the "Babel Sub-TLV Types"
+registry:</t>
 
 <table align="center">
 <thead>
@@ -457,9 +471,9 @@ make a node more susceptible to timing attacks.</t>
 <section title="Acknowledgements">
 
 <t>The authors are indebted to Jean-Paul Smetz, who prompted the
-investigation that originally lead to this protocol.  Toke
-Høyland-Jørgensen, Maria Matejka and Ondřej Zajiček provided helpful
-comments about a draft version of this document.</t>
+investigation that originally lead to this protocol.  We are also grateful
+to David Schinazi, Toke Høyland-Jørgensen, Maria Matejka, David Schinazi,
+Steffen Vogel, and Ondřej Zajiček.</t>
 
 </section>
 
@@ -480,6 +494,26 @@ comments about a draft version of this document.</t>
 </front>
 <seriesInfo name="RFC" value="8966"/>
 <seriesInfo name="DOI" value="10.17487/RFC8966"/>
+</reference>
+
+<reference anchor="RFC2119"><front>
+<title>Key words for use in RFCs to Indicate Requirement Levels</title>
+<author initials="S." surname="Bradner" fullname="S. Bradner"/>
+<date year="1997" month="March"/>
+</front>
+<seriesInfo name="BCP" value="14"/>
+<seriesInfo name="RFC" value="2119"/>
+<seriesInfo name="DOI" value="10.17487/RFC2119"/>
+</reference>
+
+<reference anchor="RFC8174"><front>
+<title>Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words</title>
+<author initials="B." surname="Leiba" fullname="B. Leiba"/>
+<date year="2017" month="May"/>
+</front>
+<seriesInfo name="BCP" value="14"/>
+<seriesInfo name="RFC" value="8174"/>
+<seriesInfo name="DOI" value="10.17487/RFC8174"/>
 </reference>
 
 </references>

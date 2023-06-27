@@ -150,7 +150,7 @@ every Hello that it sends a timestamp t1 (according to A's local clock).
 When a node B receives A's Hello equipped with a timestamp, it computes
 the time t1' at which the Hello was received (according to B's local
 clock).  It then MUST record the value t1 in the Origin Timestamp field
-of the Neighbor Table entry corresponding to A, and the value t1' in the
+of the Neighbour Table entry corresponding to A, and the value t1' in the
 Receive Timestamp field of the Neighbour Table entry.</t>
 
 <t>When B sends an IHU to A, it checks whether both timestamps are
@@ -194,16 +194,19 @@ was received.  A then computes the value d = (t2 - t1) - (t2' - t1')
 (where all computations are done modulo 2^32), which is a measurement of
 the RTT between A and B.</t>
 
-<t>This algorithm has a number of desirable properties.  First, since
-there is no requirement that t1' and t2' be equal, the protocol remains
-asynchronous: the only change to Babel's message scheduling is the
-requirement that a packet containing an IHU also contains a Hello.
-Second, since it only ever computes differences of timestamps according to
-a single clock, it does not require synchronised clocks.  Third, it
-requires very little additional state: a node only needs to store the two
-timestamps associated with the last hello received from each neighbour.
-Finally, since it only requires piggybacking one or two timestamps on each
-Hello and IHU packet, it makes efficient use of network resources.</t>
+<t>This algorithm has a number of desirable properties.  First, the is is
+symmetric: A and B use the same procedures for timestamping packets and
+computing RTT samples, and both nodes produce one RTT sample for each
+received (Hello, IHU) pair.  Second, since there is no requirement that
+t1' and t2' be equal, the protocol is asynchronous: the only change
+to Babel's message scheduling is the requirement that a packet containing
+an IHU also contain a Hello.  Third, since it only ever computes
+differences of timestamps according to a single clock, it does not require
+synchronised clocks.  Fourth, it requires very little additional state:
+a node only needs to store the two timestamps associated with the last
+hello received from each neighbour.  Finally, since it only requires
+piggybacking one or two timestamps on each Hello and IHU packet, it makes
+efficient use of network resources.</t>
 
 <t>In principle, this algorithm is inaccurate in the presence of clock
 drift (i.e. when A's and B's clocks are running at different frequencies).
@@ -212,7 +215,7 @@ significant clock drift is unlikely to happen at that time scale.</t>
 
 </section>
 
-<section title="Wrap-around and node restart">
+<section title="Wrap-around and node restart" anchor="wraparound">
 
 <t>Timestamp values are a count of microseconds stored as a 32-bit
 unsigned integer; thus, they wrap around every 71 minutes or so.  What is
@@ -233,6 +236,33 @@ Timestamp recorded in the Neighbour Table; if the Hello's timestamp
 appears to be older than the recorded timestamp, or if it appears to be
 more recent by an interval larger than the value T, then the timestamps
 SHOULD NOT be used for computation of an RTT sample.</t>
+
+</section>
+
+<section title="Implementation notes">
+
+<t>The accuracy of the computed RTT samples depends on Transmit Timestamps
+being computed as late as possible before transmission of a packet
+containing a Hello TLV, and Receive Timestamps being computed as early as
+possible after reception of a packet containing a (Hello, IHU) pair.  We
+have found the following implementation strategy to be useful.</t>
+
+<t>When a Hello TLV is buffered for transmission, we insert a PadN sub-TLV
+(Section 4.7.2 of <xref target="RFC8966"/>) with a length of 4 octets
+within the TLV.  When the packet is ready to be sent, we check whether it
+contains a 4-octet PADN sub-TLV; we then overwrite the PADN sub-TLV with
+a Timestamp sub-TLV with the current time, and send out the packet.</t>
+
+<t>Conversely, when a packet is received, we immediately compute the
+current time and record it with the received packet.  We then process the
+packet as usual, and use the recorded timestamp in order to compute an RTT
+sample.</t>
+
+<t>The protocol is designed to survive the clock being reset when a node
+reboots; on POSIX systems, this makes it possible to use the
+CLOCK_MONOTONIC clock for computing timestamps.  If CLOCK_MONOTONIC is not
+available, CLOCK_REALTIME may be used, since the protocol is able to
+survive the clock being occasionally stepped.</t>
 
 </section>
 
@@ -266,21 +296,22 @@ form of hysteresis.</t>
 <t>In this section, we describe an algorithm that integrates both
 smoothing and hysteresis and has been shown to behave well both in
 simulation and experimentally over the Internet <xref target="DELAY-BASED"/>.
-This algorithm is considered experimental, since we do not
-currently have a theoretical understanding of its behaviour, and in
-particular we do not know by how much it could be simplified without
-impairing its functionality.</t>
+While implementations MAY use this algorithm, it is considered experimental,
+since we do not currently have a theoretical understanding of its
+behaviour, and in particular we do not know by how much it could be
+simplified without impairing its functionality.</t>
 
 <section title="Smoothing">
 
 <t>The RTT samples provided by Mills algorithm are fairly accurate, but
-rather noisy: individual samples may be outliers and indicate a value much
-larger than the correct one.  Thus, some smoothing needs to be applied
-first, in order to get rid of these outliers.</t>
+somewhat noisy: individual samples may be outliers and indicate a value
+much larger than the correct one.  Thus, some smoothing needs to be
+applied first, in order to get rid of these outliers.</t>
 
 <t>Our current implementation uses a simple exponential average, as
 described in <xref target="DELAY-BASED"/>.  Other algorithms have also
-been considered, such as a moving average or a moving minimum.</t>
+been considered, such as a moving average or a moving minimum, but we have
+not evaluated their behaviour.</t>
 
 </section>
 
@@ -290,9 +321,9 @@ been considered, such as a moving average or a moving minimum.</t>
 to a link cost, suitable for input to the metric computation procedure
 (Section 3.5.2 of <xref target="RFC8966"/>).  Obviously, the mapping
 should be monotonic (larger RTTs imply larger costs).  In addition, in
-order to enhance stability (<xref target="route-selection"/>), the
-mapping should be bounded: above a certain RTT, all links are equally
-bad, and hence their costs no longer oscillate.</t>
+order to enhance stability, the mapping should be bounded: above a certain
+RTT, all links are equally bad, and therefore congested links do not
+contribute to routing instability.</t>
 
 <t>We currently use the following function for mapping RTTs to link costs,
 parameterised by three parameters rtt-min, rtt-max and max-rtt-penalty:</t>
@@ -328,6 +359,14 @@ a single hop, C.  Between rtt-min and rtt-max, the cost increases linearly;
 above rtt-max, the constant value max-rtt-penalty is added to the nominal
 cost.</t>
 
+<t>The value rtt-min should be slightly larger than the RTT of a local,
+uncongested link.  The value rtt-max should be the RTT at which a link
+should be considered useless due to congestion; making rtt-max smaller
+improves stability, but prevents the protocol from discriminating between
+high-latency links.  As to max-rtt-penalty, it controls how much the
+protocol will penalise long-distance links.  We suggest the default values
+rtt-min=10ms, rtt-max=120ms, max-rtt-penalty=150.</t>
+
 </section>
 
 <section title="Hysteresis">
@@ -356,8 +395,7 @@ from blackholes or routing loops.</t>
 <t>If a sub-TLV defined in this extension is longer than expected, the
 additional data is silently ignored.  This provision is made in order to
 allow a future version of this protocol to extend the packet format with
-additional data, for example higher-precision timestamps or absolute
-timestamps.</t>
+additional data, for example high-precision or absolute timestamps.</t>
 
 </section>
 
@@ -368,9 +406,10 @@ timestamps.</t>
 carries a single timestamp, or within an IHU sub-TLV, in which case it
 carries two timestamps.</t>
 
-<t>Timestamps are encoded as 32-bit unsigned integers, expressed in
-units of one microsecond, counting from an arbitrary origin.  Timestamps
-wrap around every 4295 seconds, or slightly more than one hour.</t>
+<t>Timestamps are encoded as 32-bit unsigned integers (modulo 2^32),
+expressed in units of one microsecond, counting from an arbitrary origin.
+Timestamps wrap around every 4295 seconds, or slightly more than one
+hour (see also <xref target="wraparound"/>).</t>
 
 <section title="Timestamp sub-TLV in Hello TLVs">
 
@@ -389,8 +428,8 @@ has the following format:</t>
 <t>Fields:</t>
 <dl newline="false" spacing="normal" indent="10">
 <dt>Type</dt><dd>Set to 3 to indicate a Timestamp sub-TLV.</dd>
-<dt>Length</dt><dd>The length of the body, exclusive of the Type and
-Length fields.</dd>
+<dt>Length</dt><dd>The length of the body in octets, exclusive of the Type
+and Length fields.</dd>
 <dt>Transmit timestamp</dt><dd>The time at which the packet containing
 this sub-TLV was sent, according to the sender's clock.</dd>
 </dl>
@@ -405,8 +444,8 @@ remainder of the enclosing TLV processed as usual).</t>
 
 <section title="Timestamp sub-TLV in IHU TLVs">
 
-<t>When contained in an IHU TLV destined for node A, the
-Timestamp sub-TLV has the following format:</t>
+<t>When contained in an IHU TLV, the Timestamp sub-TLV has the following
+format:</t>
 <artwork><![CDATA[
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -422,14 +461,14 @@ Timestamp sub-TLV has the following format:</t>
 <t>Fields:</t>
 <dl newline="false" spacing="normal" indent="10">
 <dt>Type</dt><dd>Set to 3 to indicate a Timestamp sub-TLV.</dd>
-<dt>Length</dt><dd>The length of the body, exclusive of the Type and
-Length fields.</dd>
+<dt>Length</dt><dd>The length of the body in octets, exclusive of the Type
+and Length fields.</dd>
 <dt>Origin timestamp</dt><dd>A copy of the transmit timestamp of the last
 Timestamp sub-TLV contained in a Hello TLV received from the node to which
-the enclosing IHU applies.</dd>
+the enclosing IHU TLV applies.</dd>
 <dt>Receive timestamp</dt><dd>The time, according to the sender's clock,
-at which the last timestamped sub-TLV was received from the node to which
-the enclosing IHU applies.</dd>
+at which the last timestamped Hello TLV was received from the node to which
+the enclosing IHU TLV applies.</dd>
 </dl>
 
 <t>If the Length field is larger than the expected 8 octets, the sub-TLV
@@ -472,7 +511,7 @@ make a node more susceptible to timing attacks.</t>
 
 <t>The authors are indebted to Jean-Paul Smetz, who prompted the
 investigation that originally lead to this protocol.  We are also grateful
-to David Schinazi, Toke Høyland-Jørgensen, Maria Matejka, David Schinazi,
+to Donald Eastlake, Toke Høyland-Jørgensen, Maria Matejka, David Schinazi,
 Steffen Vogel, and Ondřej Zajiček.</t>
 
 </section>

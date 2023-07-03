@@ -42,7 +42,7 @@
 
 <abstract>
 <t>This document defines an extension to the Babel routing protocol that
-uses symmetric delay in metric computation and therefore makes it possible
+measures the round-trip time (RTT) between routers and makes it possible
 to prefer lower latency links over higher latency ones.</t>
 </abstract>
 
@@ -96,7 +96,7 @@ is reasonably stable (<xref target="route-selection"/>).</t>
 <t>We believe that this protocol may be useful in other situations than
 the one described above, such as when running Babel in a congested
 wireless mesh network or over a complex link layer that performs its own
-routing; the high granularity of the timestamps used (1µs) should make it
+routing; the fine granularity of the timestamps used (1µs) should make it
 possible to experiment with RTT-based metrics on this kind of link
 layers.</t>
 
@@ -194,19 +194,19 @@ was received.  A then computes the value d = (t2 - t1) - (t2' - t1')
 (where all computations are done modulo 2^32), which is a measurement of
 the RTT between A and B.</t>
 
-<t>This algorithm has a number of desirable properties.  First, the is is
-symmetric: A and B use the same procedures for timestamping packets and
-computing RTT samples, and both nodes produce one RTT sample for each
-received (Hello, IHU) pair.  Second, since there is no requirement that
-t1' and t2' be equal, the protocol is asynchronous: the only change
-to Babel's message scheduling is the requirement that a packet containing
-an IHU also contain a Hello.  Third, since it only ever computes
-differences of timestamps according to a single clock, it does not require
-synchronised clocks.  Fourth, it requires very little additional state:
-a node only needs to store the two timestamps associated with the last
-hello received from each neighbour.  Finally, since it only requires
-piggybacking one or two timestamps on each Hello and IHU packet, it makes
-efficient use of network resources.</t>
+<t>This algorithm has a number of desirable properties.  First, the
+algorithm is symmetric: A and B use the same procedures for timestamping
+packets and computing RTT samples, and both nodes produce one RTT sample
+for each received (Hello, IHU) pair.  Second, since there is no
+requirement that t1' and t2' be equal, the protocol is asynchronous: the
+only change to Babel's message scheduling is the requirement that a packet
+containing an IHU also contain a Hello.  Third, since it only ever
+computes differences of timestamps according to a single clock, it does
+not require synchronised clocks.  Fourth, it requires very little
+additional state: a node only needs to store the two timestamps associated
+with the last hello received from each neighbour.  Finally, since it only
+requires piggybacking one or two timestamps on each Hello and IHU packet,
+it makes efficient use of network resources.</t>
 
 <t>In principle, this algorithm is inaccurate in the presence of clock
 drift (i.e. when A's and B's clocks are running at different frequencies).
@@ -408,8 +408,8 @@ carries two timestamps.</t>
 
 <t>Timestamps are encoded as 32-bit unsigned integers (modulo 2^32),
 expressed in units of one microsecond, counting from an arbitrary origin.
-Timestamps wrap around every 4295 seconds, or slightly more than one
-hour (see also <xref target="wraparound"/>).</t>
+Timestamps wrap around every 4295 seconds, or rougly 71 minutes (see also
+<xref target="wraparound"/>).</t>
 
 <section title="Timestamp sub-TLV in Hello TLVs">
 

@@ -60,7 +60,7 @@ many networks, it fails to select reasonable routes in some topologies
 involving tunnels or VPNs.</t>
 
 <t>Consider for example the following topology, with three routers A,
-B and D located in Paris and a fourth router located in Tokyo, connected
+B and D located in Paris and a fourth router C located in Tokyo, connected
 through tunnels in a diamond topology.</t>
 <artwork><![CDATA[
                    +------------+
@@ -147,18 +147,19 @@ sends a set of IHU messages, at most one per neighbour (Section 3.4.2 of
 
 <t>In order to enable the computation of RTTs, a node A MUST include in
 every Hello that it sends a timestamp t1 (according to A's local clock).
-When a node B receives A's Hello equipped with a timestamp, it computes
-the time t1' at which the Hello was received (according to B's local
-clock).  It then MUST record the value t1 in the Origin Timestamp field
-of the Neighbour Table entry corresponding to A, and the value t1' in the
-Receive Timestamp field of the Neighbour Table entry.</t>
+When a node B receives A's timestamped Hello, it computes the time t1' at
+which the Hello was received (according to B's local clock).  It then MUST
+record the value t1 in the Origin Timestamp field of the Neighbour Table
+entry corresponding to A, and the value t1' in the Receive Timestamp field
+of the Neighbour Table entry.</t>
 
-<t>When B sends an IHU to A, it checks whether both timestamps are
-defined.  If that is the case, then it MUST ensure that its IHU TLV is
-sent in a packet that also contains a timestamped Hello TLV (either
-a normally scheduled Hello, or an unscheduled Hello, see Section 3.4.1 of
-<xref target="RFC8966"/>).  It MUST include in the IHU both the Origin
-Timestamp and the Receive Timestamp stored in the neighbor table.</t>
+<t>When B sends an IHU to A, it checks whether both timestamps are defined
+in the Neighbour Table.  If that is the case, then it MUST ensure that its
+IHU TLV is sent in a packet that also contains a timestamped Hello TLV
+(either a normally scheduled Hello, or an unscheduled Hello, see
+Section 3.4.1 of <xref target="RFC8966"/>).  It MUST include in the IHU
+both the Origin Timestamp and the Receive Timestamp stored in the Neighbour
+Table.</t>
 
 <t>This is illustrated in the following sequence diagram:</t>
 <artwork><![CDATA[
@@ -192,7 +193,8 @@ a timestamped Hello and an IHU containing two timestamps.  If that is the
 case, it computes the time t2 (according to its local clock) at which it
 was received.  A then computes the value d = (t2 - t1) - (t2' - t1')
 (where all computations are done modulo 2^32), which is a measurement of
-the RTT between A and B.</t>
+the RTT between A and B.  (A then stores the values t2' and t2 in its
+Neighbour Table, as B did before.)</t>
 
 <t>This algorithm has a number of desirable properties.  First, the
 algorithm is symmetric: A and B use the same procedures for timestamping
@@ -205,11 +207,11 @@ computes differences of timestamps according to a single clock, it does
 not require synchronised clocks.  Fourth, it requires very little
 additional state: a node only needs to store the two timestamps associated
 with the last hello received from each neighbour.  Finally, since it only
-requires piggybacking one or two timestamps on each Hello and IHU packet,
+requires piggybacking one or two timestamps on each Hello and IHU TLV,
 it makes efficient use of network resources.</t>
 
 <t>In principle, this algorithm is inaccurate in the presence of clock
-drift (i.e. when A's and B's clocks are running at different frequencies).
+drift (i.e., when A's and B's clocks are running at different frequencies).
 However, t2' - t1' is usually on the order of seconds, and
 significant clock drift is unlikely to happen at that time scale.</t>
 
@@ -250,7 +252,7 @@ have found the following implementation strategy to be useful.</t>
 <t>When a Hello TLV is buffered for transmission, we insert a PadN sub-TLV
 (Section 4.7.2 of <xref target="RFC8966"/>) with a length of 4 octets
 within the TLV.  When the packet is ready to be sent, we check whether it
-contains a 4-octet PADN sub-TLV; we then overwrite the PADN sub-TLV with
+contains a 4-octet PadN sub-TLV; we then overwrite the PadN sub-TLV with
 a Timestamp sub-TLV with the current time, and send out the packet.</t>
 
 <t>Conversely, when a packet is received, we immediately compute the
@@ -276,7 +278,7 @@ input to the route selection procedure, for at least three reasons.</t>
 
 <t>First of all, in the presence of bursty traffic, routers experience
 transient congestion, which causes occasional spikes in the measured RTT.
-Thus, the RTT signal is often noisy, and requires smoothing before it can
+Thus, the RTT signal may be noisy, and requires smoothing before it can
 be used for route selection.</t>
 
 <t>Second, using the RTT signal for route selection gives rise to
@@ -288,30 +290,30 @@ oscillations between parallel routes, which might lead to packet
 reordering and negatively affect upper-layer protocols (such as TCP).</t>
 
 <t>Third, even in the absence of congestion, the RTT tends to exhibit some
-variation.  If two parallel routes have their RTT oscillate around
+variation.  If the RTTs of two parallel routes oscillate around
 a common value, using the RTT as input to route selection will cause
 frequent routing oscillations, which, again, indicates the need for some
 form of hysteresis.</t>
 
-<t>In this section, we describe an algorithm that integrates both
-smoothing and hysteresis and has been shown to behave well both in
-simulation and experimentally over the Internet <xref target="DELAY-BASED"/>.
-While implementations MAY use this algorithm, it is considered experimental,
+<t>In this section, we describe an algorithm that integrates smoothing and
+hysteresis and has been shown to behave well both in simulation and
+experimentally over the Internet <xref target="DELAY-BASED"/>.  While
+implementations MAY use this algorithm, it is considered experimental,
 since we do not currently have a theoretical understanding of its
 behaviour, and in particular we do not know by how much it could be
 simplified without impairing its functionality.</t>
 
 <section title="Smoothing">
 
-<t>The RTT samples provided by Mills algorithm are fairly accurate, but
+<t>The RTT samples provided by Mills' algorithm are fairly accurate, but
 somewhat noisy: individual samples may be outliers and indicate a value
 much larger than the correct one.  Thus, some smoothing needs to be
 applied first, in order to get rid of these outliers.</t>
 
-<t>Our current implementation uses a simple exponential average, as
-described in <xref target="DELAY-BASED"/>.  Other algorithms have also
-been considered, such as a moving average or a moving minimum, but we have
-not evaluated their behaviour.</t>
+<t>Our current implementation uses an exponential average, as described in
+<xref target="DELAY-BASED"/>.  Other algorithms have also been considered,
+such as a moving average or a moving minimum, but we have not evaluated
+their behaviour.</t>
 
 </section>
 
@@ -354,18 +356,19 @@ parameterised by three parameters rtt-min, rtt-max and max-rtt-penalty:</t>
     0         rtt-min    rtt-max                          RTT
 ]]></artwork>
 
-<t>For RTTs below rtt-min, the link cost is just the nominal cost of
-a single hop, C.  Between rtt-min and rtt-max, the cost increases linearly;
+<t>For RTTs below rtt-min, the link cost is just the nominal cost C of
+a single hop.  Between rtt-min and rtt-max, the cost increases linearly;
 above rtt-max, the constant value max-rtt-penalty is added to the nominal
 cost.</t>
 
 <t>The value rtt-min should be slightly larger than the RTT of a local,
-uncongested link.  The value rtt-max should be the RTT at which a link
-should be considered useless due to congestion; making rtt-max smaller
-improves stability, but prevents the protocol from discriminating between
-high-latency links.  As to max-rtt-penalty, it controls how much the
-protocol will penalise long-distance links.  We suggest the default values
-rtt-min=10ms, rtt-max=120ms, max-rtt-penalty=150.</t>
+uncongested link.  The value rtt-max should be the RTT above which a link
+should be avoided if possible, either because it is a long-distance link
+or because it is congested; making rtt-max smaller improves stability, but
+prevents the protocol from discriminating between high-latency links.  As
+to max-rtt-penalty, it controls how much the protocol will penalise
+long-distance links.  We suggest the default values rtt-min = 10ms,
+rtt-max = 120ms, max-rtt-penalty = 150.</t>
 
 </section>
 
@@ -437,8 +440,8 @@ this sub-TLV was sent, according to the sender's clock.</dd>
 <t>If the Length field is larger than the expected 4 octets, the sub-TLV
 MUST be processed normally and any extra data contained in this sub-TLV
 MUST be silently ignored.  If the Length field is smaller than the
-expected 4 octets, then this sub-TLV MUST be silently ignored (and the
-remainder of the enclosing TLV processed as usual).</t>
+expected 4 octets, then this sub-TLV MUST be ignored (and the remainder of
+the enclosing TLV processed as usual).</t>
 
 </section>
 
@@ -474,8 +477,8 @@ the enclosing IHU TLV applies.</dd>
 <t>If the Length field is larger than the expected 8 octets, the sub-TLV
 MUST be processed normally and any extra data contained in this sub-TLV
 MUST be silently ignored.  If the Length field is smaller than the
-expected 8 octets, then this sub-TLV MUST be silently ignored (and the
-remainder of the enclosing TLV processed as usual).</t>
+expected 8 octets, then this sub-TLV MUST be silently (and the remainder
+of the enclosing TLV processed as usual).</t>
 
 </section>
 

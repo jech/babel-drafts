@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!DOCTYPE rfc>
 <rfc version='3' 
-     docName='draft-ietf-babel-rtt-extension-02'
+     docName='draft-ietf-babel-rtt-extension-03'
      ipr='trust200902'
      consensus='true'
      submissionType='IETF'
@@ -38,7 +38,7 @@
 </address>
 </author>
 
-<date day="26" month="June" year="2023"/>
+<date day="3" month="July" year="2023"/>
 
 <abstract>
 <t>This document defines an extension to the Babel routing protocol that

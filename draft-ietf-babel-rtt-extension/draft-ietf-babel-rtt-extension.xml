@@ -59,9 +59,7 @@ on all other types of links.  While this strategy works reasonably well in
 many networks, it fails to select reasonable routes in some topologies
 involving tunnels or VPNs.</t>
 
-<t>Consider for example the following topology, with three routers A,
-B and D located in Paris and a fourth router C located in Tokyo, connected
-through tunnels in a diamond topology.</t>
+<figure anchor="fig-diamond"><name>Four routers in a diamond topology</name>
 <artwork><![CDATA[
                    +------------+
                    | A (Paris)  +---------------+
@@ -79,10 +77,14 @@ through tunnels in a diamond topology.</t>
                    | D (Paris)  +---------------+
                    +------------+
 ]]></artwork>
+</figure>
 
-<t>When routing traffic from A to D, it is obviously preferable to use the
-local route through B, as this is likely to provide better service quality
-and lower monetary cost than the distant route through C.  However, the
+<t>Consider for example the topology described in <xref target="fig-diamond"/>,
+with three routers A, B and D located in Paris and a fourth router
+C located in Tokyo, connected through tunnels in a diamond topology.  When
+routing traffic from A to D, it is obviously preferable to use the local
+route through B, as this is likely to provide better service quality and
+lower monetary cost than the distant route through C.  However, the
 existing implementations of Babel consider both routes as having the same
 metric, and will therefore route the traffic through C in roughly half the
 cases.</t>
@@ -145,13 +147,42 @@ protocol and later used in NTP <xref target="NTP"/>.</t>
 sends a set of IHU messages, at most one per neighbour (Section 3.4.2 of
 <xref target="RFC8966"/>).</t>
 
+<figure anchor="fig-seq"><name>Mill's algorithm</name>
+<artwork><![CDATA[
+   A          B
+     |      |
+  t1 +      |
+     |\     |
+     | \    |
+     |  \   |  Hello(t1)
+     |   \  |
+     |    \ |
+     |     \|
+     |      + t1'
+     |      |
+     |      |               RTT = (t2 - t1) - (t2' - t1')
+     |      |
+     |      + t2'
+     |     /|
+     |    / |
+     |   /  |
+     |  /   |  Hello(t2')
+     | /    |  IHU(t1, t1')
+     |/     |
+  t2 +      |
+     |      |
+     v      v
+]]></artwork>
+</figure>
+
 <t>In order to enable the computation of RTTs, a node A MUST include in
-every Hello that it sends a timestamp t1 (according to A's local clock).
-When a node B receives A's timestamped Hello, it computes the time t1' at
-which the Hello was received (according to B's local clock).  It then MUST
-record the value t1 in the Origin Timestamp field of the Neighbour Table
-entry corresponding to A, and the value t1' in the Receive Timestamp field
-of the Neighbour Table entry.</t>
+every Hello that it sends a timestamp t1 (according to A's local clock),
+as illustrated in <xref target="fig-seq"/>.  When a node B receives A's
+timestamped Hello, it computes the time t1' at which the Hello was
+received (according to B's local clock).  It then MUST record the value t1
+in the Origin Timestamp field of the Neighbour Table entry corresponding
+to A, and the value t1' in the Receive Timestamp field of the Neighbour
+Table entry.</t>
 
 <t>When B sends an IHU to A, it checks whether both timestamps are defined
 in the Neighbour Table.  If that is the case, then it MUST ensure that its
@@ -161,37 +192,10 @@ Section 3.4.1 of <xref target="RFC8966"/>).  It MUST include in the IHU
 both the Origin Timestamp and the Receive Timestamp stored in the Neighbour
 Table.</t>
 
-<t>This is illustrated in the following sequence diagram:</t>
-<artwork><![CDATA[
- A          B
-   |      |
-t1 +      |
-   |\     |
-   | \    |
-   |  \   |  Hello(t1)
-   |   \  |
-   |    \ |
-   |     \|
-   |      + t1'
-   |      |
-   |      |
-   |      |
-   |      + t2'
-   |     /|
-   |    / |
-   |   /  |
-   |  /   |  Hello(t2')
-   | /    |  IHU(t1, t1')
-   |/     |
-t2 +      |
-   |      |
-   v      v
-]]></artwork>
-
 <t>Upon receiving B's packet, A MUST verify that it contains both
 a timestamped Hello and an IHU containing two timestamps.  If that is the
 case, it computes the time t2 (according to its local clock) at which it
-was received.  A then computes the value d = (t2 - t1) - (t2' - t1')
+was received.  A then computes the value RTT = (t2 - t1) - (t2' - t1')
 (where all computations are done modulo 2^32), which is a measurement of
 the RTT between A and B.  (A then stores the values t2' and t2 in its
 Neighbour Table, as B did before.)</t>
@@ -327,9 +331,7 @@ order to enhance stability, the mapping should be bounded: above a certain
 RTT, all links are equally bad, and therefore congested links do not
 contribute to routing instability.</t>
 
-<t>We currently use the following function for mapping RTTs to link costs,
-parameterised by three parameters rtt-min, rtt-max and max-rtt-penalty:</t>
-
+<figure anchor="fig-mapping"><name>Mapping from RTT to link cost</name>
 <artwork><![CDATA[
   cost
     ^
@@ -355,11 +357,14 @@ parameterised by three parameters rtt-min, rtt-max and max-rtt-penalty:</t>
   0 +---------------------------------------------------->
     0         rtt-min    rtt-max                          RTT
 ]]></artwork>
+</figure>
 
-<t>For RTTs below rtt-min, the link cost is just the nominal cost C of
-a single hop.  Between rtt-min and rtt-max, the cost increases linearly;
-above rtt-max, the constant value max-rtt-penalty is added to the nominal
-cost.</t>
+<t>We currently use the function described in <xref target="fig-mapping"/>
+for mapping RTTs to link costs, parameterised by three parameters rtt-min,
+rtt-max and max-rtt-penalty.  For RTTs below rtt-min, the link cost is
+just the nominal cost C of a single hop.  Between rtt-min and rtt-max, the
+cost increases linearly; above rtt-max, the constant value max-rtt-penalty
+is added to the nominal cost.</t>
 
 <t>The value rtt-min should be slightly larger than the RTT of a local,
 uncongested link.  The value rtt-max should be the RTT above which a link

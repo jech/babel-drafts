@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!DOCTYPE rfc>
 <rfc version='3' 
-     docName='draft-ietf-babel-rtt-extension-03'
+     docName='draft-ietf-babel-rtt-extension-04'
      ipr='trust200902'
      consensus='true'
      submissionType='IETF'
@@ -25,7 +25,7 @@
 </address>
 </author>
 <author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek">
-<organization>IRIF, University of Paris-Diderot</organization>
+<organization>IRIF, Université Paris Cité</organization>
 <address>
 <postal>
 <street>Case 7014</street>
@@ -38,7 +38,7 @@
 </address>
 </author>
 
-<date day="3" month="July" year="2023"/>
+<date day="26" month="July" year="2023"/>
 
 <abstract>
 <t>This document defines an extension to the Babel routing protocol that
@@ -192,13 +192,13 @@ Section 3.4.1 of <xref target="RFC8966"/>).  It MUST include in the IHU
 both the Origin Timestamp and the Receive Timestamp stored in the Neighbour
 Table.</t>
 
-<t>Upon receiving B's packet, A MUST verify that it contains both
-a timestamped Hello and an IHU containing two timestamps.  If that is the
-case, it computes the time t2 (according to its local clock) at which it
-was received.  A then computes the value RTT = (t2 - t1) - (t2' - t1')
-(where all computations are done modulo 2^32), which is a measurement of
-the RTT between A and B.  (A then stores the values t2' and t2 in its
-Neighbour Table, as B did before.)</t>
+<t>Upon receiving B's packet, A computes the time t2 (according to its
+local clock) at which it was received.  A MUST then verify that it
+contains both a Hello TLV with timestamp t2' and an IHU TLV with two
+timestamps t1 and t1'.  If that is the case, A computes the value
+RTT = (t2 - t1) - (t2' - t1') (where all computations are done modulo
+2^32), which is a measurement of the RTT between A and B.  (A then stores
+the values t2' and t2 in its Neighbour Table, as B did before.)</t>
 
 <t>This algorithm has a number of desirable properties.  First, the
 algorithm is symmetric: A and B use the same procedures for timestamping
@@ -482,7 +482,7 @@ the enclosing IHU TLV applies.</dd>
 <t>If the Length field is larger than the expected 8 octets, the sub-TLV
 MUST be processed normally and any extra data contained in this sub-TLV
 MUST be silently ignored.  If the Length field is smaller than the
-expected 8 octets, then this sub-TLV MUST be silently (and the remainder
+expected 8 octets, then this sub-TLV MUST be ignored (and the remainder
 of the enclosing TLV processed as usual).</t>
 
 </section>
@@ -519,7 +519,7 @@ make a node more susceptible to timing attacks.</t>
 
 <t>The authors are indebted to Jean-Paul Smetz, who prompted the
 investigation that originally lead to this protocol.  We are also grateful
-to Donald Eastlake, Toke Høyland-Jørgensen, Maria Matejka, David Schinazi,
+to Donald Eastlake, Toke Høiland-Jørgensen, Maria Matejka, David Schinazi,
 Steffen Vogel, and Ondřej Zajiček.</t>
 
 </section>

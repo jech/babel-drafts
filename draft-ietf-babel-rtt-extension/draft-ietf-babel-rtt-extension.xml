@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!DOCTYPE rfc>
 <rfc version='3' 
-     docName='draft-ietf-babel-rtt-extension-04'
+     docName='draft-ietf-babel-rtt-extension-05'
      ipr='trust200902'
      consensus='true'
      submissionType='IETF'
@@ -38,7 +38,7 @@
 </address>
 </author>
 
-<date day="26" month="July" year="2023"/>
+<date day="15" month="January" year="2024"/>
 
 <abstract>
 <t>This document defines an extension to the Babel routing protocol that
@@ -508,10 +508,15 @@ registry:</t>
 <section title="Security Considerations">
 
 <t>This extension adds additional timestamping data to two of the TLVs
-sent by a Babel router.  Since the timestamps use an arbitrary origin,
-they do not leak private data, such as a node's timezone.  However, by
-broadcasting the value of a reasonably accurate local clock, they might
-make a node more susceptible to timing attacks.</t>
+sent by a Babel router.  By broadcasting the value of a reasonably
+accurate local clock, they might make a node more susceptible to timing
+attacks.</t>
+
+<t>Broadcasting an accurate time raises privacy issues.  The timestamps
+used by this protocol have an arbitrary origin, and therefore do not leak
+a node's boot time or timezone.  However, having access to accurate
+timestamps could allow an attacker to determine the physical location of
+a node, which might be undesirable in some deployments.</t>
 
 </section>
 

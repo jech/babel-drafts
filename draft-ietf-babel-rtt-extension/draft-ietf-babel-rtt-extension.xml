@@ -6,7 +6,6 @@
      consensus='true'
      submissionType='IETF'
      category='std'
-     updates='8967'
      xml:lang='en'
      xmlns:xi="http://www.w3.org/2001/XInclude">
 <front>
@@ -38,7 +37,7 @@
 </address>
 </author>
 
-<date day="15" month="January" year="2024"/>
+<date day="1" month="March" year="2024"/>
 
 <abstract>
 <t>This document defines an extension to the Babel routing protocol that

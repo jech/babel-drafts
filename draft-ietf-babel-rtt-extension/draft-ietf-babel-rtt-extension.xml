@@ -88,18 +88,51 @@ existing implementations of Babel consider both routes as having the same
 metric, and will therefore route the traffic through C in roughly half the
 cases.</t>
 
-<t>In this document, we specify an extension to the Babel routing protocol
-that enables precise measurement of the round-trip time (RTT) of a link,
-and allows its usage in metric computation.  Since this causes a negative
-feedback loop, special care is needed to ensure that the resulting network
-is reasonably stable (<xref target="route-selection"/>).</t>
+<t>In the first part of this document (<xref target="rtt-sampling"/>),
+we specify an extension to the Babel routing protocol that produces
+a sequence of accurate measurements of the round-trip time (RTT) between
+two Babel neighbours.  These measurements are not directly usable as an
+input to Babel's route selection procedure, since they tend to be noisy
+and to cause a negative feedback loop, which might give rise to frequent
+oscillations.  In a second part (<xref target="route-selection"/>), we
+define an algorithm that maps the sequence of RTT samples to a link cost
+that can be used for route selection.</t>
 
-<t>We believe that this protocol may be useful in other situations than
-the one described above, such as when running Babel in a congested
-wireless mesh network or over a complex link layer that performs its own
-routing; the fine granularity of the timestamps used (1µs) should make it
-possible to experiment with RTT-based metrics on this kind of link
-layers.</t>
+<section title="applicability">
+
+<t>The extension defined in <xref target="rtt-sampling"/> provides
+a sequence of accurate but potentially noisy RTT samples.  Since the
+round-trip time is a symmetric measure of delay, this protocol is only
+applicable in environments where the symmetric delay is a good predictor
+of whether a link should be taken by routing traffic; this is the case in
+most networks known to the authors, but might not necessarily be the case
+in networks built over exotic link technologies.</t>
+
+<t>The extension makes minimal requirements on the nodes.  In particular,
+it does not assume synchronised clocks, but only requires that clock drift
+be negligible during the time interval between two Hello TLVs.  Since that
+is on the order of a few seconds, this requirement is met even with cheap
+crystal oscillators such as the ones used in consumer electronics.</t>
+
+<t>The algorithm defined in <xref target="route-selection"/> makes
+a number of assumptions about the network.  The assumption with most
+severe consequences is that all links below a certain RTT (rtt-min in
+<xref target="cost-computation"/>) can be grouped in a single category of
+"good" links.  While this is the case in wide-area overlay networks, it
+makes the algorithm inapplicable in networks where distinguishing between
+low-latency links is important.</t>
+
+<t>There are other assumptions, but they are less likely to limit the
+algorithm's applicability.  The algorithm assumes that all links above
+a certain RTT (rtt-max in <xref target="cost-computation"/>) can be
+assumed to be equally bad, and will only be used as a last resort.  In
+addition, in order to avoid oscillations, the algorithm is designed to
+react slowly to RTT variations, thus causing suboptimal routing for
+seconds or even minutes after an RTT change; while this is a desirable
+property in fixed networks, as it avoid excessive route oscillations, it
+might be an issue with networks with high rates of node mobility.</t>
+
+</section>
 
 </section>
 
@@ -113,7 +146,7 @@ they appear in all capitals, as shown here.</t>
 
 </section>
 
-<section title="RTT sampling">
+<section title="RTT sampling" anchor="rtt-sampling">
 
 <section title="Data structures">
 

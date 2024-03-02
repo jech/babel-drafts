@@ -262,19 +262,19 @@ more, a node may occasionally reboot and restart its clock at an arbitrary
 origin.  For these reasons, very old timestamps or nonsensical timestamps
 MUST NOT be used to yield RTT samples.</t>
 
-<t>We suggest the following algorithm to achieve that.  When a node
-receives a packet containing a Hello and an IHU, it SHOULD compare the
-current local time t2 with the Origin Timestamp contained in the IHU; if
-the Origin Timestamp appears to be in the future, or if it is in the past
-by more than a time T (the value T=3 minutes is RECOMMENDED), then the
-timestamps are still recorded in the neighbour table, but SHOULD NOT be
-used for computation of an RTT sample.</t>
+<t>The following algorithm can be used to achieve that.  When a node
+receives a packet containing a Hello and an IHU, it compares the current
+local time t2 with the Origin Timestamp contained in the IHU; if the
+Origin Timestamp appears to be in the future, or if it is in the past by
+more than a time T (the value T=3 minutes is recommended), then the
+timestamps are still recorded in the neighbour table, but are not used for
+computation of an RTT sample.</t>
 
 <t>Similary, the node compares the Hello's timestamp with the Receive
 Timestamp recorded in the Neighbour Table; if the Hello's timestamp
 appears to be older than the recorded timestamp, or if it appears to be
 more recent by an interval larger than the value T, then the timestamps
-SHOULD NOT be used for computation of an RTT sample.</t>
+are not used for computation of an RTT sample.</t>
 
 </section>
 

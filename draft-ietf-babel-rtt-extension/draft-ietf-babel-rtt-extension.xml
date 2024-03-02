@@ -162,7 +162,8 @@ entry in the Neighbour Table with the following data:</t>
 <ul spacing="normal">
 <li>the Origin Timestamp, a 32-bit timestamp (modulo 2^32) according to
 the neighbour's clock;</li>
-<li>the Receive Timestamp, a 32-bit timestamp according to the local clock.</li>
+<li>the Receive Timestamp, a 32-bit timestamp (modulo 2^32) according to
+the local clock.</li>
 </ul>
 <t>Both values are initially undefined.</t>
 
@@ -175,9 +176,9 @@ the neighbour's clock;</li>
 protocol and later used in NTP <xref target="NTP"/>.</t>
 
 <t>A Babel speaker periodically sends Hello messages to its neighbours
-(Section 3.4.1 of <xref target="RFC8966"/>).  Additionally, it occasionally
-sends a set of IHU messages, at most one per neighbour (Section 3.4.2 of
-<xref target="RFC8966"/>).</t>
+(Section 3.4.1 of <xref target="RFC8966"/>).  Additionally, it
+occasionally sends a set of IHU ("I Heard You") messages, at most one per
+neighbour (Section 3.4.2 of <xref target="RFC8966"/>).</t>
 
 <figure anchor="fig-seq"><name>Mill's algorithm</name>
 <artwork><![CDATA[
@@ -475,10 +476,11 @@ this sub-TLV was sent, according to the sender's clock.</dd>
 </dl>
 
 <t>If the Length field is larger than the expected 4 octets, the sub-TLV
-MUST be processed normally and any extra data contained in this sub-TLV
-MUST be silently ignored.  If the Length field is smaller than the
-expected 4 octets, then this sub-TLV MUST be ignored (and the remainder of
-the enclosing TLV processed as usual).</t>
+MUST be processed normally (the first 4 octets are interpreted as
+described above), and any extra data contained in this sub-TLV MUST be
+silently ignored.  If the Length field is smaller than the expected
+4 octets, then this sub-TLV MUST be ignored (and the remainder of the
+enclosing TLV processed as usual).</t>
 
 </section>
 
@@ -512,10 +514,11 @@ the enclosing IHU TLV applies.</dd>
 </dl>
 
 <t>If the Length field is larger than the expected 8 octets, the sub-TLV
-MUST be processed normally and any extra data contained in this sub-TLV
-MUST be silently ignored.  If the Length field is smaller than the
-expected 8 octets, then this sub-TLV MUST be ignored (and the remainder
-of the enclosing TLV processed as usual).</t>
+MUST be processed normally (the first 8 octets are interpreted as
+described above), and any extra data contained in this sub-TLV MUST be
+silently ignored.  If the Length field is smaller than the expected
+8 octets, then this sub-TLV MUST be ignored (and the remainder of the
+enclosing TLV processed as usual).</t>
 
 </section>
 

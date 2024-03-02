@@ -548,7 +548,9 @@ attacks.</t>
 used by this protocol have an arbitrary origin, and therefore do not leak
 a node's boot time or timezone.  However, having access to accurate
 timestamps could allow an attacker to determine the physical location of
-a node, which might be undesirable in some deployments.</t>
+a node.  Nodes might avoid disclosure of location information by not
+including timestamp sub-TLVs in the TLVs that they send, which will cause
+their neighbours to fall back to hop-count routing.</t>
 
 </section>
 

@@ -249,8 +249,15 @@ it makes efficient use of network resources.</t>
 
 <t>In principle, this algorithm is inaccurate in the presence of clock
 drift (i.e., when A's and B's clocks are running at different frequencies).
-However, t2' - t1' is usually on the order of seconds, and
+However, t2' - t1' is usually on the order of a few seconds, and
 significant clock drift is unlikely to happen at that time scale.</t>
+
+<t>In order for RTT values to be consistent between implementations,
+timestamps need to be computed at roughly the same point in the network
+stack.  Transmit timestamps SHOULD be computed just before the packet is
+passed to the network stack (i.e., before it is subjected to any queueing
+delays), and receive timestamps SHOULD be computed just after the packet
+is received from the network stack.</t>
 
 </section>
 
@@ -281,16 +288,18 @@ are not used for computation of an RTT sample.</t>
 <section title="Implementation notes">
 
 <t>The accuracy of the computed RTT samples depends on Transmit Timestamps
-being computed as late as possible before transmission of a packet
-containing a Hello TLV, and Receive Timestamps being computed as early as
-possible after reception of a packet containing a (Hello, IHU) pair.  We
-have found the following implementation strategy to be useful.</t>
+being computed as late as possible before a packet containing a Hello TLV
+is passed to the network stack, and Receive Timestamps being computed as
+early as possible after reception of a packet containing a (Hello, IHU)
+pair.  We have found the following implementation strategy to be
+useful.</t>
 
 <t>When a Hello TLV is buffered for transmission, we insert a PadN sub-TLV
 (Section 4.7.2 of <xref target="RFC8966"/>) with a length of 4 octets
 within the TLV.  When the packet is ready to be sent, we check whether it
-contains a 4-octet PadN sub-TLV; we then overwrite the PadN sub-TLV with
-a Timestamp sub-TLV with the current time, and send out the packet.</t>
+contains a 4-octet PadN sub-TLV; if that's the case, we overwrite the PadN
+sub-TLV with a Timestamp sub-TLV with the current time, and send out the
+packet.</t>
 
 <t>Conversely, when a packet is received, we immediately compute the
 current time and record it with the received packet.  We then process the
@@ -562,7 +571,7 @@ their neighbours to fall back to hop-count routing.</t>
 <t>The authors are indebted to Jean-Paul Smets, who prompted the
 investigation that originally lead to this protocol.  We are also grateful
 to Donald Eastlake, Toke Høiland-Jørgensen, Maria Matejka, David Schinazi,
-Steffen Vogel, and Ondřej Zajiček.</t>
+Pacal Thubert, Steffen Vogel, and Ondřej Zajiček.</t>
 
 </section>
 

@@ -273,7 +273,7 @@ MUST NOT be used to yield RTT samples.</t>
 receives a packet containing a Hello and an IHU, it compares the current
 local time t2 with the Origin Timestamp contained in the IHU; if the
 Origin Timestamp appears to be in the future, or if it is in the past by
-more than a time T (the value T=3 minutes is recommended), then the
+more than a time T (the value T = 3 minutes is recommended), then the
 timestamps are still recorded in the neighbour table, but are not used for
 computation of an RTT sample.</t>
 
@@ -282,6 +282,12 @@ Timestamp recorded in the Neighbour Table; if the Hello's timestamp
 appears to be older than the recorded timestamp, or if it appears to be
 more recent by an interval larger than the value T, then the timestamps
 are not used for computation of an RTT sample.</t>
+
+<t>Finally, in order to avoid using stale data, if a node does not
+successfully compute an RTT sample for a given neighbour for a time T2, it
+SHOULD discard any RTT-related state for that neighbour (such as the
+smoothed RTT, see <xref target="smoothing"/>).  The default value
+T2 = 3 minutes is RECOMMENDED.</t>
 
 </section>
 

@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!DOCTYPE rfc>
 <rfc version='3' 
-     docName='draft-ietf-babel-rtt-extension-05'
+     docName='draft-ietf-babel-rtt-extension-06'
      ipr='trust200902'
      consensus='true'
      submissionType='IETF'
@@ -338,7 +338,7 @@ a negative feedback loop: when a route has a low RTT, it is deemed to be
 more desirable, which causes it to be used for more data traffic, which
 may lead to congestion, which in turn increases the RTT.  Without some
 form of hysteresis, using RTT for route selection would lead to
-oscillations between parallel routes, which might lead to packet
+oscillations between parallel routes, which would lead to packet
 reordering and negatively affect upper-layer protocols (such as TCP).</t>
 
 <t>Third, even in the absence of congestion, the RTT tends to exhibit some
@@ -349,23 +349,40 @@ form of hysteresis.</t>
 
 <t>In this section, we describe an algorithm that integrates smoothing and
 hysteresis and has been shown to behave well both in simulation and
-experimentally over the Internet <xref target="DELAY-BASED"/>.  While
-implementations MAY use this algorithm, it is considered experimental,
-since we do not currently have a theoretical understanding of its
-behaviour, and in particular we do not know by how much it could be
-simplified without impairing its functionality.</t>
+experimentally over the Internet <xref target="DELAY-BASED"/>, and is
+RECOMMENDED when RTT information is being used for route selection.  The
+algorithm is structured as follows:</t>
+<ul>
+<li>the RTT values are first smoothed in order to avoid instabilities due to
+outliers (<xref target="smoothing"/>);</li>
+<li>the resulting smoothed samples are mapped to a cost using a bounded,
+non-linear mapping, which avoids
+instabilities at the lower and at the upper end of the RTT range
+(<xref target="cost-computation"/>);</li>
+<li>finally, a hysteresis filter is applied in order to limit the amount of
+oscillation in the middle of the RTT range (<xref target="hysteresis"/>).</li>
+</ul>
 
-<section title="Smoothing">
+<section title="Smoothing" anchor="smoothing">
 
 <t>The RTT samples provided by Mills' algorithm are fairly accurate, but
-somewhat noisy: individual samples may be outliers and indicate a value
-much larger than the correct one.  Thus, some smoothing needs to be
-applied first, in order to get rid of these outliers.</t>
+noisy: experiments indicate the occasional presence of individual samples
+that are much larger than the expected value.  Thus, some form of
+smoothing SHOULD be applied in order to avoid instabilities due to
+occasional outliers.</t>
 
-<t>Our current implementation uses an exponential average, as described in
-<xref target="DELAY-BASED"/>.  Other algorithms have also been considered,
-such as a moving average or a moving minimum, but we have not evaluated
-their behaviour.</t>
+<t>An implementation MAY use the exponential average algorithm, which is
+simple to implement and appears to yield good results in practice <xref
+target="DELAY-BASED"/>.  The algorithm is parameterised by a constant α,
+where 0 &lt; α &lt; 1, which controls the amount of smoothing being
+applied.  Fr each neighbour, it maintains a smoothed value RTT which is
+initially undefined.  When the first sample RTT0 is measured, the smoothed
+value is set to the value of RTT0.  At each new sample RTTn, the smoothed
+value is set to a weighted average of the previous smoothed value and the
+new sample:</t>
+<artwork>    RTT := α RTT + (1 - α) RTTn</artwork>
+<t>The smoothing constant α SHOULD be between 0.8 and 0.9; the value 0.836
+is the RECOMMENDED default.</t>
 
 </section>
 
@@ -374,10 +391,12 @@ their behaviour.</t>
 <t>The smoothed RTT value obtained in the previous step needs to be mapped
 to a link cost, suitable for input to the metric computation procedure
 (Section 3.5.2 of <xref target="RFC8966"/>).  Obviously, the mapping
-should be monotonic (larger RTTs imply larger costs).  In addition, in
-order to enhance stability, the mapping should be bounded: above a certain
-RTT, all links are equally bad, and therefore congested links do not
-contribute to routing instability.</t>
+should be monotonic (larger RTTs imply larger costs).  In addition, the
+mapping should be constant beyond a certain value (all very bad links are
+equally bad), so that congested links do not contribute to routing
+instability.  The mapping should also be constant around 0, so that small
+oscillations in the RTT of low-RTT links do not contribute to routing
+instability.</t>
 
 <figure anchor="fig-mapping"><name>Mapping from RTT to link cost</name>
 <artwork><![CDATA[
@@ -407,31 +426,31 @@ contribute to routing instability.</t>
 ]]></artwork>
 </figure>
 
-<t>We currently use the function described in <xref target="fig-mapping"/>
-for mapping RTTs to link costs, parameterised by three parameters rtt-min,
-rtt-max and max-rtt-penalty.  For RTTs below rtt-min, the link cost is
-just the nominal cost C of a single hop.  Between rtt-min and rtt-max, the
-cost increases linearly; above rtt-max, the constant value max-rtt-penalty
-is added to the nominal cost.</t>
+<t>Implementations SHOULD use the mapping described in figure <xref
+target="fig-mapping"/>, which is parameterised by three parameters
+rtt-min, rtt-max, and max-rtt-penalty.  For RTT values below rtt-min, the
+link cost is just the nominal cost C of a single hop.  Between rtt-min and
+rtt-max, the cost increases linearly; above rtt-max, the constant value
+max-rtt-penalty is added to the nominal cost.</t>
 
 <t>The value rtt-min should be slightly larger than the RTT of a local,
 uncongested link.  The value rtt-max should be the RTT above which a link
 should be avoided if possible, either because it is a long-distance link
-or because it is congested; making rtt-max smaller improves stability, but
-prevents the protocol from discriminating between high-latency links.  As
-to max-rtt-penalty, it controls how much the protocol will penalise
-long-distance links.  We suggest the default values rtt-min = 10ms,
-rtt-max = 120ms, max-rtt-penalty = 150.</t>
+or because it is congested; reducing the value of rtt-max improves
+stability, but prevents the protocol from discriminating between
+high-latency links.  As to max-rtt-penalty, it controls how much the
+protocol will penalise long-distance links.  The default values
+rtt-min = 10ms, rtt-max = 120ms, and max-rtt-penalty = 150 are
+RECOMMENDED.</t>
 
 </section>
 
-<section title="Hysteresis">
+<section title="Hysteresis" anchor="hysteresis">
 
 <t>Even after applying a bounded mapping from smoothed RTT to a cost
 value, the cost may fluctuate when a link's RTT is between rtt-min and
-rtt-max.  This is effectively mitigated by using a robust hysteresis
-algorithm, such as the one described in Appendix A.3 of
-<xref target="RFC8966"/>.</t>
+rtt-max.  Implementations SHOULD use a robust hysteresis algorithm, such
+as the one described in Appendix A.3 of <xref target="RFC8966"/>.</t>
 
 </section>
 

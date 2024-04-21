@@ -1,0 +1,671 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE rfc>
+<rfc version='3' 
+     docName='draft-ietf-babel-rtt-extension-07'
+     ipr='trust200902'
+     consensus='true'
+     submissionType='IETF'
+     category='std'
+     xml:lang='en'
+     xmlns:xi="http://www.w3.org/2001/XInclude">
+<front>
+<title abbrev="Babel RTT Extension">Delay-based Metric Extension for the Babel Routing Protocol</title>
+<author fullname="Baptiste Jonglez" initials="B." surname="Jonglez">
+<organization>ENS Lyon</organization>
+<address>
+<postal>
+<street></street>
+<city></city>
+<region></region>
+<code></code>
+<country>France</country>
+</postal>
+<email>baptiste.jonglez@ens-lyon.org</email>
+</address>
+</author>
+<author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek">
+<organization>IRIF, Université Paris Cité</organization>
+<address>
+<postal>
+<street>Case 7014</street>
+<city>75205 Paris Cedex 13</city>
+<region></region>
+<code></code>
+<country>France</country>
+</postal>
+<email>jch@irif.fr</email>
+</address>
+</author>
+
+<date day="21" month="April" year="2024"/>
+
+<abstract>
+<t>This document defines an extension to the Babel routing protocol that
+measures the round-trip time (RTT) between routers and makes it possible
+to prefer lower latency links over higher latency ones.</t>
+</abstract>
+
+</front>
+
+<middle>
+
+<section title="Introduction">
+
+<t>The Babel routing protocol <xref target="RFC8966"/> does not mandate
+a specific algorithm for computing metrics; existing implementations use
+a packet-loss based metric on wireless links and a simple hop-count metric
+on all other types of links.  While this strategy works reasonably well in
+many networks, it fails to select reasonable routes in some topologies
+involving tunnels or VPNs.</t>
+
+<figure anchor="fig-diamond"><name>Four routers in a diamond topology</name>
+<artwork><![CDATA[
+                   +------------+
+                   | A (Paris)  +---------------+
+                   +------------+                \
+                  /                               \
+                 /                                 \
+                /                                   \
+  +------------+                                     +------------+
+  | B  (Paris) |                                     | C  (Tokyo) |
+  +------------+                                     +------------+
+                \                                   /
+                 \                                 /
+                  \                               /
+                   +------------+                /
+                   | D (Paris)  +---------------+
+                   +------------+
+]]></artwork>
+</figure>
+
+<t>Consider for example the topology described in <xref target="fig-diamond"/>,
+with three routers A, B and D located in Paris and a fourth router
+C located in Tokyo, connected through tunnels in a diamond topology.  When
+routing traffic from A to D, it is obviously preferable to use the local
+route through B, as this is likely to provide better service quality and
+lower monetary cost than the distant route through C.  However, the
+existing implementations of Babel consider both routes as having the same
+metric, and will therefore route the traffic through C in roughly half the
+cases.</t>
+
+<t>In the first part of this document (<xref target="rtt-sampling"/>),
+we specify an extension to the Babel routing protocol that produces
+a sequence of accurate measurements of the round-trip time (RTT) between
+two Babel neighbours.  These measurements are not directly usable as an
+input to Babel's route selection procedure, since they tend to be noisy
+and to cause a negative feedback loop, which might give rise to frequent
+oscillations.  In a second part (<xref target="route-selection"/>), we
+define an algorithm that maps the sequence of RTT samples to a link cost
+that can be used for route selection.</t>
+
+<section title="Applicability">
+
+<t>The extension defined in <xref target="rtt-sampling"/> provides
+a sequence of accurate but potentially noisy RTT samples.  Since the
+round-trip time is a symmetric measure of delay, this protocol is only
+applicable in environments where the symmetric delay is a good predictor
+of whether a link should be taken by routing traffic, which might not
+necessarily be the case in networks built over exotic link technologies.</t>
+
+<t>The extension makes minimal requirements on the nodes.  In particular,
+it does not assume synchronised clocks, but only requires that clock drift
+be negligible during the time interval between two Hello TLVs.  Since that
+is on the order of a few seconds, this requirement is met even with cheap
+crystal oscillators such as the ones used in consumer electronics.</t>
+
+<t>The algorithm defined in <xref target="route-selection"/> makes
+a number of assumptions about the network.  The assumption with most
+severe consequences is that all links below a certain RTT (rtt-min in
+<xref target="cost-computation"/>) can be grouped in a single category of
+"good" links.  While this is the case in wide-area overlay networks, it
+makes the algorithm inapplicable in networks where distinguishing between
+low-latency links is important.</t>
+
+<t>There are other assumptions, but they are less likely to limit the
+algorithm's applicability.  The algorithm assumes that all links above
+a certain RTT (rtt-max in <xref target="cost-computation"/>) can be
+assumed to be equally bad, and will only be used as a last resort.  In
+addition, in order to avoid oscillations, the algorithm is designed to
+react slowly to RTT variations, thus causing suboptimal routing for
+seconds or even minutes after an RTT change; while this is a desirable
+property in fixed networks, as it avoid excessive route oscillations, it
+might be an issue with networks with high rates of node mobility.</t>
+
+</section>
+
+</section>
+
+<section><name>Specification of Requirements</name>
+
+<t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+"SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+"OPTIONAL" in this document are to be interpreted as described in BCP 14
+<xref target="RFC2119"/> <xref target="RFC8174"/> when, and only when,
+they appear in all capitals, as shown here.</t>
+
+</section>
+
+<section title="RTT sampling" anchor="rtt-sampling">
+
+<section title="Data structures">
+
+<t>We assume that every Babel speaker maintains a local clock, that counts
+microseconds from an arbitrary origin.  We do not assume that clocks are
+synchronised: clocks local to distinct nodes need not share a common
+origin.  The protocol will eventually recover if the clock is stepped, so
+clocks need not persist across node reboots.</t>
+
+<t>Every Babel speaker maintains a Neighbour Table, described in
+Section 3.2.4 of <xref target="RFC8966"/>.  This extension extends every
+entry in the Neighbour Table with the following data:</t>
+<ul spacing="normal">
+<li>the Origin Timestamp, a 32-bit timestamp (modulo 2^32) according to
+the neighbour's clock;</li>
+<li>the Receive Timestamp, a 32-bit timestamp (modulo 2^32) according to
+the local clock.</li>
+</ul>
+<t>Both values are initially undefined.</t>
+
+</section>
+
+<section title="Protocol operation">
+
+<t>The RTT to a neighbour is estimated using an algorithm due to Mills
+<xref target="MILLS"/>, originally developed for the HELLO routing
+protocol and later used in NTP <xref target="NTP"/>.</t>
+
+<t>A Babel speaker periodically sends Hello messages to its neighbours
+(Section 3.4.1 of <xref target="RFC8966"/>).  Additionally, it
+occasionally sends a set of IHU ("I Heard You") messages, at most one per
+neighbour (Section 3.4.2 of <xref target="RFC8966"/>).</t>
+
+<figure anchor="fig-seq"><name>Mill's algorithm</name>
+<artwork><![CDATA[
+   A          B
+     |      |
+  t1 +      |
+     |\     |
+     | \    |
+     |  \   |  Hello(t1)
+     |   \  |
+     |    \ |
+     |     \|
+     |      + t1'
+     |      |
+     |      |               RTT = (t2 - t1) - (t2' - t1')
+     |      |
+     |      + t2'
+     |     /|
+     |    / |
+     |   /  |
+     |  /   |  Hello(t2')
+     | /    |  IHU(t1, t1')
+     |/     |
+  t2 +      |
+     |      |
+     v      v
+]]></artwork>
+</figure>
+
+<t>In order to enable the computation of RTTs, a node A MUST include in
+every Hello that it sends a timestamp t1 (according to A's local clock),
+as illustrated in <xref target="fig-seq"/>.  When a node B receives A's
+timestamped Hello, it computes the time t1' at which the Hello was
+received (according to B's local clock).  It then MUST record the value t1
+in the Origin Timestamp field of the Neighbour Table entry corresponding
+to A, and the value t1' in the Receive Timestamp field of the Neighbour
+Table entry.</t>
+
+<t>When B sends an IHU to A, it checks whether both timestamps are defined
+in the Neighbour Table.  If that is the case, then it MUST ensure that its
+IHU TLV is sent in a packet that also contains a timestamped Hello TLV
+(either a normally scheduled Hello, or an unscheduled Hello, see
+Section 3.4.1 of <xref target="RFC8966"/>).  It MUST include in the IHU
+both the Origin Timestamp and the Receive Timestamp stored in the Neighbour
+Table.</t>
+
+<t>Upon receiving B's packet, A computes the time t2 (according to its
+local clock) at which it was received.  A MUST then verify that it
+contains both a Hello TLV with timestamp t2' and an IHU TLV with two
+timestamps t1 and t1'.  If that is the case, A computes the value
+RTT = (t2 - t1) - (t2' - t1') (where all computations are done modulo
+2^32), which is a measurement of the RTT between A and B.  (A then stores
+the values t2' and t2 in its Neighbour Table, as B did before.)</t>
+
+<t>This algorithm has a number of desirable properties.  First, the
+algorithm is symmetric: A and B use the same procedures for timestamping
+packets and computing RTT samples, and both nodes produce one RTT sample
+for each received (Hello, IHU) pair.  Second, since there is no
+requirement that t1' and t2' be equal, the protocol is asynchronous: the
+only change to Babel's message scheduling is the requirement that a packet
+containing an IHU also contain a Hello.  Third, since it only ever
+computes differences of timestamps according to a single clock, it does
+not require synchronised clocks.  Fourth, it requires very little
+additional state: a node only needs to store the two timestamps associated
+with the last hello received from each neighbour.  Finally, since it only
+requires piggybacking one or two timestamps on each Hello and IHU TLV,
+it makes efficient use of network resources.</t>
+
+<t>In principle, this algorithm is inaccurate in the presence of clock
+drift (i.e., when A's and B's clocks are running at different frequencies).
+However, t2' - t1' is usually on the order of a few seconds, and
+significant clock drift is unlikely to happen at that time scale.</t>
+
+<t>In order for RTT values to be consistent between implementations,
+timestamps need to be computed at roughly the same point in the network
+stack.  Transmit timestamps SHOULD be computed just before the packet is
+passed to the network stack (i.e., before it is subjected to any queueing
+delays), and receive timestamps SHOULD be computed just after the packet
+is received from the network stack.</t>
+
+</section>
+
+<section title="Wrap-around and node restart" anchor="wraparound">
+
+<t>Timestamp values are a count of microseconds stored as a 32-bit
+unsigned integer; thus, they wrap around every 71 minutes or so.  What is
+more, a node may occasionally reboot and restart its clock at an arbitrary
+origin.  For these reasons, very old timestamps or nonsensical timestamps
+MUST NOT be used to yield RTT samples.</t>
+
+<t>The following algorithm can be used to achieve that.  When a node
+receives a packet containing a Hello and an IHU, it compares the current
+local time t2 with the Origin Timestamp contained in the IHU; if the
+Origin Timestamp appears to be in the future, or if it is in the past by
+more than a time T (the value T = 3 minutes is recommended), then the
+timestamps are still recorded in the neighbour table, but are not used for
+computation of an RTT sample.</t>
+
+<t>Similary, the node compares the Hello's timestamp with the Receive
+Timestamp recorded in the Neighbour Table; if the Hello's timestamp
+appears to be older than the recorded timestamp, or if it appears to be
+more recent by an interval larger than the value T, then the timestamps
+are not used for computation of an RTT sample.</t>
+
+</section>
+
+<section title="Implementation notes">
+
+<t>The accuracy of the computed RTT samples depends on Transmit Timestamps
+being computed as late as possible before a packet containing a Hello TLV
+is passed to the network stack, and Receive Timestamps being computed as
+early as possible after reception of a packet containing a (Hello, IHU)
+pair.  We have found the following implementation strategy to be
+useful.</t>
+
+<t>When a Hello TLV is buffered for transmission, we insert a PadN sub-TLV
+(Section 4.7.2 of <xref target="RFC8966"/>) with a length of 4 octets
+within the TLV.  When the packet is ready to be sent, we check whether it
+contains a 4-octet PadN sub-TLV; if that's the case, we overwrite the PadN
+sub-TLV with a Timestamp sub-TLV with the current time, and send out the
+packet.</t>
+
+<t>Conversely, when a packet is received, we immediately compute the
+current time and record it with the received packet.  We then process the
+packet as usual, and use the recorded timestamp in order to compute an RTT
+sample.</t>
+
+<t>The protocol is designed to survive the clock being reset when a node
+reboots; on POSIX systems, this makes it possible to use the
+CLOCK_MONOTONIC clock for computing timestamps.  If CLOCK_MONOTONIC is not
+available, CLOCK_REALTIME may be used, since the protocol is able to
+survive the clock being occasionally stepped.</t>
+
+</section>
+
+</section>
+
+<section title="RTT-based route selection" anchor="route-selection">
+
+<t>The protocol described above yields a series of RTT samples.  While
+these samples are fairly accurate, they are not directly usable as an
+input to the route selection procedure, for at least three reasons.</t>
+
+<t>First of all, in the presence of bursty traffic, routers experience
+transient congestion, which causes occasional spikes in the measured RTT.
+Thus, the RTT signal may be noisy, and requires smoothing before it can
+be used for route selection.</t>
+
+<t>Second, using the RTT signal for route selection gives rise to
+a negative feedback loop: when a route has a low RTT, it is deemed to be
+more desirable, which causes it to be used for more data traffic, which
+may lead to congestion, which in turn increases the RTT.  Without some
+form of hysteresis, using RTT for route selection would lead to
+oscillations between parallel routes, which would lead to packet
+reordering and negatively affect upper-layer protocols (such as TCP).</t>
+
+<t>Third, even in the absence of congestion, the RTT tends to exhibit some
+variation.  If the RTTs of two parallel routes oscillate around
+a common value, using the RTT as input to route selection will cause
+frequent routing oscillations, which, again, indicates the need for some
+form of hysteresis.</t>
+
+<t>In this section, we describe an algorithm that integrates smoothing and
+hysteresis and has been shown to behave well both in simulation and
+experimentally over the Internet <xref target="DELAY-BASED"/>, and is
+RECOMMENDED when RTT information is being used for route selection.  The
+algorithm is structured as follows:</t>
+<ul>
+<li>the RTT values are first smoothed in order to avoid instabilities due to
+outliers (<xref target="smoothing"/>);</li>
+<li>the resulting smoothed samples are mapped to a cost using a bounded,
+non-linear mapping, which avoids
+instabilities at the lower and at the upper end of the RTT range
+(<xref target="cost-computation"/>);</li>
+<li>finally, a hysteresis filter is applied in order to limit the amount of
+oscillation in the middle of the RTT range (<xref target="hysteresis"/>).</li>
+</ul>
+
+<section title="Smoothing" anchor="smoothing">
+
+<t>The RTT samples provided by Mills' algorithm are fairly accurate, but
+noisy: experiments indicate the occasional presence of individual samples
+that are much larger than the expected value.  Thus, some form of
+smoothing SHOULD be applied in order to avoid instabilities due to
+occasional outliers.</t>
+
+<t>An implementation MAY use the exponential average algorithm, which is
+simple to implement and appears to yield good results in practice <xref
+target="DELAY-BASED"/>.  The algorithm is parameterised by a constant α,
+where 0 &lt; α &lt; 1, which controls the amount of smoothing being
+applied.  Fr each neighbour, it maintains a smoothed value RTT which is
+initially undefined.  When the first sample RTT0 is measured, the smoothed
+value is set to the value of RTT0.  At each new sample RTTn, the smoothed
+value is set to a weighted average of the previous smoothed value and the
+new sample:</t>
+<artwork>    RTT := α RTT + (1 - α) RTTn</artwork>
+<t>The smoothing constant α SHOULD be between 0.8 and 0.9; the value 0.836
+is the RECOMMENDED default.</t>
+
+</section>
+
+<section title="Cost computation" anchor="cost-computation">
+
+<t>The smoothed RTT value obtained in the previous step needs to be mapped
+to a link cost, suitable for input to the metric computation procedure
+(Section 3.5.2 of <xref target="RFC8966"/>).  Obviously, the mapping
+should be monotonic (larger RTTs imply larger costs).  In addition, the
+mapping should be constant beyond a certain value (all very bad links are
+equally bad), so that congested links do not contribute to routing
+instability.  The mapping should also be constant around 0, so that small
+oscillations in the RTT of low-RTT links do not contribute to routing
+instability.</t>
+
+<figure anchor="fig-mapping"><name>Mapping from RTT to link cost</name>
+<artwork><![CDATA[
+  cost
+    ^
+    |
+    |
+    |                           C + max-rtt-penalty
+    |                       +---------------------------
+    |                      /.
+    |                     / .
+    |                    /  .
+    |                   /   .
+    |                  /    .
+    |                 /     .
+    |                /      .
+    |               /       .
+    |              /        .
+    |             /         .
+  C +------------+          .
+    |            .          .
+    |            .          .
+    |            .          .
+    |            .          .
+  0 +---------------------------------------------------->
+    0         rtt-min    rtt-max                          RTT
+]]></artwork>
+</figure>
+
+<t>Implementations SHOULD use the mapping described in figure <xref
+target="fig-mapping"/>, which is parameterised by three parameters
+rtt-min, rtt-max, and max-rtt-penalty.  For RTT values below rtt-min, the
+link cost is just the nominal cost C of a single hop.  Between rtt-min and
+rtt-max, the cost increases linearly; above rtt-max, the constant value
+max-rtt-penalty is added to the nominal cost.</t>
+
+<t>The value rtt-min should be slightly larger than the RTT of a local,
+uncongested link.  The value rtt-max should be the RTT above which a link
+should be avoided if possible, either because it is a long-distance link
+or because it is congested; reducing the value of rtt-max improves
+stability, but prevents the protocol from discriminating between
+high-latency links.  As to max-rtt-penalty, it controls how much the
+protocol will penalise long-distance links.  The default values
+rtt-min = 10ms, rtt-max = 120ms, and max-rtt-penalty = 150 are
+RECOMMENDED.</t>
+
+</section>
+
+<section title="Hysteresis" anchor="hysteresis">
+
+<t>Even after applying a bounded mapping from smoothed RTT to a cost
+value, the cost may fluctuate when a link's RTT is between rtt-min and
+rtt-max.  Implementations SHOULD use a robust hysteresis algorithm, such
+as the one described in Appendix A.3 of <xref target="RFC8966"/>.</t>
+
+</section>
+
+</section>
+
+<section title="Backwards and forwards compatibility">
+
+<t>This protocol extension stores the data that it requires within
+sub-TLVs of Babel's Hello and IHU TLVs.  As discussed in Appendix D of
+<xref target="RFC8966"/>, implementations that do not understand this
+extension will silently ignore the sub-TLVs while parsing the rest of the
+TLVs that they contain.  In effect, this extension supports building
+hybrid networks consisting of extended and unextended routers, and while
+such networks might suffer from sub-optimal routing, they will not suffer
+from blackholes or routing loops.</t>
+
+<t>If a sub-TLV defined in this extension is longer than expected, the
+additional data is silently ignored.  This provision is made in order to
+allow a future version of this protocol to extend the packet format with
+additional data, for example high-precision or absolute timestamps.</t>
+
+</section>
+
+<section title="Packet format">
+
+<t>This extension defines the Timestamp sub-TLV whose Type field has value
+3.  This sub-TLV can be contained within a Hello sub-TLV, in which case it
+carries a single timestamp, or within an IHU sub-TLV, in which case it
+carries two timestamps.</t>
+
+<t>Timestamps are encoded as 32-bit unsigned integers (modulo 2^32),
+expressed in units of one microsecond, counting from an arbitrary origin.
+Timestamps wrap around every 4295 seconds, or rougly 71 minutes (see also
+<xref target="wraparound"/>).</t>
+
+<section title="Timestamp sub-TLV in Hello TLVs">
+
+<t>When contained within a Hello TLV, the Timestamp sub-TLV
+has the following format:</t>
+<artwork><![CDATA[
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|   Type = 3    |    Length     |      Transmit timestamp       |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|          (continued)          |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+]]></artwork>
+
+<t>Fields:</t>
+<dl newline="false" spacing="normal" indent="10">
+<dt>Type</dt><dd>Set to 3 to indicate a Timestamp sub-TLV.</dd>
+<dt>Length</dt><dd>The length of the body in octets, exclusive of the Type
+and Length fields.</dd>
+<dt>Transmit timestamp</dt><dd>The time at which the packet containing
+this sub-TLV was sent, according to the sender's clock.</dd>
+</dl>
+
+<t>If the Length field is larger than the expected 4 octets, the sub-TLV
+MUST be processed normally (the first 4 octets are interpreted as
+described above), and any extra data contained in this sub-TLV MUST be
+silently ignored.  If the Length field is smaller than the expected
+4 octets, then this sub-TLV MUST be ignored (and the remainder of the
+enclosing TLV processed as usual).</t>
+
+</section>
+
+<section title="Timestamp sub-TLV in IHU TLVs">
+
+<t>When contained in an IHU TLV, the Timestamp sub-TLV has the following
+format:</t>
+<artwork><![CDATA[
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|   Type = 3    |    Length     |        Origin timestamp       |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|          (continued)          |        Receive timestamp      |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|          (continued)          |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+]]></artwork>
+
+<t>Fields:</t>
+<dl newline="false" spacing="normal" indent="10">
+<dt>Type</dt><dd>Set to 3 to indicate a Timestamp sub-TLV.</dd>
+<dt>Length</dt><dd>The length of the body in octets, exclusive of the Type
+and Length fields.</dd>
+<dt>Origin timestamp</dt><dd>A copy of the transmit timestamp of the last
+Timestamp sub-TLV contained in a Hello TLV received from the node to which
+the enclosing IHU TLV applies.</dd>
+<dt>Receive timestamp</dt><dd>The time, according to the sender's clock,
+at which the last timestamped Hello TLV was received from the node to which
+the enclosing IHU TLV applies.</dd>
+</dl>
+
+<t>If the Length field is larger than the expected 8 octets, the sub-TLV
+MUST be processed normally (the first 8 octets are interpreted as
+described above), and any extra data contained in this sub-TLV MUST be
+silently ignored.  If the Length field is smaller than the expected
+8 octets, then this sub-TLV MUST be ignored (and the remainder of the
+enclosing TLV processed as usual).</t>
+
+</section>
+
+</section>
+
+<section title="IANA Considerations">
+
+<t>IANA has added the following entry to the "Babel Sub-TLV Types"
+registry:</t>
+
+<table align="center">
+<thead>
+<tr><th>Type</th><th>Name</th><th>Reference</th></tr>
+</thead>
+<tbody>
+<tr><td>3</td><td>Timestamp</td><td>(this document)</td></tr>
+</tbody>
+</table>
+
+</section>
+
+<section title="Security Considerations">
+
+<t>This extension adds additional timestamping data to two of the TLVs
+sent by a Babel router.  By broadcasting the value of a reasonably
+accurate local clock, they might make a node more susceptible to timing
+attacks.</t>
+
+<t>Broadcasting an accurate time raises privacy issues.  The timestamps
+used by this protocol have an arbitrary origin, and therefore do not leak
+a node's boot time or timezone.  However, having access to accurate
+timestamps could allow an attacker to determine the physical location of
+a node.  Nodes might avoid disclosure of location information by not
+including timestamp sub-TLVs in the TLVs that they send, which will cause
+their neighbours to fall back to hop-count routing.</t>
+
+</section>
+
+<section title="Acknowledgements">
+
+<t>The authors are indebted to Jean-Paul Smets, who prompted the
+investigation that originally lead to this protocol.  We are also grateful
+to Donald Eastlake, Toke Høiland-Jørgensen, Maria Matejka, David Schinazi,
+Pacal Thubert, Steffen Vogel, and Ondřej Zajiček.</t>
+
+</section>
+
+</middle>
+
+<back>
+
+<references><name>References</name>
+
+<references><name>Normative References</name>
+
+<reference anchor="RFC8966" target="https://www.rfc-editor.org/info/rfc8966">
+<front>
+<title>The Babel Routing Protocol</title>
+<author initials="J." surname="Chroboczek" fullname="J. Chroboczek"/>
+<author initials="D." surname="Schinazi" fullname="D. Schinazi"/>
+<date year="2021" month="January"/>
+</front>
+<seriesInfo name="RFC" value="8966"/>
+<seriesInfo name="DOI" value="10.17487/RFC8966"/>
+</reference>
+
+<reference anchor="RFC2119"><front>
+<title>Key words for use in RFCs to Indicate Requirement Levels</title>
+<author initials="S." surname="Bradner" fullname="S. Bradner"/>
+<date year="1997" month="March"/>
+</front>
+<seriesInfo name="BCP" value="14"/>
+<seriesInfo name="RFC" value="2119"/>
+<seriesInfo name="DOI" value="10.17487/RFC2119"/>
+</reference>
+
+<reference anchor="RFC8174"><front>
+<title>Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words</title>
+<author initials="B." surname="Leiba" fullname="B. Leiba"/>
+<date year="2017" month="May"/>
+</front>
+<seriesInfo name="BCP" value="14"/>
+<seriesInfo name="RFC" value="8174"/>
+<seriesInfo name="DOI" value="10.17487/RFC8174"/>
+</reference>
+
+</references>
+
+<references><name>Informative References</name>
+
+<reference anchor="DELAY-BASED"><front>
+<title>A delay-based routing metric</title>
+<author fullname="Baptiste Jonglez" initials="B." surname="Jonglez"/>
+<author fullname="Juliusz Chroboczek" initials="J." surname="Chroboczek"/>
+<date month="March" year="2014"/>
+</front>
+<annotation>Available online from http://arxiv.org/abs/1403.3488</annotation>
+</reference>
+
+<reference anchor="MILLS"><front>
+<title>DCN Local-Network Protocols</title>
+<author fullname="David L. Mills" initials="D. L." surname="Mills"/>
+<date month="December" year="1983"/>
+</front>
+<seriesInfo name="RFC" value="891"/>
+</reference>
+
+<reference anchor="NTP"><front>
+<title>Network Time Protocol Version 4: Protocol and Algorithms Specification</title>
+<author initials='D.' surname='Mills' fullname='D. Mills'/>
+<author initials='J.' surname='Martin' fullname='J. Martin'/>
+<author initials='J.' surname='Burbank' fullname='J. Burbank'/>
+<author initials='W.' surname='Kasch' fullname='W. Kasch'/>
+<date year='2010' month='June' />
+</front>
+<seriesInfo name='RFC' value='5905' />
+</reference>
+
+</references>
+</references>
+
+</back>
+</rfc>

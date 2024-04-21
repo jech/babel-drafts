@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!DOCTYPE rfc>
 <rfc version='3' 
-     docName='draft-ietf-babel-rtt-extension-06'
+     docName='draft-ietf-babel-rtt-extension-07'
      ipr='trust200902'
      consensus='true'
      submissionType='IETF'
@@ -37,7 +37,7 @@
 </address>
 </author>
 
-<date day="16" month="April" year="2024"/>
+<date day="21" month="April" year="2024"/>
 
 <abstract>
 <t>This document defines an extension to the Babel routing protocol that
@@ -98,15 +98,14 @@ oscillations.  In a second part (<xref target="route-selection"/>), we
 define an algorithm that maps the sequence of RTT samples to a link cost
 that can be used for route selection.</t>
 
-<section title="applicability">
+<section title="Applicability">
 
 <t>The extension defined in <xref target="rtt-sampling"/> provides
 a sequence of accurate but potentially noisy RTT samples.  Since the
 round-trip time is a symmetric measure of delay, this protocol is only
 applicable in environments where the symmetric delay is a good predictor
-of whether a link should be taken by routing traffic; this is the case in
-most networks known to the authors, but might not necessarily be the case
-in networks built over exotic link technologies.</t>
+of whether a link should be taken by routing traffic, which might not
+necessarily be the case in networks built over exotic link technologies.</t>
 
 <t>The extension makes minimal requirements on the nodes.  In particular,
 it does not assume synchronised clocks, but only requires that clock drift
@@ -282,12 +281,6 @@ Timestamp recorded in the Neighbour Table; if the Hello's timestamp
 appears to be older than the recorded timestamp, or if it appears to be
 more recent by an interval larger than the value T, then the timestamps
 are not used for computation of an RTT sample.</t>
-
-<t>Finally, in order to avoid using stale data, if a node does not
-successfully compute an RTT sample for a given neighbour for a time T2, it
-SHOULD discard any RTT-related state for that neighbour (such as the
-smoothed RTT, see <xref target="smoothing"/>).  The default value
-T2 = 3 minutes is RECOMMENDED.</t>
 
 </section>
 
